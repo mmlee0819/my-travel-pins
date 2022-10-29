@@ -1,5 +1,6 @@
 import React from "react"
 import { createGlobalStyle } from "styled-components"
+import { Outlet } from "react-router-dom"
 
 const GlobalStyle = createGlobalStyle`
   *{
@@ -17,6 +18,7 @@ function App() {
   return (
     <>
       <GlobalStyle />
+      <Outlet />
     </>
   )
 }
