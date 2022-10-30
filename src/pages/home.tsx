@@ -47,7 +47,7 @@ function Home() {
   const nameRef = useRef<HTMLInputElement>(null!)
   const emailRef = useRef<HTMLInputElement>(null!)
   const pwRef = useRef<HTMLInputElement>(null!)
-  const { signUp } = useContext(AuthContext)
+  const { signUp, signIn, logOut } = useContext(AuthContext)
 
   return (
     <Wrapper>
@@ -69,7 +69,20 @@ function Home() {
         >
           Sign up
         </Btn>
-        <Btn>Sign in</Btn>
+        <Btn
+          onClick={() => {
+            signIn(emailRef.current.value, pwRef.current.value)
+          }}
+        >
+          Sign in
+        </Btn>
+        <Btn
+          onClick={() => {
+            logOut()
+          }}
+        >
+          Sign out
+        </Btn>
       </BtnWrapper>
 
       <BtnLink to="/mika">點我去user的地圖頁</BtnLink>

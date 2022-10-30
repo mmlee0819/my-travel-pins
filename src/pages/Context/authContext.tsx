@@ -1,9 +1,13 @@
 import React from "react"
 import { createContext, useState, ReactNode } from "react"
-import { createUserWithEmailAndPassword } from "firebase/auth"
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth"
 import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
-import { doc, setDoc, getDoc } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore"
 
 declare module "*.png"
 
@@ -21,6 +25,8 @@ interface AuthContextType {
     photoURL: string
   }) => void
   signUp: (name: string, email: string, password: string) => void
+  signIn: (email: string, password: string) => void
+  logOut: () => void
   isLogin: boolean
   setIsLogin: (isLogin: boolean) => void
 }
@@ -41,6 +47,8 @@ export const AuthContext = createContext<AuthContextType>({
   isLogin: false,
   setIsLogin: (isLogin: boolean) => Boolean,
   signUp: (name: string, email: string, password: string) => Response,
+  signIn: (email: string, password: string) => Response,
+  logOut: () => Response,
 })
 
 interface Props {
@@ -55,7 +63,7 @@ export const AuthContextProvider = ({ children }: Props) => {
     email: "",
     photoURL: "",
   })
-  // console.log("profileIcon", profileIcon)
+
   const signUp = async (name: string, email: string, password: string) => {
     if (!name || !email || !password) return
     try {
@@ -83,9 +91,39 @@ export const AuthContextProvider = ({ children }: Props) => {
     }
   }
 
+  const signIn = async (email: string, password: string) => {
+    if (!email || !password) return
+    try {
+      console.log("登入中")
+      await signInWithEmailAndPassword(auth, email.trim(), password.trim())
+      setIsLogin(true)
+      console.log("已登入")
+    } catch (error: unknown) {
+      console.log(error)
+    }
+  }
+
+  const logOut = async () => {
+    try {
+      console.log("登出中")
+      await signOut(auth)
+      console.log("已登出")
+      setIsLogin(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <AuthContext.Provider
-      value={{ signUp, currentUser, setCurrentUser, isLogin, setIsLogin }}
+      value={{
+        signUp,
+        signIn,
+        logOut,
+        currentUser,
+        setCurrentUser,
+        isLogin,
+        setIsLogin,
+      }}
     >
       {children}
     </AuthContext.Provider>
