@@ -47,42 +47,56 @@ function Home() {
   const nameRef = useRef<HTMLInputElement>(null!)
   const emailRef = useRef<HTMLInputElement>(null!)
   const pwRef = useRef<HTMLInputElement>(null!)
-  const { signUp, signIn, logOut } = useContext(AuthContext)
-
+  const { isLogin, signUp, signIn, logOut } = useContext(AuthContext)
+  console.log("isLogin", isLogin)
   return (
     <Wrapper>
       <Title>我是首頁</Title>
-      <FormWrapper>
-        <Input ref={nameRef} name="userName" placeholder="name" />
-        <Input ref={emailRef} name="accountEmail" placeholder="xxx@xxxxx" />
-        <Input ref={pwRef} name="password" placeholder="at least 6 letters" />
-      </FormWrapper>
+      {isLogin ? (
+        ""
+      ) : (
+        <FormWrapper>
+          <Input ref={nameRef} name="userName" placeholder="name" />
+          <Input ref={emailRef} name="accountEmail" placeholder="xxx@xxxxx" />
+          <Input ref={pwRef} name="password" placeholder="at least 6 letters" />
+        </FormWrapper>
+      )}
       <BtnWrapper>
-        <Btn
-          onClick={() => {
-            signUp(
-              nameRef.current.value,
-              emailRef.current.value,
-              pwRef.current.value
-            )
-          }}
-        >
-          Sign up
-        </Btn>
-        <Btn
-          onClick={() => {
-            signIn(emailRef.current.value, pwRef.current.value)
-          }}
-        >
-          Sign in
-        </Btn>
-        <Btn
-          onClick={() => {
-            logOut()
-          }}
-        >
-          Sign out
-        </Btn>
+        {isLogin ? (
+          ""
+        ) : (
+          <>
+            <Btn
+              onClick={() => {
+                signUp(
+                  nameRef.current.value,
+                  emailRef.current.value,
+                  pwRef.current.value
+                )
+              }}
+            >
+              Sign up
+            </Btn>
+            <Btn
+              onClick={() => {
+                signIn(emailRef.current.value, pwRef.current.value)
+              }}
+            >
+              Sign in
+            </Btn>
+          </>
+        )}
+        {isLogin ? (
+          <Btn
+            onClick={() => {
+              logOut()
+            }}
+          >
+            Sign out
+          </Btn>
+        ) : (
+          ""
+        )}
       </BtnWrapper>
 
       <BtnLink to="/mika">點我去user的地圖頁</BtnLink>

@@ -1,29 +1,21 @@
 import React from "react"
-import { createContext, useState, ReactNode } from "react"
+import { createContext, useState, useEffect, ReactNode } from "react"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth"
 import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
-import { doc, setDoc } from "firebase/firestore"
+import { doc, setDoc, getDoc } from "firebase/firestore"
+import { DocumentData } from "@firebase/firestore-types"
 
 declare module "*.png"
 
 interface AuthContextType {
-  currentUser: {
-    id: string
-    name: string
-    email: string
-    photoURL: string
-  }
-  setCurrentUser: (currentUser: {
-    id: string
-    name: string
-    email: string
-    photoURL: string
-  }) => void
+  currentUser: UserInfoType | DocumentData | undefined
+  setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) => void
   signUp: (name: string, email: string, password: string) => void
   signIn: (email: string, password: string) => void
   logOut: () => void
@@ -38,12 +30,8 @@ export const AuthContext = createContext<AuthContextType>({
     email: "",
     photoURL: "",
   },
-  setCurrentUser: (currentUser: {
-    id: string
-    name: string
-    email: string
-    photoURL: string
-  }) => Response,
+  setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) =>
+    Response,
   isLogin: false,
   setIsLogin: (isLogin: boolean) => Boolean,
   signUp: (name: string, email: string, password: string) => Response,
@@ -55,14 +43,32 @@ interface Props {
   children?: ReactNode
 }
 
+interface UserInfoType {
+  id: string | DocumentData
+  name: string | DocumentData
+  email: string | DocumentData
+  photoURL: string | DocumentData
+}
 export const AuthContextProvider = ({ children }: Props) => {
   const [isLogin, setIsLogin] = useState(false)
-  const [currentUser, setCurrentUser] = useState({
-    id: "",
-    name: "",
-    email: "",
-    photoURL: "",
-  })
+  const [currentUser, setCurrentUser] = useState<
+    UserInfoType | DocumentData | undefined
+  >()
+
+  useEffect(() => {
+    const checkLoginStatus = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser !== null) {
+        const docRef = doc(db, "users", currentUser.uid)
+        const docSnap = await getDoc(docRef)
+        const userInfo: DocumentData = docSnap.data()!
+        setCurrentUser(userInfo)
+        setIsLogin(true)
+      } else {
+        setIsLogin(false)
+      }
+    })
+    return checkLoginStatus
+  }, [])
 
   const signUp = async (name: string, email: string, password: string) => {
     if (!name || !email || !password) return
