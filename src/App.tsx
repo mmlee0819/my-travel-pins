@@ -1,6 +1,7 @@
 import React from "react"
 import { createGlobalStyle } from "styled-components"
 import { Outlet } from "react-router-dom"
+import { AuthContextProvider } from "./pages/Context/authContext"
 
 const GlobalStyle = createGlobalStyle`
   *{
@@ -16,10 +17,10 @@ const GlobalStyle = createGlobalStyle`
 `
 function App() {
   return (
-    <>
+    <AuthContextProvider>
       <GlobalStyle />
       <Outlet />
-    </>
+    </AuthContextProvider>
   )
 }
 
