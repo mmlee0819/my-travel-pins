@@ -1,5 +1,5 @@
 import React from "react"
-import { useState } from "react"
+import { useState, useContext } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
 import {
@@ -10,6 +10,9 @@ import {
   StandaloneSearchBox,
 } from "@react-google-maps/api"
 import { darkMap } from "../User/darkMap"
+import { AuthContext } from "../Context/authContext"
+import homeIcon from "./homeIcon.png"
+import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
 
 const Wrapper = styled.div`
   display: flex;
@@ -66,12 +69,13 @@ interface Position {
   lng: number | undefined
 }
 
-const center = {
-  lat: 25.061945,
-  lng: 121.5484174,
-}
-
 function User() {
+  const { currentUser } = useContext(AuthContext)
+  console.log(currentUser)
+  const center = {
+    lat: currentUser?.hometownLat,
+    lng: currentUser?.hometownLng,
+  }
   const [newpin, setNewPin] = useState<google.maps.LatLng | Position>()
   // const [marker, setMarker] = useState<google.maps.Marker>()
   const [markers, setMarkers] = useState<Position[]>([
@@ -88,14 +92,10 @@ function User() {
   console.log("markers", markers)
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_google_API_KEY!,
+    googleMapsApiKey: myGoogleApiKey!,
     libraries: ["places"],
   })
 
-  const containerStyle = {
-    minHeight: "100vh",
-    width: "100vw",
-  }
   const onMkLoad = (marker: google.maps.Marker) => {
     console.log(" marker", marker)
   }
@@ -128,8 +128,8 @@ function User() {
         <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
       </Wrapper>
       {/* <LoadScript
-        googleMapsApiKey={process.env.REACT_APP_google_API_KEY!}
-        libraries={["places"]}
+          googleMapsApiKey={process.env.REACT_APP_google_API_KEY!}
+          libraries={["places"]}
       > */}
       {isLoaded ? (
         <GoogleMap
@@ -149,12 +149,8 @@ function User() {
             </StandaloneSearchBox>
             <BtnAddPin>Add pin</BtnAddPin>
           </SearchWrapper>
-          {/* <Marker onLoad={onMkLoad} position={center} />
-          <Marker
-            onLoad={onMkLoad}
-            position={{ lat: 41.9027835, lng: 12.4963655 }}
-          /> */}
-          {markers?.map((marker) => {
+          <Marker onLoad={onMkLoad} position={center} icon={homeIcon} />
+          {/* {markers?.map((marker) => {
             return (
               <Marker
                 key={marker.placeId}
@@ -162,7 +158,7 @@ function User() {
                 position={new google.maps.LatLng(marker.lat!, marker.lng)}
               />
             )
-          })}
+          })} */}
         </GoogleMap>
       ) : (
         ""
