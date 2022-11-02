@@ -15,7 +15,7 @@ import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
 import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
 import { db } from "../Utils/firebase"
-import { doc, setDoc } from "firebase/firestore"
+import { doc, setDoc, updateDoc } from "firebase/firestore"
 
 const Wrapper = styled.div`
   display: flex;
@@ -69,6 +69,9 @@ const BtnAddPin = styled.div`
   border-radius: 10px;
   cursor: pointer;
 `
+const BtnPost = styled(BtnAddPin)`
+  margin-top: 20px;
+`
 
 const PostArea = styled.div`
   position: absolute;
@@ -93,7 +96,7 @@ const UploadPhotoWrapper = styled.div`
   flex-flow: column wrap;
 `
 const ArticleWrapper = styled(UploadPhotoWrapper)``
-
+const Textarea = styled.textarea``
 const UploadImgLabel = styled.label`
   display: flex;
   align-items: center;
@@ -142,11 +145,14 @@ function User() {
   const [hasAddPin, setHasAddPin] = useState(false)
   console.log("hasAddPin", hasAddPin)
   const [photos, setPhotos] = useState<string[]>([])
-
-  const { isLoaded, loadError } = useJsApiLoader({
+  const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
     libraries: ["places"],
   })
+  const [artiTitle, setArtiTitle] = useState("")
+  const [travelDate, setTravelDate] = useState("")
+  const [artiContent, setArtiContent] = useState("")
+  const [hasPosted, setHasPosted] = useState(false)
 
   const onMkLoad = (marker: google.maps.Marker) => {
     console.log(" marker", marker)
@@ -192,8 +198,26 @@ function User() {
       ]
     })
     setHasAddPin(true)
+    setHasPosted(false)
   }
-  // const addMemory = async () => {}
+  const addMemory = async () => {
+    const docRef = doc(db, "pins", newPin.id)
+    const artiInfo = {
+      article: {
+        title: artiTitle,
+        travelDate: travelDate,
+        content: artiContent,
+      },
+      postTime: new Date(),
+    }
+    try {
+      await updateDoc(docRef, artiInfo)
+      setHasPosted(true)
+      setHasAddPin(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <>
       <Wrapper>
@@ -235,12 +259,28 @@ function User() {
             )}
             <Title>Step 2 : Write something to save your memory!</Title>
           </SearchWrapper>
-          {hasAddPin ? (
+          {hasAddPin && !hasPosted ? (
             <PostArea>
               <ArticleWrapper>
-                <ArticleTitleInput placeholder="Title"></ArticleTitleInput>
-                <ArticleTitleInput placeholder="When did you go there?"></ArticleTitleInput>
-                <textarea placeholder="What's on your mind?" rows={6} />
+                <ArticleTitleInput
+                  placeholder="Title"
+                  onChange={(e) => {
+                    setArtiTitle(e.target.value)
+                  }}
+                ></ArticleTitleInput>
+                <ArticleTitleInput
+                  placeholder="When did you go there?"
+                  onChange={(e) => {
+                    setTravelDate(e.target.value)
+                  }}
+                ></ArticleTitleInput>
+                <Textarea
+                  placeholder="What's on your mind?"
+                  rows={6}
+                  onChange={(e) => {
+                    setArtiContent(e.target.value)
+                  }}
+                />
               </ArticleWrapper>
               <UploadPhotoWrapper>
                 <UploadImgLabel>
@@ -266,6 +306,7 @@ function User() {
                   />
                 </UploadImgLabel>
                 <BtnAddPin>Upload</BtnAddPin>
+                <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
               </UploadPhotoWrapper>
             </PostArea>
           ) : (
