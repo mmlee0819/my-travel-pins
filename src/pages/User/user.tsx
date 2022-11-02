@@ -16,7 +16,7 @@ import uploadIcon from "./uploadImgIcon.png"
 import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
-import { ref, uploadBytesResumable } from "firebase/storage"
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 
 const Wrapper = styled.div`
   display: flex;
@@ -98,6 +98,7 @@ const PostArea = styled.div`
   padding: 10px;
   height: 70%;
   font-size: 14px;
+  opacity: 0.6;
 `
 const ArticleTitleInput = styled.input`
   background-color: #ffffff;
@@ -108,6 +109,11 @@ const UploadPhotoWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: column wrap;
+`
+const UrlsImgWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
 `
 const ArticleWrapper = styled(UploadPhotoWrapper)``
 const Textarea = styled.textarea``
@@ -120,8 +126,9 @@ const UploadImgLabel = styled.label`
 const UploadImgIcon = styled.img`
   width: 30px;
   height: 30px;
-  z-index: 300;
+  z-index: 3;
 `
+
 const UploadImgInput = styled.input`
   display: none;
 `
@@ -162,10 +169,7 @@ function User() {
   const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
-  console.log("filesName", filesName)
-  console.log("photos", photos)
-  console.log("uploadProgress", uploadProgress)
-  console.log("hasUpload", hasUpload)
+  const [urls, setUrls] = useState<string[]>([])
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
@@ -186,7 +190,6 @@ function User() {
       if (searchResult) {
         const newLat = searchResult[0]?.geometry?.location?.lat()
         const newLng = searchResult[0]?.geometry?.location?.lng()
-        console.log(searchResult[0])
         const placeName = searchResult[0]?.name
         const placeId = searchResult[0]?.place_id
         setLocation({ lat: newLat, lng: newLng })
@@ -236,14 +239,12 @@ function User() {
     }
   }
   const handleUpload = () => {
+    const folderName = `${currentUser?.id.slice(
+      0,
+      4
+    )}-${newPin.location.placeId.slice(0, 4)}`
     photos.map((photo) => {
-      const imgRef = ref(
-        storage,
-        `/${currentUser?.id.slice(0, 4)}-${newPin.location.placeId.slice(
-          0,
-          4
-        )}}/${photo.name}`
-      )
+      const imgRef = ref(storage, `/${folderName}/${photo.name}`)
       const uploadTask = uploadBytesResumable(imgRef, photo)
       uploadTask.on(
         "state_changed",
@@ -256,11 +257,24 @@ function User() {
         },
         (error) => {
           console.log(error)
+        },
+        async () => {
+          const url = await getDownloadURL(
+            ref(storage, `/${folderName}/${photo.name}`)
+          )
+          setUrls((prev) => [...prev, url])
         }
       )
     })
   }
+
   const addMemory = async () => {
+    if (filesName.length !== 0 && !hasUpload) {
+      alert(
+        "It seems that you have some photos, please click upload button first!"
+      )
+      return
+    }
     const docRef = doc(db, "pins", newPin.id)
     const artiInfo = {
       article: {
@@ -269,11 +283,16 @@ function User() {
         content: artiContent,
       },
       postTime: new Date(),
+      album: urls,
     }
     try {
       await updateDoc(docRef, artiInfo)
       setHasPosted(true)
       setHasAddPin(false)
+      setFilesName([])
+      setPhotos([])
+      setUploadProgress(0)
+      setUrls([])
     } catch (error) {
       console.log(error)
     }
@@ -342,15 +361,19 @@ function User() {
                   }}
                 />
               </ArticleWrapper>
-              {hasUpload ? (
-                "All images uploaded successfully!"
+              {hasUpload && urls ? (
+                <UrlsImgWrapper>
+                  {urls.map((url) => {
+                    return <UploadImgIcon key={url.slice(0, -8)} src={url} />
+                  })}
+                </UrlsImgWrapper>
               ) : (
                 <UploadPhotoWrapper>
                   <UploadImgLabel>
                     <UploadImgIcon src={uploadIcon} />
-                    {photos
-                      ? photos.map((photo) => {
-                          return `\n${photo}`
+                    {filesName
+                      ? filesName.map((fileName) => {
+                          return `\n${fileName}`
                         })
                       : "Choose photos"}
                     <UploadImgInput
@@ -371,7 +394,7 @@ function User() {
             ""
           )}
           <Marker onLoad={onMkLoad} position={center} icon={homeIcon} />
-          {/* {markers?.map((marker) => {
+          {markers?.map((marker) => {
             return (
               <Marker
                 key={marker.placeId}
@@ -379,7 +402,7 @@ function User() {
                 position={new google.maps.LatLng(marker.lat!, marker.lng)}
               />
             )
-          })} */}
+          })}
         </GoogleMap>
       ) : (
         ""
