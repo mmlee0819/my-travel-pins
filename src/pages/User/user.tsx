@@ -14,8 +14,9 @@ import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
 import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
-import { db } from "../Utils/firebase"
+import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
+import { ref, uploadBytesResumable } from "firebase/storage"
 
 const Wrapper = styled.div`
   display: flex;
@@ -57,6 +58,19 @@ const Input = styled.input`
 `
 
 const BtnAddPin = styled.div`
+  display: flex;
+  justify-content: center;
+  align-self: end;
+  align-items: center;
+  padding: 10px;
+  height: 30px;
+  color: #ffffff;
+  background-color: #000000;
+  opacity: 0.8;
+  border-radius: 10px;
+  cursor: pointer;
+`
+const BtnUpload = styled.button`
   display: flex;
   justify-content: center;
   align-self: end;
@@ -144,7 +158,15 @@ function User() {
   console.log("markers", markers)
   const [hasAddPin, setHasAddPin] = useState(false)
   console.log("hasAddPin", hasAddPin)
-  const [photos, setPhotos] = useState<string[]>([])
+  const [filesName, setFilesName] = useState<string[]>([])
+  const [photos, setPhotos] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [hasUpload, setHasUpload] = useState(false)
+  console.log("filesName", filesName)
+  console.log("photos", photos)
+  console.log("uploadProgress", uploadProgress)
+  console.log("hasUpload", hasUpload)
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
     libraries: ["places"],
@@ -199,6 +221,44 @@ function User() {
     })
     setHasAddPin(true)
     setHasPosted(false)
+    setHasUpload(false)
+  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files !== null) {
+      for (const file of e.target.files) {
+        setFilesName((prev: string[]) => {
+          return [...prev, file.name]
+        })
+        setPhotos((prev: File[]) => {
+          return [...prev, file]
+        })
+      }
+    }
+  }
+  const handleUpload = () => {
+    photos.map((photo) => {
+      const imgRef = ref(
+        storage,
+        `/${currentUser?.id.slice(0, 4)}-${newPin.location.placeId.slice(
+          0,
+          4
+        )}}/${photo.name}`
+      )
+      const uploadTask = uploadBytesResumable(imgRef, photo)
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          )
+          setUploadProgress(progress)
+          setHasUpload(true)
+        },
+        (error) => {
+          console.log(error)
+        }
+      )
+    })
   }
   const addMemory = async () => {
     const docRef = doc(db, "pins", newPin.id)
@@ -282,32 +342,30 @@ function User() {
                   }}
                 />
               </ArticleWrapper>
-              <UploadPhotoWrapper>
-                <UploadImgLabel>
-                  <UploadImgIcon src={uploadIcon} />
-                  {photos
-                    ? photos.map((photo) => {
-                        return `\n${photo}`
-                      })
-                    : "Choose photos"}
-                  <UploadImgInput
-                    type="file"
-                    accept="image/*"
-                    multiple={true}
-                    onChange={(e) => {
-                      if (e.target.files !== null) {
-                        for (const file of e.target.files) {
-                          setPhotos((prev: string[]) => {
-                            return [...prev, file.name]
-                          })
-                        }
-                      }
-                    }}
-                  />
-                </UploadImgLabel>
-                <BtnAddPin>Upload</BtnAddPin>
-                <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
-              </UploadPhotoWrapper>
+              {hasUpload ? (
+                "All images uploaded successfully!"
+              ) : (
+                <UploadPhotoWrapper>
+                  <UploadImgLabel>
+                    <UploadImgIcon src={uploadIcon} />
+                    {photos
+                      ? photos.map((photo) => {
+                          return `\n${photo}`
+                        })
+                      : "Choose photos"}
+                    <UploadImgInput
+                      type="file"
+                      accept="image/*"
+                      multiple={true}
+                      onChange={(e) => {
+                        handleChange(e)
+                      }}
+                    />
+                  </UploadImgLabel>
+                  <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
+                </UploadPhotoWrapper>
+              )}
+              <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
             </PostArea>
           ) : (
             ""
