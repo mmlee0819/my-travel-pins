@@ -13,10 +13,12 @@ import { darkMap } from "../User/darkMap"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
+import { db } from "../Utils/firebase"
+import { doc, setDoc } from "firebase/firestore"
 
 const Wrapper = styled.div`
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: row nowrap;
   width: 80%;
   margin: 0 auto;
 `
@@ -52,11 +54,11 @@ const Input = styled.input`
 `
 const BtnAddPin = styled.div`
   display: flex;
-  width: 100px;
-  height: 30px;
   justify-content: center;
-  align-self: self-end;
+  align-self: end;
   align-items: center;
+  padding: 10px;
+  height: 30px;
   color: #ffffff;
   background-color: #000000;
   opacity: 0.8;
@@ -76,19 +78,23 @@ function User() {
     lat: currentUser?.hometownLat,
     lng: currentUser?.hometownLng,
   }
-  const [newpin, setNewPin] = useState<google.maps.LatLng | Position>()
-  // const [marker, setMarker] = useState<google.maps.Marker>()
-  const [markers, setMarkers] = useState<Position[]>([
-    {
-      placeId: "00000000mmlee",
-      lat: 25.061945,
-      lng: 121.5484174,
+  const [location, setLocation] = useState<google.maps.LatLng | Position>()
+  const [newPin, setNewPin] = useState({
+    id: "",
+    userId: "",
+    location: {
+      lat: 0,
+      lng: 0,
+      name: "",
+      placeId: "",
     },
-  ])
+  })
+  // const [marker, setMarker] = useState<google.maps.Marker>()
+  const [markers, setMarkers] = useState<Position[]>([])
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  console.log("newpin", newpin)
+  console.log("newpin", newPin)
   console.log("markers", markers)
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -107,23 +113,44 @@ function User() {
         const newLat = searchResult[0]?.geometry?.location?.lat()
         const newLng = searchResult[0]?.geometry?.location?.lng()
         console.log(searchResult[0])
-        setNewPin({ lat: newLat, lng: newLng })
-        setMarkers((prev) => {
-          return [
-            ...prev,
-            { placeId: searchResult[0].place_id, lat: newLat, lng: newLng },
-          ]
-        })
+        const placeName = searchResult[0]?.name
+        const placeId = searchResult[0]?.place_id
+        setLocation({ lat: newLat, lng: newLng })
+        const newPinInfo = {
+          id: `${currentUser?.id}-${placeId}`,
+          userId: currentUser?.id,
+          location: {
+            lat: newLat!,
+            lng: newLng!,
+            name: placeName!,
+            placeId: placeId!,
+          },
+        }
+        setNewPin(newPinInfo)
       }
     } else console.log("失敗啦")
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
+  const addPin = async () => {
+    if (!newPin) return
+    await setDoc(doc(db, "pins", newPin?.id), newPin)
+    setMarkers((prev) => {
+      return [
+        ...prev,
+        {
+          placeId: newPin.location.placeId,
+          lat: newPin.location.lat,
+          lng: newPin.location.lng,
+        },
+      ]
+    })
+  }
   return (
     <>
       <Wrapper>
         <Title>我是user的地圖頁</Title>
-        <BtnLink to="/">點我回首頁</BtnLink>
+        <BtnLink to="/">回首頁</BtnLink>
         <BtnLink to="/mika/my-memories">點我去user的memories列表</BtnLink>
         <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
       </Wrapper>
@@ -141,16 +168,18 @@ function User() {
           options={{ draggable: true, styles: darkMap }}
         >
           <SearchWrapper>
+            <Title>Add a new memory</Title>
+            <Title>Step 1 : Where did you go?</Title>
             <StandaloneSearchBox
               onLoad={onLoad}
               onPlacesChanged={onPlacesChanged}
             >
               <Input placeholder="City, Address..."></Input>
             </StandaloneSearchBox>
-            <BtnAddPin>Add pin</BtnAddPin>
+            <BtnAddPin onClick={addPin}>Confirm to add pin</BtnAddPin>
           </SearchWrapper>
           <Marker onLoad={onMkLoad} position={center} icon={homeIcon} />
-          {/* {markers?.map((marker) => {
+          {markers?.map((marker) => {
             return (
               <Marker
                 key={marker.placeId}
@@ -158,7 +187,7 @@ function User() {
                 position={new google.maps.LatLng(marker.lat!, marker.lng)}
               />
             )
-          })} */}
+          })}
         </GoogleMap>
       ) : (
         ""
