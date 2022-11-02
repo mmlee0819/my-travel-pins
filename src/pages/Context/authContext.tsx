@@ -16,8 +16,16 @@ declare module "*.png"
 interface AuthContextType {
   currentUser: UserInfoType | DocumentData | undefined
   setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) => void
-  signUp: (name: string, email: string, password: string) => void
-  signIn: (email: string, password: string) => void
+  signUp: (
+    name: string,
+    email: string,
+    password: string,
+    searchResult: google.maps.places.PlaceResult[]
+  ) => void
+  signIn: (
+    email: string,
+    password: string,
+  ) => void
   logOut: () => void
   isLogin: boolean
   setIsLogin: (isLogin: boolean) => void
@@ -29,12 +37,20 @@ export const AuthContext = createContext<AuthContextType>({
     name: "",
     email: "",
     photoURL: "",
+    hometownName: "Taipei",
+    hometownLat: 25.061945,
+    hometownLng: 121.5484174,
   },
   setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) =>
     Response,
   isLogin: false,
   setIsLogin: (isLogin: boolean) => Boolean,
-  signUp: (name: string, email: string, password: string) => Response,
+  signUp: (
+    name: string,
+    email: string,
+    password: string,
+    searchResult: google.maps.places.PlaceResult[]
+  ) => Response,
   signIn: (email: string, password: string) => Response,
   logOut: () => Response,
 })
@@ -48,13 +64,15 @@ interface UserInfoType {
   name: string | DocumentData
   email: string | DocumentData
   photoURL: string | DocumentData
+  hometownName: string
+  hometownLat: number
+  hometownLng: number
 }
 export const AuthContextProvider = ({ children }: Props) => {
   const [isLogin, setIsLogin] = useState(false)
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
-
   useEffect(() => {
     const checkLoginStatus = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser !== null) {
@@ -70,7 +88,12 @@ export const AuthContextProvider = ({ children }: Props) => {
     return checkLoginStatus
   }, [])
 
-  const signUp = async (name: string, email: string, password: string) => {
+  const signUp = async (
+    name: string,
+    email: string,
+    password: string,
+    searchResult: google.maps.places.PlaceResult[]
+  ) => {
     if (!name || !email || !password) return
     try {
       console.log("註冊中")
@@ -87,6 +110,9 @@ export const AuthContextProvider = ({ children }: Props) => {
         name,
         email: user.email!,
         photoURL: defaultAvatar,
+        hometownName: searchResult[0]?.name,
+        hometownLat: searchResult[0]?.geometry?.location?.lat(),
+        hometownLng: searchResult[0]?.geometry?.location?.lng(),
       }
       await setDoc(doc(db, "users", user.uid), userInfo)
       setCurrentUser(userInfo)
