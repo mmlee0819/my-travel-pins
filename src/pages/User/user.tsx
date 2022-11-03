@@ -16,16 +16,22 @@ import uploadIcon from "./uploadImgIcon.png"
 import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage"
 
 const Wrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
 `
 const Title = styled.div`
   color: #000000;
+  width: 100%;
 `
 
 const BtnLink = styled(Link)`
@@ -47,7 +53,7 @@ const SearchWrapper = styled.div`
   font-size: 14px;
 `
 const Input = styled.input`
-  width: 300px;
+  width: 100%;
   height: 30px;
   font-size: 15px;
   color: #ffffff;
@@ -58,9 +64,9 @@ const Input = styled.input`
 `
 
 const BtnAddPin = styled.div`
+  position: relative;
   display: flex;
-  justify-content: center;
-  align-self: end;
+  align-self: flex-start;
   align-items: center;
   padding: 10px;
   height: 30px;
@@ -73,12 +79,13 @@ const BtnAddPin = styled.div`
 const BtnUpload = styled.button`
   display: flex;
   justify-content: center;
-  align-self: end;
+  align-self: start;
   align-items: center;
   padding: 10px;
   height: 30px;
   color: #ffffff;
-  background-color: #000000;
+  background-color: #5197ff;
+  border: none;
   opacity: 0.8;
   border-radius: 10px;
   cursor: pointer;
@@ -86,7 +93,14 @@ const BtnUpload = styled.button`
 const BtnPost = styled(BtnAddPin)`
   margin-top: 20px;
 `
-
+const BtnCancel = styled(BtnPost)``
+const PostBtnWrapper = styled(Wrapper)`
+  justify-content: space-between;
+  margin-bottom: 10px;
+`
+const CancelReminder = styled(Title)`
+  text-align: end;
+`
 const PostArea = styled.div`
   position: absolute;
   top: 80px;
@@ -238,11 +252,11 @@ function User() {
       }
     }
   }
+  const folderName = `${currentUser?.id.slice(
+    0,
+    4
+  )}-${newPin.location.placeId.slice(0, 4)}`
   const handleUpload = () => {
-    const folderName = `${currentUser?.id.slice(
-      0,
-      4
-    )}-${newPin.location.placeId.slice(0, 4)}`
     photos.map((photo) => {
       const imgRef = ref(storage, `/${folderName}/${photo.name}`)
       const uploadTask = uploadBytesResumable(imgRef, photo)
@@ -297,6 +311,26 @@ function User() {
       console.log(error)
     }
   }
+
+  const cancelPost = () => {
+    if (urls.length !== 0) {
+      console.log("開始刪除檔案")
+      try {
+        filesName.map(async (file) => {
+          await deleteObject(ref(storage, `/${folderName}/${file}`))
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    setHasPosted(true)
+    setHasAddPin(false)
+    setFilesName([])
+    setPhotos([])
+    setUploadProgress(0)
+    setUrls([])
+  }
+
   return (
     <>
       <Wrapper>
@@ -371,7 +405,7 @@ function User() {
                 <UploadPhotoWrapper>
                   <UploadImgLabel>
                     <UploadImgIcon src={uploadIcon} />
-                    {filesName
+                    {filesName.length !== 0
                       ? filesName.map((fileName) => {
                           return `\n${fileName}`
                         })
@@ -388,7 +422,14 @@ function User() {
                   <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
                 </UploadPhotoWrapper>
               )}
-              <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
+              <PostBtnWrapper>
+                <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
+                <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
+              </PostBtnWrapper>
+              <CancelReminder>
+                If you click `Cancel`, all content and uploaded files will not
+                be preserved.
+              </CancelReminder>
             </PostArea>
           ) : (
             ""
