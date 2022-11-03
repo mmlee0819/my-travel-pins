@@ -22,7 +22,6 @@ root.render(
         </Route>
       </Routes>
     </BrowserRouter>
-    <App />
   </>
 )
 

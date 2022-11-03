@@ -5,7 +5,6 @@ import { Link } from "react-router-dom"
 import {
   useJsApiLoader,
   GoogleMap,
-  LoadScript,
   Marker,
   StandaloneSearchBox,
 } from "@react-google-maps/api"
@@ -152,13 +151,16 @@ interface Position {
   lng: number | undefined
 }
 
+const libraries = String(["places"])
 function User() {
-  const { currentUser } = useContext(AuthContext)
+  const google = window.google
+  const { isLoaded, currentUser, navigate } = useContext(AuthContext)
   console.log(currentUser)
   const center = {
     lat: currentUser?.hometownLat,
     lng: currentUser?.hometownLng,
   }
+
   const [location, setLocation] = useState<google.maps.LatLng | Position>()
   const [newPin, setNewPin] = useState({
     id: "",
@@ -185,10 +187,10 @@ function User() {
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: myGoogleApiKey!,
-    libraries: ["places"],
-  })
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: myGoogleApiKey!,
+  //   [libraries]: libraries,
+  // })
   const [artiTitle, setArtiTitle] = useState("")
   const [travelDate, setTravelDate] = useState("")
   const [artiContent, setArtiContent] = useState("")
@@ -307,6 +309,9 @@ function User() {
       setPhotos([])
       setUploadProgress(0)
       setUrls([])
+      if (currentUser) {
+        navigate(`/${currentUser.name}/my-memories`)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -339,10 +344,6 @@ function User() {
         <BtnLink to="/mika/my-memories">點我去user的memories列表</BtnLink>
         <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
       </Wrapper>
-      {/* <LoadScript
-          googleMapsApiKey={process.env.REACT_APP_google_API_KEY!}
-          libraries={["places"]}
-      > */}
       {isLoaded ? (
         <GoogleMap
           id="my-map"
@@ -448,7 +449,6 @@ function User() {
       ) : (
         ""
       )}
-      {/* </LoadScript> */}
     </>
   )
 }

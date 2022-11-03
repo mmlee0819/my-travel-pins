@@ -3,19 +3,20 @@ import styled from "styled-components"
 import { useState, useRef, useContext } from "react"
 import { Link } from "react-router-dom"
 import { AuthContext } from "./Context/authContext"
-import {
-  GoogleMap,
-  LoadScript,
-  StandaloneSearchBox,
-} from "@react-google-maps/api"
-import { containerStyle, centerSchool, myGoogleApiKey } from "./Utils/gmap"
+import { GoogleMap, StandaloneSearchBox } from "@react-google-maps/api"
+import { containerStyle, centerSchool } from "./Utils/gmap"
 import { darkMap } from "./User/darkMap"
 
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  width: 80%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
+`
+
+const LoginArea = styled.div`
+  position: relative;
+  align-items: center;
 `
 
 const Title = styled.div`
@@ -53,6 +54,7 @@ const BtnWrapper = styled.div`
   gap: 20px;
 `
 const Btn = styled.div`
+  display: inline-block;
   color: #000000;
   padding: 10px;
   border: 1px solid #000000;
@@ -76,24 +78,47 @@ function Home() {
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
 
-  const { isLogin, signUp, signIn, logOut } = useContext(AuthContext)
+  const { isLoaded, currentUser, isLogin, signUp, signIn, logOut } =
+    useContext(AuthContext)
+  console.log("isLoaded", isLoaded)
   console.log("isLogin", isLogin)
+
+  if (!isLoaded) return <Title>Please wait...</Title>
   return (
     <Wrapper>
       <Title>我是首頁</Title>
-
-      {isLogin ? (
-        ""
+      {isLogin && currentUser !== undefined ? (
+        <>
+          <LoginArea>
+            <BtnLink to={`/${currentUser.name}`}>my-map</BtnLink>
+            <BtnLink to={`/${currentUser.name}/my-memories`}>
+              my-memories
+            </BtnLink>
+            <BtnLink to={`/${currentUser.name}/my-friends`}>my-friends</BtnLink>
+            <Btn
+              onClick={() => {
+                logOut()
+              }}
+            >
+              Sign out
+            </Btn>
+          </LoginArea>
+        </>
       ) : (
-        <LoadScript googleMapsApiKey={myGoogleApiKey!} libraries={["places"]}>
-          <GoogleMap
-            id="my-map"
-            mapTypeId="94ce067fe76ff36f"
-            mapContainerStyle={containerStyle}
-            center={centerSchool}
-            zoom={2}
-            options={{ draggable: true, styles: darkMap }}
-          >
+        ""
+      )}
+      <GoogleMap
+        id="my-map"
+        mapTypeId="94ce067fe76ff36f"
+        mapContainerStyle={containerStyle}
+        center={centerSchool}
+        zoom={2}
+        options={{ draggable: true, styles: darkMap }}
+      >
+        {isLogin && currentUser !== undefined ? (
+          ""
+        ) : (
+          <>
             <FormWrapper>
               <Input ref={nameRef} name="userName" placeholder="name" />
               <Input
@@ -113,51 +138,32 @@ function Home() {
                 <Input placeholder="Your hometown"></Input>
               </StandaloneSearchBox>
             </FormWrapper>
-          </GoogleMap>
-        </LoadScript>
-      )}
-      <BtnWrapper>
-        {isLogin ? (
-          ""
-        ) : (
-          <>
-            <Btn
-              onClick={() => {
-                signUp(
-                  nameRef.current.value,
-                  emailRef.current.value,
-                  pwRef.current.value,
-                  result!
-                )
-              }}
-            >
-              Sign up
-            </Btn>
-            <Btn
-              onClick={() => {
-                signIn(emailRef.current.value, pwRef.current.value)
-              }}
-            >
-              Sign in
-            </Btn>
+            <BtnWrapper>
+              <Btn
+                onClick={() => {
+                  if (result) {
+                    signUp(
+                      nameRef.current.value,
+                      emailRef.current.value,
+                      pwRef.current.value,
+                      result
+                    )
+                  }
+                }}
+              >
+                Sign up
+              </Btn>
+              <Btn
+                onClick={() => {
+                  signIn(emailRef.current.value, pwRef.current.value)
+                }}
+              >
+                Sign in
+              </Btn>
+            </BtnWrapper>
           </>
         )}
-        {isLogin ? (
-          <Btn
-            onClick={() => {
-              logOut()
-            }}
-          >
-            Sign out
-          </Btn>
-        ) : (
-          ""
-        )}
-      </BtnWrapper>
-
-      <BtnLink to="/mika">點我去user的地圖頁</BtnLink>
-      <BtnLink to="/mika/my-memories">點我去user的memories列表</BtnLink>
-      <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
+      </GoogleMap>
     </Wrapper>
   )
 }
