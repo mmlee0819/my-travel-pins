@@ -2,17 +2,12 @@ import React from "react"
 import { useState, useContext } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import {
-  useJsApiLoader,
-  GoogleMap,
-  Marker,
-  StandaloneSearchBox,
-} from "@react-google-maps/api"
+import { GoogleMap, Marker, StandaloneSearchBox } from "@react-google-maps/api"
 import { darkMap } from "../User/darkMap"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
-import { containerStyle, myGoogleApiKey } from "../Utils/gmap"
+import { containerStyle } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import {
@@ -30,7 +25,6 @@ const Wrapper = styled.div`
 `
 const Title = styled.div`
   color: #000000;
-  width: 100%;
 `
 
 const BtnLink = styled(Link)`
@@ -102,14 +96,14 @@ const CancelReminder = styled(Title)`
 `
 const PostArea = styled.div`
   position: absolute;
-  top: 80px;
-  right: 30px;
+  top: 20px;
+  right: 60px;
   display: flex;
   flex-flow: column nowrap;
   background-color: #ffffff;
   width: 40%;
   padding: 10px;
-  height: 70%;
+  height: 100%;
   font-size: 14px;
   opacity: 0.6;
 `
@@ -151,7 +145,6 @@ interface Position {
   lng: number | undefined
 }
 
-const libraries = String(["places"])
 function User() {
   const google = window.google
   const { isLoaded, currentUser, navigate } = useContext(AuthContext)
@@ -172,7 +165,7 @@ function User() {
       placeId: "",
     },
   })
-  // const [marker, setMarker] = useState<google.maps.Marker>()
+
   const [markers, setMarkers] = useState<Position[]>([])
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
@@ -187,10 +180,6 @@ function User() {
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
 
-  // const { isLoaded } = useJsApiLoader({
-  //   googleMapsApiKey: myGoogleApiKey!,
-  //   [libraries]: libraries,
-  // })
   const [artiTitle, setArtiTitle] = useState("")
   const [travelDate, setTravelDate] = useState("")
   const [artiContent, setArtiContent] = useState("")
@@ -203,23 +192,25 @@ function User() {
     if (searchBox instanceof google.maps.places.SearchBox) {
       console.log(searchBox.getPlaces())
       const searchResult = searchBox.getPlaces()
-      if (searchResult) {
+      if (searchResult !== undefined && currentUser) {
         const newLat = searchResult[0]?.geometry?.location?.lat()
         const newLng = searchResult[0]?.geometry?.location?.lng()
         const placeName = searchResult[0]?.name
         const placeId = searchResult[0]?.place_id
         setLocation({ lat: newLat, lng: newLng })
-        const newPinInfo = {
-          id: `${currentUser?.id}-${placeId}`,
-          userId: currentUser?.id,
-          location: {
-            lat: newLat!,
-            lng: newLng!,
-            name: placeName!,
-            placeId: placeId!,
-          },
+        if (newLat && newLng && placeName && placeId) {
+          const newPinInfo = {
+            id: `${currentUser?.id}-${placeId}`,
+            userId: `${currentUser?.id}`,
+            location: {
+              lat: newLat,
+              lng: newLng,
+              name: placeName,
+              placeId: placeId,
+            },
+          }
+          setNewPin(newPinInfo)
         }
-        setNewPin(newPinInfo)
       }
     } else console.log("失敗啦")
   }
@@ -243,6 +234,8 @@ function User() {
     setHasUpload(false)
   }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilesName([])
+    setPhotos([])
     if (e.target.files !== null) {
       for (const file of e.target.files) {
         setFilesName((prev: string[]) => {
