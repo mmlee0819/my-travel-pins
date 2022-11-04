@@ -1,5 +1,6 @@
 import React from "react"
 import { createContext, useState, useEffect, ReactNode } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,6 +11,8 @@ import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
+import { useJsApiLoader } from "@react-google-maps/api"
+import { myGoogleApiKey } from "../Utils/gmap"
 
 declare module "*.png"
 
@@ -22,13 +25,12 @@ interface AuthContextType {
     password: string,
     searchResult: google.maps.places.PlaceResult[]
   ) => void
-  signIn: (
-    email: string,
-    password: string,
-  ) => void
+  signIn: (email: string, password: string) => void
   logOut: () => void
   isLogin: boolean
   setIsLogin: (isLogin: boolean) => void
+  navigate: (path: string) => void
+  isLoaded: boolean
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -53,6 +55,8 @@ export const AuthContext = createContext<AuthContextType>({
   ) => Response,
   signIn: (email: string, password: string) => Response,
   logOut: () => Response,
+  navigate: (path: string) => Response,
+  isLoaded: true,
 })
 
 interface Props {
@@ -68,11 +72,20 @@ interface UserInfoType {
   hometownLat: number
   hometownLng: number
 }
+
 export const AuthContextProvider = ({ children }: Props) => {
   const [isLogin, setIsLogin] = useState(false)
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
+
+  const navigate = useNavigate()
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: myGoogleApiKey!,
+    libraries: ["places"],
+  })
+
   useEffect(() => {
     const checkLoginStatus = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser !== null) {
@@ -105,19 +118,22 @@ export const AuthContextProvider = ({ children }: Props) => {
       const avatarPathRef = ref(storage, "defaultAvatar.png")
       const defaultAvatar = await getDownloadURL(avatarPathRef)
       const user = userCredential.user
-      const userInfo = {
-        id: user.uid!,
-        name,
-        email: user.email!,
-        photoURL: defaultAvatar,
-        hometownName: searchResult[0]?.name,
-        hometownLat: searchResult[0]?.geometry?.location?.lat(),
-        hometownLng: searchResult[0]?.geometry?.location?.lng(),
+      if (user) {
+        const userInfo = {
+          id: user.uid,
+          name,
+          email: user.email,
+          photoURL: defaultAvatar,
+          hometownName: searchResult[0]?.name,
+          hometownLat: searchResult[0]?.geometry?.location?.lat(),
+          hometownLng: searchResult[0]?.geometry?.location?.lng(),
+        }
+        await setDoc(doc(db, "users", user.uid), userInfo)
+        setCurrentUser(userInfo)
+        setIsLogin(true)
+        console.log("註冊完成，已登入")
+        navigate(`/${currentUser?.name}`)
       }
-      await setDoc(doc(db, "users", user.uid), userInfo)
-      setCurrentUser(userInfo)
-      setIsLogin(true)
-      console.log("註冊完成，已登入")
     } catch (error: unknown) {
       console.log(error)
     }
@@ -127,9 +143,21 @@ export const AuthContextProvider = ({ children }: Props) => {
     if (!email || !password) return
     try {
       console.log("登入中")
-      await signInWithEmailAndPassword(auth, email.trim(), password.trim())
-      setIsLogin(true)
-      console.log("已登入")
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password.trim()
+      )
+      const docRef = doc(db, "users", userCredential.user.uid)
+      const docSnap = await getDoc(docRef)
+      if (docSnap) {
+        const userInfo = docSnap.data()
+        setCurrentUser(userInfo)
+        setIsLogin(true)
+        setIsLogin(true)
+        console.log("已登入")
+        navigate(`/${userInfo?.name}`)
+      }
     } catch (error: unknown) {
       console.log(error)
     }
@@ -155,6 +183,8 @@ export const AuthContextProvider = ({ children }: Props) => {
         setCurrentUser,
         isLogin,
         setIsLogin,
+        navigate,
+        isLoaded,
       }}
     >
       {children}
