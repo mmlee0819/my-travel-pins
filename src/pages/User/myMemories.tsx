@@ -131,19 +131,19 @@ function MyMemories() {
   useEffect(() => {
     const getPins = async () => {
       if (currentUser !== null && !hasFetched) {
+        const newMemories: DocumentData[] = []
         const pinsRef = collection(db, "pins")
         const q = query(pinsRef, where("userId", "==", currentUser?.id))
         const querySnapshot = await getDocs(q)
         querySnapshot.forEach((doc) => {
-          setMemories((prev: DocumentData[]) => {
-            return [...prev, doc.data()]
-          })
+          newMemories.push(doc.data())
         })
+        setMemories(newMemories)
         setHasFetched(true)
       }
     }
     getPins()
-  }, [currentUser])
+  }, [currentUser?.id])
 
   return (
     <>

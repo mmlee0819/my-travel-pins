@@ -1,21 +1,36 @@
 import React from "react"
-import { useState, useContext } from "react"
+import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import { GoogleMap, Marker, StandaloneSearchBox } from "@react-google-maps/api"
+import {
+  GoogleMap,
+  Marker,
+  StandaloneSearchBox,
+  InfoWindow,
+} from "@react-google-maps/api"
 import { darkMap } from "../User/darkMap"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
 import { containerStyle } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
-import { doc, setDoc, updateDoc } from "firebase/firestore"
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore"
 import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
   deleteObject,
 } from "firebase/storage"
+import { DocumentData } from "@firebase/firestore-types"
+import defaultImage from "../assets/defaultImage.png"
 
 const Wrapper = styled.div`
   display: flex;
@@ -139,21 +154,38 @@ const UploadImgIcon = styled.img`
 const UploadImgInput = styled.input`
   display: none;
 `
+
+const PinInfoArea = styled.div`
+  background-color: #ffffff;
+`
+const PinInfoImg = styled.img`
+  width: 150px;
+  height: 120px;
+`
+const PinInfoTitle = styled.div`
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+`
+
 interface Position {
   placeId?: string | undefined
+  name?: string | undefined
   lat: number | undefined
   lng: number | undefined
 }
-
+interface Hometown {
+  lat?: number
+  lng?: number
+  name?: string
+}
 function User() {
-  const google = window.google
   const { isLoaded, currentUser, navigate } = useContext(AuthContext)
-  console.log(currentUser)
+  console.log("currentUser", currentUser)
   const center = {
     lat: currentUser?.hometownLat,
     lng: currentUser?.hometownLng,
   }
-
   const [location, setLocation] = useState<google.maps.LatLng | Position>()
   const [newPin, setNewPin] = useState({
     id: "",
@@ -166,30 +198,45 @@ function User() {
     },
   })
 
-  const [markers, setMarkers] = useState<Position[]>([])
+  const [markers, setMarkers] = useState<DocumentData[]>([])
+  const [selectedMarker, setSelectedMarker] = useState<DocumentData>()
+  const [hometown, setHometown] = useState<Hometown>()
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  console.log("newpin", newPin)
   console.log("markers", markers)
   const [hasAddPin, setHasAddPin] = useState(false)
-  console.log("hasAddPin", hasAddPin)
   const [filesName, setFilesName] = useState<string[]>([])
   const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
-
   const [artiTitle, setArtiTitle] = useState<string>("")
   const [travelDate, setTravelDate] = useState<string>("")
   const [artiContent, setArtiContent] = useState<string>("")
   const [hasPosted, setHasPosted] = useState(false)
-  console.log("urls", urls)
-  console.log("photos", photos)
-  console.log("filesName", filesName)
+  const [hasFetched, setHasFetched] = useState(false)
+
+  useEffect(() => {
+    const getAllPins = async () => {
+      if (currentUser !== null && !hasFetched) {
+        const newMarkers: DocumentData[] = []
+        const pinsRef = collection(db, "pins")
+        const q = query(pinsRef, where("userId", "==", currentUser?.id))
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+          newMarkers.push(doc.data())
+        })
+        setMarkers(newMarkers)
+        setHasFetched(true)
+      }
+    }
+    getAllPins()
+  }, [currentUser?.id])
   const onMkLoad = (marker: google.maps.Marker) => {
     console.log(" marker", marker)
   }
+
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
       console.log(searchBox.getPlaces())
@@ -199,7 +246,9 @@ function User() {
         const newLng = searchResult[0]?.geometry?.location?.lng()
         const placeName = searchResult[0]?.name
         const placeId = searchResult[0]?.place_id
-        setLocation({ lat: newLat, lng: newLng })
+        if (newLat && newLng) {
+          setLocation({ lat: newLat, lng: newLng })
+        }
         if (newLat && newLng && placeName && placeId) {
           const newPinInfo = {
             id: `${currentUser?.id}-${placeId}`,
@@ -217,7 +266,9 @@ function User() {
     } else console.log("失敗啦")
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
-
+  const onInfoWinLoad = (infoWindow: google.maps.InfoWindow) => {
+    console.log("infoWindow: ", infoWindow)
+  }
   const addPin = async () => {
     if (!newPin) return
     await setDoc(doc(db, "pins", newPin?.id), newPin)
@@ -225,15 +276,19 @@ function User() {
       return [
         ...prev,
         {
-          placeId: newPin.location.placeId,
-          lat: newPin.location.lat,
-          lng: newPin.location.lng,
+          location: {
+            placeId: newPin.location.placeId,
+            lat: newPin.location.lat,
+            lng: newPin.location.lng,
+            name: newPin.location.name,
+          },
         },
       ]
     })
     setHasAddPin(true)
     setHasPosted(false)
     setHasUpload(false)
+    setHasFetched(false)
   }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilesName([])
@@ -254,6 +309,7 @@ function User() {
     4
   )}-${newPin.location.placeId.slice(0, 4)}`
   const handleUpload = () => {
+    const newUrls: string[] = []
     photos.map((photo) => {
       const imgRef = ref(storage, `/${folderName}/${photo.name}`)
       const uploadTask = uploadBytesResumable(imgRef, photo)
@@ -273,10 +329,12 @@ function User() {
           const url = await getDownloadURL(
             ref(storage, `/${folderName}/${photo.name}`)
           )
-          setUrls((prev) => [...prev, url])
+          newUrls.push(url)
+          return newUrls
         }
       )
     })
+    setUrls(newUrls)
   }
 
   const addMemory = async () => {
@@ -329,6 +387,16 @@ function User() {
     setPhotos([])
     setUploadProgress(0)
     setUrls([])
+  }
+
+  const choosePin = (e: google.maps.MapMouseEvent) => {
+    const filteredMarker = markers.filter((marker) => {
+      return (
+        marker.location.lat === e.latLng?.lat() &&
+        marker.location.lng === e.latLng?.lng()
+      )
+    })
+    setSelectedMarker(filteredMarker[0])
   }
 
   return (
@@ -430,16 +498,83 @@ function User() {
           ) : (
             ""
           )}
-          <Marker onLoad={onMkLoad} position={center} icon={homeIcon} />
+          <Marker
+            onLoad={onMkLoad}
+            position={center}
+            icon={homeIcon}
+            onClick={() => {
+              setHometown({
+                lat: currentUser?.hometownLat,
+                lng: currentUser?.hometownLng,
+                name: currentUser?.hometownName,
+              })
+            }}
+          />
+          {hometown && hometown?.name ? (
+            <InfoWindow
+              onLoad={onInfoWinLoad}
+              position={center}
+              options={{
+                pixelOffset: new window.google.maps.Size(0, -50),
+              }}
+              onCloseClick={() => {
+                setHometown({})
+              }}
+            >
+              <PinInfoArea>
+                <PinInfoTitle>
+                  {hometown && hometown?.name !== ""
+                    ? `My Hometown ${hometown?.name}`
+                    : ""}
+                </PinInfoTitle>
+              </PinInfoArea>
+            </InfoWindow>
+          ) : (
+            ""
+          )}
           {markers?.map((marker) => {
             return (
               <Marker
-                key={marker.placeId}
+                key={marker.location.placeId}
                 onLoad={onMkLoad}
-                position={new google.maps.LatLng(marker.lat!, marker.lng)}
+                position={
+                  new google.maps.LatLng(
+                    marker.location.lat,
+                    marker.location.lng
+                  )
+                }
+                onClick={(e: google.maps.MapMouseEvent) => {
+                  choosePin(e)
+                }}
               />
             )
           })}
+          {selectedMarker && (
+            <InfoWindow
+              onLoad={onInfoWinLoad}
+              onCloseClick={() => {
+                setSelectedMarker(undefined)
+              }}
+              position={{
+                lat: selectedMarker?.location?.lat,
+                lng: selectedMarker?.location?.lng,
+              }}
+              options={{
+                pixelOffset: new window.google.maps.Size(0, -40),
+              }}
+            >
+              <PinInfoArea>
+                <PinInfoImg
+                  src={
+                    selectedMarker.albumURLs
+                      ? selectedMarker?.albumURLs[0]
+                      : defaultImage
+                  }
+                />
+                <PinInfoTitle>{selectedMarker?.location?.name}</PinInfoTitle>
+              </PinInfoArea>
+            </InfoWindow>
+          )}
         </GoogleMap>
       ) : (
         ""
