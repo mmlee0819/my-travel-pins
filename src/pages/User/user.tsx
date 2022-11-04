@@ -180,11 +180,13 @@ function User() {
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
 
-  const [artiTitle, setArtiTitle] = useState("")
-  const [travelDate, setTravelDate] = useState("")
-  const [artiContent, setArtiContent] = useState("")
+  const [artiTitle, setArtiTitle] = useState<string>("")
+  const [travelDate, setTravelDate] = useState<string>("")
+  const [artiContent, setArtiContent] = useState<string>("")
   const [hasPosted, setHasPosted] = useState(false)
-
+  console.log("urls", urls)
+  console.log("photos", photos)
+  console.log("filesName", filesName)
   const onMkLoad = (marker: google.maps.Marker) => {
     console.log(" marker", marker)
   }
@@ -292,7 +294,8 @@ function User() {
         content: artiContent,
       },
       postTime: new Date(),
-      album: urls,
+      albumURLs: urls,
+      albumNames: filesName,
     }
     try {
       await updateDoc(docRef, artiInfo)
@@ -312,7 +315,6 @@ function User() {
 
   const cancelPost = () => {
     if (urls.length !== 0) {
-      console.log("開始刪除檔案")
       try {
         filesName.map(async (file) => {
           await deleteObject(ref(storage, `/${folderName}/${file}`))

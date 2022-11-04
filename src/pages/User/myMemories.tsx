@@ -2,13 +2,21 @@ import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
-import { collection, query, where, getDocs } from "firebase/firestore"
-import { db } from "../Utils/firebase"
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  deleteDoc,
+} from "firebase/firestore"
+import { db, storage } from "../Utils/firebase"
 import { GoogleMap, Marker } from "@react-google-maps/api"
 import trashBin from "./trashBin.png"
 import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { DocumentData } from "@firebase/firestore-types"
+import { ref, deleteObject } from "firebase/storage"
 
 const Wrapper = styled.div`
   display: flex;
@@ -44,6 +52,7 @@ const BtnDelete = styled.img`
   align-self: center;
   width: 40px;
   height: 40px;
+  cursor: pointer;
 `
 const ImgsWrapper = styled.div`
   display: flex;
@@ -83,12 +92,41 @@ const BtnReadMore = styled.div`
   border-radius: 5px;
   cursor: pointer;
 `
+
 function MyMemories() {
   const { currentUser, isLoaded } = useContext(AuthContext)
   const [memories, setMemories] = useState<DocumentData>([])
   const [hasFetched, setHasFetched] = useState(false)
   console.log(currentUser)
   console.log("memories", memories)
+
+  const deleteMemory = async (
+    e: React.MouseEvent<HTMLImageElement, MouseEvent>
+  ) => {
+    try {
+      const folderName = `${memories[0].userId.slice(
+        0,
+        4
+      )}-${memories[0].location.placeId.slice(0, 4)}`
+
+      const newMemories = memories.filter((memory: DocumentData) => {
+        return memory.id !== (e.target as Element).id
+      })
+      const chosenMemory = memories.filter((memory: DocumentData) => {
+        return memory.id === (e.target as Element).id
+      })
+      if (chosenMemory[0].albumNames) {
+        chosenMemory[0].albumNames.map(async (fileName: string) => {
+          await deleteObject(ref(storage, `/${folderName}/${fileName}`))
+        })
+      }
+      const docRef = doc(db, "pins", (e.target as Element).id)
+      await deleteDoc(docRef)
+      setMemories(newMemories)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     const getPins = async () => {
@@ -121,7 +159,13 @@ function MyMemories() {
             ? memories.map((memory: DocumentData) => {
                 return (
                   <MemoryList key={memory.id}>
-                    <BtnDelete src={trashBin} />
+                    <BtnDelete
+                      src={trashBin}
+                      id={memory.id}
+                      onClick={(e) => {
+                        deleteMemory(e)
+                      }}
+                    />
                     <MapWrapper>
                       <GoogleMap
                         mapContainerStyle={{ height: "100px", width: "120px" }}
@@ -148,8 +192,8 @@ function MyMemories() {
                       <Title>{memory?.location?.name}</Title>
                     </MapWrapper>
                     <ImgsWrapper>
-                      {memory?.album ? (
-                        memory?.album?.map((photo: string) => {
+                      {memory?.albumURLs ? (
+                        memory?.albumURLs?.map((photo: string) => {
                           return (
                             <MemoryImg key={photo.slice(0, -8)} src={photo} />
                           )
@@ -166,7 +210,9 @@ function MyMemories() {
                       <Title>{memory?.article?.title}</Title>
                       <Title>{memory?.article?.content}</Title>
                       <BtnReadMore>
-                        {memory.article ? "Read more" : "Add memory"}
+                        {memory?.article?.content !== ""
+                          ? "Read more"
+                          : "Add memory"}
                       </BtnReadMore>
                     </ArticleWrapper>
                   </MemoryList>
