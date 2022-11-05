@@ -55,7 +55,6 @@ const SearchWrapper = styled.div`
   width: 30%;
   background-color: #ffffff;
   padding: 10px;
-  height: 60%;
   opacity: 0.6;
   gap: 20px;
   font-size: 14px;
