@@ -402,9 +402,9 @@ function User() {
     <>
       <Wrapper>
         <Title>我是user的地圖頁</Title>
-        <BtnLink to="/">回首頁</BtnLink>
-        <BtnLink to="/mika/my-memories">點我去user的memories列表</BtnLink>
-        <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
+        <BtnLink to="/">Home</BtnLink>
+        <BtnLink to="/mika/my-memories">My-map</BtnLink>
+        <BtnLink to="/mika/my-friends">MY-friends</BtnLink>
       </Wrapper>
       {isLoaded ? (
         <GoogleMap

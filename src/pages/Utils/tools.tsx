@@ -2,6 +2,8 @@ import React from "react"
 import { useState } from "react"
 import { useDrag } from "@use-gesture/react"
 import { useSpring, animated } from "@react-spring/web"
+import GridLayout from "react-grid-layout"
+import { Responsive, WidthProvider } from "react-grid-layout"
 import styled from "styled-components"
 import robot from "../assets/robotic1.png"
 import currency from "../assets/whiteCurrencies.png"
@@ -10,6 +12,8 @@ import hsr from "../assets/whiteHSR.png"
 import train from "../assets/whiteTrain.png"
 import tripAdvisor from "../assets/tripadvisor.png"
 import weather from "../assets/whiteWeather.png"
+import "/node_modules/react-grid-layout/css/styles.css"
+import "/node_modules/react-resizable/css/styles.css"
 
 const ToolsWrapper = styled.div`
   position: absolute;
@@ -59,8 +63,35 @@ const TAIcon = styled(CurrencyIcon)`
 const Weather = styled(CurrencyIcon)`
   background-image: url(${weather});
 `
+
+const GridArea = styled.div`
+  position: absolute;
+  display: flex;
+  top: 0px;
+  z-index: 99;
+`
+const GridItemWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: column wrap;
+  font-size: 12px;
+  color: #ffffff;
+  background: #2d2d2d;
+`
+
+const GridItemContent = styled.div`
+  padding: 8px;
+`
+
+const ResponsiveGridLayout = WidthProvider(Responsive)
+const layout = [{ i: "exchange-rate", x: 0, y: 0, w: 1, h: 1 }]
+const getLayouts = () => {
+  const savedLayouts = localStorage.getItem("grid-layout")
+  return savedLayouts ? JSON.parse(savedLayouts) : { lg: layout }
+}
 function ToolsRobot() {
   const [showTools, setShowTools] = useState(false)
+  const [showExange, setShowExange] = useState(false)
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -72,33 +103,69 @@ function ToolsRobot() {
       y: offset[1],
     })
   })
-
+  const handleLayoutChange = (
+    layout: GridLayout.Layout[],
+    layouts: GridLayout.Layouts
+  ) => {
+    localStorage.setItem("grid-layout", JSON.stringify(layouts))
+  }
+  const today = new Date().toDateString()
+  const currentTime = new Date().toLocaleTimeString("en-US")
   return (
-    <ToolsWrapper>
-      <DragWrapper
-        style={{ x, y }}
-        {...bindDrag()}
-        onClick={(e) => {
-          if ((e.target as Element).id === "robotIcon") {
-            setShowTools((prev) => !prev)
-          }
-        }}
-      >
-        <RobotIcon id="robotIcon" />
-        {showTools ? (
-          <>
-            <Weather id="weatherIcon" />
-            <CurrencyIcon id="currencyIcon" />
-            <FlightIcon id="flightIcon" />
-            <HSRIcon id="hsrIcon" />
-            <TrainIcon id="trainIcon" />
-            <TAIcon id="tripAdviIcon" />
-          </>
-        ) : (
-          ""
-        )}
-      </DragWrapper>
-    </ToolsWrapper>
+    <>
+      <ToolsWrapper>
+        <DragWrapper
+          style={{ x, y }}
+          {...bindDrag()}
+          onClick={(e) => {
+            if ((e.target as Element).id === "robotIcon") {
+              setShowTools((prev) => !prev)
+            }
+          }}
+        >
+          <RobotIcon id="robotIcon" />
+          {showTools ? (
+            <>
+              <Weather id="weatherIcon" />
+              <CurrencyIcon
+                id="currencyIcon"
+                onClick={(e) => {
+                  if ((e.target as Element).id === "currencyIcon") {
+                    setShowExange((prev) => !prev)
+                  }
+                }}
+              />
+              <FlightIcon id="flightIcon" />
+              <HSRIcon id="hsrIcon" />
+              <TrainIcon id="trainIcon" />
+              <TAIcon id="tripAdviIcon" />
+            </>
+          ) : (
+            ""
+          )}
+        </DragWrapper>
+      </ToolsWrapper>
+      {showExange ? (
+        <GridArea>
+          <ResponsiveGridLayout
+            layouts={getLayouts()}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 5, md: 4, sm: 3, xs: 2, xxs: 1 }}
+            rowHeight={60}
+            width={1000}
+            onLayoutChange={handleLayoutChange}
+            z-index={99}
+          >
+            <GridItemWrapper key="exchange-rate">
+              <GridItemContent>Exchange rates</GridItemContent>
+              <GridItemContent>{`Current time: ${today} ${currentTime}`}</GridItemContent>
+            </GridItemWrapper>
+          </ResponsiveGridLayout>
+        </GridArea>
+      ) : (
+        ""
+      )}
+    </>
   )
 }
 
