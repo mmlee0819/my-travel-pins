@@ -1,13 +1,3 @@
-import { db, storage } from "../Utils/firebase"
-import {
-  doc,
-  setDoc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore"
 import usa from "../assets/flags/usa.png"
 import japan from "../assets/flags/japan.png"
 import uk from "../assets/flags/uk.png"

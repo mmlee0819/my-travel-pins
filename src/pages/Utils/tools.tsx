@@ -1,5 +1,5 @@
 import React from "react"
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { useDrag } from "@use-gesture/react"
 import { useSpring, animated } from "@react-spring/web"
 import GridLayout from "react-grid-layout"
@@ -15,6 +15,7 @@ import weather from "../assets/whiteWeather.png"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { currencies } from "../Tools/currencies"
+import { ToolContext } from "../Context/toolContext"
 
 const ToolsWrapper = styled.div`
   position: absolute;
@@ -146,7 +147,10 @@ const getLayouts = () => {
   return savedLayouts ? JSON.parse(savedLayouts) : { lg: layout }
 }
 function ToolsRobot() {
+  const { currenciesData, setCurrenciesData, getRatesData } =
+    useContext(ToolContext)
   const [showTools, setShowTools] = useState(false)
+  console.log("currenciesData", currenciesData)
   const [showExange, setShowExange] = useState(false)
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
@@ -177,21 +181,7 @@ function ToolsRobot() {
   ) => {
     localStorage.setItem("grid-layout", JSON.stringify(layouts))
   }
-  const today = new Date().toDateString()
 
-  const getRates = async () => {
-    try {
-      const response = await fetch("https://tw.rter.info/capi.php", {
-        method: "GET",
-        headers: {
-          "Content-Type": "text/javascript",
-        },
-      })
-      console.log("response", response.json())
-    } catch (error) {
-      console.log(error)
-    }
-  }
   return (
     <>
       <ToolsWrapper>
@@ -213,6 +203,9 @@ function ToolsRobot() {
                 onClick={(e) => {
                   if ((e.target as Element).id === "currencyIcon") {
                     setShowExange((prev) => !prev)
+                  }
+                  if (!showExange) {
+                    getRatesData()
                   }
                 }}
               />
@@ -240,7 +233,7 @@ function ToolsRobot() {
           >
             <GridItemWrapper key="exchange-rate">
               <GridItemContent>Exchange rates</GridItemContent>
-              <GridItemContent>{`Data updated time: ${today}`}</GridItemContent>
+              <GridItemContent>{`Data updated time: ${currenciesData?.USDTWD.UTC}`}</GridItemContent>
               <ExchangesWrapper>
                 <ExchangesRows>
                   <ExchangesTitle>Amount</ExchangesTitle>
@@ -248,7 +241,7 @@ function ToolsRobot() {
                   <ExchangesTitle>To</ExchangesTitle>
                 </ExchangesRows>
                 <ExchangesRows>
-                  <AmountInput />
+                  <AmountInput type="number" />
                   <WhiteInputTitle
                     onClick={() => {
                       setShowFrom((prev) => !prev)
@@ -325,13 +318,7 @@ function ToolsRobot() {
                   </WhiteInputTitle>
                 </ExchangesRows>
               </ExchangesWrapper>
-              <BtnClick
-                onClick={() => {
-                  getRates()
-                }}
-              >
-                Click
-              </BtnClick>
+              <BtnClick>Click</BtnClick>
             </GridItemWrapper>
           </ResponsiveGridLayout>
         </GridArea>

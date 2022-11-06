@@ -2,6 +2,7 @@ import React from "react"
 import { createGlobalStyle } from "styled-components"
 import { Outlet } from "react-router-dom"
 import { AuthContextProvider } from "./pages/Context/authContext"
+import { ToolContextProvider } from "./pages/Context/toolContext"
 import ToolsRobot from "./pages/Utils/tools"
 
 const GlobalStyle = createGlobalStyle`
@@ -21,9 +22,11 @@ function App() {
   return (
     <>
       <AuthContextProvider>
-        <GlobalStyle />
-        <ToolsRobot />
-        <Outlet />
+        <ToolContextProvider>
+          <GlobalStyle />
+          <ToolsRobot />
+          <Outlet />
+        </ToolContextProvider>
       </AuthContextProvider>
     </>
   )
