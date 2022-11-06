@@ -85,8 +85,10 @@ const GridItemContent = styled.div`
   padding: 8px;
 `
 const BtnClick = styled.div`
-  width: 10%;
-  height: 20px;
+  margin-top: 20px;
+  padding: 5px;
+  width: 120px;
+  height: 30px;
   line-height: 20px;
   text-align: center;
   background-color: #034961;
@@ -113,7 +115,12 @@ const CurrencyRow = styled(ExchangesRows)`
 `
 const ExchangesTitle = styled.div`
   font-size: 12px;
+  width: 120px;
+  margin-top: 20px;
+`
+const AmountTitle = styled(ExchangesTitle)`
   width: 100px;
+  margin-top: 20px;
 `
 const FlagImg = styled.img`
   margin: 0 5px;
@@ -141,29 +148,41 @@ const AmountInput = styled.input`
 `
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
-const layout = [{ i: "exchange-rate", x: 0, y: 0, w: 1, h: 1 }]
+const layout = [{ i: "exchange-rate-1", x: 0, y: 0, w: 1, h: 1 }]
 const getLayouts = () => {
   const savedLayouts = localStorage.getItem("grid-layout")
   return savedLayouts ? JSON.parse(savedLayouts) : { lg: layout }
 }
 function ToolsRobot() {
-  const { currenciesData, setCurrenciesData, getRatesData } =
-    useContext(ToolContext)
+  const {
+    currenciesData,
+    getRatesData,
+    calculateRates,
+    currentRate,
+    convertResult,
+    setCurrentRate,
+    setConvertResult,
+    amount,
+    setAmount,
+    selectedFrom,
+    setSelectedFrom,
+    selectedTo,
+    setSelectedTo,
+  } = useContext(ToolContext)
   const [showTools, setShowTools] = useState(false)
-  console.log("currenciesData", currenciesData)
-  const [showExange, setShowExange] = useState(false)
+  const [showExchange, setShowExchange] = useState(false)
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
-  const [selectedFrom, setSelectedFrom] = useState({
-    id: "",
-    flag: "",
-    currency: "",
-  })
-  const [selectedTo, setSelectedTo] = useState({
-    id: "",
-    flag: "",
-    currency: "",
-  })
+  console.log("currenciesData", currenciesData)
+  console.log("showFrom", showFrom)
+  console.log("showTo", showTo)
+  console.log("showExchange", showExchange)
+  console.log("selectedFrom", selectedFrom)
+  console.log("selectedTo", selectedTo)
+  console.log("amount", amount)
+  console.log("typeof amount", typeof amount)
+  console.log("currentRate", currentRate)
+  console.log("convertResult", convertResult)
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -189,7 +208,14 @@ function ToolsRobot() {
           style={{ x, y }}
           {...bindDrag()}
           onClick={(e) => {
-            if ((e.target as Element).id === "robotIcon") {
+            if ((e.target as Element).id === "robotIcon" && showTools) {
+              setSelectedFrom({ id: "", flag: "", currency: "" })
+              setSelectedTo({ id: "", flag: "", currency: "" })
+              setCurrentRate(0)
+              setConvertResult(0)
+              setShowExchange(false)
+              setShowTools((prev) => !prev)
+            } else if ((e.target as Element).id === "robotIcon" && !showTools) {
               setShowTools((prev) => !prev)
             }
           }}
@@ -201,11 +227,17 @@ function ToolsRobot() {
               <CurrencyIcon
                 id="currencyIcon"
                 onClick={(e) => {
-                  if ((e.target as Element).id === "currencyIcon") {
-                    setShowExange((prev) => !prev)
-                  }
-                  if (!showExange) {
+                  if (
+                    (e.target as Element).id === "currencyIcon" &&
+                    !showExchange
+                  ) {
                     getRatesData()
+                    setShowExchange((prev) => !prev)
+                  } else if (
+                    (e.target as Element).id === "currencyIcon" &&
+                    showExchange
+                  ) {
+                    setShowExchange((prev) => !prev)
                   }
                 }}
               />
@@ -219,7 +251,7 @@ function ToolsRobot() {
           )}
         </DragWrapper>
       </ToolsWrapper>
-      {showExange ? (
+      {showExchange ? (
         <GridArea>
           <ResponsiveGridLayout
             layouts={getLayouts()}
@@ -232,19 +264,25 @@ function ToolsRobot() {
             z-index={99}
           >
             <GridItemWrapper key="exchange-rate">
-              <GridItemContent>Exchange rates</GridItemContent>
-              <GridItemContent>{`Data updated time: ${currenciesData?.USDTWD.UTC}`}</GridItemContent>
+              <GridItemContent>Currency Converter</GridItemContent>
+              <GridItemContent>{`Data updated time: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
               <ExchangesWrapper>
                 <ExchangesRows>
-                  <ExchangesTitle>Amount</ExchangesTitle>
+                  <AmountTitle>Amount</AmountTitle>
                   <ExchangesTitle>From</ExchangesTitle>
                   <ExchangesTitle>To</ExchangesTitle>
                 </ExchangesRows>
                 <ExchangesRows>
-                  <AmountInput type="number" />
+                  <AmountInput
+                    type="number"
+                    min="1"
+                    onChange={(e) => {
+                      setAmount(e.target.value)
+                    }}
+                  />
                   <WhiteInputTitle
                     onClick={() => {
-                      setShowFrom((prev) => !prev)
+                      setShowFrom((prev: boolean) => !prev)
                     }}
                   >
                     {selectedFrom.id === "" ? (
@@ -281,7 +319,7 @@ function ToolsRobot() {
                   </WhiteInputTitle>
                   <WhiteInputTitle
                     onClick={() => {
-                      setShowTo((prev) => !prev)
+                      setShowTo((prev: boolean) => !prev)
                     }}
                   >
                     {selectedTo.id === "" ? (
@@ -317,8 +355,23 @@ function ToolsRobot() {
                       })}
                   </WhiteInputTitle>
                 </ExchangesRows>
+
+                <AmountTitle>
+                  {currentRate
+                    ? `Exchange rate: ${currentRate}`
+                    : "Exchange rate"}
+                </AmountTitle>
+                <AmountTitle>
+                  {convertResult ? `Result: ${convertResult}` : "Result"}
+                </AmountTitle>
               </ExchangesWrapper>
-              <BtnClick>Click</BtnClick>
+              <BtnClick
+                onClick={() => {
+                  calculateRates(amount, currentRate, selectedFrom, selectedTo)
+                }}
+              >
+                Convert
+              </BtnClick>
             </GridItemWrapper>
           </ResponsiveGridLayout>
         </GridArea>
