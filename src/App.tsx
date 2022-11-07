@@ -2,6 +2,8 @@ import React from "react"
 import { createGlobalStyle } from "styled-components"
 import { Outlet } from "react-router-dom"
 import { AuthContextProvider } from "./pages/Context/authContext"
+import { ToolContextProvider } from "./pages/Context/toolContext"
+import ToolsRobot from "./pages/Utils/tools"
 
 const GlobalStyle = createGlobalStyle`
   *{
@@ -12,15 +14,21 @@ const GlobalStyle = createGlobalStyle`
    }
 
   #root {
-     min-height: 100vh;
+    position: relative;
+    min-height: 100vh;
   }
 `
 function App() {
   return (
-    <AuthContextProvider>
-      <GlobalStyle />
-      <Outlet />
-    </AuthContextProvider>
+    <>
+      <AuthContextProvider>
+        <ToolContextProvider>
+          <GlobalStyle />
+          <ToolsRobot />
+          <Outlet />
+        </ToolContextProvider>
+      </AuthContextProvider>
+    </>
   )
 }
 

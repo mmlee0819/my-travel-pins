@@ -1,7 +1,8 @@
 import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-
+import { useContext } from "react"
+import { AuthContext } from "../Context/authContext"
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -17,12 +18,22 @@ const BtnLink = styled(Link)`
 `
 
 function MyFriends() {
+  const { currentUser, isLogin } = useContext(AuthContext)
+
   return (
     <Wrapper>
-      <Title>我是user的好友列表</Title>
-      <BtnLink to="/">點我回首頁</BtnLink>
-      <BtnLink to="/mika">點我回user的地圖頁</BtnLink>
-      <BtnLink to="/mika/my-memories">點我去user的回憶列表</BtnLink>
+      {isLogin && currentUser !== undefined ? (
+        <>
+          <Title>我是user的好友列表</Title>
+          <BtnLink to="/">點我回首頁</BtnLink>
+          <BtnLink to={`/${currentUser?.name}`}>點我回user的地圖頁</BtnLink>
+          <BtnLink to={`/${currentUser?.name}/my-memories`}>
+            點我去user的回憶列表
+          </BtnLink>
+        </>
+      ) : (
+        <Title>你沒有登入</Title>
+      )}
     </Wrapper>
   )
 }

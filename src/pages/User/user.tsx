@@ -55,7 +55,6 @@ const SearchWrapper = styled.div`
   width: 30%;
   background-color: #ffffff;
   padding: 10px;
-  height: 60%;
   opacity: 0.6;
   gap: 20px;
   font-size: 14px;
@@ -180,7 +179,7 @@ interface Hometown {
   name?: string
 }
 function User() {
-  const { isLoaded, currentUser, navigate } = useContext(AuthContext)
+  const { isLoaded, isLogin, currentUser, navigate } = useContext(AuthContext)
   console.log("currentUser", currentUser)
   const center = {
     lat: currentUser?.hometownLat,
@@ -309,7 +308,6 @@ function User() {
     4
   )}-${newPin.location.placeId.slice(0, 4)}`
   const handleUpload = () => {
-    const newUrls: string[] = []
     photos.map((photo) => {
       const imgRef = ref(storage, `/${folderName}/${photo.name}`)
       const uploadTask = uploadBytesResumable(imgRef, photo)
@@ -329,12 +327,12 @@ function User() {
           const url = await getDownloadURL(
             ref(storage, `/${folderName}/${photo.name}`)
           )
-          newUrls.push(url)
-          return newUrls
+          setUrls((prev) => {
+            return [...prev, url]
+          })
         }
       )
     })
-    setUrls(newUrls)
   }
 
   const addMemory = async () => {
@@ -402,10 +400,20 @@ function User() {
   return (
     <>
       <Wrapper>
-        <Title>我是user的地圖頁</Title>
-        <BtnLink to="/">回首頁</BtnLink>
-        <BtnLink to="/mika/my-memories">點我去user的memories列表</BtnLink>
-        <BtnLink to="/mika/my-friends">點我去user的friends列表</BtnLink>
+        {isLogin && currentUser !== undefined ? (
+          <>
+            <Title>我是user的地圖頁</Title>
+            <BtnLink to="/">Home</BtnLink>
+            <BtnLink to={`/${currentUser.name}/my-memories`}>
+              My-memories
+            </BtnLink>
+            <BtnLink to={`/${currentUser.name}/my-friends`}>MY-friends</BtnLink>
+          </>
+        ) : (
+          <>
+            <Title>你沒有登入</Title>
+          </>
+        )}
       </Wrapper>
       {isLoaded ? (
         <GoogleMap
@@ -462,7 +470,8 @@ function User() {
               {hasUpload && urls ? (
                 <UrlsImgWrapper>
                   {urls.map((url) => {
-                    return <UploadImgIcon key={url.slice(0, -8)} src={url} />
+                    console.log(url)
+                    return <UploadImgIcon key={url} src={url} />
                   })}
                 </UrlsImgWrapper>
               ) : (
