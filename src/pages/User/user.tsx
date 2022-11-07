@@ -174,10 +174,11 @@ interface Position {
   lng: number | undefined
 }
 interface Hometown {
-  lat?: number
-  lng?: number
-  name?: string
+  lat?: number | null
+  lng?: number | null
+  name?: string | null
 }
+
 function User() {
   const { isLoaded, isLogin, currentUser, navigate } = useContext(AuthContext)
   console.log("currentUser", currentUser)
@@ -303,35 +304,39 @@ function User() {
       }
     }
   }
-  const folderName = `${currentUser?.id.slice(
-    0,
-    4
-  )}-${newPin.location.placeId.slice(0, 4)}`
+
   const handleUpload = () => {
     photos.map((photo) => {
-      const imgRef = ref(storage, `/${folderName}/${photo.name}`)
-      const uploadTask = uploadBytesResumable(imgRef, photo)
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = Math.round(
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          )
-          setUploadProgress(progress)
-          setHasUpload(true)
-        },
-        (error) => {
-          console.log(error)
-        },
-        async () => {
-          const url = await getDownloadURL(
-            ref(storage, `/${folderName}/${photo.name}`)
-          )
-          setUrls((prev) => {
-            return [...prev, url]
-          })
-        }
-      )
+      if (typeof currentUser?.id === "string") {
+        const folderName = `${currentUser?.id?.slice(
+          0,
+          4
+        )}-${newPin.location.placeId.slice(0, 4)}`
+
+        const imgRef = ref(storage, `/${folderName}/${photo.name}`)
+        const uploadTask = uploadBytesResumable(imgRef, photo)
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress = Math.round(
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            )
+            setUploadProgress(progress)
+            setHasUpload(true)
+          },
+          (error) => {
+            console.log(error)
+          },
+          async () => {
+            const url = await getDownloadURL(
+              ref(storage, `/${folderName}/${photo.name}`)
+            )
+            setUrls((prev) => {
+              return [...prev, url]
+            })
+          }
+        )
+      }
     })
   }
 
@@ -370,7 +375,11 @@ function User() {
   }
 
   const cancelPost = () => {
-    if (urls.length !== 0) {
+    if (urls.length !== 0 && typeof currentUser?.id === "string") {
+      const folderName = `${currentUser?.id?.slice(
+        0,
+        4
+      )}-${newPin.location.placeId.slice(0, 4)}`
       try {
         filesName.map(async (file) => {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
@@ -415,12 +424,17 @@ function User() {
           </>
         )}
       </Wrapper>
-      {isLoaded ? (
+      {isLoaded &&
+      typeof currentUser?.hometownLat === "number" &&
+      typeof currentUser?.hometownLng === "number" ? (
         <GoogleMap
           id="my-map"
           mapTypeId="94ce067fe76ff36f"
           mapContainerStyle={containerStyle}
-          center={center}
+          center={{
+            lat: currentUser?.hometownLat,
+            lng: currentUser?.hometownLng,
+          }}
           zoom={2}
           options={{ draggable: true, styles: darkMap }}
         >
@@ -454,6 +468,7 @@ function User() {
                   }}
                 ></ArticleTitleInput>
                 <ArticleTitleInput
+                  type="date"
                   placeholder="When did you go there?"
                   onChange={(e) => {
                     setTravelDate(e.target.value)
@@ -507,22 +522,39 @@ function User() {
           ) : (
             ""
           )}
-          <Marker
-            onLoad={onMkLoad}
-            position={center}
-            icon={homeIcon}
-            onClick={() => {
-              setHometown({
+          {typeof center?.lat === "number" &&
+          typeof center?.lng === "number" ? (
+            <Marker
+              onLoad={onMkLoad}
+              position={{
                 lat: currentUser?.hometownLat,
                 lng: currentUser?.hometownLng,
-                name: currentUser?.hometownName,
-              })
-            }}
-          />
+              }}
+              icon={homeIcon}
+              onClick={() => {
+                if (
+                  typeof currentUser?.hometownLat === "number" &&
+                  typeof currentUser?.hometownLng === "number" &&
+                  typeof currentUser?.hometownName === "string"
+                ) {
+                  setHometown({
+                    lat: currentUser?.hometownLat,
+                    lng: currentUser?.hometownLng,
+                    name: currentUser?.hometownName,
+                  })
+                }
+              }}
+            />
+          ) : (
+            ""
+          )}
           {hometown && hometown?.name ? (
             <InfoWindow
               onLoad={onInfoWinLoad}
-              position={center}
+              position={{
+                lat: currentUser?.hometownLat,
+                lng: currentUser?.hometownLng,
+              }}
               options={{
                 pixelOffset: new window.google.maps.Size(0, -50),
               }}
