@@ -403,7 +403,7 @@ function User() {
       <Wrapper>
         <Title>我是user的地圖頁</Title>
         <BtnLink to="/">Home</BtnLink>
-        <BtnLink to="/mika/my-memories">My-map</BtnLink>
+        <BtnLink to="/mika/my-memories">My-memories</BtnLink>
         <BtnLink to="/mika/my-friends">MY-friends</BtnLink>
       </Wrapper>
       {isLoaded ? (

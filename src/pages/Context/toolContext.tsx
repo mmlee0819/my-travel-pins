@@ -124,8 +124,14 @@ export const ToolContextProvider = ({ children }: Props) => {
     } else if (selectedTo.id === "USD") {
       const filteredCurrency = `USD${selectedFrom?.id}`
       const filteredRate = currenciesData?.[filteredCurrency]?.Exrate
-      console.log()
       setCurrentRate(1 / filteredRate)
+      setConvertResult(0)
+    } else if (selectedFrom.id !== "USD" && selectedTo.id !== "USD") {
+      const filteredFrom = `USD${selectedFrom?.id}`
+      let filteredRate = currenciesData?.[filteredFrom]?.Exrate
+      const filteredTo = `USD${selectedTo?.id}`
+      filteredRate = (1 / filteredRate) * currenciesData?.[filteredTo]?.Exrate
+      setCurrentRate(filteredRate)
       setConvertResult(0)
     }
   }, [selectedFrom.id, selectedTo.id])
@@ -173,6 +179,10 @@ export const ToolContextProvider = ({ children }: Props) => {
     const amountNum = Number(amount)
     const calculation = amountNum * currentRate
     setConvertResult(calculation)
+    if (selectedFrom.id !== "USD" || selectedTo.id !== "USD") {
+      const fourthCalcut = Math.round(calculation * 10000) / 10000
+      setConvertResult(fourthCalcut)
+    }
   }
 
   return (

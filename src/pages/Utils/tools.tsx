@@ -12,6 +12,7 @@ import hsr from "../assets/whiteHSR.png"
 import train from "../assets/whiteTrain.png"
 import tripAdvisor from "../assets/tripadvisor.png"
 import weather from "../assets/whiteWeather.png"
+import calculator from "../assets/calculator.png"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { currencies } from "../Tools/currencies"
@@ -85,9 +86,12 @@ const GridItemContent = styled.div`
   padding: 8px;
 `
 const BtnClick = styled.div`
+  display: flex;
+  align-items: center;
   margin-top: 20px;
+  margin-left: 8px;
   padding: 5px;
-  width: 120px;
+  width: 90px;
   height: 30px;
   line-height: 20px;
   text-align: center;
@@ -121,6 +125,20 @@ const ExchangesTitle = styled.div`
 const AmountTitle = styled(ExchangesTitle)`
   width: 100px;
   margin-top: 20px;
+`
+const Credits = styled.a`
+  padding: 8px;
+  text-decoration: underline;
+  &:visited {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  &:hover {
+    color: #ffffff;
+  }
+  &:active {
+    color: #ffffff;
+  }
 `
 const FlagImg = styled.img`
   margin: 0 5px;
@@ -265,7 +283,7 @@ function ToolsRobot() {
           >
             <GridItemWrapper key="exchange-rate">
               <GridItemContent>Currency Converter</GridItemContent>
-              <GridItemContent>{`Data updated time: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
+              <GridItemContent>{`Last updated: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
               <ExchangesWrapper>
                 <ExchangesRows>
                   <AmountTitle>Amount</AmountTitle>
@@ -370,8 +388,12 @@ function ToolsRobot() {
                   calculateRates(amount, currentRate, selectedFrom, selectedTo)
                 }}
               >
+                <FlagImg src={calculator} />
                 Convert
               </BtnClick>
+              <Credits href="https://tw.rter.info/howto_currencyapi.php">
+                We use ©RTER.info for our Converter.
+              </Credits>
             </GridItemWrapper>
           </ResponsiveGridLayout>
         </GridArea>
