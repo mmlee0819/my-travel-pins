@@ -112,14 +112,23 @@ const ExchangesRows = styled.div`
   gap: 10%;
   z-index: 100;
 `
+const CurrenciesWrapper = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  margin-top: 5px;
+  width: 420px;
+`
 const CurrencyRow = styled(ExchangesRows)`
+  padding: 5px 0;
+  width: 140px;
   color: #000000;
   background-color: #ffffff;
   border: none;
+  gap: 2%;
 `
 const ExchangesTitle = styled.div`
   font-size: 12px;
-  width: 120px;
+  width: 140px;
   margin-top: 20px;
 `
 const AmountTitle = styled(ExchangesTitle)`
@@ -149,12 +158,13 @@ const FlagImg = styled.img`
 const WhiteInputArea = styled.div`
   align-items: center;
   line-height: 20px;
-  width: 120px;
+  width: 140px;
   height: 20px;
   background-color: #ffffff;
   border-radius: 5px;
   cursor: pointer;
 `
+
 const WhiteInputTitle = styled(WhiteInputArea)``
 const AmountInput = styled.input`
   font-size: 12px;
@@ -191,16 +201,7 @@ function ToolsRobot() {
   const [showExchange, setShowExchange] = useState(false)
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
-  console.log("currenciesData", currenciesData)
-  console.log("showFrom", showFrom)
-  console.log("showTo", showTo)
-  console.log("showExchange", showExchange)
-  console.log("selectedFrom", selectedFrom)
-  console.log("selectedTo", selectedTo)
-  console.log("amount", amount)
-  console.log("typeof amount", typeof amount)
-  console.log("currentRate", currentRate)
-  console.log("convertResult", convertResult)
+
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -311,29 +312,33 @@ function ToolsRobot() {
                         {selectedFrom.currency}
                       </CurrencyRow>
                     )}
-                    {showFrom &&
-                      currencies &&
-                      currencies.map((item) => {
-                        return (
-                          <>
-                            <CurrencyRow
-                              key={item.id}
-                              id={item.id}
-                              onClick={(e) => {
-                                const filteredCurrency = currencies.filter(
-                                  (item) => {
-                                    return item.id === (e.target as Element).id
-                                  }
-                                )
-                                setSelectedFrom(filteredCurrency[0])
-                              }}
-                            >
-                              <FlagImg src={item.flag} />
-                              {item.currency}
-                            </CurrencyRow>
-                          </>
-                        )
-                      })}
+                    <CurrenciesWrapper>
+                      {showFrom &&
+                        currencies &&
+                        currencies.map((item) => {
+                          return (
+                            <>
+                              <CurrencyRow
+                                key={item.id}
+                                id={item.id}
+                                onClick={(e) => {
+                                  const filteredCurrency = currencies.filter(
+                                    (item) => {
+                                      return (
+                                        item.id === (e.target as Element).id
+                                      )
+                                    }
+                                  )
+                                  setSelectedFrom(filteredCurrency[0])
+                                }}
+                              >
+                                <FlagImg src={item.flag} />
+                                {item.currency}
+                              </CurrencyRow>
+                            </>
+                          )
+                        })}
+                    </CurrenciesWrapper>
                   </WhiteInputTitle>
                   <WhiteInputTitle
                     onClick={() => {
@@ -348,11 +353,11 @@ function ToolsRobot() {
                         {selectedTo.currency}
                       </CurrencyRow>
                     )}
-                    {showTo &&
-                      currencies &&
-                      currencies.map((item) => {
-                        return (
-                          <>
+                    <CurrenciesWrapper>
+                      {showTo &&
+                        currencies &&
+                        currencies.map((item) => {
+                          return (
                             <CurrencyRow
                               key={item.id}
                               id={item.id}
@@ -368,9 +373,9 @@ function ToolsRobot() {
                               <FlagImg src={item.flag} />
                               {item.currency}
                             </CurrencyRow>
-                          </>
-                        )
-                      })}
+                          )
+                        })}
+                    </CurrenciesWrapper>
                   </WhiteInputTitle>
                 </ExchangesRows>
 
@@ -392,7 +397,7 @@ function ToolsRobot() {
                 Convert
               </BtnClick>
               <Credits href="https://tw.rter.info/howto_currencyapi.php">
-                We use ©RTER.info for our Converter.
+                Credits: ©RTER.info
               </Credits>
             </GridItemWrapper>
           </ResponsiveGridLayout>

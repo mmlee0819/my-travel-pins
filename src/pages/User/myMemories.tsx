@@ -94,7 +94,7 @@ const BtnReadMore = styled.div`
 `
 
 function MyMemories() {
-  const { currentUser, isLoaded } = useContext(AuthContext)
+  const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
   const [memories, setMemories] = useState<DocumentData>([])
   const [hasFetched, setHasFetched] = useState(false)
   console.log(currentUser)
@@ -147,12 +147,16 @@ function MyMemories() {
 
   return (
     <>
-      <Wrapper>
-        <Title>我是user的回憶列表</Title>
-        <BtnLink to="/">Home</BtnLink>
-        <BtnLink to="/mika">My-map</BtnLink>
-        <BtnLink to="/mika/my-friends">MY-friends</BtnLink>
-      </Wrapper>
+      {isLogin && currentUser !== undefined ? (
+        <Wrapper>
+          <Title>我是user的回憶列表</Title>
+          <BtnLink to="/">Home</BtnLink>
+          <BtnLink to={`/${currentUser.name}`}>My-map</BtnLink>
+          <BtnLink to={`/${currentUser.name}/my-friends`}>MY-friends</BtnLink>
+        </Wrapper>
+      ) : (
+        ""
+      )}
       {isLoaded ? (
         <MemoryListWrapper>
           {memories
