@@ -2,7 +2,6 @@ import React from "react"
 import { useState, useContext } from "react"
 import { useDrag } from "@use-gesture/react"
 import { useSpring, animated } from "@react-spring/web"
-import GridLayout from "react-grid-layout"
 import { Responsive, WidthProvider } from "react-grid-layout"
 import styled from "styled-components"
 import robot from "../assets/robotic1.png"
@@ -71,10 +70,11 @@ const GridArea = styled.div`
   position: absolute;
   display: flex;
   top: 0px;
+  min-width: 500px;
+  min-height: 300px;
   z-index: 99;
 `
 const GridItemWrapper = styled.div`
-  position: relative;
   display: flex;
   flex-flow: column wrap;
   font-size: 12px;
@@ -136,6 +136,7 @@ const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
 `
 const Credits = styled.a`
+  width: 160px;
   padding: 8px;
   text-decoration: underline;
   &:visited {
@@ -176,11 +177,15 @@ const AmountInput = styled.input`
 `
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
-const layout = [{ i: "exchange-rate-1", x: 0, y: 0, w: 1, h: 1 }]
-const getLayouts = () => {
-  const savedLayouts = localStorage.getItem("grid-layout")
-  return savedLayouts ? JSON.parse(savedLayouts) : { lg: layout }
+
+const layouts = {
+  lg: [{ i: "exRate-1", x: 0, y: 0, w: 3, h: 1, maxW: 1, maxH: 1 }],
+  md: [{ i: "exRate-2", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
+  sm: [{ i: "exRate-3", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "exRate-4", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
+  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
 }
+
 function ToolsRobot() {
   const {
     currenciesData,
@@ -213,12 +218,6 @@ function ToolsRobot() {
       y: offset[1],
     })
   })
-  const handleLayoutChange = (
-    layout: GridLayout.Layout[],
-    layouts: GridLayout.Layouts
-  ) => {
-    localStorage.setItem("grid-layout", JSON.stringify(layouts))
-  }
 
   return (
     <>
@@ -273,25 +272,20 @@ function ToolsRobot() {
       {showExchange ? (
         <GridArea>
           <ResponsiveGridLayout
-            layouts={getLayouts()}
+            layouts={layouts}
             key="tools"
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 5, md: 4, sm: 3, xs: 2, xxs: 1 }}
-            rowHeight={60}
+            cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
             width={1000}
-            onLayoutChange={handleLayoutChange}
+            rowHeight={350}
             z-index={99}
           >
             <GridItemWrapper key="exchange-rate">
               <GridItemContent>Currency Converter</GridItemContent>
               <GridItemContent>{`Last updated: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
               <ExchangesWrapper>
-                <ExchangesRows>
+                <ExchangesWrapper>
                   <AmountTitle>Amount</AmountTitle>
-                  <ExchangesTitle>From</ExchangesTitle>
-                  <ExchangesTitle>To</ExchangesTitle>
-                </ExchangesRows>
-                <ExchangesRows>
                   <AmountInput
                     type="number"
                     min="1"
@@ -299,25 +293,72 @@ function ToolsRobot() {
                       setAmount(e.target.value)
                     }}
                   />
-                  <WhiteInputTitle
-                    onClick={() => {
-                      setShowFrom((prev: boolean) => !prev)
-                    }}
-                  >
-                    {selectedFrom.id === "" ? (
-                      <WhiteInputArea />
-                    ) : (
-                      <CurrencyRow>
-                        <FlagImg src={selectedFrom.flag} />
-                        {selectedFrom.currency}
-                      </CurrencyRow>
-                    )}
-                    <CurrenciesWrapper>
-                      {showFrom &&
-                        currencies &&
-                        currencies.map((item) => {
-                          return (
-                            <>
+                </ExchangesWrapper>
+                <ExchangesRows>
+                  <ExchangesWrapper>
+                    <ExchangesTitle>From</ExchangesTitle>
+                    <WhiteInputTitle
+                      onClick={() => {
+                        setShowFrom((prev: boolean) => !prev)
+                      }}
+                    >
+                      {selectedFrom.id === "" ? (
+                        <WhiteInputArea />
+                      ) : (
+                        <CurrencyRow>
+                          <FlagImg src={selectedFrom.flag} />
+                          {selectedFrom.currency}
+                        </CurrencyRow>
+                      )}
+                      <CurrenciesWrapper>
+                        {showFrom &&
+                          currencies &&
+                          currencies.map((item) => {
+                            return (
+                              <>
+                                <CurrencyRow
+                                  key={item.id}
+                                  id={item.id}
+                                  onClick={(e) => {
+                                    const filteredCurrency = currencies.filter(
+                                      (item) => {
+                                        return (
+                                          item.id === (e.target as Element).id
+                                        )
+                                      }
+                                    )
+                                    setSelectedFrom(filteredCurrency[0])
+                                  }}
+                                >
+                                  <FlagImg src={item.flag} />
+                                  {item.currency}
+                                </CurrencyRow>
+                              </>
+                            )
+                          })}
+                      </CurrenciesWrapper>
+                    </WhiteInputTitle>
+                  </ExchangesWrapper>
+                  <ExchangesWrapper>
+                    <ExchangesTitle>To</ExchangesTitle>
+                    <WhiteInputTitle
+                      onClick={() => {
+                        setShowTo((prev: boolean) => !prev)
+                      }}
+                    >
+                      {selectedTo.id === "" ? (
+                        <WhiteInputArea />
+                      ) : (
+                        <CurrencyRow>
+                          <FlagImg src={selectedTo.flag} />
+                          {selectedTo.currency}
+                        </CurrencyRow>
+                      )}
+                      <CurrenciesWrapper>
+                        {showTo &&
+                          currencies &&
+                          currencies.map((item) => {
+                            return (
                               <CurrencyRow
                                 key={item.id}
                                 id={item.id}
@@ -329,54 +370,17 @@ function ToolsRobot() {
                                       )
                                     }
                                   )
-                                  setSelectedFrom(filteredCurrency[0])
+                                  setSelectedTo(filteredCurrency[0])
                                 }}
                               >
                                 <FlagImg src={item.flag} />
                                 {item.currency}
                               </CurrencyRow>
-                            </>
-                          )
-                        })}
-                    </CurrenciesWrapper>
-                  </WhiteInputTitle>
-                  <WhiteInputTitle
-                    onClick={() => {
-                      setShowTo((prev: boolean) => !prev)
-                    }}
-                  >
-                    {selectedTo.id === "" ? (
-                      <WhiteInputArea />
-                    ) : (
-                      <CurrencyRow>
-                        <FlagImg src={selectedTo.flag} />
-                        {selectedTo.currency}
-                      </CurrencyRow>
-                    )}
-                    <CurrenciesWrapper>
-                      {showTo &&
-                        currencies &&
-                        currencies.map((item) => {
-                          return (
-                            <CurrencyRow
-                              key={item.id}
-                              id={item.id}
-                              onClick={(e) => {
-                                const filteredCurrency = currencies.filter(
-                                  (item) => {
-                                    return item.id === (e.target as Element).id
-                                  }
-                                )
-                                setSelectedTo(filteredCurrency[0])
-                              }}
-                            >
-                              <FlagImg src={item.flag} />
-                              {item.currency}
-                            </CurrencyRow>
-                          )
-                        })}
-                    </CurrenciesWrapper>
-                  </WhiteInputTitle>
+                            )
+                          })}
+                      </CurrenciesWrapper>
+                    </WhiteInputTitle>
+                  </ExchangesWrapper>
                 </ExchangesRows>
 
                 <AmountTitle>

@@ -10,10 +10,8 @@ import {
 import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import { DocumentData } from "@firebase/firestore-types"
 import { useJsApiLoader } from "@react-google-maps/api"
 import { myGoogleApiKey } from "../Utils/gmap"
-
 declare module "*.png"
 
 interface AuthContextType {
@@ -71,6 +69,9 @@ interface UserInfoType {
   hometownName: string
   hometownLat: number
   hometownLng: number
+}
+interface DocumentData {
+  [field: string]: string | number | null | undefined
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
