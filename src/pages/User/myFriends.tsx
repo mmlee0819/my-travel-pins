@@ -1,9 +1,10 @@
 import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import { useState, useContext } from "react"
+import { useContext } from "react"
 import { AuthContext } from "../Context/authContext"
-import queryFriend from "../assets/magnifying-friends.png"
+import { Autocomplete } from "../Utils/autoComplete"
+
 const NavWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -97,43 +98,6 @@ const FriendsWrapper = styled(InviWrapper)`
 const ContentTitle = styled.div`
   font-size: 1rem;
 `
-const InputWrapper = styled(SplitWrapper)`
-  align-items: center;
-  gap: 8px;
-  margin-bottom:15px;
-`
-const QueryFriendInput = styled.input`
-  display: flex;
-  flex: 1 1 auto;
-  padding-left: 5px;
-  width: 70%;
-  font-size: 16px;
-  line-height: 20px;
-  height: 20px;
-  &:focus {
-    color: #034961;
-    outline: 1px solid #fbcb63;
-    border: none;
-  }
-`
-const QueryIconWrapper = styled.div`
-  position: relative;
-  display: flex;
-  width: 12%;
-  min-width: 22px;
-  background-color: #034961;
-  line-height: 22px;
-  height: 22px;
-  border-radius: 5px;
-`
-const QueryIconImg = styled.img`
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 20px;
-  height: 20px;
-`
-
 
 function MyFriends() {
   const { currentUser, isLogin } = useContext(AuthContext)
@@ -166,12 +130,7 @@ function MyFriends() {
         <ContentArea>
           <ContentWrapper>
             <InviWrapper>
-              <InputWrapper>
-                <QueryFriendInput />
-                <QueryIconWrapper>
-                  <QueryIconImg src={queryFriend} />
-                </QueryIconWrapper>
-              </InputWrapper>
+              <Autocomplete />
               <ContentTitle>They want to be your friend ...</ContentTitle>
             </InviWrapper>
             <FriendsWrapper></FriendsWrapper>
