@@ -1,7 +1,7 @@
 import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import { useContext } from "react"
+import { useState, useContext } from "react"
 import { AuthContext } from "../Context/authContext"
 import { Autocomplete } from "../Utils/autoComplete"
 
@@ -85,6 +85,7 @@ const ContentWrapper = styled(ContentArea)`
   gap: 20px;
   border: none;
 `
+
 const InviWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -101,6 +102,7 @@ const ContentTitle = styled.div`
 
 function MyFriends() {
   const { currentUser, isLogin } = useContext(AuthContext)
+  const [qResultIds, setQResultIds] = useState<string[]>([])
 
   return (
     <>
@@ -130,7 +132,10 @@ function MyFriends() {
         <ContentArea>
           <ContentWrapper>
             <InviWrapper>
-              <Autocomplete />
+              <Autocomplete
+                qResultIds={qResultIds}
+                setQResultIds={setQResultIds}
+              />
               <ContentTitle>They want to be your friend ...</ContentTitle>
             </InviWrapper>
             <FriendsWrapper></FriendsWrapper>

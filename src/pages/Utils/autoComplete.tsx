@@ -1,6 +1,6 @@
-import React from "react"
+import React, { Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
-import { useState, useRef, useEffect, useMemo } from "react"
+import { useState, useRef, useEffect, useMemo, useContext } from "react"
 import algoliasearch from "algoliasearch/lite"
 import {
   AutocompleteOptions,
@@ -10,6 +10,10 @@ import {
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
 import queryFriendImg from "../assets/034961magnifying-friends.png"
+import { db } from "../Utils/firebase"
+import { getDoc, doc, setDoc } from "firebase/firestore"
+import { DocumentData } from "@firebase/firestore-types"
+import { AuthContext } from "../Context/authContext"
 
 const InputWrapper = styled.div`
   display: flex;
@@ -34,6 +38,9 @@ const QueryFriendInput = styled.input`
     outline: 1px solid #fbcb63;
     border: none;
     border-radius: 5px;
+  }
+  ::placeholder {
+    font-size: 12px;
   }
 `
 const QueryIconWrapper = styled.div`
@@ -81,22 +88,91 @@ const ResultContent = styled(ResultContentWrapper)`
   font-family: "Poppins";
   line-height: 16px;
   height: 16px;
+  font-size: 14px;
   cursor: pointer;
 `
+const FilteredWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  line-height: 16px;
+  height: 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+`
+const FilteredContent = styled.div`
+  margin: 2px;
+  align-self: center;
+  font-family: "Poppins";
+  line-height: 16px;
+  height: 16px;
+  font-size: 12px;
+`
+const UserAvatar = styled.img`
+  width: 16px;
+  height: 16px;
+`
+
+export const BtnInvite = styled.div`
+  position: absolute;
+  right: 5px;
+  padding: 1px 5px;
+  align-self: center;
+  font-family: "Poppins";
+  line-height: 16px;
+  height: 16px;
+  font-size: 12px;
+  color: #ffffff;
+  background-color: #3490ca;
+`
+export const BtnWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 10%;
+  line-height: 16px;
+  height: 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+`
+export const BtnAccept = styled.div`
+  width: 40%;
+  background-color: #ca3434;
+`
+export const BtnDeny = styled.div`
+  width: 40%;
+  background-color: #ca3434;
+`
+
 const searchClient = algoliasearch(
   "NW2MT84M3G",
   "f31f1435408c2dda975160ac96a5e625"
 )
 type AutocompleteItem = Hit<{
-  photoURL: string
   name: string
-  hometownName: string
-  email: string
 }>
 
-export function Autocomplete(
-  props: Partial<AutocompleteOptions<AutocompleteItem>>
-) {
+interface Props extends Partial<AutocompleteOptions<AutocompleteItem>> {
+  qResultIds: string[]
+  setQResultIds: Dispatch<SetStateAction<string[]>>
+}
+interface UserInfoType {
+  id: string | DocumentData
+  name: string | DocumentData
+  email: string | DocumentData
+  photoURL: string | DocumentData
+  hometownName: string
+  hometownLat: number
+  hometownLng: number
+}
+
+export function Autocomplete(props: Props) {
+  const { currentUser, isLogin } = useContext(AuthContext)
+  const [filteredId, setFilteredId] = useState("")
+  const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
+  const [friendStatus, setFriendStatus] = useState("")
+  console.log("friendStatus", friendStatus)
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -108,6 +184,7 @@ export function Autocomplete(
     activeItemId: null,
     status: "idle",
   })
+
   const autocomplete = useMemo(
     () =>
       createAutocomplete<
@@ -131,7 +208,7 @@ export function Autocomplete(
                       indexName: "users_myTravelPins",
                       query,
                       params: {
-                        hitsPerPage: 5,
+                        hitsPerPage: 10,
                       },
                     },
                   ],
@@ -144,13 +221,79 @@ export function Autocomplete(
       }),
     [props]
   )
-
   const formRef = useRef<HTMLFormElement>(null)
   const qInputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { getEnvironmentProps } = autocomplete
 
-  console.log(" qInputRef", qInputRef)
+  console.log("autocompleteState", autocompleteState)
+  console.log("props.qResultIds", props.qResultIds)
+  console.log("qInputRef.current.value", qInputRef?.current?.value)
+  console.log("filteredId", filteredId)
+  console.log("queryResult", queryResult)
+  const checkRelation = async (id: string) => {
+    if (!isLogin || currentUser === null) return
+    const inviterIsMedocRef = doc(
+      db,
+      "relationships",
+      `${currentUser?.id}${id}`
+    )
+    const receiverIsMeDocRef = doc(
+      db,
+      "relationships",
+      `${id}${currentUser?.id}`
+    )
+    const friendDocRef = doc(db, "users", `${currentUser?.id}`)
+    const friendDocSnap = await getDoc(friendDocRef)
+    const inviterIsMeDocSnap = await getDoc(inviterIsMedocRef)
+    const receiverIsMeDocSnap = await getDoc(receiverIsMeDocRef)
+    if (friendDocSnap.exists() && friendDocSnap.data().friends?.includes(id)) {
+      setFriendStatus("alreadyFriend")
+      return
+    } else if (
+      inviterIsMeDocSnap.exists() &&
+      inviterIsMeDocSnap.data().status === "pending"
+    ) {
+      setFriendStatus("awaitingReply")
+      return
+    } else if (
+      receiverIsMeDocSnap.exists() &&
+      receiverIsMeDocSnap.data().status === "pending"
+    ) {
+      setFriendStatus("acceptOrDeny")
+      return
+    } else {
+      console.log("No such document!")
+      setFriendStatus("")
+      return
+    }
+  }
+  const getQueryResult = async (id: string) => {
+    try {
+      const docRef = doc(db, "users", id)
+      const docSnap = await getDoc(docRef)
+      if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data())
+        setQueryResult(docSnap.data())
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const addFriend = async (id: string) => {
+    if (!isLogin || currentUser === null) return
+    try {
+      const addRef = doc(db, "relationships", `${currentUser?.id}${id}`)
+      await setDoc(addRef, {
+        inviter: currentUser?.id,
+        receiver: id,
+        status: "pending",
+      })
+      setFriendStatus("awaitingReply")
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     if (!formRef.current || !panelRef.current || !qInputRef.current) {
@@ -181,12 +324,13 @@ export function Autocomplete(
         >
           <QueryIconWrapper>
             <Label>
-              <BtnQueryIcon type="submit" {...autocomplete.getLabelProps({})} />
+              <BtnQueryIcon type="submit" {...autocomplete.getLabelProps()} />
             </Label>
             <QueryFriendInput
-              ref={qInputRef}
+              ref={autocompleteState.isOpen ? qInputRef : null}
               {...autocomplete.getInputProps({
                 inputElement: qInputRef.current,
+                placeholder: "Search a friend",
               })}
             />
           </QueryIconWrapper>
@@ -201,12 +345,17 @@ export function Autocomplete(
                 {items.length > 0 &&
                   items.map((item) => {
                     return (
-                      <ResultContentWrapper
-                        key={item.objectID}
-                        id={item.objectID}
-                      >
+                      <ResultContentWrapper key={item.objectID}>
                         <ResultContent
                           {...autocomplete.getItemProps({ item, source })}
+                          onClick={() => {
+                            setAutocompleteState({
+                              ...autocompleteState,
+                              isOpen: false,
+                            })
+                            getQueryResult(item.objectID)
+                            checkRelation(item.objectID)
+                          }}
                         >
                           {item.name}
                         </ResultContent>
@@ -217,6 +366,44 @@ export function Autocomplete(
             )
           })}
         </ResultsSection>
+      )}
+      {queryResult ? (
+        <FilteredWrapper>
+          <UserAvatar src={queryResult.photoURL} />
+          <FilteredContent>{queryResult.name}</FilteredContent>
+          <FilteredContent>{queryResult.hometownName}</FilteredContent>
+          {friendStatus === "" ? (
+            <BtnInvite
+              onClick={() => {
+                addFriend(queryResult.id)
+              }}
+            >
+              Add friend
+            </BtnInvite>
+          ) : (
+            ""
+          )}
+          {friendStatus === "acceptOrDeny" ? (
+            <BtnWrapper>
+              <BtnAccept>Accept</BtnAccept>
+              <BtnDeny>Deny</BtnDeny>
+            </BtnWrapper>
+          ) : (
+            ""
+          )}
+          {friendStatus === "alreadyFriend" ? (
+            <BtnInvite>Visit friend</BtnInvite>
+          ) : (
+            ""
+          )}
+          {friendStatus === "awaitingReply" ? (
+            <FilteredContent>Awaiting reply</FilteredContent>
+          ) : (
+            ""
+          )}
+        </FilteredWrapper>
+      ) : (
+        ""
       )}
     </>
   )

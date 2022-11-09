@@ -61,7 +61,7 @@ interface Props {
   children?: ReactNode
 }
 
-interface UserInfoType {
+export interface UserInfoType {
   id: string | DocumentData
   name: string | DocumentData
   email: string | DocumentData
@@ -70,7 +70,7 @@ interface UserInfoType {
   hometownLat: number
   hometownLng: number
 }
-interface DocumentData {
+export interface DocumentData {
   [field: string]: string | number | null | undefined
 }
 
@@ -111,6 +111,16 @@ export const AuthContextProvider = ({ children }: Props) => {
     if (!name || !email || !password) return
     try {
       console.log("註冊中")
+      const engLetter = /^[a-zA-Z]*$/
+      let UpdatedName = ""
+      if (engLetter.test(name[0])) {
+        const namesArr = name.split(" ")
+        const newNameArr = namesArr.map((name) => {
+          const newName = name.charAt(0).toUpperCase() + name.slice(1)
+          return newName
+        })
+        UpdatedName = newNameArr.join(" ")
+      }
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email.trim(),
@@ -122,7 +132,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       if (user) {
         const userInfo = {
           id: user.uid,
-          name,
+          name: UpdatedName || name,
           email: user.email,
           photoURL: defaultAvatar,
           hometownName: searchResult[0]?.name,
