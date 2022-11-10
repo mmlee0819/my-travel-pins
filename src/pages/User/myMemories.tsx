@@ -3,10 +3,6 @@ import styled from "styled-components"
 import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
 import {
-  collection,
-  query,
-  where,
-  getDocs,
   doc,
   deleteDoc,
 } from "firebase/firestore"
@@ -17,6 +13,7 @@ import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { DocumentData } from "@firebase/firestore-types"
 import { ref, deleteObject } from "firebase/storage"
+import { getPins } from "./commonUse"
 
 const Wrapper = styled.div`
   display: flex;
@@ -32,7 +29,7 @@ const BtnLink = styled(Link)`
   margin: 0 20px;
 `
 
-const MemoryListWrapper = styled.div`
+export const MemoryListWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   width: 90%;
@@ -41,7 +38,8 @@ const MemoryListWrapper = styled.div`
   gap: 20px;
   border: 1px solid #000000;
 `
-const MemoryList = styled.div`
+
+export const MemoryList = styled.div`
   display: flex;
   flex-flow: row nowrap;
   height: 150px;
@@ -54,7 +52,8 @@ const BtnDelete = styled.img`
   height: 40px;
   cursor: pointer;
 `
-const ImgsWrapper = styled.div`
+
+export const ImgsWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -64,26 +63,26 @@ const ImgsWrapper = styled.div`
   border: none;
   overflow: overlay;
 `
-const MemoryImg = styled.img`
+export const MemoryImg = styled.img`
   width: 30%;
   height: 120px;
 `
-const ArticleWrapper = styled(MemoryListWrapper)`
+export const ArticleWrapper = styled(MemoryListWrapper)`
   width: 200px;
   padding: 0 15px;
   font-size: 14px;
   gap: 10px;
   border: none;
 `
-const MapWrapper = styled.div`
+export const MapWrapper = styled.div`
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   text-align: center;
-  height: 120px;
-  width: 120px;
+  height: 100%;
+  width: 20%;
   font-size: 14px;
 `
-const BtnReadMore = styled.div`
+export const BtnReadMore = styled.div`
   display: flex;
   align-self: end;
   text-align: center;
@@ -93,7 +92,7 @@ const BtnReadMore = styled.div`
   cursor: pointer;
 `
 
-function MyMemories() {
+export default function MyMemories() {
   const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
   const [memories, setMemories] = useState<DocumentData>([])
   const [hasFetched, setHasFetched] = useState(false)
@@ -129,20 +128,19 @@ function MyMemories() {
   }
 
   useEffect(() => {
-    const getPins = async () => {
-      if (currentUser !== null && !hasFetched) {
-        const newMemories: DocumentData[] = []
-        const pinsRef = collection(db, "pins")
-        const q = query(pinsRef, where("userId", "==", currentUser?.id))
-        const querySnapshot = await getDocs(q)
-        querySnapshot.forEach((doc) => {
-          newMemories.push(doc.data())
-        })
-        setMemories(newMemories)
-        setHasFetched(true)
-      }
+    if (
+      currentUser !== null &&
+      currentUser?.id &&
+      currentUser?.id === "string"
+    ) {
+      getPins(
+        currentUser,
+        currentUser?.id,
+        hasFetched,
+        setHasFetched,
+        setMemories
+      )
     }
-    getPins()
   }, [currentUser?.id])
 
   return (
@@ -172,7 +170,7 @@ function MyMemories() {
                     />
                     <MapWrapper>
                       <GoogleMap
-                        mapContainerStyle={{ height: "100px", width: "120px" }}
+                        mapContainerStyle={{ height: "100px", width: "100%" }}
                         center={{
                           lat: memory.location.lat,
                           lng: memory.location.lng,
@@ -230,5 +228,3 @@ function MyMemories() {
     </>
   )
 }
-
-export default MyMemories

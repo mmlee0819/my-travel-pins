@@ -24,7 +24,7 @@ import {
   arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-
+import { DefinedDocumentData } from "./commonUse"
 export const NavWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -139,10 +139,6 @@ const BtnVisitLink = styled(BtnDefault)`
   text-decoration: none;
 `
 
-export interface DefinedDocumentData {
-  [field: string]: string | number | null | undefined | string[]
-}
-
 const usersRef = collection(db, "users")
 const today = `${new Date().getFullYear()}-${
   new Date().getMonth() + 1
@@ -225,7 +221,6 @@ export default function MyFriends() {
         const q = query(usersRef, where("id", "in", myFriends))
         const querySnapshot = await getDocs(q)
         querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data())
           newFriends.push(doc.data())
         })
         const newIds = newFriends.map((friend) => {

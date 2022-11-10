@@ -7,7 +7,9 @@ import Home from "./pages/home"
 import User from "./pages/User/myMap"
 import MyMemories from "./pages/User/myMemories"
 import MyFriends from "./pages/User/myFriends"
-import FriendsHome from "./pages/User/friendsHome"
+import FriendsHome from "./pages/User/friendHome"
+import FriendMemories from "./pages/User/friendMemories"
+
 import reportWebVitals from "./reportWebVitals"
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
@@ -23,6 +25,10 @@ root.render(
           <Route
             path="/:user/my-friend/:friendName/:friendId"
             element={<FriendsHome />}
+          ></Route>
+          <Route
+            path="/:user/my-friend/:friendName/:friendId/memories"
+            element={<FriendMemories />}
           ></Route>
         </Route>
       </Routes>

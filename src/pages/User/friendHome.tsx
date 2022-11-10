@@ -13,9 +13,9 @@ import {
   ContentArea,
   SplitWrapper,
   ContentWrapper,
-  DefinedDocumentData,
-} from "../User/myFriends"
-import { PinInfoArea, PinInfoTitle, PinInfoImg, choosePin } from "../User/myMap"
+} from "./myFriends"
+import { PinInfoArea, PinInfoTitle, PinInfoImg } from "./myMap"
+import { DefinedDocumentData, PinContent, choosePinOnMap } from "./commonUse"
 import { db } from "../Utils/firebase"
 import {
   doc,
@@ -29,6 +29,7 @@ import { darkMap } from "./darkMap"
 import homeIcon from "./homeIcon.png"
 import { containerStyle } from "../Utils/gmap"
 import defaultImage from "../assets/defaultImage.png"
+import { DocumentData } from "@firebase/firestore-types"
 
 const TabLink = styled(Link)`
   padding: 5px 8px;
@@ -64,27 +65,28 @@ const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
   margin-left: 128px;
 `
-interface AllMarkers {
-  albumNames?: string[]
-  albumURLs?: string[]
-  article?: {
-    content: string
-    travelDate: string
-    title: string
-  }
-  id?: string
-  location?: { placeId: string; lat: number; lng: number; name: string }
-  postTime?: { seconds: number; nanoseconds: number }
-
-  userId?: string
-}
+// interface AllMarkers {
+//   albumNames?: string[]
+//   albumURLs?: string[]
+//   article?: {
+//     content: string
+//     travelDate: string
+//     title: string
+//   }
+//   id?: string
+//   location?: { placeId: string; lat: number; lng: number; name: string }
+//   postTime?: { seconds: number; nanoseconds: number }
+//   userId?: string
+// }
 
 function FriendsHome() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
   const [hometownText, setHometownText] = useState("")
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
-  const [markers, setMarkers] = useState<AllMarkers[]>([])
-  const [selectedMarker, setSelectedMarker] = useState<AllMarkers>()
+  const [markers, setMarkers] = useState<
+    DocumentData[] | DefinedDocumentData[] | PinContent[]
+  >([])
+  const [selectedMarker, setSelectedMarker] = useState<PinContent>()
   console.log("hometownText", hometownText)
   console.log("markers", markers)
   const url = window.location.href
@@ -109,7 +111,7 @@ function FriendsHome() {
     const getAllPinsOfFriend = async () => {
       const q = query(collection(db, "pins"), where("userId", "==", friendId))
       const querySnapshot = await getDocs(q)
-      const newMarkers: DefinedDocumentData[] | AllMarkers[] = []
+      const newMarkers: DefinedDocumentData[] | PinContent[] = []
       querySnapshot.forEach((doc) => {
         newMarkers.push(doc.data())
       })
@@ -229,7 +231,7 @@ function FriendsHome() {
                         )
                       }
                       onClick={(e: google.maps.MapMouseEvent) => {
-                        choosePin(e, markers, setSelectedMarker)
+                        choosePinOnMap(e, markers, setSelectedMarker)
                       }}
                     />
                   )
