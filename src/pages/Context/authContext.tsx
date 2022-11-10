@@ -10,7 +10,11 @@ import {
 import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import { useJsApiLoader } from "@react-google-maps/api"
+import {
+  useJsApiLoader,
+  LoadScriptProps,
+} from "@react-google-maps/api"
+
 import { myGoogleApiKey } from "../Utils/gmap"
 declare module "*.png"
 
@@ -75,7 +79,7 @@ export interface UserInfoType {
 export interface DocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
-
+const libraries: LoadScriptProps["libraries"] = ["places"]
 export const AuthContextProvider = ({ children }: Props) => {
   const [isLogin, setIsLogin] = useState(false)
   const [currentUser, setCurrentUser] = useState<
@@ -86,7 +90,7 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
-    libraries: ["places"],
+    libraries,
   })
 
   useEffect(() => {
