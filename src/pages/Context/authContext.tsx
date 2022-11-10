@@ -69,6 +69,7 @@ export interface UserInfoType {
   hometownName: string
   hometownLat: number
   hometownLng: number
+  friends?: string[]
 }
 export interface DocumentData {
   [field: string]: string | number | null | undefined

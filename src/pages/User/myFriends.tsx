@@ -1,9 +1,29 @@
 import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import { useState, useContext } from "react"
+import { useState, useEffect, useContext } from "react"
 import { AuthContext } from "../Context/authContext"
-import { Autocomplete } from "../Utils/autoComplete"
+import {
+  Autocomplete,
+  FilteredWrapper,
+  UserAvatar,
+  FilteredContent,
+  BtnDefault,
+  BtnAccept,
+  BtnDeny,
+} from "../Utils/autoComplete"
+import { db } from "../Utils/firebase"
+import {
+  collection,
+  query,
+  where,
+  getDoc,
+  getDocs,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore"
+import { DocumentData, QueryDocumentSnapshot } from "@firebase/firestore-types"
 
 const NavWrapper = styled.div`
   display: flex;
@@ -99,11 +119,141 @@ const FriendsWrapper = styled(InviWrapper)`
 const ContentTitle = styled.div`
   font-size: 1rem;
 `
+const RowWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  width: 100%;
+`
+const BtnWrapper = styled.div`
+  display: flex;
+  width: 50%;
+  justify-content: space-around;
+  align-self: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  line-height: 16px;
+  height: 16px;
+`
+interface DefinedDocumentData {
+  [field: string]: string | number | null | undefined
+}
+
+const usersRef = collection(db, "users")
 
 function MyFriends() {
   const { currentUser, isLogin } = useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
+  const [relationships, setRelationships] = useState<
+    DocumentData | DefinedDocumentData
+  >([])
+  const [invitingIds, setInvitingIds] = useState<string[]>([])
+  const [invitingList, setInvitingList] = useState<
+    DocumentData | DefinedDocumentData
+  >([])
+  const [beInvitedIds, setBeInvitedIds] = useState<string[]>([])
+  const [beInvitedList, setBeInvitedList] = useState<
+    DocumentData | DefinedDocumentData
+  >([])
+  const [friends, setFriends] = useState<DocumentData>([])
+  console.log("relationships", relationships)
+  console.log("friends", friends)
+  console.log("invitingList", invitingList)
+  console.log("beInviedList", beInvitedList)
 
+  useEffect(() => {
+    const relationRef = collection(db, "relationships")
+    const checkRealtimeRelationships = onSnapshot(relationRef, (snapshot) => {
+      const newDocs: DocumentData | DefinedDocumentData = []
+      snapshot.docs.forEach((doc) => {
+        newDocs.push(doc.data())
+        console.log(newDocs)
+      })
+      console.log("newDocs", newDocs)
+      setRelationships(newDocs)
+    })
+    return checkRealtimeRelationships
+  }, [])
+
+  useEffect(() => {
+    if (!isLogin || currentUser === null) return
+    if (relationships && relationships.length !== 0) {
+      const newInvitingIds = relationships
+        ?.filter((doc: DocumentData | DefinedDocumentData) => {
+          return doc.inviter === currentUser?.id && doc.status === "pending"
+        })
+        .map((item: DocumentData | DefinedDocumentData) => {
+          return item.receiver
+        })
+      setInvitingIds(newInvitingIds)
+
+      const invitedIds = relationships
+        ?.filter((doc: DocumentData | DefinedDocumentData) => {
+          return doc.receiver === currentUser?.id && doc.status === "pending"
+        })
+        .map((item: DocumentData | DefinedDocumentData) => {
+          return item.inviter
+        })
+      setBeInvitedIds(invitedIds)
+    }
+  }, [relationships])
+
+  useEffect(() => {
+    if (!currentUser?.friends) return
+    const getFriendsList = async () => {
+      try {
+        const newFriends: DocumentData = []
+        const q = query(usersRef, where("id", "in", currentUser?.friends))
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data())
+          newFriends.push(doc.data())
+        })
+        setFriends(newFriends)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getFriendsList()
+  }, [currentUser?.friends])
+
+  useEffect(() => {
+    if (!invitingIds) return
+    const getInvitingList = async () => {
+      try {
+        const newInvitings: DocumentData = []
+        const q = query(usersRef, where("id", "in", invitingIds))
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data())
+          newInvitings.push(doc.data())
+        })
+        setInvitingList(newInvitings)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getInvitingList()
+  }, [invitingIds])
+
+  useEffect(() => {
+    if (!beInvitedIds) return
+    const getInvitedList = async () => {
+      try {
+        const newInviteds: DocumentData = []
+        const q = query(usersRef, where("id", "in", beInvitedIds))
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data())
+          newInviteds.push(doc.data())
+        })
+        setBeInvitedList(newInviteds)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getInvitedList()
+  }, [beInvitedIds])
   return (
     <>
       <NavWrapper>
@@ -136,9 +286,59 @@ function MyFriends() {
                 qResultIds={qResultIds}
                 setQResultIds={setQResultIds}
               />
+              {invitingList.length !== 0
+                ? invitingList.map((inviting: DocumentData) => {
+                    return (
+                      <FilteredWrapper key={inviting.id}>
+                        <UserAvatar src={inviting.photoURL} />
+                        <FilteredContent>{inviting.name}</FilteredContent>
+                        <FilteredContent>
+                          {inviting.hometownName}
+                        </FilteredContent>
+                        <FilteredContent>Awaitint reply</FilteredContent>
+                      </FilteredWrapper>
+                    )
+                  })
+                : ""}
               <ContentTitle>They want to be your friend ...</ContentTitle>
+              {beInvitedList.length !== 0
+                ? beInvitedList.map((invited: DocumentData) => {
+                    return (
+                      <RowWrapper key={invited.id}>
+                        <FilteredWrapper>
+                          <UserAvatar src={invited.photoURL} />
+                          <FilteredContent>{invited.name}</FilteredContent>
+                          <FilteredContent>
+                            {invited.hometownName}
+                          </FilteredContent>
+                        </FilteredWrapper>
+                        <BtnWrapper>
+                          <BtnAccept>Accept</BtnAccept>
+                          <BtnDeny>Deny</BtnDeny>
+                        </BtnWrapper>
+                      </RowWrapper>
+                    )
+                  })
+                : ""}
             </InviWrapper>
-            <FriendsWrapper></FriendsWrapper>
+            <FriendsWrapper>
+              {friends.length !== 0 ? (
+                friends.map((friend: DocumentData) => {
+                  return (
+                    <FilteredWrapper key={friend.id}>
+                      <UserAvatar src={friend.photoURL} />
+                      <FilteredContent>{friend.name}</FilteredContent>
+                      <FilteredContent>{friend.hometownName}</FilteredContent>
+                      <BtnDefault>Visit friend</BtnDefault>
+                    </FilteredWrapper>
+                  )
+                })
+              ) : (
+                <>
+                  <FilteredContent>No friends</FilteredContent>
+                </>
+              )}
+            </FriendsWrapper>
           </ContentWrapper>
         </ContentArea>
       </Container>

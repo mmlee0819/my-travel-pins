@@ -91,7 +91,7 @@ const ResultContent = styled(ResultContentWrapper)`
   font-size: 14px;
   cursor: pointer;
 `
-const FilteredWrapper = styled.div`
+export const FilteredWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: row nowrap;
@@ -101,7 +101,7 @@ const FilteredWrapper = styled.div`
   margin-top: 10px;
   margin-bottom: 20px;
 `
-const FilteredContent = styled.div`
+export const FilteredContent = styled.div`
   margin: 2px;
   align-self: center;
   font-family: "Poppins";
@@ -109,12 +109,12 @@ const FilteredContent = styled.div`
   height: 16px;
   font-size: 12px;
 `
-const UserAvatar = styled.img`
+export const UserAvatar = styled.img`
   width: 16px;
   height: 16px;
 `
 
-export const BtnInvite = styled.div`
+export const BtnDefault = styled.div`
   position: absolute;
   right: 5px;
   padding: 1px 5px;
@@ -136,12 +136,14 @@ export const BtnWrapper = styled.div`
   margin-top: 10px;
   margin-bottom: 20px;
 `
+
 export const BtnAccept = styled.div`
-  width: 40%;
-  background-color: #ca3434;
+  width: 30%;
+  text-align: center;
+  color: #ffffff;
+  background-color: #34ca9d;
 `
-export const BtnDeny = styled.div`
-  width: 40%;
+export const BtnDeny = styled(BtnAccept)`
   background-color: #ca3434;
 `
 
@@ -373,13 +375,13 @@ export function Autocomplete(props: Props) {
           <FilteredContent>{queryResult.name}</FilteredContent>
           <FilteredContent>{queryResult.hometownName}</FilteredContent>
           {friendStatus === "" ? (
-            <BtnInvite
+            <BtnDefault
               onClick={() => {
                 addFriend(queryResult.id)
               }}
             >
               Add friend
-            </BtnInvite>
+            </BtnDefault>
           ) : (
             ""
           )}
@@ -392,7 +394,7 @@ export function Autocomplete(props: Props) {
             ""
           )}
           {friendStatus === "alreadyFriend" ? (
-            <BtnInvite>Visit friend</BtnInvite>
+            <BtnDefault>Visit friend</BtnDefault>
           ) : (
             ""
           )}
