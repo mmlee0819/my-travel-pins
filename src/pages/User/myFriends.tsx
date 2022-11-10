@@ -22,8 +22,9 @@ import {
   doc,
   onSnapshot,
   updateDoc,
+  arrayUnion,
 } from "firebase/firestore"
-import { DocumentData, QueryDocumentSnapshot } from "@firebase/firestore-types"
+import { DocumentData } from "@firebase/firestore-types"
 
 const NavWrapper = styled.div`
   display: flex;
@@ -136,10 +137,13 @@ const BtnWrapper = styled.div`
   height: 16px;
 `
 interface DefinedDocumentData {
-  [field: string]: string | number | null | undefined
+  [field: string]: string | number | null | undefined | string[]
 }
 
 const usersRef = collection(db, "users")
+const today = `${new Date().getFullYear()}-${
+  new Date().getMonth() + 1
+}-${new Date().getDate()}`
 
 function MyFriends() {
   const { currentUser, isLogin } = useContext(AuthContext)
@@ -155,9 +159,18 @@ function MyFriends() {
   const [beInvitedList, setBeInvitedList] = useState<
     DocumentData | DefinedDocumentData
   >([])
-  const [friends, setFriends] = useState<DocumentData>([])
+  const [friendIds, setFriendIds] = useState<string[]>([])
+  const [friends, setFriends] = useState<
+    DocumentData[] | DefinedDocumentData[]
+  >([])
+  const [myFriends, setMyFriends] = useState<string[]>([])
+  console.log("currentUser", currentUser)
   console.log("relationships", relationships)
+  console.log("friendIds", friendIds)
   console.log("friends", friends)
+  console.log("myFriends", myFriends)
+  console.log("invitingIds", invitingIds)
+  console.log("beInvitedIds", beInvitedIds)
   console.log("invitingList", invitingList)
   console.log("beInviedList", beInvitedList)
 
@@ -174,6 +187,19 @@ function MyFriends() {
     })
     return checkRealtimeRelationships
   }, [])
+
+  useEffect(() => {
+    console.log("typeof currentUser?.id", typeof currentUser?.id)
+    if (typeof currentUser?.id !== "string") return
+    const checkRealtimeUserStatus = onSnapshot(
+      doc(db, "users", currentUser?.id),
+      (doc: DocumentData) => {
+        setMyFriends(doc.data().friends)
+      }
+    )
+
+    return checkRealtimeUserStatus
+  }, [currentUser?.id, beInvitedIds])
 
   useEffect(() => {
     if (!isLogin || currentUser === null) return
@@ -199,27 +225,35 @@ function MyFriends() {
   }, [relationships])
 
   useEffect(() => {
-    if (!currentUser?.friends) return
+    console.log("myFriends", myFriends)
     const getFriendsList = async () => {
       try {
-        const newFriends: DocumentData = []
-        const q = query(usersRef, where("id", "in", currentUser?.friends))
+        if (myFriends.length === 0) return
+        const newFriends: DocumentData[] = []
+        const q = query(usersRef, where("id", "in", myFriends))
         const querySnapshot = await getDocs(q)
         querySnapshot.forEach((doc) => {
           console.log(doc.id, " => ", doc.data())
           newFriends.push(doc.data())
         })
+        const newIds = newFriends.map((friend) => {
+          return friend.id
+        })
+        setFriendIds(newIds)
         setFriends(newFriends)
       } catch (error) {
         console.log(error)
       }
     }
     getFriendsList()
-  }, [currentUser?.friends])
+  }, [myFriends])
 
   useEffect(() => {
-    if (!invitingIds) return
     const getInvitingList = async () => {
+      if (invitingIds.length === 0) {
+        setInvitingList([])
+        return
+      }
       try {
         const newInvitings: DocumentData = []
         const q = query(usersRef, where("id", "in", invitingIds))
@@ -237,14 +271,16 @@ function MyFriends() {
   }, [invitingIds])
 
   useEffect(() => {
-    if (!beInvitedIds) return
     const getInvitedList = async () => {
+      if (beInvitedIds.length === 0) {
+        setBeInvitedList([])
+        return
+      }
       try {
         const newInviteds: DocumentData = []
         const q = query(usersRef, where("id", "in", beInvitedIds))
         const querySnapshot = await getDocs(q)
         querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data())
           newInviteds.push(doc.data())
         })
         setBeInvitedList(newInviteds)
@@ -254,6 +290,47 @@ function MyFriends() {
     }
     getInvitedList()
   }, [beInvitedIds])
+
+  const acceptFriendReq = async (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (!isLogin || currentUser === null) return
+    console.log((e.target as Element).id)
+    try {
+      if (typeof currentUser?.id === "string") {
+        console.log("我在這")
+        const currentUserRef = doc(db, "users", currentUser?.id)
+        const inviterRef = doc(db, "users", (e.target as Element).id)
+        const currentRelationRef = doc(
+          db,
+          "relationships",
+          `${(e.target as Element).id}${currentUser?.id}`
+        )
+        await updateDoc(currentUserRef, {
+          friends: arrayUnion((e.target as Element).id),
+        })
+        console.log("currentUser的好友陣列已新增")
+        await updateDoc(inviterRef, {
+          friends: arrayUnion(currentUser?.id),
+        })
+        console.log("對方的好友陣列已新增")
+        await updateDoc(currentRelationRef, {
+          status: "accept",
+          beFriend: today,
+        })
+        console.log("relation的status已改")
+        const newBeInviteds = beInvitedIds.filter((item) => {
+          return item !== (e.target as Element).id
+        })
+        setFriendIds((prev) => {
+          return [...prev, (e.target as Element).id]
+        })
+        setBeInvitedIds(newBeInviteds)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <>
       <NavWrapper>
@@ -295,7 +372,7 @@ function MyFriends() {
                         <FilteredContent>
                           {inviting.hometownName}
                         </FilteredContent>
-                        <FilteredContent>Awaitint reply</FilteredContent>
+                        <FilteredContent>Awaiting reply</FilteredContent>
                       </FilteredWrapper>
                     )
                   })
@@ -313,13 +390,22 @@ function MyFriends() {
                           </FilteredContent>
                         </FilteredWrapper>
                         <BtnWrapper>
-                          <BtnAccept>Accept</BtnAccept>
+                          <BtnAccept
+                            id={invited.id}
+                            onClick={(
+                              e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                            ) => {
+                              acceptFriendReq(e)
+                            }}
+                          >
+                            Accept
+                          </BtnAccept>
                           <BtnDeny>Deny</BtnDeny>
                         </BtnWrapper>
                       </RowWrapper>
                     )
                   })
-                : ""}
+                : "none"}
             </InviWrapper>
             <FriendsWrapper>
               {friends.length !== 0 ? (

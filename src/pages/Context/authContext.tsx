@@ -40,6 +40,7 @@ export const AuthContext = createContext<AuthContextType>({
     hometownName: "Taipei",
     hometownLat: 25.061945,
     hometownLng: 121.5484174,
+    friends: [],
   },
   setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) =>
     Response,
@@ -69,10 +70,10 @@ export interface UserInfoType {
   hometownName: string
   hometownLat: number
   hometownLng: number
-  friends?: string[]
+  friends: string[]
 }
 export interface DocumentData {
-  [field: string]: string | number | null | undefined
+  [field: string]: string | number | null | undefined | string[]
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
@@ -139,6 +140,7 @@ export const AuthContextProvider = ({ children }: Props) => {
           hometownName: searchResult[0]?.name,
           hometownLat: searchResult[0]?.geometry?.location?.lat(),
           hometownLng: searchResult[0]?.geometry?.location?.lng(),
+          friends: [],
         }
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)

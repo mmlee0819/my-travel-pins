@@ -125,23 +125,30 @@ export const BtnDefault = styled.div`
   font-size: 12px;
   color: #ffffff;
   background-color: #3490ca;
+  cursor: pointer;
 `
 export const BtnWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: row nowrap;
-  width: 10%;
-  line-height: 16px;
-  height: 16px;
   margin-top: 10px;
   margin-bottom: 20px;
+  width: 10%;
+  height: 16px;
+  line-height: 16px;
+  font-size: 12px;
+  gap: 10px;
 `
 
 export const BtnAccept = styled.div`
-  width: 30%;
+  width: 48%;
   text-align: center;
+  font-family: "Poppins";
+  font-size: 12px;
   color: #ffffff;
   background-color: #34ca9d;
+  border-radius: 3px;
+  cursor: pointer;
 `
 export const BtnDeny = styled(BtnAccept)`
   background-color: #ca3434;
