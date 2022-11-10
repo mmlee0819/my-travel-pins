@@ -14,7 +14,7 @@ import {
   SplitWrapper,
   ContentWrapper,
 } from "./myFriends"
-import { DefinedDocumentData, getPins } from "./commonUse"
+import { DefinedDocumentData, getPins, getSpecificPin } from "./commonUse"
 import {
   MemoryListWrapper,
   MemoryList,
@@ -24,15 +24,6 @@ import {
   BtnReadMore,
   MemoryImg,
 } from "./myMemories"
-import { db } from "../Utils/firebase"
-import {
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  collection,
-  where,
-} from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
 
@@ -75,8 +66,11 @@ function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
   const [memories, setMemories] = useState<DocumentData[]>([])
   const [hasFetched, setHasFetched] = useState(false)
+  const [memory, setMemory] = useState<DocumentData>()
+  const [memoryIsShow, setMemoryIsShow] = useState(false)
   console.log(currentUser)
   console.log("memories", memories)
+  console.log("memory", memory)
   const url = window.location.href
   const splitUrlArr = url.split("/")
   const friendId = splitUrlArr.slice(-2, -1)[0]
@@ -117,9 +111,9 @@ function FriendMemories() {
             {isLoaded ? (
               <MemoryListWrapper>
                 {memories
-                  ? memories.map((memory) => {
+                  ? memories.map((item) => {
                       return (
-                        <MemoryList key={memory.id}>
+                        <MemoryList key={item.id}>
                           <MapWrapper>
                             <GoogleMap
                               mapContainerStyle={{
@@ -127,8 +121,8 @@ function FriendMemories() {
                                 width: "100%",
                               }}
                               center={{
-                                lat: memory.location.lat,
-                                lng: memory.location.lng,
+                                lat: item.location.lat,
+                                lng: item.location.lng,
                               }}
                               zoom={16}
                               options={{
@@ -141,16 +135,16 @@ function FriendMemories() {
                             >
                               <Marker
                                 position={{
-                                  lat: memory.location.lat,
-                                  lng: memory.location.lng,
+                                  lat: item.location.lat,
+                                  lng: item.location.lng,
                                 }}
                               />
                             </GoogleMap>
-                            <Title>{memory?.location?.name}</Title>
+                            <Title>{item?.location?.name}</Title>
                           </MapWrapper>
                           <ImgsWrapper>
-                            {memory?.albumURLs ? (
-                              memory?.albumURLs?.map((photo: string) => {
+                            {item?.albumURLs ? (
+                              item?.albumURLs?.map((photo: string) => {
                                 return (
                                   <MemoryImg
                                     key={photo.slice(0, -8)}
@@ -166,11 +160,20 @@ function FriendMemories() {
                             )}
                           </ImgsWrapper>
                           <ArticleWrapper>
-                            <Title>{memory?.article?.travelDate}</Title>
-                            <Title>{memory?.article?.title}</Title>
-                            <Title>{memory?.article?.content}</Title>
-                            <BtnReadMore>
-                              {memory?.article?.content !== ""
+                            <Title>{item?.article?.travelDate}</Title>
+                            <Title>{item?.article?.title}</Title>
+                            <Title>{item?.article?.content}</Title>
+                            <BtnReadMore
+                              id={item?.id}
+                              onClick={() => {
+                                getSpecificPin(
+                                  item?.id,
+                                  setMemory,
+                                  setMemoryIsShow
+                                )
+                              }}
+                            >
+                              {item?.article?.content !== ""
                                 ? "Read more"
                                 : "Add memory"}
                             </BtnReadMore>

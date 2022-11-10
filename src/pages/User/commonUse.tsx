@@ -74,3 +74,20 @@ export const choosePinOnMap = (
   })
   setSelectedMarker(filteredMarker[0])
 }
+
+export const getSpecificPin = async (
+  pinId: string,
+  setMemory: Dispatch<SetStateAction<DocumentData | PinContent>>,
+  setMemoryIsShow: Dispatch<SetStateAction<boolean>>
+) => {
+  const docRef = doc(db, "pins", pinId)
+  const docSnap = await getDoc(docRef)
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data())
+    setMemory(docSnap.data())
+    setMemoryIsShow(true)
+  } else {
+    // doc.data() will be undefined in this case
+    console.log("No such document!")
+  }
+}

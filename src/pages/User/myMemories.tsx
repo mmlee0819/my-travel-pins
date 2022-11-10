@@ -36,7 +36,6 @@ export const MemoryListWrapper = styled.div`
   margin: 10px auto;
   padding: 10px;
   gap: 20px;
-  border: 1px solid #000000;
 `
 
 export const MemoryList = styled.div`
