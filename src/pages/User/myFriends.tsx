@@ -135,6 +135,10 @@ const BtnWrapper = styled.div`
   line-height: 16px;
   height: 16px;
 `
+const BtnVisitLink = styled(BtnDefault)`
+  text-decoration: none;
+`
+
 interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
@@ -436,7 +440,13 @@ function MyFriends() {
                       <UserAvatar src={friend.photoURL} />
                       <FilteredContent>{friend.name}</FilteredContent>
                       <FilteredContent>{friend.hometownName}</FilteredContent>
-                      <BtnDefault>Visit friend</BtnDefault>
+                      <BtnVisitLink
+                        to={`/${currentUser?.name}/my-friend/${friend.name}`}
+                        as={Link}
+                        id={friend.id}
+                      >
+                        Visit friend
+                      </BtnVisitLink>
                     </FilteredWrapper>
                   )
                 })

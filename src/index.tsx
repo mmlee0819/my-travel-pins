@@ -19,6 +19,7 @@ root.render(
           <Route path="/:user" element={<User />}></Route>
           <Route path="/:user/my-memories" element={<MyMemories />}></Route>
           <Route path="/:user/my-friends" element={<MyFriends />}></Route>
+          <Route path="/:user/my-friend/:friend" element={<Home />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
