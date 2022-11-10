@@ -125,6 +125,7 @@ export const BtnDefault = styled.div`
   font-size: 12px;
   color: #ffffff;
   background-color: #3490ca;
+  border-radius: 3px;
   cursor: pointer;
 `
 export const BtnWrapper = styled.div`
@@ -165,6 +166,7 @@ type AutocompleteItem = Hit<{
 interface Props extends Partial<AutocompleteOptions<AutocompleteItem>> {
   qResultIds: string[]
   setQResultIds: Dispatch<SetStateAction<string[]>>
+  invitingIds: string[]
 }
 interface UserInfoType {
   id: string | DocumentData
@@ -235,11 +237,11 @@ export function Autocomplete(props: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
   const { getEnvironmentProps } = autocomplete
 
-  console.log("autocompleteState", autocompleteState)
-  console.log("props.qResultIds", props.qResultIds)
-  console.log("qInputRef.current.value", qInputRef?.current?.value)
-  console.log("filteredId", filteredId)
-  console.log("queryResult", queryResult)
+  // console.log("autocompleteState", autocompleteState)
+  // console.log("props.qResultIds", props.qResultIds)
+  // console.log("qInputRef.current.value", qInputRef?.current?.value)
+  // console.log("filteredId", filteredId)
+  // console.log("queryResult", queryResult)
   const checkRelation = async (id: string) => {
     if (!isLogin || currentUser === null) return
     const inviterIsMedocRef = doc(
@@ -376,7 +378,7 @@ export function Autocomplete(props: Props) {
           })}
         </ResultsSection>
       )}
-      {queryResult ? (
+      {queryResult && !props.invitingIds.includes(queryResult.id) ? (
         <FilteredWrapper>
           <UserAvatar src={queryResult.photoURL} />
           <FilteredContent>{queryResult.name}</FilteredContent>

@@ -17,7 +17,6 @@ import {
   collection,
   query,
   where,
-  getDoc,
   getDocs,
   doc,
   onSnapshot,
@@ -164,15 +163,6 @@ function MyFriends() {
     DocumentData[] | DefinedDocumentData[]
   >([])
   const [myFriends, setMyFriends] = useState<string[]>([])
-  console.log("currentUser", currentUser)
-  console.log("relationships", relationships)
-  console.log("friendIds", friendIds)
-  console.log("friends", friends)
-  console.log("myFriends", myFriends)
-  console.log("invitingIds", invitingIds)
-  console.log("beInvitedIds", beInvitedIds)
-  console.log("invitingList", invitingList)
-  console.log("beInviedList", beInvitedList)
 
   useEffect(() => {
     const relationRef = collection(db, "relationships")
@@ -298,7 +288,6 @@ function MyFriends() {
     console.log((e.target as Element).id)
     try {
       if (typeof currentUser?.id === "string") {
-        console.log("我在這")
         const currentUserRef = doc(db, "users", currentUser?.id)
         const inviterRef = doc(db, "users", (e.target as Element).id)
         const currentRelationRef = doc(
@@ -309,11 +298,9 @@ function MyFriends() {
         await updateDoc(currentUserRef, {
           friends: arrayUnion((e.target as Element).id),
         })
-        console.log("currentUser的好友陣列已新增")
         await updateDoc(inviterRef, {
           friends: arrayUnion(currentUser?.id),
         })
-        console.log("對方的好友陣列已新增")
         await updateDoc(currentRelationRef, {
           status: "accept",
           beFriend: today,
@@ -324,6 +311,30 @@ function MyFriends() {
         })
         setFriendIds((prev) => {
           return [...prev, (e.target as Element).id]
+        })
+        setBeInvitedIds(newBeInviteds)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const denyFriendReq = async (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    try {
+      if (typeof currentUser?.id === "string") {
+        const currentRelationRef = doc(
+          db,
+          "relationships",
+          `${(e.target as Element).id}${currentUser?.id}`
+        )
+        await updateDoc(currentRelationRef, {
+          status: "reject",
+          rejectedDay: today,
+        })
+        const newBeInviteds = beInvitedIds.filter((item) => {
+          return item !== (e.target as Element).id
         })
         setBeInvitedIds(newBeInviteds)
       }
@@ -362,6 +373,7 @@ function MyFriends() {
               <Autocomplete
                 qResultIds={qResultIds}
                 setQResultIds={setQResultIds}
+                invitingIds={invitingIds}
               />
               {invitingList.length !== 0
                 ? invitingList.map((inviting: DocumentData) => {
@@ -400,7 +412,16 @@ function MyFriends() {
                           >
                             Accept
                           </BtnAccept>
-                          <BtnDeny>Deny</BtnDeny>
+                          <BtnDeny
+                            id={invited.id}
+                            onClick={(
+                              e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                            ) => {
+                              denyFriendReq(e)
+                            }}
+                          >
+                            Deny
+                          </BtnDeny>
                         </BtnWrapper>
                       </RowWrapper>
                     )
