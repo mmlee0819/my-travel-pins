@@ -25,33 +25,33 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 
-const NavWrapper = styled.div`
+export const NavWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   width: 80%;
   margin: 0 auto;
 `
-const Title = styled.div`
+export const Title = styled.div`
   color: #000000;
 `
 
-const BtnLink = styled(Link)`
+export const BtnLink = styled(Link)`
   margin: 0 20px;
 `
 
-const Container = styled.div`
+export const Container = styled.div`
   display: flex;
   flex-flow: column wrap;
   margin: 0 20px;
   font-size: 14px;
 `
-const TabWrapper = styled(Container)`
+export const TabWrapper = styled(Container)`
   flex-flow: row nowrap;
   margin: 30px auto 0 30px;
   font-size: 20px;
   gap: 30px;
 `
-const TabLink = styled(Link)`
+export const TabLink = styled(Link)`
   padding: 5px 8px;
   width: 100px;
   text-align: center;
@@ -68,7 +68,7 @@ const TabLink = styled(Link)`
     color: #000000;
   }
 `
-const TabTitle = styled.div`
+export const TabTitle = styled.div`
   padding: 5px 8px;
   width: 100px;
   text-align: center;
@@ -78,28 +78,28 @@ const TabTitle = styled.div`
   border-top-right-radius: 8px;
   border-bottom: none;
 `
-const ContentArea = styled.div`
+export const ContentArea = styled.div`
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
   border: 1px solid #beb9b9;
   border-top: none;
 `
-const SplitWrapper = styled.div`
+export const SplitWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   margin: 0;
   padding: 0;
 `
-const LeftSplit = styled.div`
+export const LeftSplit = styled.div`
   width: 160px;
   border-top: 1px solid #beb9b9;
 `
-const RightSplit = styled(LeftSplit)`
+export const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
   margin-left: 100px;
 `
-const ContentWrapper = styled(ContentArea)`
+export const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
   padding: 15px;
   gap: 20px;
@@ -135,7 +135,11 @@ const BtnWrapper = styled.div`
   line-height: 16px;
   height: 16px;
 `
-interface DefinedDocumentData {
+const BtnVisitLink = styled(BtnDefault)`
+  text-decoration: none;
+`
+
+export interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
 
@@ -144,7 +148,7 @@ const today = `${new Date().getFullYear()}-${
   new Date().getMonth() + 1
 }-${new Date().getDate()}`
 
-function MyFriends() {
+export default function MyFriends() {
   const { currentUser, isLogin } = useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
@@ -170,9 +174,7 @@ function MyFriends() {
       const newDocs: DocumentData | DefinedDocumentData = []
       snapshot.docs.forEach((doc) => {
         newDocs.push(doc.data())
-        console.log(newDocs)
       })
-      console.log("newDocs", newDocs)
       setRelationships(newDocs)
     })
     return checkRealtimeRelationships
@@ -436,7 +438,13 @@ function MyFriends() {
                       <UserAvatar src={friend.photoURL} />
                       <FilteredContent>{friend.name}</FilteredContent>
                       <FilteredContent>{friend.hometownName}</FilteredContent>
-                      <BtnDefault>Visit friend</BtnDefault>
+                      <BtnVisitLink
+                        to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
+                        as={Link}
+                        id={friend.id}
+                      >
+                        Visit friend
+                      </BtnVisitLink>
                     </FilteredWrapper>
                   )
                 })
@@ -453,4 +461,4 @@ function MyFriends() {
   )
 }
 
-export default MyFriends
+// export default MyFriends

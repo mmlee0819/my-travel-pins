@@ -4,9 +4,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import "./index.css"
 import App from "./App"
 import Home from "./pages/home"
-import User from "./pages/User/user"
+import User from "./pages/User/myMap"
 import MyMemories from "./pages/User/myMemories"
 import MyFriends from "./pages/User/myFriends"
+import FriendsHome from "./pages/User/friendsHome"
 import reportWebVitals from "./reportWebVitals"
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
@@ -19,6 +20,10 @@ root.render(
           <Route path="/:user" element={<User />}></Route>
           <Route path="/:user/my-memories" element={<MyMemories />}></Route>
           <Route path="/:user/my-friends" element={<MyFriends />}></Route>
+          <Route
+            path="/:user/my-friend/:friendName/:friendId"
+            element={<FriendsHome />}
+          ></Route>
         </Route>
       </Routes>
     </BrowserRouter>

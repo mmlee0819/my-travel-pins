@@ -1,4 +1,4 @@
-import React from "react"
+import React, { Dispatch, SetStateAction } from "react"
 import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
@@ -8,7 +8,7 @@ import {
   StandaloneSearchBox,
   InfoWindow,
 } from "@react-google-maps/api"
-import { darkMap } from "../User/darkMap"
+import { darkMap } from "./darkMap"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
@@ -154,14 +154,14 @@ const UploadImgInput = styled.input`
   display: none;
 `
 
-const PinInfoArea = styled.div`
+export const PinInfoArea = styled.div`
   background-color: #ffffff;
 `
-const PinInfoImg = styled.img`
+export const PinInfoImg = styled.img`
   width: 150px;
   height: 120px;
 `
-const PinInfoTitle = styled.div`
+export const PinInfoTitle = styled.div`
   text-align: center;
   font-size: 12px;
   font-weight: 700;
@@ -178,8 +178,21 @@ interface Hometown {
   lng?: number | null
   name?: string | null
 }
+export const choosePin = (
+  e: google.maps.MapMouseEvent,
+  markers: DocumentData[],
+  setSelectedMarker: Dispatch<SetStateAction<DocumentData | undefined>>
+) => {
+  const filteredMarker = markers.filter((marker) => {
+    return (
+      marker.location.lat === e.latLng?.lat() &&
+      marker.location.lng === e.latLng?.lng()
+    )
+  })
+  setSelectedMarker(filteredMarker[0])
+}
 
-function User() {
+export default function User() {
   const { isLoaded, isLogin, currentUser, navigate } = useContext(AuthContext)
   console.log("currentUser", currentUser)
   const center = {
@@ -396,16 +409,6 @@ function User() {
     setUrls([])
   }
 
-  const choosePin = (e: google.maps.MapMouseEvent) => {
-    const filteredMarker = markers.filter((marker) => {
-      return (
-        marker.location.lat === e.latLng?.lat() &&
-        marker.location.lng === e.latLng?.lng()
-      )
-    })
-    setSelectedMarker(filteredMarker[0])
-  }
-
   return (
     <>
       <Wrapper>
@@ -585,7 +588,7 @@ function User() {
                   )
                 }
                 onClick={(e: google.maps.MapMouseEvent) => {
-                  choosePin(e)
+                  choosePin(e, markers, setSelectedMarker)
                 }}
               />
             )
@@ -623,5 +626,3 @@ function User() {
     </>
   )
 }
-
-export default User
