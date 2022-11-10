@@ -10,7 +10,7 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
   body {
-     font-family: 'Noto Sans TC', sans-serif;
+    font-family: 'Jomhuria','Poppins', sans-serif;
    }
 
   #root {

@@ -40,6 +40,7 @@ export const AuthContext = createContext<AuthContextType>({
     hometownName: "Taipei",
     hometownLat: 25.061945,
     hometownLng: 121.5484174,
+    friends: [],
   },
   setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) =>
     Response,
@@ -61,7 +62,7 @@ interface Props {
   children?: ReactNode
 }
 
-interface UserInfoType {
+export interface UserInfoType {
   id: string | DocumentData
   name: string | DocumentData
   email: string | DocumentData
@@ -69,9 +70,10 @@ interface UserInfoType {
   hometownName: string
   hometownLat: number
   hometownLng: number
+  friends: string[]
 }
-interface DocumentData {
-  [field: string]: string | number | null | undefined
+export interface DocumentData {
+  [field: string]: string | number | null | undefined | string[]
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
@@ -111,6 +113,16 @@ export const AuthContextProvider = ({ children }: Props) => {
     if (!name || !email || !password) return
     try {
       console.log("註冊中")
+      const engLetter = /^[a-zA-Z]*$/
+      let UpdatedName = ""
+      if (engLetter.test(name[0])) {
+        const namesArr = name.split(" ")
+        const newNameArr = namesArr.map((name) => {
+          const newName = name.charAt(0).toUpperCase() + name.slice(1)
+          return newName
+        })
+        UpdatedName = newNameArr.join(" ")
+      }
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email.trim(),
@@ -122,12 +134,13 @@ export const AuthContextProvider = ({ children }: Props) => {
       if (user) {
         const userInfo = {
           id: user.uid,
-          name,
+          name: UpdatedName || name,
           email: user.email,
           photoURL: defaultAvatar,
           hometownName: searchResult[0]?.name,
           hometownLat: searchResult[0]?.geometry?.location?.lat(),
           hometownLng: searchResult[0]?.geometry?.location?.lng(),
+          friends: [],
         }
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)
