@@ -2,10 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
-import {
-  doc,
-  deleteDoc,
-} from "firebase/firestore"
+import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
 import { GoogleMap, Marker } from "@react-google-maps/api"
 import trashBin from "./trashBin.png"
@@ -32,7 +29,6 @@ const BtnLink = styled(Link)`
 export const MemoryListWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  width: 90%;
   margin: 10px auto;
   padding: 10px;
   gap: 20px;
@@ -128,9 +124,9 @@ export default function MyMemories() {
 
   useEffect(() => {
     if (
+      currentUser !== undefined &&
       currentUser !== null &&
-      currentUser?.id &&
-      currentUser?.id === "string"
+      typeof currentUser?.id === "string"
     ) {
       getPins(
         currentUser,
