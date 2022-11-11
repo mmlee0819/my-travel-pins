@@ -2,182 +2,113 @@ import React from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
-import { doc, deleteDoc } from "firebase/firestore"
-import { db, storage } from "../Utils/firebase"
-import { GoogleMap, Marker } from "@react-google-maps/api"
-import trashBin from "./trashBin.png"
-import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
-import { DocumentData } from "@firebase/firestore-types"
-import { ref, deleteObject } from "firebase/storage"
-import { getPins, getSpecificPin } from "./ts_fn_commonUse"
+import { GoogleMap, Marker } from "@react-google-maps/api"
 import {
   Container,
   ContentArea,
   ContentWrapper,
-  DetailContentWrapper,
-  DetailArticleWrapper,
-  DetailImg,
-  DetailImgsWrapper,
-  DetailMapWrapper,
+  NavWrapper,
+  Title,
+  BtnLink,
   TabWrapper,
-  TabLink,
-  TabTitle,
   SplitWrapper,
+} from "./myFriends"
+import { getPins, getSpecificPin } from "./ts_fn_commonUse"
+import {
+  MapWrapper,
+  MemoryListWrapper,
+  MemoryList,
+  ImgsWrapper,
+  ArticleWrapper,
+  BtnReadMore,
+  MemoryImg,
+} from "./myMemories"
+import {
+  DetailMapWrapper,
+  DetailImgsWrapper,
+  DetailArticleWrapper,
+  DetailContentWrapper,
+  DetailImg,
 } from "./components/UIforMemoriesPage"
+import { DocumentData } from "@firebase/firestore-types"
+import defaultImage from "../assets/defaultImage.png"
 
-const Wrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 80%;
-  margin: 0 auto;
-`
-const Title = styled.div`
+const TabLink = styled(Link)`
+  padding: 5px 8px;
+  text-align: center;
   color: #000000;
-`
-
-const BtnLink = styled(Link)`
-  margin: 0 20px;
-`
-
-export const MemoryListWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  margin: 10px auto;
-  padding: 10px;
-  gap: 20px;
-`
-
-export const MemoryList = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  height: 150px;
-  padding: 10px 0;
-  gap: 20px;
-`
-const BtnDelete = styled.img`
-  align-self: center;
-  width: 40px;
-  height: 40px;
+  text-decoration: none;
   cursor: pointer;
+  &:visited {
+    color: #000000;
+  }
+  &:hover {
+    color: #2d65be;
+  }
+  &:active {
+    color: #000000;
+  }
 `
-
-export const ImgsWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  height: 120px;
-  width: 50%;
-  gap: 10px;
-  border: none;
-  overflow: overlay;
-`
-export const MemoryImg = styled.img`
-  width: 30%;
-  height: 120px;
-`
-export const ArticleWrapper = styled(MemoryListWrapper)`
-  width: 200px;
-  padding: 0 15px;
-  font-size: 14px;
-  gap: 10px;
-  border: none;
-`
-export const MapWrapper = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
+const TabTitle = styled.div`
+  padding: 5px 8px;
+  width: 130px;
   text-align: center;
-  height: 100%;
-  width: 20%;
-  font-size: 14px;
-`
-export const BtnReadMore = styled.div`
-  display: flex;
-  align-self: end;
-  text-align: center;
-  padding: 5px;
-  border: 1px solid #000000;
-  border-radius: 5px;
-  cursor: pointer;
+  color: #2d65be;
+  border: 1px solid #beb9b9;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: none;
 `
 const LeftSplit = styled.div`
-  width: 116px;
+  width: 154px;
   border-top: 1px solid #beb9b9;
 `
 const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
-  margin-left: 129px;
+  margin-left: 128px;
 `
-export default function MyMemories() {
-  const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
-  const [memories, setMemories] = useState<DocumentData>([])
+
+function FriendMemories() {
+  const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
+  const [memories, setMemories] = useState<DocumentData[]>([])
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<DocumentData>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
-  console.log(currentUser)
-  console.log("memories", memories)
 
-  const deleteMemory = async (
-    e: React.MouseEvent<HTMLImageElement, MouseEvent>
-  ) => {
-    try {
-      const folderName = `${memories[0].userId.slice(
-        0,
-        4
-      )}-${memories[0].location.placeId.slice(0, 4)}`
-
-      const newMemories = memories.filter((memory: DocumentData) => {
-        return memory.id !== (e.target as Element).id
-      })
-      const chosenMemory = memories.filter((memory: DocumentData) => {
-        return memory.id === (e.target as Element).id
-      })
-      if (chosenMemory[0].albumNames) {
-        chosenMemory[0].albumNames.map(async (fileName: string) => {
-          await deleteObject(ref(storage, `/${folderName}/${fileName}`))
-        })
-      }
-      const docRef = doc(db, "pins", (e.target as Element).id)
-      await deleteDoc(docRef)
-      setMemories(newMemories)
-    } catch (error) {
-      console.log(error)
-    }
+  const url = window.location.href
+  const splitUrlArr = url.split("/")
+  const friendId = splitUrlArr.slice(-2, -1)[0]
+  let friendName = splitUrlArr.slice(-3, -2)[0]
+  if (friendName[0] === "%") {
+    friendName = decodeURI(friendName)
   }
-
   useEffect(() => {
-    if (
-      currentUser !== undefined &&
-      currentUser !== null &&
-      typeof currentUser?.id === "string"
-    ) {
-      getPins(
-        currentUser,
-        currentUser?.id,
-        hasFetched,
-        setHasFetched,
-        setMemories
-      )
-    }
-  }, [currentUser?.id])
+    getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
+  }, [friendId])
 
   return (
     <>
-      {isLogin && currentUser !== undefined ? (
-        <Wrapper>
-          <Title>我是user的回憶列表</Title>
-          <BtnLink to="/">Home</BtnLink>
-          <BtnLink to={`/${currentUser.name}`}>My-map</BtnLink>
-          <BtnLink to={`/${currentUser.name}/my-friends`}>MY-friends</BtnLink>
-        </Wrapper>
-      ) : (
-        "你沒有登入"
-      )}
+      <NavWrapper>
+        {isLogin && currentUser !== undefined ? (
+          <>
+            <Title>我是好友的回憶列表</Title>
+            <BtnLink to="/">HOME</BtnLink>
+            <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
+            <BtnLink to={`/${currentUser?.name}/my-memories`}>
+              my-memories
+            </BtnLink>
+          </>
+        ) : (
+          <Title>你沒有登入</Title>
+        )}
+      </NavWrapper>
       <Container>
         <TabWrapper>
-          <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
-          <TabTitle>My Memories</TabTitle>
-          <TabLink to={`/${currentUser?.name}/my-friends`}>My friends</TabLink>
+          <TabLink
+            to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}`}
+          >{`${friendName}'s Map`}</TabLink>
+          <TabTitle>{`${friendName}'s Memories`}</TabTitle>
         </TabWrapper>
         <SplitWrapper>
           <LeftSplit />
@@ -188,17 +119,10 @@ export default function MyMemories() {
             {isLoaded ? (
               <MemoryListWrapper>
                 {memories
-                  ? memories.map((item: DocumentData) => {
+                  ? memories.map((item) => {
                       return (
                         <DetailContentWrapper key={item.id}>
                           <MemoryList>
-                            <BtnDelete
-                              src={trashBin}
-                              id={item.id}
-                              onClick={(e) => {
-                                deleteMemory(e)
-                              }}
-                            />
                             <MapWrapper>
                               <GoogleMap
                                 mapContainerStyle={{
@@ -209,7 +133,7 @@ export default function MyMemories() {
                                   lat: item.location.lat,
                                   lng: item.location.lng,
                                 }}
-                                zoom={16}
+                                zoom={10}
                                 options={{
                                   draggable: true,
                                   mapTypeControl: false,
@@ -278,9 +202,9 @@ export default function MyMemories() {
                               </BtnReadMore>
                             </ArticleWrapper>
                           </MemoryList>
-                          {memory && memoryIsShow && memory?.id === item.id ? (
+                          {memory && memoryIsShow && memory.id === item.id ? (
                             <DetailContentWrapper
-                              key={`${memory?.id}-${memory?.location.placeId}`}
+                              key={`${memory.id}-${memory.location.placeId}`}
                             >
                               <DetailArticleWrapper>
                                 <Title>{memory?.article?.travelDate}</Title>
@@ -308,8 +232,8 @@ export default function MyMemories() {
                                       width: "100%",
                                     }}
                                     center={{
-                                      lat: memory?.location.lat,
-                                      lng: memory?.location.lng,
+                                      lat: memory.location.lat,
+                                      lng: memory.location.lng,
                                     }}
                                     zoom={14}
                                     options={{
@@ -322,8 +246,8 @@ export default function MyMemories() {
                                   >
                                     <Marker
                                       position={{
-                                        lat: memory?.location.lat,
-                                        lng: memory?.location.lng,
+                                        lat: memory.location.lat,
+                                        lng: memory.location.lng,
                                       }}
                                     />
                                   </GoogleMap>
@@ -349,3 +273,4 @@ export default function MyMemories() {
     </>
   )
 }
+export default FriendMemories

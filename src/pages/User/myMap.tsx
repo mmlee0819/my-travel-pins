@@ -31,6 +31,7 @@ import {
 } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
+import { choosePinOnMap, PinContent } from "./ts_fn_commonUse"
 
 const Wrapper = styled.div`
   display: flex;
@@ -177,19 +178,6 @@ interface Hometown {
   lat?: number | null
   lng?: number | null
   name?: string | null
-}
-export const choosePin = (
-  e: google.maps.MapMouseEvent,
-  markers: DocumentData[],
-  setSelectedMarker: Dispatch<SetStateAction<DocumentData | undefined>>
-) => {
-  const filteredMarker = markers.filter((marker) => {
-    return (
-      marker.location.lat === e.latLng?.lat() &&
-      marker.location.lng === e.latLng?.lng()
-    )
-  })
-  setSelectedMarker(filteredMarker[0])
 }
 
 export default function User() {
@@ -588,7 +576,7 @@ export default function User() {
                   )
                 }
                 onClick={(e: google.maps.MapMouseEvent) => {
-                  choosePin(e, markers, setSelectedMarker)
+                  choosePinOnMap(e, markers, setSelectedMarker)
                 }}
               />
             )

@@ -338,7 +338,7 @@ export function Autocomplete(props: Props) {
               <BtnQueryIcon type="submit" {...autocomplete.getLabelProps()} />
             </Label>
             <QueryFriendInput
-              ref={autocompleteState.isOpen ? qInputRef : null}
+              ref={qInputRef}
               {...autocomplete.getInputProps({
                 inputElement: qInputRef.current,
                 placeholder: "Search a friend",
@@ -366,6 +366,9 @@ export function Autocomplete(props: Props) {
                             })
                             getQueryResult(item.objectID)
                             checkRelation(item.objectID)
+                            if (qInputRef.current !== null) {
+                              qInputRef.current.value = ""
+                            }
                           }}
                         >
                           {item.name}
