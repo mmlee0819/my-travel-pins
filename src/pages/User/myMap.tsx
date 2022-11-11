@@ -31,7 +31,7 @@ import {
 } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
-import { choosePinOnMap, PinContent } from "./commonUse"
+import { choosePinOnMap, PinContent } from "./ts_fn_commonUse"
 
 const Wrapper = styled.div`
   display: flex;

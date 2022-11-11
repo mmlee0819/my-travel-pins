@@ -5,16 +5,16 @@ import { useState, useContext, useEffect } from "react"
 import { AuthContext } from "../Context/authContext"
 import { GoogleMap, Marker } from "@react-google-maps/api"
 import {
+  Container,
+  ContentArea,
+  ContentWrapper,
   NavWrapper,
   Title,
   BtnLink,
-  Container,
   TabWrapper,
-  ContentArea,
   SplitWrapper,
-  ContentWrapper,
 } from "./myFriends"
-import { DefinedDocumentData, getPins, getSpecificPin } from "./commonUse"
+import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
   MapWrapper,
   MemoryListWrapper,
@@ -24,6 +24,13 @@ import {
   BtnReadMore,
   MemoryImg,
 } from "./myMemories"
+import {
+  DetailMapWrapper,
+  DetailImgsWrapper,
+  DetailArticleWrapper,
+  DetailContentWrapper,
+  DetailImg,
+} from "./components/UIforMemoriesPage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
 
@@ -61,44 +68,6 @@ const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
   margin-left: 128px;
 `
-const DetailContentWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  margin: 0;
-  padding: 10px;
-  gap: 20px;
-`
-const DetailArticleWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  margin: 0;
-`
-const DetailImgsWrapper = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  width: 100%;
-  gap: 20px;
-`
-const DetailImg = styled.div<{
-  bkImage: string
-}>`
-  display: flex;
-  flex: 0 1 45%;
-  height: 200px;
-  background-image: ${(props) => `url(${props.bkImage})`};
-  background-size: 100% 100%;
-`
-const DetailMapWrapper = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  text-align: center;
-  justify-content: center;
-  width: 100%;
-  height: 400px;
-  font-size: 14px;
-`
 
 function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
@@ -106,14 +75,14 @@ function FriendMemories() {
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<DocumentData>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
-  console.log(currentUser)
-  console.log("memories", memories)
-  console.log("memory", memory)
-  console.log("memoryIsShow", memoryIsShow)
+
   const url = window.location.href
   const splitUrlArr = url.split("/")
   const friendId = splitUrlArr.slice(-2, -1)[0]
-  const friendName = splitUrlArr.slice(-3, -2)[0]
+  let friendName = splitUrlArr.slice(-3, -2)[0]
+  if (friendName[0] === "%") {
+    friendName = decodeURI(friendName)
+  }
   useEffect(() => {
     getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
   }, [friendId])
@@ -123,7 +92,7 @@ function FriendMemories() {
       <NavWrapper>
         {isLogin && currentUser !== undefined ? (
           <>
-            <Title>我是user的好友列表</Title>
+            <Title>我是好友的回憶列表</Title>
             <BtnLink to="/">HOME</BtnLink>
             <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
             <BtnLink to={`/${currentUser?.name}/my-memories`}>

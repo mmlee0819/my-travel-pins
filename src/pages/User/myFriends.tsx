@@ -24,7 +24,7 @@ import {
   arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData } from "./commonUse"
+import { DefinedDocumentData } from "./ts_fn_commonUse"
 export const NavWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -92,12 +92,12 @@ export const SplitWrapper = styled.div`
   padding: 0;
 `
 export const LeftSplit = styled.div`
-  width: 160px;
+  width: 291px;
   border-top: 1px solid #beb9b9;
 `
 export const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
-  margin-left: 100px;
+  margin-left: 98px;
 `
 export const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
@@ -357,7 +357,10 @@ export default function MyFriends() {
       </NavWrapper>
       <Container>
         <TabWrapper>
-          <TabLink to={`/${currentUser?.name}`}>My Memories</TabLink>
+          <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
+          <TabLink to={`/${currentUser?.name}/my-memories`}>
+            My Memories
+          </TabLink>
           <TabTitle>My Friends</TabTitle>
         </TabWrapper>
         <SplitWrapper>

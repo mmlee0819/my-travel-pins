@@ -15,7 +15,11 @@ import {
   ContentWrapper,
 } from "./myFriends"
 import { PinInfoArea, PinInfoTitle, PinInfoImg } from "./myMap"
-import { DefinedDocumentData, PinContent, choosePinOnMap } from "./commonUse"
+import {
+  DefinedDocumentData,
+  PinContent,
+  choosePinOnMap,
+} from "./ts_fn_commonUse"
 import { db } from "../Utils/firebase"
 import {
   doc,
@@ -92,7 +96,11 @@ function FriendsHome() {
   const url = window.location.href
   const splitUrlArr = url.split("/")
   const friendId = splitUrlArr.slice(-1)[0]
-  const friendName = splitUrlArr.slice(-2, -1)[0]
+  let friendName = splitUrlArr.slice(-2, -1)[0]
+  if (friendName[0] === "%") {
+    friendName = decodeURI(friendName)
+  }
+
   useEffect(() => {
     const getFriendInfo = async () => {
       if (typeof friendId !== "string") return
@@ -107,6 +115,7 @@ function FriendsHome() {
     }
     getFriendInfo()
   }, [friendId])
+
   useEffect(() => {
     const getAllPinsOfFriend = async () => {
       const q = query(collection(db, "pins"), where("userId", "==", friendId))
@@ -135,7 +144,7 @@ function FriendsHome() {
       <NavWrapper>
         {isLogin && currentUser !== undefined ? (
           <>
-            <Title>我是user的好友列表</Title>
+            <Title>我是好友的地圖</Title>
             <BtnLink to="/">HOME</BtnLink>
             <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
             <BtnLink to={`/${currentUser?.name}/my-memories`}>

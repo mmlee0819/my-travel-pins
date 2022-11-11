@@ -10,7 +10,21 @@ import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { DocumentData } from "@firebase/firestore-types"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins } from "./commonUse"
+import { getPins, getSpecificPin } from "./ts_fn_commonUse"
+import {
+  Container,
+  ContentArea,
+  ContentWrapper,
+  DetailContentWrapper,
+  DetailArticleWrapper,
+  DetailImg,
+  DetailImgsWrapper,
+  DetailMapWrapper,
+  TabWrapper,
+  TabLink,
+  TabTitle,
+  SplitWrapper,
+} from "./components/UIforMemoriesPage"
 
 const Wrapper = styled.div`
   display: flex;
@@ -86,11 +100,20 @@ export const BtnReadMore = styled.div`
   border-radius: 5px;
   cursor: pointer;
 `
-
+const LeftSplit = styled.div`
+  width: 116px;
+  border-top: 1px solid #beb9b9;
+`
+const RightSplit = styled(LeftSplit)`
+  flex: 1 1 auto;
+  margin-left: 129px;
+`
 export default function MyMemories() {
   const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
   const [memories, setMemories] = useState<DocumentData>([])
   const [hasFetched, setHasFetched] = useState(false)
+  const [memory, setMemory] = useState<DocumentData>()
+  const [memoryIsShow, setMemoryIsShow] = useState(false)
   console.log(currentUser)
   console.log("memories", memories)
 
@@ -148,78 +171,181 @@ export default function MyMemories() {
           <BtnLink to={`/${currentUser.name}/my-friends`}>MY-friends</BtnLink>
         </Wrapper>
       ) : (
-        ""
+        "你沒有登入"
       )}
-      {isLoaded ? (
-        <MemoryListWrapper>
-          {memories
-            ? memories.map((memory: DocumentData) => {
-                return (
-                  <MemoryList key={memory.id}>
-                    <BtnDelete
-                      src={trashBin}
-                      id={memory.id}
-                      onClick={(e) => {
-                        deleteMemory(e)
-                      }}
-                    />
-                    <MapWrapper>
-                      <GoogleMap
-                        mapContainerStyle={{ height: "100px", width: "100%" }}
-                        center={{
-                          lat: memory.location.lat,
-                          lng: memory.location.lng,
-                        }}
-                        zoom={16}
-                        options={{
-                          draggable: true,
-                          mapTypeControl: false,
-                          streetViewControl: false,
-                          scaleControl: false,
-                          fullscreenControl: false,
-                        }}
-                      >
-                        <Marker
-                          position={{
-                            lat: memory.location.lat,
-                            lng: memory.location.lng,
-                          }}
-                        />
-                      </GoogleMap>
-                      <Title>{memory?.location?.name}</Title>
-                    </MapWrapper>
-                    <ImgsWrapper>
-                      {memory?.albumURLs ? (
-                        memory?.albumURLs?.map((photo: string) => {
-                          return (
-                            <MemoryImg key={photo.slice(0, -8)} src={photo} />
-                          )
-                        })
-                      ) : (
-                        <>
-                          <MemoryImg src={defaultImage} />
-                          <Title>No photo uploaded</Title>
-                        </>
-                      )}
-                    </ImgsWrapper>
-                    <ArticleWrapper>
-                      <Title>{memory?.article?.travelDate}</Title>
-                      <Title>{memory?.article?.title}</Title>
-                      <Title>{memory?.article?.content}</Title>
-                      <BtnReadMore>
-                        {memory?.article?.content !== ""
-                          ? "Read more"
-                          : "Add memory"}
-                      </BtnReadMore>
-                    </ArticleWrapper>
-                  </MemoryList>
-                )
-              })
-            : ""}
-        </MemoryListWrapper>
-      ) : (
-        <Title>Please wait...</Title>
-      )}
+      <Container>
+        <TabWrapper>
+          <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
+          <TabTitle>My Memories</TabTitle>
+          <TabLink to={`/${currentUser?.name}/my-friends`}>My friends</TabLink>
+        </TabWrapper>
+        <SplitWrapper>
+          <LeftSplit />
+          <RightSplit />
+        </SplitWrapper>
+        <ContentArea>
+          <ContentWrapper>
+            {isLoaded ? (
+              <MemoryListWrapper>
+                {memories
+                  ? memories.map((item: DocumentData) => {
+                      return (
+                        <DetailContentWrapper key={item.id}>
+                          <MemoryList>
+                            <BtnDelete
+                              src={trashBin}
+                              id={item.id}
+                              onClick={(e) => {
+                                deleteMemory(e)
+                              }}
+                            />
+                            <MapWrapper>
+                              <GoogleMap
+                                mapContainerStyle={{
+                                  height: "100px",
+                                  width: "100%",
+                                }}
+                                center={{
+                                  lat: item.location.lat,
+                                  lng: item.location.lng,
+                                }}
+                                zoom={16}
+                                options={{
+                                  draggable: true,
+                                  mapTypeControl: false,
+                                  streetViewControl: false,
+                                  scaleControl: false,
+                                  fullscreenControl: false,
+                                }}
+                              >
+                                <Marker
+                                  position={{
+                                    lat: item.location.lat,
+                                    lng: item.location.lng,
+                                  }}
+                                />
+                              </GoogleMap>
+                              <Title>{item?.location?.name}</Title>
+                            </MapWrapper>
+                            <ImgsWrapper>
+                              {item?.albumURLs ? (
+                                item?.albumURLs?.map((photo: string) => {
+                                  return (
+                                    <MemoryImg
+                                      key={photo.slice(0, -8)}
+                                      src={photo}
+                                    />
+                                  )
+                                })
+                              ) : (
+                                <>
+                                  <MemoryImg src={defaultImage} />
+                                  <Title>No photo uploaded</Title>
+                                </>
+                              )}
+                            </ImgsWrapper>
+                            <ArticleWrapper>
+                              <Title>{item?.article?.travelDate}</Title>
+                              <Title>{item?.article?.title}</Title>
+                              <Title>{item?.article?.content}</Title>
+                              <BtnReadMore
+                                id={item?.id}
+                                onClick={() => {
+                                  if (memoryIsShow && memory?.id !== item?.id) {
+                                    setMemoryIsShow(false)
+                                    getSpecificPin(
+                                      item?.id,
+                                      setMemory,
+                                      setMemoryIsShow
+                                    )
+                                  } else if (
+                                    memoryIsShow &&
+                                    memory?.id === item?.id
+                                  ) {
+                                    setMemoryIsShow(false)
+                                  } else {
+                                    getSpecificPin(
+                                      item?.id,
+                                      setMemory,
+                                      setMemoryIsShow
+                                    )
+                                  }
+                                }}
+                              >
+                                {item?.article?.content !== ""
+                                  ? "Read more"
+                                  : "Add memory"}
+                              </BtnReadMore>
+                            </ArticleWrapper>
+                          </MemoryList>
+                          {memory && memoryIsShow && memory?.id === item.id ? (
+                            <DetailContentWrapper
+                              key={`${memory?.id}-${memory?.location.placeId}`}
+                            >
+                              <DetailArticleWrapper>
+                                <Title>{memory?.article?.travelDate}</Title>
+                                <Title>{memory?.article?.title}</Title>
+                              </DetailArticleWrapper>
+                              <Title>{memory?.article?.content}</Title>
+                              <DetailImgsWrapper>
+                                {memory?.albumURLs &&
+                                  memory?.albumURLs?.length !== 0 &&
+                                  memory?.albumURLs.map((photoUrl: string) => {
+                                    return (
+                                      <DetailImg
+                                        key={photoUrl}
+                                        bkImage={photoUrl}
+                                      />
+                                    )
+                                  })}
+                              </DetailImgsWrapper>
+                              {memoryIsShow ? (
+                                <DetailMapWrapper>
+                                  <Title>{memory?.location?.name}</Title>
+                                  <GoogleMap
+                                    mapContainerStyle={{
+                                      height: "300px",
+                                      width: "100%",
+                                    }}
+                                    center={{
+                                      lat: memory?.location.lat,
+                                      lng: memory?.location.lng,
+                                    }}
+                                    zoom={14}
+                                    options={{
+                                      draggable: true,
+                                      mapTypeControl: false,
+                                      streetViewControl: false,
+                                      scaleControl: false,
+                                      fullscreenControl: false,
+                                    }}
+                                  >
+                                    <Marker
+                                      position={{
+                                        lat: memory?.location.lat,
+                                        lng: memory?.location.lng,
+                                      }}
+                                    />
+                                  </GoogleMap>
+                                </DetailMapWrapper>
+                              ) : (
+                                ""
+                              )}
+                            </DetailContentWrapper>
+                          ) : (
+                            ""
+                          )}
+                        </DetailContentWrapper>
+                      )
+                    })
+                  : ""}
+              </MemoryListWrapper>
+            ) : (
+              <Title>Please wait...</Title>
+            )}
+          </ContentWrapper>
+        </ContentArea>
+      </Container>
     </>
   )
 }
