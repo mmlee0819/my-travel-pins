@@ -8,13 +8,26 @@ import {
   StandaloneSearchBox,
   InfoWindow,
 } from "@react-google-maps/api"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from "chart.js"
+import { Line } from "react-chartjs-2"
 import { AuthContext } from "../Context/authContext"
+
 const GridArea = styled.div`
   font-family: "Poppins";
   position: absolute;
   display: flex;
   top: 0px;
-  min-width: 50vw;
+  min-width: 40vw;
   min-height: 50vh;
   z-index: 99;
 `
@@ -29,49 +42,95 @@ const GridItemWrapper = styled.div`
 `
 
 const Input = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
   padding-left: 8px;
   width: 100%;
   height: 30px;
   font-size: 15px;
-  color: #ffffff;
-  background-color: #000000;
+  color: #2d2d2d;
+  background-color: #ffffff;
   border: 1px solid #000000;
   opacity: 0.8;
   z-index: 100;
 `
+
 const CurrentWeatherInfoArea = styled.div`
   padding: 5px;
-  background-color: #ffffff;
+  background-color: #f99c62;
   border: 1px solid #f99c62;
   border-radius: 5px;
-  /* width: 150px;
-  height: 120px; */
 `
 const CurrentWeatherImg = styled.img`
   width: 50px;
   height: 50px;
 `
 const CurrentWeatherTitle = styled.div`
-  text-align: start;
-  color: #000000;
+  text-align: center;
+  color: #2b2a2a;
   font-size: 12px;
   font-weight: 500;
 `
 const CurrentWeatherText = styled.div`
-  text-align: center;
-  color: #000000;
+  padding-right: 5px;
+  text-align: start;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 700;
 `
-const RowWrapper = styled.div`
+const ForecastWeatherImg = styled.img`
+  width: 30px;
+  height: 30px;
+`
+
+const ForecastWeatherText = styled.div`
+  padding-right: 5px;
+  text-align: start;
+  color: #2b2a2a;
+  font-size: 12px;
+  font-weight: 700;
+`
+const RowNoWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  width: 100%;
   gap: 5px;
+`
+const RowWrapper = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  gap: 5px;
+`
+const ForecastRowWrapper = styled(RowWrapper)`
+  gap: 0;
+  justify-content: space-around;
 `
 const ColumnWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   align-self: center;
+`
+const ForecastColumnArea = styled(ColumnWrapper)`
+  margin: 10px 0;
+  min-height: 50%;
+`
+const WeatherContentArea = styled.div`
+  min-width: 50vw;
+  min-height: 60vh;
+  padding: 5px;
+  background-color: #ffffff;
+`
+const TitleWrapper = styled(RowNoWrapper)`
+  justify-content: end;
+  font-size: 12px;
+  font-weight: 500;
+`
+const HumidityText = styled(ForecastWeatherText)`
+  color: #f99c62;
+`
+const PopText = styled(ForecastWeatherText)`
+  color: #229fdd;
 `
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -92,6 +151,46 @@ interface LocationType {
   name: string | undefined
 }
 
+interface WeatherDataType {
+  current: {
+    dt: 0
+    feels_like: 0
+    humidity: 0
+    temp: 0
+    uvi: 0
+    weather: [{ description: ""; icon: ""; id: 0; main: "" }]
+  }
+  daily: [
+    {
+      dt: 0
+      feels_like: { day: 0; night: 0; eve: 0; morn: 0 }
+      humidity: 0
+      pop: 0
+      temp: {
+        day: 0
+        eve: 0
+        max: 0
+        min: 0
+        morn: 0
+        night: 0
+      }
+      uvi: 0
+      weather: [{ description: ""; icon: ""; id: 0; main: "" }]
+      snow?: 0
+    }
+  ]
+}
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 const myOpenweatherApiKey = process.env.REACT_APP_openweather_API_KEY
 
 function WeatherWidget(props: Props) {
@@ -111,8 +210,64 @@ function WeatherWidget(props: Props) {
     temp: 0,
     humidity: 0,
   })
-  console.log("currWeatherStatus", currWeatherStatus)
-  console.log("location", location)
+  const [forecastStatus, setForecastStatus] = useState([
+    {
+      date: "",
+      maxTemp: 0,
+      minTemp: 0,
+      humidity: 0,
+      pop: 0,
+      description: "",
+      icon: "",
+    },
+  ])
+  const [dates, setDates] = useState<string[]>([])
+  const [maxTemps, setMaxTemps] = useState<number[]>([])
+  const [minTemps, setMinTemps] = useState<number[]>([])
+  console.log("forecastStatus", forecastStatus)
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: `${location.name} 8-day forecast`,
+      },
+    },
+    scales: {
+      y: {
+        min: currWeatherStatus.temp - 10,
+        max: currWeatherStatus.temp + 10,
+        stepSize: 5,
+      },
+    },
+  }
+  const labels = dates
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Max",
+        data: maxTemps,
+        borderColor: "#ffc59c",
+        backgroundColor: "#f99c62",
+      },
+      {
+        label: "Min",
+        data: minTemps,
+        borderColor: "#58d0ff",
+        backgroundColor: "#229fdd",
+        fill: {
+          target: "0",
+          below: "#ffffff",
+        },
+      },
+    ],
+    showLine: false,
+  }
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
       console.log(searchBox.getPlaces())
@@ -137,25 +292,51 @@ function WeatherWidget(props: Props) {
   }
 
   useEffect(() => {
-    if (!showWeather || !location) return
+    if (!showWeather || location.name === "") return
     const getWeatherData = async () => {
       try {
         console.log("有執行")
-        const forecastURL = `https://api.openweathermap.org/data/2.5/forecast?lat=${location.lat}&lon=${location.lng}&units=metric&appid=${myOpenweatherApiKey}`
-        const currentWeatherURL = `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lng}&units=metric&appid=${myOpenweatherApiKey}`
-        const currWeatherResponse = await fetch(currentWeatherURL)
-        const currWeatherData = await currWeatherResponse.json()
-        const forecastResponse = await fetch(forecastURL)
-        const forecastData = await forecastResponse.json()
+        const weatherURL = `https://api.openweathermap.org/data/3.0/onecall?lat=${location.lat}&lon=${location.lng}&exclude=minutely,hourly,alerts&cnt=7&units=metric&appid=${myOpenweatherApiKey}`
+        const weatherResponse = await fetch(weatherURL)
+        const weatherData: WeatherDataType = await weatherResponse.json()
 
-        console.log("forecast", forecastData)
-        console.log("currWeatherData", currWeatherData)
-        setCurrWeatherStatus({
-          description: currWeatherData?.weather[0]?.description,
-          icon: currWeatherData?.weather[0]?.icon,
-          temp: Math.round(currWeatherData?.main?.feels_like),
-          humidity: currWeatherData?.main.humidity,
+        console.log("forecast", weatherData)
+        const forecastInfos = weatherData?.daily?.map((item) => {
+          const date = new Date(item.dt * 1000).toDateString()
+          const readableDate = date.split(" ").slice(1, 3).join(" ")
+          const infos = {
+            date: readableDate,
+            maxTemp: Math.round(item.temp.max),
+            minTemp: Math.round(item.temp.min),
+            humidity: item.humidity,
+            pop: Math.round(item.pop * 100),
+            description: item.weather[0].description,
+            icon: item.weather[0].icon,
+          }
+          return infos
         })
+        const datesArr = weatherData?.daily?.map((item) => {
+          const date = new Date(item.dt * 1000).toDateString()
+          const readableDate = date.split(" ").slice(1, 3).join(" ")
+          return readableDate
+        })
+        const maxTempArr = weatherData?.daily?.map((item) => {
+          return item.temp.max
+        })
+        const minTempArr = weatherData?.daily?.map((item) => {
+          return item.temp.min
+        })
+
+        setCurrWeatherStatus({
+          description: weatherData?.current?.weather[0]?.description,
+          icon: weatherData?.current?.weather[0]?.icon,
+          temp: Math.round(weatherData?.current?.feels_like),
+          humidity: weatherData?.current?.humidity,
+        })
+        setDates(datesArr)
+        setMaxTemps(maxTempArr)
+        setMinTemps(minTempArr)
+        setForecastStatus(forecastInfos)
       } catch (error) {
         console.log(error)
       }
@@ -195,7 +376,7 @@ function WeatherWidget(props: Props) {
                       ? location?.lng
                       : currentUser?.hometownLng,
                 }}
-                zoom={1}
+                zoom={location?.name === "" ? 1 : 6}
                 options={{
                   draggable: true,
                   mapTypeControl: false,
@@ -209,12 +390,6 @@ function WeatherWidget(props: Props) {
                 typeof location?.lat === "number" &&
                 typeof location?.lng === "number" ? (
                   <>
-                    {/* <Marker
-                      position={{
-                        lat: location?.lat,
-                        lng: location?.lng,
-                      }}
-                    /> */}
                     <InfoWindow
                       onLoad={onInfoWinLoad}
                       position={{
@@ -230,7 +405,7 @@ function WeatherWidget(props: Props) {
                         <CurrentWeatherTitle>
                           Current weather
                         </CurrentWeatherTitle>
-                        <RowWrapper>
+                        <RowNoWrapper>
                           <CurrentWeatherImg
                             src={`http://openweathermap.org/img/wn/${currWeatherStatus.icon}@2x.png`}
                           />
@@ -242,7 +417,7 @@ function WeatherWidget(props: Props) {
                               {currWeatherStatus?.description}
                             </CurrentWeatherText>
                           </ColumnWrapper>
-                        </RowWrapper>
+                        </RowNoWrapper>
                         <CurrentWeatherTitle>
                           {location?.name}
                         </CurrentWeatherTitle>
@@ -257,8 +432,58 @@ function WeatherWidget(props: Props) {
                 onLoad={onLoad}
                 onPlacesChanged={onPlacesChanged}
               >
-                <Input placeholder="Search a place"></Input>
+                <Input placeholder="Search a place" />
               </StandaloneSearchBox>
+              {location.name !== "" ? (
+                <WeatherContentArea>
+                  <ForecastRowWrapper>
+                    <Line options={options} data={data} />
+                    {forecastStatus.map((item) => {
+                      return (
+                        <>
+                          <ForecastColumnArea>
+                            <RowNoWrapper
+                              key={`${item.date}-icon-forecast-${item.icon}`}
+                            >
+                              <ForecastWeatherImg
+                                src={`http://openweathermap.org/img/wn/${item.icon}@2x.png`}
+                              />
+                            </RowNoWrapper>
+                            <RowNoWrapper
+                              key={`${item.date}-maxTemp-${item.maxTemp}`}
+                            >
+                              <ForecastWeatherText>
+                                {item.maxTemp}°C
+                              </ForecastWeatherText>
+                            </RowNoWrapper>
+                            <RowNoWrapper
+                              key={`${item.date}-minTemp-${item.minTemp}`}
+                            >
+                              <ForecastWeatherText>
+                                {item.minTemp}°C
+                              </ForecastWeatherText>
+                            </RowNoWrapper>
+                            <RowNoWrapper
+                              key={`${item.date}-humidity-${item.humidity}`}
+                            >
+                              <HumidityText>{item.humidity}%</HumidityText>
+                            </RowNoWrapper>
+                            <RowNoWrapper key={`${item.date}-pop-${item.pop}`}>
+                              <PopText>{item.pop}%</PopText>
+                            </RowNoWrapper>
+                          </ForecastColumnArea>
+                        </>
+                      )
+                    })}
+                    <TitleWrapper>
+                      <HumidityText>Humidity</HumidityText>
+                      <PopText>Probability of Precipitation,POP</PopText>
+                    </TitleWrapper>
+                  </ForecastRowWrapper>
+                </WeatherContentArea>
+              ) : (
+                ""
+              )}
             </>
           ) : (
             ""
