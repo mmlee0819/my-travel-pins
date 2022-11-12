@@ -110,18 +110,8 @@ function ToolsRobot() {
               <Weather
                 id="weatherIcon"
                 onClick={(e) => {
-                  if (
-                    (e.target as Element).id === "weatherIcon" &&
-                    !showWeather
-                  ) {
-                    setShowWeather((prev) => !prev)
-                    // getWeatherData()
-                  } else if (
-                    (e.target as Element).id === "weatherIcon" &&
-                    showWeather
-                  ) {
-                    setShowWeather((prev) => !prev)
-                  }
+                  if ((e.target as Element).id !== "weatherIcon") return
+                  setShowWeather((prev) => !prev)
                 }}
               />
               <CurrencyIcon
