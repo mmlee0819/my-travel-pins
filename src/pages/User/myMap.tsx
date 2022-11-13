@@ -417,10 +417,10 @@ export default function User() {
           mapTypeId="94ce067fe76ff36f"
           mapContainerStyle={containerStyle}
           center={{
-            lat: currentUser?.hometownLat,
-            lng: currentUser?.hometownLng,
+            lat: selectedMarker?.location?.lat || currentUser?.hometownLat,
+            lng: selectedMarker?.location?.lng || currentUser?.hometownLng,
           }}
-          zoom={2}
+          zoom={selectedMarker ? 6 : 2}
           options={{ draggable: true, styles: darkMap }}
         >
           <SearchWrapper>

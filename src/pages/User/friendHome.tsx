@@ -183,10 +183,10 @@ function FriendsHome() {
                 mapTypeId="94ce067fe76ff36f"
                 mapContainerStyle={containerStyle}
                 center={{
-                  lat: friendInfo?.hometownLat,
-                  lng: friendInfo?.hometownLng,
+                  lat: selectedMarker?.location?.lat || friendInfo?.hometownLat,
+                  lng: selectedMarker?.location?.lng || friendInfo?.hometownLng,
                 }}
-                zoom={2}
+                zoom={selectedMarker ? 6 : 2}
                 options={{ draggable: true, styles: darkMap }}
               >
                 {typeof center?.lat === "number" &&

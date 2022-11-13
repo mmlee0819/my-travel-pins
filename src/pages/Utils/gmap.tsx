@@ -85,7 +85,7 @@ export default function StreetView(props: Props) {
       </StreetModeContainer>
       <StreetModePinContentContainer>
         <RowNoWrapper>
-          <Title>{selectedMarker.location.name}</Title>
+          <Title>{selectedMarker?.location?.name}</Title>
           <BackIconImg
             src={backIcon}
             onClick={() => {
@@ -94,17 +94,17 @@ export default function StreetView(props: Props) {
           />
         </RowNoWrapper>
 
-        <Title>{selectedMarker.article.title}</Title>
-        <Title>{selectedMarker.article.travelDate}</Title>
+        <Title>{selectedMarker?.article?.title}</Title>
+        <Title>{selectedMarker?.article?.travelDate}</Title>
 
-        {selectedMarker.albumURLs && selectedMarker.albumURLs.length !== 0 && (
+        {selectedMarker?.albumURLs && selectedMarker?.albumURLs?.length !== 0 && (
           <DetailImgsWrapper>
             {selectedMarker.albumURLs.map((photoUrl: string) => {
               return <DetailImg key={photoUrl} bkImage={photoUrl} />
             })}
           </DetailImgsWrapper>
         )}
-        <Title>{selectedMarker.article.content}</Title>
+        <Title>{selectedMarker?.article?.content}</Title>
       </StreetModePinContentContainer>
     </>
   )
