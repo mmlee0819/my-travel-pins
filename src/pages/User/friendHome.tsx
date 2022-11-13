@@ -91,6 +91,8 @@ function FriendsHome() {
     DocumentData[] | DefinedDocumentData[] | PinContent[]
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent>()
+  const [showInfoWindow, setShowInfoWindow] = useState(false)
+  const [showMemory, setShowMemory] = useState(false)
   console.log("hometownText", hometownText)
   console.log("markers", markers)
   const url = window.location.href
@@ -240,7 +242,12 @@ function FriendsHome() {
                         )
                       }
                       onClick={(e: google.maps.MapMouseEvent) => {
-                        choosePinOnMap(e, markers, setSelectedMarker)
+                        choosePinOnMap(
+                          e,
+                          markers,
+                          setSelectedMarker,
+                          setShowInfoWindow
+                        )
                       }}
                     />
                   )

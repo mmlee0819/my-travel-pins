@@ -64,7 +64,8 @@ export const choosePinOnMap = (
   markers: DocumentData[],
   setSelectedMarker: Dispatch<
     SetStateAction<DocumentData | PinContent | undefined>
-  >
+  >,
+  setShowInfoWindow: Dispatch<SetStateAction<boolean>>
 ) => {
   const filteredMarker = markers.filter((marker) => {
     return (
@@ -73,6 +74,7 @@ export const choosePinOnMap = (
     )
   })
   setSelectedMarker(filteredMarker[0])
+  setShowInfoWindow(true)
 }
 
 export const getSpecificPin = async (
@@ -90,4 +92,16 @@ export const getSpecificPin = async (
     // doc.data() will be undefined in this case
     console.log("No such document!")
   }
+}
+
+export const onStreetLoad = (selectedMarker: DocumentData) => {
+  new google.maps.StreetViewPanorama(
+    document.getElementById("street-mode-container") as HTMLElement,
+    {
+      position: new google.maps.LatLng(
+        selectedMarker?.location?.lat,
+        selectedMarker?.location?.lng
+      ),
+    }
+  )
 }
