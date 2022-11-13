@@ -127,3 +127,12 @@ export const addMsg = async (
     console.log(error)
   }
 }
+
+export const checkRealTimePinMessages = (
+  id: string,
+  setMessages: Dispatch<SetStateAction<MessagesType>>
+) => {
+  onSnapshot(doc(db, "pins", id), (doc: DocumentData) => {
+    setMessages(doc.data().messages)
+  })
+}

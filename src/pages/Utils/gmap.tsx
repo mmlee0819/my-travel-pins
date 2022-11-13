@@ -3,7 +3,11 @@ import { StreetViewService } from "@react-google-maps/api"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
 import backIcon from "../assets/back.png"
-import { MessagesType, addMsg } from "../User/ts_fn_commonUse"
+import {
+  MessagesType,
+  addMsg,
+  checkRealTimePinMessages,
+} from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
 
 const RowNoWrapper = styled.div`
@@ -166,6 +170,13 @@ const PinMsgs = (props: PropsFromStreetView) => {
       document.removeEventListener("keydown", keyDownListener)
     }
   })
+
+  useEffect(() => {
+    if (!selectedMarker?.id) return
+    checkRealTimePinMessages(selectedMarker?.id, setMessages)
+    return checkRealTimePinMessages(selectedMarker?.id, setMessages)
+  }, [selectedMarker?.id])
+
   return (
     <>
       <MsgNumText>{selectedMarker?.messages?.length || 0}則留言</MsgNumText>
