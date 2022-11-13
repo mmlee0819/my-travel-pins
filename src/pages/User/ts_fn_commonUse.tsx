@@ -4,10 +4,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
   query,
   collection,
   where,
-  Timestamp,
+  onSnapshot,
+  arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../Context/authContext"
@@ -34,8 +36,19 @@ export interface PinContent {
     content?: string
     travelDate?: string
   }
-  postTime?: Timestamp
+  postTimestamp?: number
   postReadableTime?: string
+}
+
+export interface MessagesType {
+  message?: [
+    {
+      messengerId: string
+      msgContent: string
+      msgTimestamp: number
+      msgReadableTime: string
+    }
+  ]
 }
 
 export const getPins = async (
@@ -94,14 +107,23 @@ export const getSpecificPin = async (
   }
 }
 
-export const onStreetLoad = (selectedMarker: DocumentData) => {
-  new google.maps.StreetViewPanorama(
-    document.getElementById("street-mode-container") as HTMLElement,
-    {
-      position: new google.maps.LatLng(
-        selectedMarker?.location?.lat,
-        selectedMarker?.location?.lng
-      ),
-    }
-  )
+export const addMsg = async (
+  messengerId: string,
+  id: string,
+  refValue: string
+) => {
+  try {
+    const pinRef = doc(db, "pins", id)
+    console.log("refValue", refValue)
+    await updateDoc(pinRef, {
+      messages: arrayUnion({
+        messenger: messengerId,
+        msgContent: refValue,
+        msgReadableTime: new Date(),
+        msgTimestamp: Date.now(),
+      }),
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }

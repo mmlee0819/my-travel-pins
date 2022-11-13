@@ -68,9 +68,9 @@ const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
   margin-left: 128px;
 `
-const ContentWrapper = styled(ContentArea)<{ showMemory: boolean }>`
+const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
-  padding: ${(props) => (props.showMemory ? "0" : "15px")};
+  padding: 15px;
   gap: 20px;
   border: none;
 `
@@ -174,7 +174,7 @@ function FriendsHome() {
           <RightSplit />
         </SplitWrapper>
         <ContentArea>
-          <ContentWrapper showMemory={showMemory}>
+          <ContentWrapper>
             {isLoaded &&
             typeof friendInfo?.hometownLat === "number" &&
             typeof friendInfo?.hometownLng === "number" ? (
