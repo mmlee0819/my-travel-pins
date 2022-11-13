@@ -10,10 +10,7 @@ import {
 import { auth, db, storage } from "../Utils/firebase"
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import {
-  useJsApiLoader,
-  LoadScriptProps,
-} from "@react-google-maps/api"
+import { useJsApiLoader, LoadScriptProps } from "@react-google-maps/api"
 
 import { myGoogleApiKey } from "../Utils/gmap"
 declare module "*.png"
@@ -90,6 +87,7 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
+    language: "en",
     libraries,
   })
 
