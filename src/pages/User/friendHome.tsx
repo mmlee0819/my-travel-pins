@@ -12,7 +12,6 @@ import {
   TabWrapper,
   ContentArea,
   SplitWrapper,
-  ContentWrapper,
 } from "./myFriends"
 import { PinInfoArea, PinInfoTitle, PinInfoImg } from "./myMap"
 import {
@@ -31,7 +30,7 @@ import {
 } from "firebase/firestore"
 import { darkMap } from "./darkMap"
 import homeIcon from "./homeIcon.png"
-import { containerStyle } from "../Utils/gmap"
+import StreetView, { containerStyle } from "../Utils/gmap"
 import defaultImage from "../assets/defaultImage.png"
 import { DocumentData } from "@firebase/firestore-types"
 
@@ -69,6 +68,12 @@ const RightSplit = styled(LeftSplit)`
   flex: 1 1 auto;
   margin-left: 128px;
 `
+const ContentWrapper = styled(ContentArea)<{ showMemory: boolean }>`
+  margin: 0 auto;
+  padding: ${(props) => (props.showMemory ? "0" : "15px")};
+  gap: 20px;
+  border: none;
+`
 // interface AllMarkers {
 //   albumNames?: string[]
 //   albumURLs?: string[]
@@ -91,6 +96,8 @@ function FriendsHome() {
     DocumentData[] | DefinedDocumentData[] | PinContent[]
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent>()
+  const [showInfoWindow, setShowInfoWindow] = useState(false)
+  const [showMemory, setShowMemory] = useState(false)
   console.log("hometownText", hometownText)
   console.log("markers", markers)
   const url = window.location.href
@@ -167,7 +174,7 @@ function FriendsHome() {
           <RightSplit />
         </SplitWrapper>
         <ContentArea>
-          <ContentWrapper>
+          <ContentWrapper showMemory={showMemory}>
             {isLoaded &&
             typeof friendInfo?.hometownLat === "number" &&
             typeof friendInfo?.hometownLng === "number" ? (
@@ -176,10 +183,10 @@ function FriendsHome() {
                 mapTypeId="94ce067fe76ff36f"
                 mapContainerStyle={containerStyle}
                 center={{
-                  lat: friendInfo?.hometownLat,
-                  lng: friendInfo?.hometownLng,
+                  lat: selectedMarker?.location?.lat || friendInfo?.hometownLat,
+                  lng: selectedMarker?.location?.lng || friendInfo?.hometownLng,
                 }}
-                zoom={2}
+                zoom={selectedMarker ? 6 : 2}
                 options={{ draggable: true, styles: darkMap }}
               >
                 {typeof center?.lat === "number" &&
@@ -240,7 +247,12 @@ function FriendsHome() {
                         )
                       }
                       onClick={(e: google.maps.MapMouseEvent) => {
-                        choosePinOnMap(e, markers, setSelectedMarker)
+                        choosePinOnMap(
+                          e,
+                          markers,
+                          setSelectedMarker,
+                          setShowInfoWindow
+                        )
                       }}
                     />
                   )
@@ -248,32 +260,44 @@ function FriendsHome() {
                 {selectedMarker &&
                 typeof selectedMarker?.location?.lat === "number" &&
                 typeof selectedMarker?.location?.lng === "number" ? (
-                  <InfoWindow
-                    onLoad={onInfoWinLoad}
-                    onCloseClick={() => {
-                      setSelectedMarker(undefined)
-                    }}
-                    position={{
-                      lat: selectedMarker?.location?.lat,
-                      lng: selectedMarker?.location?.lng,
-                    }}
-                    options={{
-                      pixelOffset: new window.google.maps.Size(0, -40),
-                    }}
-                  >
-                    <PinInfoArea>
-                      <PinInfoImg
-                        src={
-                          selectedMarker.albumURLs
-                            ? selectedMarker?.albumURLs[0]
-                            : defaultImage
-                        }
+                  <>
+                    <InfoWindow
+                      onLoad={onInfoWinLoad}
+                      onCloseClick={() => {
+                        setSelectedMarker(undefined)
+                      }}
+                      position={{
+                        lat: selectedMarker?.location?.lat,
+                        lng: selectedMarker?.location?.lng,
+                      }}
+                      options={{
+                        pixelOffset: new window.google.maps.Size(0, -40),
+                      }}
+                    >
+                      <PinInfoArea
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
+                      >
+                        <PinInfoImg
+                          src={
+                            selectedMarker.albumURLs
+                              ? selectedMarker?.albumURLs[0]
+                              : defaultImage
+                          }
+                        />
+                        <PinInfoTitle>
+                          {selectedMarker?.location?.name}
+                        </PinInfoTitle>
+                      </PinInfoArea>
+                    </InfoWindow>
+                    {selectedMarker && showInfoWindow && showMemory && (
+                      <StreetView
+                        selectedMarker={selectedMarker}
+                        setShowMemory={setShowMemory}
                       />
-                      <PinInfoTitle>
-                        {selectedMarker?.location?.name}
-                      </PinInfoTitle>
-                    </PinInfoArea>
-                  </InfoWindow>
+                    )}
+                  </>
                 ) : (
                   ""
                 )}

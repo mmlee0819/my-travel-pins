@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react"
+import React from "react"
 import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
@@ -12,17 +12,9 @@ import { darkMap } from "./darkMap"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
-import { containerStyle } from "../Utils/gmap"
+import StreetView, { containerStyle } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
-import {
-  doc,
-  setDoc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore"
+import { doc, setDoc, updateDoc } from "firebase/firestore"
 import {
   ref,
   uploadBytesResumable,
@@ -31,7 +23,7 @@ import {
 } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
-import { choosePinOnMap, PinContent } from "./ts_fn_commonUse"
+import { choosePinOnMap, getPins } from "./ts_fn_commonUse"
 
 const Wrapper = styled.div`
   display: flex;
@@ -157,6 +149,7 @@ const UploadImgInput = styled.input`
 
 export const PinInfoArea = styled.div`
   background-color: #ffffff;
+  cursor: pointer;
 `
 export const PinInfoImg = styled.img`
   width: 150px;
@@ -205,7 +198,6 @@ export default function User() {
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  console.log("markers", markers)
   const [hasAddPin, setHasAddPin] = useState(false)
   const [filesName, setFilesName] = useState<string[]>([])
   const [photos, setPhotos] = useState<File[]>([])
@@ -217,26 +209,27 @@ export default function User() {
   const [artiContent, setArtiContent] = useState<string>("")
   const [hasPosted, setHasPosted] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
+  const [showInfoWindow, setShowInfoWindow] = useState(false)
+  const [showMemory, setShowMemory] = useState(false)
+  console.log("markers", markers)
+  console.log("selectedMarker", selectedMarker)
+  console.log("showMemory", showMemory)
 
   useEffect(() => {
-    const getAllPins = async () => {
-      if (currentUser !== null && !hasFetched) {
-        const newMarkers: DocumentData[] = []
-        const pinsRef = collection(db, "pins")
-        const q = query(pinsRef, where("userId", "==", currentUser?.id))
-        const querySnapshot = await getDocs(q)
-        querySnapshot.forEach((doc) => {
-          newMarkers.push(doc.data())
-        })
-        setMarkers(newMarkers)
-        setHasFetched(true)
-      }
-    }
-    getAllPins()
+    if (typeof currentUser?.id === "string") {
+      getPins(
+        currentUser,
+        currentUser?.id,
+        hasFetched,
+        setHasFetched,
+        setMarkers
+      )
+    } else return
   }, [currentUser?.id])
-  const onMkLoad = (marker: google.maps.Marker) => {
-    console.log(" marker", marker)
-  }
+
+  // const onMkLoad = (marker: google.maps.Marker) => {
+  //   console.log(" marker", marker)
+  // }
 
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
@@ -270,6 +263,7 @@ export default function User() {
   const onInfoWinLoad = (infoWindow: google.maps.InfoWindow) => {
     console.log("infoWindow: ", infoWindow)
   }
+
   const addPin = async () => {
     if (!newPin) return
     await setDoc(doc(db, "pins", newPin?.id), newPin)
@@ -423,10 +417,10 @@ export default function User() {
           mapTypeId="94ce067fe76ff36f"
           mapContainerStyle={containerStyle}
           center={{
-            lat: currentUser?.hometownLat,
-            lng: currentUser?.hometownLng,
+            lat: selectedMarker?.location?.lat || currentUser?.hometownLat,
+            lng: selectedMarker?.location?.lng || currentUser?.hometownLng,
           }}
-          zoom={2}
+          zoom={selectedMarker ? 6 : 2}
           options={{ draggable: true, styles: darkMap }}
         >
           <SearchWrapper>
@@ -516,7 +510,7 @@ export default function User() {
           {typeof center?.lat === "number" &&
           typeof center?.lng === "number" ? (
             <Marker
-              onLoad={onMkLoad}
+              // onLoad={onMkLoad}
               position={{
                 lat: currentUser?.hometownLat,
                 lng: currentUser?.hometownLng,
@@ -568,7 +562,8 @@ export default function User() {
             return (
               <Marker
                 key={marker.location.placeId}
-                onLoad={onMkLoad}
+                // onLoad={onMkLoad}
+                draggable={true}
                 position={
                   new google.maps.LatLng(
                     marker.location.lat,
@@ -576,36 +571,53 @@ export default function User() {
                   )
                 }
                 onClick={(e: google.maps.MapMouseEvent) => {
-                  choosePinOnMap(e, markers, setSelectedMarker)
+                  choosePinOnMap(
+                    e,
+                    markers,
+                    setSelectedMarker,
+                    setShowInfoWindow
+                  )
                 }}
               />
             )
           })}
           {selectedMarker && (
-            <InfoWindow
-              onLoad={onInfoWinLoad}
-              onCloseClick={() => {
-                setSelectedMarker(undefined)
-              }}
-              position={{
-                lat: selectedMarker?.location?.lat,
-                lng: selectedMarker?.location?.lng,
-              }}
-              options={{
-                pixelOffset: new window.google.maps.Size(0, -40),
-              }}
-            >
-              <PinInfoArea>
-                <PinInfoImg
-                  src={
-                    selectedMarker.albumURLs
-                      ? selectedMarker?.albumURLs[0]
-                      : defaultImage
-                  }
+            <>
+              <InfoWindow
+                onLoad={onInfoWinLoad}
+                onCloseClick={() => {
+                  setSelectedMarker(undefined)
+                }}
+                position={{
+                  lat: selectedMarker?.location?.lat,
+                  lng: selectedMarker?.location?.lng,
+                }}
+                options={{
+                  pixelOffset: new window.google.maps.Size(0, -40),
+                }}
+              >
+                <PinInfoArea
+                  onClick={() => {
+                    setShowMemory(true)
+                  }}
+                >
+                  <PinInfoImg
+                    src={
+                      selectedMarker.albumURLs
+                        ? selectedMarker?.albumURLs[0]
+                        : defaultImage
+                    }
+                  />
+                  <PinInfoTitle>{selectedMarker?.location?.name}</PinInfoTitle>
+                </PinInfoArea>
+              </InfoWindow>
+              {selectedMarker && showInfoWindow && showMemory && (
+                <StreetView
+                  selectedMarker={selectedMarker}
+                  setShowMemory={setShowMemory}
                 />
-                <PinInfoTitle>{selectedMarker?.location?.name}</PinInfoTitle>
-              </PinInfoArea>
-            </InfoWindow>
+              )}
+            </>
           )}
         </GoogleMap>
       ) : (
