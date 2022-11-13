@@ -41,14 +41,13 @@ export interface PinContent {
 }
 
 export interface MessagesType {
-  message?: [
-    {
-      messengerId: string
-      msgContent: string
-      msgTimestamp: number
-      msgReadableTime: string
-    }
-  ]
+  messenger: string
+  msgContent: string
+  msgTimestamp: number
+  msgReadableTime: string
+}
+export interface MessengerInfoType {
+  name: string
 }
 
 export const getPins = async (
@@ -130,9 +129,33 @@ export const addMsg = async (
 
 export const checkRealTimePinMessages = (
   id: string,
-  setMessages: Dispatch<SetStateAction<MessagesType>>
+  setMessages: Dispatch<SetStateAction<DocumentData[]>>
 ) => {
   onSnapshot(doc(db, "pins", id), (doc: DocumentData) => {
     setMessages(doc.data().messages)
   })
+}
+
+export const queryMessengerInfo = async (
+  id: string,
+  setMessengerInfo: Dispatch<SetStateAction<DocumentData[]>>
+) => {
+  try {
+    const docRef = doc(db, "users", id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      setMessengerInfo((prev) => {
+        return [
+          ...prev,
+          { name: docSnap.data().name, photoURL: docSnap.data().photoURL },
+        ]
+      })
+      console.log("Document data:", docSnap.data())
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!")
+    }
+  } catch (error) {
+    console.log(error)
+  }
 }

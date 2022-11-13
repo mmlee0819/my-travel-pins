@@ -7,6 +7,7 @@ import {
   MessagesType,
   addMsg,
   checkRealTimePinMessages,
+  queryMessengerInfo,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
 
@@ -14,6 +15,12 @@ const RowNoWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+  min-height: 1rem;
+  margin: 15px 0;
+`
+const ColumnWrapper = styled.div`
+  display: flex;
+  flex-flow: column wrap;
 `
 const StreetModeContainer = styled(RowNoWrapper)`
   position: absolute;
@@ -35,8 +42,11 @@ const StreetModePinContentContainer = styled.div`
   z-index: 101;
 `
 const Title = styled.div`
+  display: flex;
+  flex: 1 1 auto;
   font-size: 1rem;
   color: #000000;
+  margin: 5px 0;
 `
 const BackIconImg = styled.img`
   margin-right: 20px;
@@ -44,8 +54,10 @@ const BackIconImg = styled.img`
   cursor: pointer;
 `
 const MsgNumText = styled(Title)`
-  margin-right: 20px;
-  text-align: end;
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  padding-right: 20px;
   border-bottom: 2px solid #d4d4d4;
 `
 const MsgInput = styled.input`
@@ -66,6 +78,17 @@ const MsgInput = styled.input`
     font-size: 12px;
   }
 `
+const MsgContent = styled.div`
+  display: flex;
+  flex: 1 1 auto;
+  font-size: 1rem;
+  margin: 0 20px 0 0;
+  width: 100%;
+  padding-left: 8px;
+  background-color: #f6f6f6;
+  border: none;
+  border-radius: 10px;
+`
 const UserAvatar = styled.div<{ avatarUrl: string }>`
   display: flex;
   align-self: center;
@@ -78,8 +101,13 @@ const UserAvatar = styled.div<{ avatarUrl: string }>`
 const MsgColumnWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  gap: 5px;
+  width: 100%;
 `
+const MsgRowNoWrapper = styled(RowNoWrapper)`
+  justify-content: flex-start;
+  margin: 5px 0;
+`
+
 export const DetailImgsWrapper = styled.div`
   display: flex;
   flex-flow: row wrap;
@@ -96,6 +124,7 @@ export const DetailImg = styled.div<{
   background-image: ${(props) => `url(${props.bkImage})`};
   background-size: 100% 100%;
 `
+
 interface Props {
   selectedMarker: DocumentData
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
@@ -103,8 +132,8 @@ interface Props {
 interface PropsFromStreetView {
   selectedMarker: DocumentData
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
-  messages: MessagesType
-  setMessages: Dispatch<React.SetStateAction<MessagesType>>
+  messages: DocumentData
+  setMessages: Dispatch<React.SetStateAction<DocumentData[]>>
 }
 
 export const containerStyle = {
@@ -122,7 +151,7 @@ export const myGoogleApiKey = process.env.REACT_APP_google_API_KEY
 const PinContentInStreetView = (props: Props) => {
   const { selectedMarker, setShowMemory } = props
   return (
-    <>
+    <ColumnWrapper>
       <RowNoWrapper>
         <Title>{selectedMarker?.location?.name}</Title>
         <BackIconImg
@@ -132,10 +161,8 @@ const PinContentInStreetView = (props: Props) => {
           }}
         />
       </RowNoWrapper>
-
       <Title>{selectedMarker?.article?.title}</Title>
       <Title>{selectedMarker?.article?.travelDate}</Title>
-
       {selectedMarker?.albumURLs && selectedMarker?.albumURLs?.length !== 0 && (
         <DetailImgsWrapper>
           {selectedMarker.albumURLs.map((photoUrl: string) => {
@@ -144,12 +171,14 @@ const PinContentInStreetView = (props: Props) => {
         </DetailImgsWrapper>
       )}
       <Title>{selectedMarker?.article?.content}</Title>
-    </>
+    </ColumnWrapper>
   )
 }
 const PinMsgs = (props: PropsFromStreetView) => {
   const { selectedMarker, messages, setMessages } = props
   const { currentUser } = useContext(AuthContext)
+  const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
+  console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
@@ -177,8 +206,15 @@ const PinMsgs = (props: PropsFromStreetView) => {
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
 
+  useEffect(() => {
+    if (messages === undefined || messages.length === 0) return
+    messages.map((item: DocumentData) => {
+      queryMessengerInfo(item.messenger, setMessengerInfo)
+    })
+  }, [messages])
+
   return (
-    <>
+    <ColumnWrapper>
       <MsgNumText>{selectedMarker?.messages?.length || 0}則留言</MsgNumText>
       <RowNoWrapper>
         {currentUser !== null && typeof currentUser?.photoURL === "string" && (
@@ -186,22 +222,31 @@ const PinMsgs = (props: PropsFromStreetView) => {
         )}
         <MsgInput ref={msgRef} placeholder="message..." />
       </RowNoWrapper>
-      <MsgColumnWrapper></MsgColumnWrapper>
-    </>
+      <MsgColumnWrapper>
+        {messages !== undefined &&
+          messages.length !== 0 &&
+          messengerInfo !== undefined &&
+          messengerInfo.length !== 0 &&
+          messages.map((item: MessagesType, index: number) => {
+            return (
+              <MsgRowNoWrapper key={`${item.messenger}-${item.msgTimestamp}`}>
+                <UserAvatar avatarUrl={messengerInfo[index].photoURL} />
+
+                <MsgContent>
+                  {messengerInfo[index].name}
+                  <br />
+                  {item.msgContent}
+                </MsgContent>
+              </MsgRowNoWrapper>
+            )
+          })}
+      </MsgColumnWrapper>
+    </ColumnWrapper>
   )
 }
 export default function StreetView(props: Props) {
   const { selectedMarker, setShowMemory } = props
-  const [messages, setMessages] = useState<MessagesType>({
-    message: [
-      {
-        messengerId: "",
-        msgContent: "",
-        msgTimestamp: 0,
-        msgReadableTime: "",
-      },
-    ],
-  })
+  const [messages, setMessages] = useState<DocumentData[]>([])
 
   console.log("messages", messages)
   const onStreetLoad = (selectedMarker: DocumentData) => {
