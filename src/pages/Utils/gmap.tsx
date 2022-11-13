@@ -1,11 +1,5 @@
-import React from "react"
-import {
-  GoogleMap,
-  Marker,
-  StandaloneSearchBox,
-  InfoWindow,
-  StreetViewService,
-} from "@react-google-maps/api"
+import React, { Dispatch, SetStateAction } from "react"
+import { StreetViewService } from "@react-google-maps/api"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
 import { onStreetLoad } from "../User/ts_fn_commonUse"
@@ -74,10 +68,11 @@ export const myGoogleApiKey = process.env.REACT_APP_google_API_KEY
 
 interface Props {
   selectedMarker: DocumentData
+  setShowMemory: Dispatch<React.SetStateAction<boolean>>
 }
 
 export default function StreetView(props: Props) {
-  const { selectedMarker } = props
+  const { selectedMarker, setShowMemory } = props
 
   return (
     <>
@@ -91,7 +86,12 @@ export default function StreetView(props: Props) {
       <StreetModePinContentContainer>
         <RowNoWrapper>
           <Title>{selectedMarker.location.name}</Title>
-          <BackIconImg src={backIcon} />
+          <BackIconImg
+            src={backIcon}
+            onClick={() => {
+              setShowMemory(false)
+            }}
+          />
         </RowNoWrapper>
 
         <Title>{selectedMarker.article.title}</Title>

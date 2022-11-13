@@ -584,9 +584,6 @@ export default function User() {
           {selectedMarker && (
             <>
               <InfoWindow
-                // onClick={() => {
-                //   setShowMemory(true)
-                // }}
                 onLoad={onInfoWinLoad}
                 onCloseClick={() => {
                   setSelectedMarker(undefined)
@@ -615,7 +612,10 @@ export default function User() {
                 </PinInfoArea>
               </InfoWindow>
               {selectedMarker && showInfoWindow && showMemory && (
-                <StreetView selectedMarker={selectedMarker} />
+                <StreetView
+                  selectedMarker={selectedMarker}
+                  setShowMemory={setShowMemory}
+                />
               )}
             </>
           )}

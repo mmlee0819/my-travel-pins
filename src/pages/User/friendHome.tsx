@@ -292,7 +292,10 @@ function FriendsHome() {
                       </PinInfoArea>
                     </InfoWindow>
                     {selectedMarker && showInfoWindow && showMemory && (
-                      <StreetView selectedMarker={selectedMarker} />
+                      <StreetView
+                        selectedMarker={selectedMarker}
+                        setShowMemory={setShowMemory}
+                      />
                     )}
                   </>
                 ) : (
