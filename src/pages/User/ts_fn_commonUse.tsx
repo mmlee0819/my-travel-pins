@@ -4,10 +4,13 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
   query,
   collection,
   where,
-  Timestamp,
+  onSnapshot,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../Context/authContext"
@@ -34,8 +37,15 @@ export interface PinContent {
     content?: string
     travelDate?: string
   }
-  postTime?: Timestamp
+  postTimestamp?: number
   postReadableTime?: string
+}
+
+export interface MessagesType {
+  messenger: string
+  msgContent: string
+  msgTimestamp: number
+  msgReadableTime: string
 }
 
 export const getPins = async (
@@ -94,14 +104,71 @@ export const getSpecificPin = async (
   }
 }
 
-export const onStreetLoad = (selectedMarker: DocumentData) => {
-  new google.maps.StreetViewPanorama(
-    document.getElementById("street-mode-container") as HTMLElement,
-    {
-      position: new google.maps.LatLng(
-        selectedMarker?.location?.lat,
-        selectedMarker?.location?.lng
-      ),
+export const addMsg = async (
+  messengerId: string,
+  id: string,
+  refValue: string
+) => {
+  try {
+    const pinRef = doc(db, "pins", id)
+    await updateDoc(pinRef, {
+      messages: arrayUnion({
+        messenger: messengerId,
+        msgContent: refValue,
+        msgReadableTime: new Date(),
+        msgTimestamp: Date.now(),
+      }),
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const checkRealTimePinMessages = (
+  id: string,
+  setMessages: Dispatch<SetStateAction<DocumentData[]>>
+) => {
+  onSnapshot(doc(db, "pins", id), (doc: DocumentData) => {
+    setMessages(doc.data().messages)
+  })
+}
+
+export const queryMessengerInfo = async (
+  id: string,
+  setMessengerInfo: Dispatch<SetStateAction<DocumentData[]>>
+) => {
+  try {
+    const docRef = doc(db, "users", id)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      setMessengerInfo((prev) => {
+        return [
+          ...prev,
+          { name: docSnap.data().name, photoURL: docSnap.data().photoURL },
+        ]
+      })
+      console.log("Document data:", docSnap.data())
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!")
     }
-  )
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const deleteMsg = async (id: string, item: DocumentData) => {
+  try {
+    const pinRef = doc(db, "pins", id)
+    await updateDoc(pinRef, {
+      messages: arrayRemove({
+        messenger: item.messenger,
+        msgContent: item.msgContent,
+        msgReadableTime: item.msgReadableTime,
+        msgTimestamp: item.msgTimestamp,
+      }),
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }
