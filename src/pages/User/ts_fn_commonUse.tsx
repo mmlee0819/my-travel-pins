@@ -46,9 +46,6 @@ export interface MessagesType {
   msgTimestamp: number
   msgReadableTime: string
 }
-export interface MessengerInfoType {
-  name: string
-}
 
 export const getPins = async (
   currentUser: UserInfoType | DocumentData | undefined,
@@ -113,7 +110,6 @@ export const addMsg = async (
 ) => {
   try {
     const pinRef = doc(db, "pins", id)
-    console.log("refValue", refValue)
     await updateDoc(pinRef, {
       messages: arrayUnion({
         messenger: messengerId,

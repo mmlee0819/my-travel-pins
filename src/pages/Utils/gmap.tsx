@@ -129,6 +129,7 @@ interface Props {
   selectedMarker: DocumentData
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
 }
+
 interface PropsFromStreetView {
   selectedMarker: DocumentData
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
@@ -180,6 +181,7 @@ const PinMsgs = (props: PropsFromStreetView) => {
   const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
   console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
       if (
@@ -191,6 +193,7 @@ const PinMsgs = (props: PropsFromStreetView) => {
       ) {
         console.log("Enter key was pressed. Run your function.")
         addMsg(currentUser?.id, selectedMarker?.id, msgRef?.current?.value)
+        msgRef.current.value = ""
       } else return
     }
 
@@ -208,14 +211,15 @@ const PinMsgs = (props: PropsFromStreetView) => {
 
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
+    setMessengerInfo([])
     messages.map((item: DocumentData) => {
       queryMessengerInfo(item.messenger, setMessengerInfo)
     })
-  }, [messages])
+  }, [messages.length])
 
   return (
     <ColumnWrapper>
-      <MsgNumText>{selectedMarker?.messages?.length || 0}則留言</MsgNumText>
+      <MsgNumText>{messages?.length || 0}則留言</MsgNumText>
       <RowNoWrapper>
         {currentUser !== null && typeof currentUser?.photoURL === "string" && (
           <UserAvatar avatarUrl={currentUser?.photoURL} />
@@ -226,12 +230,11 @@ const PinMsgs = (props: PropsFromStreetView) => {
         {messages !== undefined &&
           messages.length !== 0 &&
           messengerInfo !== undefined &&
-          messengerInfo.length !== 0 &&
+          messengerInfo.length === messages.length &&
           messages.map((item: MessagesType, index: number) => {
             return (
               <MsgRowNoWrapper key={`${item.messenger}-${item.msgTimestamp}`}>
                 <UserAvatar avatarUrl={messengerInfo[index].photoURL} />
-
                 <MsgContent>
                   {messengerInfo[index].name}
                   <br />
