@@ -1,29 +1,15 @@
 import React from "react"
 import styled from "styled-components"
 import { useState, useRef, useContext } from "react"
-import { Link } from "react-router-dom"
 import { AuthContext } from "./Context/authContext"
 import { GoogleMap, StandaloneSearchBox } from "@react-google-maps/api"
 import { containerStyle, centerSchool } from "./Utils/gmap"
-import { darkMap } from "./User/darkMap"
 
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   width: 100%;
   margin: 0;
-`
-
-const LoginArea = styled.div`
-  position: relative;
-  align-items: center;
-`
-
-const Title = styled.div`
-  color: #000000;
-`
-const BtnLink = styled(Link)`
-  margin: 0 20px;
 `
 
 const FormWrapper = styled.form`
@@ -60,7 +46,9 @@ const Btn = styled.div`
   border: 1px solid #000000;
   border-radius: 10px;
 `
-
+const Title = styled.div`
+  color: #000000;
+`
 function Home() {
   const nameRef = useRef<HTMLInputElement>(null!)
   const emailRef = useRef<HTMLInputElement>(null!)
@@ -78,7 +66,7 @@ function Home() {
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
 
-  const { isLoaded, currentUser, isLogin, signUp, signIn, logOut } =
+  const { isLoaded, currentUser, isLogin, signUp, signIn } =
     useContext(AuthContext)
   console.log("isLoaded", isLoaded)
   console.log("isLogin", isLogin)
@@ -86,34 +74,13 @@ function Home() {
   if (!isLoaded) return <Title>Please wait...</Title>
   return (
     <Wrapper>
-      <Title>我是首頁</Title>
-      {isLogin && currentUser !== undefined ? (
-        <>
-          <LoginArea>
-            <BtnLink to={`/${currentUser.name}`}>my-map</BtnLink>
-            <BtnLink to={`/${currentUser.name}/my-memories`}>
-              my-memories
-            </BtnLink>
-            <BtnLink to={`/${currentUser.name}/my-friends`}>my-friends</BtnLink>
-            <Btn
-              onClick={() => {
-                logOut()
-              }}
-            >
-              Sign out
-            </Btn>
-          </LoginArea>
-        </>
-      ) : (
-        ""
-      )}
       <GoogleMap
         id="my-map"
-        mapTypeId="94ce067fe76ff36f"
+        mapTypeId="35e6a39525b6e55c"
         mapContainerStyle={containerStyle}
         center={centerSchool}
         zoom={2}
-        options={{ draggable: true, styles: darkMap }}
+        options={{ draggable: true, mapId: "35e6a39525b6e55c" }}
       >
         {isLogin && currentUser !== undefined ? (
           ""

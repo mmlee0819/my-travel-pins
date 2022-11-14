@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom"
 import { AuthContextProvider } from "./pages/Context/authContext"
 import { ToolContextProvider } from "./pages/Context/toolContext"
 import ToolsRobot from "./pages/Utils/tools"
+import Header from "./pages/Components/header"
 
 const GlobalStyle = createGlobalStyle`
   *{
@@ -16,6 +17,8 @@ const GlobalStyle = createGlobalStyle`
   #root {
     position: relative;
     min-height: 100vh;
+    padding:60px;
+    background-color: #2d2d2d;
   }
 `
 function App() {
@@ -25,6 +28,7 @@ function App() {
         <ToolContextProvider>
           <GlobalStyle />
           <ToolsRobot />
+          <Header />
           <Outlet />
         </ToolContextProvider>
       </AuthContextProvider>

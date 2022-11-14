@@ -150,8 +150,9 @@ interface PropsFromStreetView {
 }
 
 export const containerStyle = {
-  minHeight: "100vh",
-  width: "100vw",
+  marginTop: "10px",
+  minHeight: "calc(100vh - 120px)",
+  width: "100%",
 }
 
 export const centerSchool = {
