@@ -211,6 +211,7 @@ export default function User() {
   const [hasFetched, setHasFetched] = useState(false)
   const [showInfoWindow, setShowInfoWindow] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
+
   console.log("markers", markers)
   console.log("selectedMarker", selectedMarker)
   console.log("showMemory", showMemory)
@@ -390,25 +391,11 @@ export default function User() {
     setUploadProgress(0)
     setUrls([])
   }
+  if (!isLogin || currentUser === undefined || currentUser === null)
+    return <Title>你沒有登入</Title>
 
   return (
     <>
-      <Wrapper>
-        {isLogin && currentUser !== undefined ? (
-          <>
-            <Title>我是user的地圖頁</Title>
-            <BtnLink to="/">Home</BtnLink>
-            <BtnLink to={`/${currentUser.name}/my-memories`}>
-              My-memories
-            </BtnLink>
-            <BtnLink to={`/${currentUser.name}/my-friends`}>MY-friends</BtnLink>
-          </>
-        ) : (
-          <>
-            <Title>你沒有登入</Title>
-          </>
-        )}
-      </Wrapper>
       {isLoaded &&
       typeof currentUser?.hometownLat === "number" &&
       typeof currentUser?.hometownLng === "number" ? (
