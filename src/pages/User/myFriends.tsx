@@ -55,24 +55,24 @@ export const TabLink = styled(Link)`
   padding: 5px 8px;
   width: 100px;
   text-align: center;
-  color: #000000;
+  color: #f99c62;
   text-decoration: none;
   cursor: pointer;
   &:visited {
-    color: #000000;
+    color: #f99c62;
   }
   &:hover {
-    color: #2d65be;
+    color: #84e2ff;
   }
   &:active {
-    color: #000000;
+    color: #f99c62;
   }
 `
 export const TabTitle = styled.div`
   padding: 5px 8px;
   width: 100px;
   text-align: center;
-  color: #2d65be;
+  color: #84e2ff;
   border: 1px solid #beb9b9;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
@@ -102,6 +102,7 @@ export const RightSplit = styled(LeftSplit)`
 export const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
   padding: 15px;
+
   gap: 20px;
   border: none;
 `
@@ -111,6 +112,7 @@ const InviWrapper = styled.div`
   flex-flow: column wrap;
   padding: 5px 8px;
   width: 40%;
+  background-color: #ffffff;
   border: 1px solid #beb9b9;
 `
 const FriendsWrapper = styled(InviWrapper)`
@@ -177,7 +179,6 @@ export default function MyFriends() {
   }, [])
 
   useEffect(() => {
-    console.log("typeof currentUser?.id", typeof currentUser?.id)
     if (typeof currentUser?.id !== "string") return
     const checkRealtimeUserStatus = onSnapshot(
       doc(db, "users", currentUser?.id),
@@ -340,122 +341,102 @@ export default function MyFriends() {
     }
   }
   return (
-    <>
-      <NavWrapper>
-        {isLogin && currentUser !== undefined ? (
-          <>
-            <Title>我是user的好友列表</Title>
-            <BtnLink to="/">HOME</BtnLink>
-            <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
-            <BtnLink to={`/${currentUser?.name}/my-memories`}>
-              my-memories
-            </BtnLink>
-          </>
-        ) : (
-          <Title>你沒有登入</Title>
-        )}
-      </NavWrapper>
-      <Container>
-        <TabWrapper>
-          <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
-          <TabLink to={`/${currentUser?.name}/my-memories`}>
-            My Memories
-          </TabLink>
-          <TabTitle>My Friends</TabTitle>
-        </TabWrapper>
-        <SplitWrapper>
-          <LeftSplit />
-          <RightSplit />
-        </SplitWrapper>
-        <ContentArea>
-          <ContentWrapper>
-            <InviWrapper>
-              <Autocomplete
-                qResultIds={qResultIds}
-                setQResultIds={setQResultIds}
-                invitingIds={invitingIds}
-              />
-              {invitingList.length !== 0
-                ? invitingList.map((inviting: DocumentData) => {
-                    return (
-                      <FilteredWrapper key={inviting.id}>
-                        <UserAvatar src={inviting.photoURL} />
-                        <FilteredContent>{inviting.name}</FilteredContent>
-                        <FilteredContent>
-                          {inviting.hometownName}
-                        </FilteredContent>
-                        <FilteredContent>Awaiting reply</FilteredContent>
-                      </FilteredWrapper>
-                    )
-                  })
-                : ""}
-              <ContentTitle>They want to be your friend ...</ContentTitle>
-              {beInvitedList.length !== 0
-                ? beInvitedList.map((invited: DocumentData) => {
-                    return (
-                      <RowWrapper key={invited.id}>
-                        <FilteredWrapper>
-                          <UserAvatar src={invited.photoURL} />
-                          <FilteredContent>{invited.name}</FilteredContent>
-                          <FilteredContent>
-                            {invited.hometownName}
-                          </FilteredContent>
-                        </FilteredWrapper>
-                        <BtnWrapper>
-                          <BtnAccept
-                            id={invited.id}
-                            onClick={(
-                              e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                            ) => {
-                              acceptFriendReq(e)
-                            }}
-                          >
-                            Accept
-                          </BtnAccept>
-                          <BtnDeny
-                            id={invited.id}
-                            onClick={(
-                              e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                            ) => {
-                              denyFriendReq(e)
-                            }}
-                          >
-                            Deny
-                          </BtnDeny>
-                        </BtnWrapper>
-                      </RowWrapper>
-                    )
-                  })
-                : "none"}
-            </InviWrapper>
-            <FriendsWrapper>
-              {friends.length !== 0 ? (
-                friends.map((friend: DocumentData) => {
+    <Container>
+      <TabWrapper>
+        <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
+        <TabLink to={`/${currentUser?.name}/my-memories`}>My Memories</TabLink>
+        <TabTitle>My Friends</TabTitle>
+      </TabWrapper>
+      <SplitWrapper>
+        <LeftSplit />
+        <RightSplit />
+      </SplitWrapper>
+      <ContentArea>
+        <ContentWrapper>
+          <InviWrapper>
+            <Autocomplete
+              qResultIds={qResultIds}
+              setQResultIds={setQResultIds}
+              invitingIds={invitingIds}
+            />
+            {invitingList.length !== 0
+              ? invitingList.map((inviting: DocumentData) => {
                   return (
-                    <FilteredWrapper key={friend.id}>
-                      <UserAvatar src={friend.photoURL} />
-                      <FilteredContent>{friend.name}</FilteredContent>
-                      <FilteredContent>{friend.hometownName}</FilteredContent>
-                      <BtnVisitLink
-                        to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
-                        as={Link}
-                        id={friend.id}
-                      >
-                        Visit friend
-                      </BtnVisitLink>
+                    <FilteredWrapper key={inviting.id}>
+                      <UserAvatar src={inviting.photoURL} />
+                      <FilteredContent>{inviting.name}</FilteredContent>
+                      <FilteredContent>{inviting.hometownName}</FilteredContent>
+                      <FilteredContent>Awaiting reply</FilteredContent>
                     </FilteredWrapper>
                   )
                 })
-              ) : (
-                <>
-                  <FilteredContent>No friends</FilteredContent>
-                </>
-              )}
-            </FriendsWrapper>
-          </ContentWrapper>
-        </ContentArea>
-      </Container>
-    </>
+              : ""}
+            <ContentTitle>They want to be your friend ...</ContentTitle>
+            {beInvitedList.length !== 0
+              ? beInvitedList.map((invited: DocumentData) => {
+                  return (
+                    <RowWrapper key={invited.id}>
+                      <FilteredWrapper>
+                        <UserAvatar src={invited.photoURL} />
+                        <FilteredContent>{invited.name}</FilteredContent>
+                        <FilteredContent>
+                          {invited.hometownName}
+                        </FilteredContent>
+                      </FilteredWrapper>
+                      <BtnWrapper>
+                        <BtnAccept
+                          id={invited.id}
+                          onClick={(
+                            e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                          ) => {
+                            acceptFriendReq(e)
+                          }}
+                        >
+                          Accept
+                        </BtnAccept>
+                        <BtnDeny
+                          id={invited.id}
+                          onClick={(
+                            e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                          ) => {
+                            denyFriendReq(e)
+                          }}
+                        >
+                          Deny
+                        </BtnDeny>
+                      </BtnWrapper>
+                    </RowWrapper>
+                  )
+                })
+              : "none"}
+          </InviWrapper>
+          <FriendsWrapper>
+            {friends.length !== 0 ? (
+              friends.map((friend: DocumentData) => {
+                return (
+                  <FilteredWrapper key={friend.id}>
+                    <UserAvatar src={friend.photoURL} />
+                    <FilteredContent>{friend.name}</FilteredContent>
+                    <FilteredContent>{friend.hometownName}</FilteredContent>
+                    <BtnVisitLink
+                      to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
+                      as={Link}
+                      id={friend.id}
+                    >
+                      Visit friend
+                    </BtnVisitLink>
+                  </FilteredWrapper>
+                )
+              })
+            ) : (
+              <>
+                <FilteredContent>No friends</FilteredContent>
+              </>
+            )}
+          </FriendsWrapper>
+        </ContentWrapper>
+      </ContentArea>
+    </Container>
   )
 }
 
