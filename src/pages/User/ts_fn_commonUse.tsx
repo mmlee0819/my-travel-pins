@@ -10,6 +10,7 @@ import {
   where,
   onSnapshot,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../Context/authContext"
@@ -151,6 +152,22 @@ export const queryMessengerInfo = async (
       // doc.data() will be undefined in this case
       console.log("No such document!")
     }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const deleteMsg = async (id: string, item: DocumentData) => {
+  try {
+    const pinRef = doc(db, "pins", id)
+    await updateDoc(pinRef, {
+      messages: arrayRemove({
+        messenger: item.messenger,
+        msgContent: item.msgContent,
+        msgReadableTime: item.msgReadableTime,
+        msgTimestamp: item.msgTimestamp,
+      }),
+    })
   } catch (error) {
     console.log(error)
   }

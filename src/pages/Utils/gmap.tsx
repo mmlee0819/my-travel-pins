@@ -8,6 +8,7 @@ import {
   addMsg,
   checkRealTimePinMessages,
   queryMessengerInfo,
+  deleteMsg,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
 
@@ -106,6 +107,17 @@ const MsgColumnWrapper = styled.div`
 const MsgRowNoWrapper = styled(RowNoWrapper)`
   justify-content: flex-start;
   margin: 5px 0;
+`
+const BtnMsgDelete = styled.div`
+  position: absolute;
+  right: 40px;
+  display: inline-block;
+  font-size: 1rem;
+  color: #3c3c3c;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
 `
 
 export const DetailImgsWrapper = styled.div`
@@ -240,6 +252,15 @@ const PinMsgs = (props: PropsFromStreetView) => {
                   <br />
                   {item.msgContent}
                 </MsgContent>
+                {currentUser !== null && item.messenger === currentUser?.id && (
+                  <BtnMsgDelete
+                    onClick={() => {
+                      deleteMsg(selectedMarker?.id, item)
+                    }}
+                  >
+                    Delete Message
+                  </BtnMsgDelete>
+                )}
               </MsgRowNoWrapper>
             )
           })}
@@ -251,7 +272,6 @@ export default function StreetView(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const [messages, setMessages] = useState<DocumentData[]>([])
 
-  console.log("messages", messages)
   const onStreetLoad = (selectedMarker: DocumentData) => {
     new google.maps.StreetViewPanorama(
       document.getElementById("street-mode-container") as HTMLElement,
