@@ -29,7 +29,7 @@ const GridArea = styled.div`
   top: 0px;
   min-width: 40vw;
   min-height: 50vh;
-  z-index: 99;
+  z-index: 150;
 `
 const GridItemWrapper = styled.div`
   display: flex;
@@ -53,7 +53,7 @@ const Input = styled.input`
   background-color: #ffffff;
   border: 1px solid #000000;
   opacity: 0.8;
-  z-index: 100;
+  z-index: 199;
 `
 
 const CurrentWeatherInfoArea = styled.div`
@@ -117,7 +117,6 @@ const ForecastColumnArea = styled(ColumnWrapper)`
 `
 const WeatherContentArea = styled.div`
   min-width: 50vw;
-  min-height: 60vh;
   padding: 5px;
   background-color: #ffffff;
 `
@@ -126,11 +125,17 @@ const TitleWrapper = styled(RowNoWrapper)`
   font-size: 12px;
   font-weight: 500;
 `
-const HumidityText = styled(ForecastWeatherText)`
+const MaxTempText = styled(ForecastWeatherText)`
   color: #f99c62;
 `
-const PopText = styled(ForecastWeatherText)`
+const MinTempText = styled(ForecastWeatherText)`
   color: #229fdd;
+`
+const HumidityText = styled(ForecastWeatherText)`
+  color: #b8b8b8;
+`
+const PopText = styled(ForecastWeatherText)`
+  color: #2b2a2a;
 `
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -353,28 +358,20 @@ function WeatherWidget(props: Props) {
         cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
         width={1000}
         rowHeight={350}
-        z-index={99}
+        z-index={199}
       >
         <GridItemWrapper key="weather-query">
-          {isLoaded &&
-          typeof currentUser?.hometownLat === "number" &&
-          typeof currentUser?.hometownLng === "number" ? (
+          {isLoaded ? (
             <>
               <GoogleMap
                 mapTypeId="1742ed94a3f0f03"
                 mapContainerStyle={{
-                  height: "100%",
+                  minHeight: "100%",
                   width: "100%",
                 }}
                 center={{
-                  lat:
-                    typeof location?.lat === "number"
-                      ? location?.lat
-                      : currentUser?.hometownLat,
-                  lng:
-                    typeof location?.lng === "number"
-                      ? location?.lng
-                      : currentUser?.hometownLng,
+                  lat: location?.lat,
+                  lng: location?.lng,
                 }}
                 zoom={location?.name === "" ? 1 : 6}
                 options={{
@@ -388,7 +385,8 @@ function WeatherWidget(props: Props) {
               >
                 {location.name !== "" &&
                 typeof location?.lat === "number" &&
-                typeof location?.lng === "number" ? (
+                typeof location?.lng === "number" &&
+                currWeatherStatus.icon !== "" ? (
                   <>
                     <InfoWindow
                       onLoad={onInfoWinLoad}
@@ -452,16 +450,12 @@ function WeatherWidget(props: Props) {
                             <RowNoWrapper
                               key={`${item.date}-maxTemp-${item.maxTemp}`}
                             >
-                              <ForecastWeatherText>
-                                {item.maxTemp}°C
-                              </ForecastWeatherText>
+                              <MaxTempText>{item.maxTemp}°C</MaxTempText>
                             </RowNoWrapper>
                             <RowNoWrapper
                               key={`${item.date}-minTemp-${item.minTemp}`}
                             >
-                              <ForecastWeatherText>
-                                {item.minTemp}°C
-                              </ForecastWeatherText>
+                              <MinTempText>{item.minTemp}°C</MinTempText>
                             </RowNoWrapper>
                             <RowNoWrapper
                               key={`${item.date}-humidity-${item.humidity}`}

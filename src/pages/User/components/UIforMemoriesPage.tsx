@@ -23,13 +23,18 @@ export const ContentArea = styled.div`
 export const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
   padding: 15px;
+  background-color: #ffffff;
   gap: 20px;
   border: none;
 `
 export const TabLink = styled(Link)`
-  padding: 5px 8px;
+  padding: 5px 8px 0px 8px;
   text-align: center;
   color: #000000;
+  background-color: #ffffff;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: none;
   text-decoration: none;
   cursor: pointer;
   &:visited {
@@ -43,14 +48,14 @@ export const TabLink = styled(Link)`
   }
 `
 export const TabTitle = styled.div`
-  padding: 5px 8px;
+  padding: 5px 8px 0px 8px;
   width: 130px;
   text-align: center;
   color: #2d65be;
-  border: 1px solid #beb9b9;
+  background-color: #ffffff;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  border-bottom: none;
+  border: none;
 `
 
 export const DetailContentWrapper = styled.div`

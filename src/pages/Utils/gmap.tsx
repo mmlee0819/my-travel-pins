@@ -37,21 +37,29 @@ const StreetModePinContentContainer = styled.div`
   flex-flow: column wrap;
   padding: 10px;
   width: 50vw;
-  min-height: calc(100vh - 30px);
   font-family: "Poppins";
   background-color: #ffffff;
   z-index: 101;
 `
+const ContainerArea = styled.div`
+  position: relative;
+  height: calc(100vh - 60px);
+  overflow-y: scroll;
+`
 const Title = styled.div`
   display: flex;
   flex: 1 1 auto;
-  font-size: 1rem;
+  font-size: 20px;
   color: #000000;
   margin: 5px 0;
 `
+const ArticleContent = styled(Title)`
+  white-space: pre-wrap;
+`
 const BackIconImg = styled.img`
   margin-right: 20px;
-  width: 10%;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
 `
 const MsgNumText = styled(Title)`
@@ -64,7 +72,7 @@ const MsgNumText = styled(Title)`
 const MsgInput = styled.input`
   display: flex;
   flex: 1 1 auto;
-  font-size: 1rem;
+  font-size: 16px;
   margin: 10px 20px 10px 0;
   padding-left: 8px;
   background-color: #f6f6f6;
@@ -82,7 +90,7 @@ const MsgInput = styled.input`
 const MsgContent = styled.div`
   display: flex;
   flex: 1 1 auto;
-  font-size: 1rem;
+  font-size: 16px;
   margin: 0 20px 0 0;
   width: 100%;
   padding-left: 8px;
@@ -102,6 +110,7 @@ const UserAvatar = styled.div<{ avatarUrl: string }>`
 const MsgColumnWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
+  height: 300px;
   width: 100%;
 `
 const MsgRowNoWrapper = styled(RowNoWrapper)`
@@ -112,7 +121,7 @@ const BtnMsgDelete = styled.div`
   position: absolute;
   right: 40px;
   display: inline-block;
-  font-size: 1rem;
+  font-size: 16px;
   color: #3c3c3c;
   cursor: pointer;
   &:hover {
@@ -123,16 +132,16 @@ const BtnMsgDelete = styled.div`
 export const DetailImgsWrapper = styled.div`
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-evenly;
-  width: 80%;
-  height: 30vh;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 50vh;
   gap: 20px;
 `
 export const DetailImg = styled.div<{
   bkImage: string
 }>`
   display: flex;
-  flex: 0 1 30%;
+  flex: 0 1 40%;
   background-image: ${(props) => `url(${props.bkImage})`};
   background-size: 100% 100%;
 `
@@ -150,8 +159,9 @@ interface PropsFromStreetView {
 }
 
 export const containerStyle = {
-  minHeight: "100vh",
-  width: "100vw",
+  marginTop: "10px",
+  minHeight: "calc(100vh - 120px)",
+  width: "100%",
 }
 
 export const centerSchool = {
@@ -176,6 +186,10 @@ const PinContentInStreetView = (props: Props) => {
       </RowNoWrapper>
       <Title>{selectedMarker?.article?.title}</Title>
       <Title>{selectedMarker?.article?.travelDate}</Title>
+      <ArticleContent
+        dangerouslySetInnerHTML={{ __html: selectedMarker?.article?.content }}
+      />
+
       {selectedMarker?.albumURLs && selectedMarker?.albumURLs?.length !== 0 && (
         <DetailImgsWrapper>
           {selectedMarker.albumURLs.map((photoUrl: string) => {
@@ -183,7 +197,6 @@ const PinContentInStreetView = (props: Props) => {
           })}
         </DetailImgsWrapper>
       )}
-      <Title>{selectedMarker?.article?.content}</Title>
     </ColumnWrapper>
   )
 }
@@ -216,7 +229,7 @@ const PinMsgs = (props: PropsFromStreetView) => {
   })
 
   useEffect(() => {
-    if (!selectedMarker?.id) return
+    if (!selectedMarker?.id || messages === undefined) return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
@@ -227,10 +240,10 @@ const PinMsgs = (props: PropsFromStreetView) => {
     messages.map((item: DocumentData) => {
       queryMessengerInfo(item.messenger, setMessengerInfo)
     })
-  }, [messages.length])
+  }, [messages])
 
   return (
-    <ColumnWrapper>
+    <>
       <MsgNumText>{messages?.length || 0}則留言</MsgNumText>
       <RowNoWrapper>
         {currentUser !== null && typeof currentUser?.photoURL === "string" && (
@@ -265,7 +278,7 @@ const PinMsgs = (props: PropsFromStreetView) => {
             )
           })}
       </MsgColumnWrapper>
-    </ColumnWrapper>
+    </>
   )
 }
 export default function StreetView(props: Props) {
@@ -294,16 +307,20 @@ export default function StreetView(props: Props) {
         />
       </StreetModeContainer>
       <StreetModePinContentContainer>
-        <PinContentInStreetView
-          selectedMarker={selectedMarker}
-          setShowMemory={setShowMemory}
-        />
-        <PinMsgs
-          selectedMarker={selectedMarker}
-          setShowMemory={setShowMemory}
-          messages={messages}
-          setMessages={setMessages}
-        />
+        <ColumnWrapper>
+          <ContainerArea>
+            <PinContentInStreetView
+              selectedMarker={selectedMarker}
+              setShowMemory={setShowMemory}
+            />
+            <PinMsgs
+              selectedMarker={selectedMarker}
+              setShowMemory={setShowMemory}
+              messages={messages}
+              setMessages={setMessages}
+            />
+          </ContainerArea>
+        </ColumnWrapper>
       </StreetModePinContentContainer>
     </>
   )

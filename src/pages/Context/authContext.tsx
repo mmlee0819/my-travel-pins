@@ -87,7 +87,6 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
-    language: "en",
     libraries,
   })
 
@@ -130,7 +129,7 @@ export const AuthContextProvider = ({ children }: Props) => {
         email.trim(),
         password.trim()
       )
-      const avatarPathRef = ref(storage, "defaultAvatar.png")
+      const avatarPathRef = ref(storage, "defaultProfile.png")
       const defaultAvatar = await getDownloadURL(avatarPathRef)
       const user = userCredential.user
       if (user) {

@@ -74,19 +74,6 @@ const ContentWrapper = styled(ContentArea)`
   gap: 20px;
   border: none;
 `
-// interface AllMarkers {
-//   albumNames?: string[]
-//   albumURLs?: string[]
-//   article?: {
-//     content: string
-//     travelDate: string
-//     title: string
-//   }
-//   id?: string
-//   location?: { placeId: string; lat: number; lng: number; name: string }
-//   postTime?: { seconds: number; nanoseconds: number }
-//   userId?: string
-// }
 
 function FriendsHome() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
@@ -147,168 +134,152 @@ function FriendsHome() {
   }
 
   return (
-    <>
-      <NavWrapper>
-        {isLogin && currentUser !== undefined ? (
-          <>
-            <Title>我是好友的地圖</Title>
-            <BtnLink to="/">HOME</BtnLink>
-            <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
-            <BtnLink to={`/${currentUser?.name}/my-memories`}>
-              my-memories
-            </BtnLink>
-          </>
-        ) : (
-          <Title>你沒有登入</Title>
-        )}
-      </NavWrapper>
-      <Container>
-        <TabWrapper>
-          <TabTitle>{`${friendName}'s Map`}</TabTitle>
-          <TabLink
-            to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
-          >{`${friendName}'s Memories`}</TabLink>
-        </TabWrapper>
-        <SplitWrapper>
-          <LeftSplit />
-          <RightSplit />
-        </SplitWrapper>
-        <ContentArea>
-          <ContentWrapper>
-            {isLoaded &&
-            typeof friendInfo?.hometownLat === "number" &&
-            typeof friendInfo?.hometownLng === "number" ? (
-              <GoogleMap
-                id={`${friendName}-map`}
-                mapTypeId="94ce067fe76ff36f"
-                mapContainerStyle={containerStyle}
-                center={{
-                  lat: selectedMarker?.location?.lat || friendInfo?.hometownLat,
-                  lng: selectedMarker?.location?.lng || friendInfo?.hometownLng,
-                }}
-                zoom={selectedMarker ? 6 : 2}
-                options={{ draggable: true, styles: darkMap }}
-              >
-                {typeof center?.lat === "number" &&
-                typeof center?.lng === "number" ? (
+    <Container>
+      <TabWrapper>
+        <TabTitle>{`${friendName}'s Map`}</TabTitle>
+        <TabLink
+          to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
+        >{`${friendName}'s Memories`}</TabLink>
+      </TabWrapper>
+      <SplitWrapper>
+        <LeftSplit />
+        <RightSplit />
+      </SplitWrapper>
+      <ContentArea>
+        <ContentWrapper>
+          {isLoaded &&
+          typeof friendInfo?.hometownLat === "number" &&
+          typeof friendInfo?.hometownLng === "number" ? (
+            <GoogleMap
+              id={`${friendName}-map`}
+              mapTypeId="94ce067fe76ff36f"
+              mapContainerStyle={containerStyle}
+              center={{
+                lat: selectedMarker?.location?.lat || friendInfo?.hometownLat,
+                lng: selectedMarker?.location?.lng || friendInfo?.hometownLng,
+              }}
+              zoom={selectedMarker ? 6 : 2}
+              options={{ draggable: true, styles: darkMap }}
+            >
+              {typeof center?.lat === "number" &&
+              typeof center?.lng === "number" ? (
+                <Marker
+                  onLoad={onMkLoad}
+                  position={{
+                    lat: friendInfo?.hometownLat,
+                    lng: friendInfo?.hometownLng,
+                  }}
+                  icon={homeIcon}
+                  onClick={() => {
+                    if (typeof friendInfo?.hometownName === "string") {
+                      setHometownText(friendInfo?.hometownName)
+                    }
+                  }}
+                />
+              ) : (
+                ""
+              )}
+              {hometownText ? (
+                <InfoWindow
+                  onLoad={onInfoWinLoad}
+                  position={{
+                    lat: friendInfo?.hometownLat,
+                    lng: friendInfo?.hometownLng,
+                  }}
+                  options={{
+                    pixelOffset: new window.google.maps.Size(0, -50),
+                  }}
+                  onCloseClick={() => {
+                    setHometownText("")
+                  }}
+                >
+                  <PinInfoArea>
+                    <PinInfoTitle>
+                      {hometownText !== "" ? `Hometown ${hometownText}` : ""}
+                    </PinInfoTitle>
+                  </PinInfoArea>
+                </InfoWindow>
+              ) : (
+                ""
+              )}
+              {markers?.map((marker) => {
+                if (
+                  typeof marker?.location?.lat !== "number" &&
+                  typeof marker?.location?.lng !== "number"
+                )
+                  return
+                return (
                   <Marker
+                    key={marker?.location?.placeId}
                     onLoad={onMkLoad}
-                    position={{
-                      lat: friendInfo?.hometownLat,
-                      lng: friendInfo?.hometownLng,
-                    }}
-                    icon={homeIcon}
-                    onClick={() => {
-                      if (typeof friendInfo?.hometownName === "string") {
-                        setHometownText(friendInfo?.hometownName)
-                      }
+                    position={
+                      new google.maps.LatLng(
+                        marker.location.lat,
+                        marker.location.lng
+                      )
+                    }
+                    onClick={(e: google.maps.MapMouseEvent) => {
+                      choosePinOnMap(
+                        e,
+                        markers,
+                        setSelectedMarker,
+                        setShowInfoWindow
+                      )
                     }}
                   />
-                ) : (
-                  ""
-                )}
-                {hometownText ? (
+                )
+              })}
+              {selectedMarker &&
+              typeof selectedMarker?.location?.lat === "number" &&
+              typeof selectedMarker?.location?.lng === "number" ? (
+                <>
                   <InfoWindow
                     onLoad={onInfoWinLoad}
+                    onCloseClick={() => {
+                      setSelectedMarker(undefined)
+                    }}
                     position={{
-                      lat: friendInfo?.hometownLat,
-                      lng: friendInfo?.hometownLng,
+                      lat: selectedMarker?.location?.lat,
+                      lng: selectedMarker?.location?.lng,
                     }}
                     options={{
-                      pixelOffset: new window.google.maps.Size(0, -50),
-                    }}
-                    onCloseClick={() => {
-                      setHometownText("")
+                      pixelOffset: new window.google.maps.Size(0, -40),
                     }}
                   >
-                    <PinInfoArea>
+                    <PinInfoArea
+                      onClick={() => {
+                        setShowMemory(true)
+                      }}
+                    >
+                      <PinInfoImg
+                        src={
+                          selectedMarker.albumURLs
+                            ? selectedMarker?.albumURLs[0]
+                            : defaultImage
+                        }
+                      />
                       <PinInfoTitle>
-                        {hometownText !== "" ? `Hometown ${hometownText}` : ""}
+                        {selectedMarker?.location?.name}
                       </PinInfoTitle>
                     </PinInfoArea>
                   </InfoWindow>
-                ) : (
-                  ""
-                )}
-                {markers?.map((marker) => {
-                  if (
-                    typeof marker?.location?.lat !== "number" &&
-                    typeof marker?.location?.lng !== "number"
-                  )
-                    return
-                  return (
-                    <Marker
-                      key={marker?.location?.placeId}
-                      onLoad={onMkLoad}
-                      position={
-                        new google.maps.LatLng(
-                          marker.location.lat,
-                          marker.location.lng
-                        )
-                      }
-                      onClick={(e: google.maps.MapMouseEvent) => {
-                        choosePinOnMap(
-                          e,
-                          markers,
-                          setSelectedMarker,
-                          setShowInfoWindow
-                        )
-                      }}
+                  {selectedMarker && showInfoWindow && showMemory && (
+                    <StreetView
+                      selectedMarker={selectedMarker}
+                      setShowMemory={setShowMemory}
                     />
-                  )
-                })}
-                {selectedMarker &&
-                typeof selectedMarker?.location?.lat === "number" &&
-                typeof selectedMarker?.location?.lng === "number" ? (
-                  <>
-                    <InfoWindow
-                      onLoad={onInfoWinLoad}
-                      onCloseClick={() => {
-                        setSelectedMarker(undefined)
-                      }}
-                      position={{
-                        lat: selectedMarker?.location?.lat,
-                        lng: selectedMarker?.location?.lng,
-                      }}
-                      options={{
-                        pixelOffset: new window.google.maps.Size(0, -40),
-                      }}
-                    >
-                      <PinInfoArea
-                        onClick={() => {
-                          setShowMemory(true)
-                        }}
-                      >
-                        <PinInfoImg
-                          src={
-                            selectedMarker.albumURLs
-                              ? selectedMarker?.albumURLs[0]
-                              : defaultImage
-                          }
-                        />
-                        <PinInfoTitle>
-                          {selectedMarker?.location?.name}
-                        </PinInfoTitle>
-                      </PinInfoArea>
-                    </InfoWindow>
-                    {selectedMarker && showInfoWindow && showMemory && (
-                      <StreetView
-                        selectedMarker={selectedMarker}
-                        setShowMemory={setShowMemory}
-                      />
-                    )}
-                  </>
-                ) : (
-                  ""
-                )}
-              </GoogleMap>
-            ) : (
-              "Please wait..."
-            )}
-          </ContentWrapper>
-        </ContentArea>
-      </Container>
-    </>
+                  )}
+                </>
+              ) : (
+                ""
+              )}
+            </GoogleMap>
+          ) : (
+            "Please wait..."
+          )}
+        </ContentWrapper>
+      </ContentArea>
+    </Container>
   )
 }
 export default FriendsHome
