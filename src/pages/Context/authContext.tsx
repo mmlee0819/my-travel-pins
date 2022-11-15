@@ -184,6 +184,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       await signOut(auth)
       console.log("已登出")
       setIsLogin(false)
+      navigate("/")
     } catch (error) {
       console.log(error)
     }

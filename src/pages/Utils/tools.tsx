@@ -16,8 +16,8 @@ import WeatherWidget from "../Tools/weather"
 const ToolsWrapper = styled.div`
   position: absolute;
   display: flex;
-  top: 100px;
-  right: 30px;
+  top: 10px;
+  right: 10px;
   z-index: 200;
 `
 const DragWrapper = styled(animated.div)`

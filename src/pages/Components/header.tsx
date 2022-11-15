@@ -16,8 +16,8 @@ const HeaderContainer = styled.div`
     width: 100%;
     max-width: 1440px;
     padding-right: 60px;
-    color: #2d2d2d;
-    background-color: #fff;
+    color: #fff;
+    background-color: #2d2d2d;
     z-index: 180;
   }
 `
@@ -64,15 +64,12 @@ const Btn = styled.div`
 function Header() {
   const { currentUser, isLogin, logOut } = useContext(AuthContext)
 
+  if (!isLogin || currentUser === undefined || currentUser === null) return null
   return (
     <HeaderContainer>
       <RowNoWrapper>
         <UserAvatar />
-        <Title>
-          {isLogin && currentUser !== null
-            ? `Hello ${currentUser?.name} !`
-            : "Welcome"}
-        </Title>
+        <Title>{`Hello ${currentUser?.name} !`}</Title>
       </RowNoWrapper>
       {isLogin && currentUser !== undefined && (
         <LoginArea>

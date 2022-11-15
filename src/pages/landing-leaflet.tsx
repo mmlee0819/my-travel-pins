@@ -21,6 +21,35 @@ const Container = styled.div`
   max-width: 1440px;
   width: 100%;
   height: calc(100vh - 120px);
+  background-color: rgb(255, 255, 255, 0.1);
+  border-radius: 20px;
+`
+const TitleWrapper = styled.div`
+  position: absolute;
+  top: 70px;
+  right: 80px;
+  text-align: right;
+  font-family: "Jaldi";
+  color: #fff;
+`
+const Title = styled.div`
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 40px;
+`
+const SubTitle = styled.div`
+  padding-right: 3px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0px;
+`
+
+const Slogan = styled.div`
+  display: flex;
+  justify-content: center;
+  font-family: "Just Me Again Down Here";
+  font-size: 1rem;
 `
 const Wrapper = styled.div`
   display: flex;
@@ -60,9 +89,6 @@ const Btn = styled.div`
   border: 1px solid #000000;
   border-radius: 10px;
   cursor: pointer;
-`
-const Title = styled.div`
-  color: #000000;
 `
 
 const DefaultIcon = L.icon({
@@ -117,6 +143,8 @@ function Home() {
 
   const myCustomStyle = {
     stroke: false,
+    // color: "#2d2d2d",
+    // weight: 1,
     fill: true,
     fillColor: "#fff",
     fillOpacity: 1,
@@ -124,6 +152,10 @@ function Home() {
 
   return (
     <Container>
+      <TitleWrapper>
+        <Title>My Travel Pins</Title>
+        <SubTitle>your treasure keeper and query helper</SubTitle>
+      </TitleWrapper>
       <MapContainer
         id="homeMap"
         center={[51.5, -0.09]}
@@ -132,12 +164,11 @@ function Home() {
         scrollWheelZoom={false}
         dragging={false}
         style={{
-          top: "30px",
           margin: "0 auto",
           width: "100%",
-          height: "calc(100% - 30px)",
+          height: "100%",
           zIndex: "50",
-          backgroundColor: "#5594b7",
+          backgroundColor: "rgb(255, 255, 255, 0)",
           borderRadius: "10px",
         }}
       >
@@ -155,8 +186,9 @@ function Home() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         /> */}
-        <Marker position={[33, 121]}>
-          <Popup offset={[0, -20]} keepInView={true}>
+        <Marker position={[42, 121]}>
+          <Popup offset={[0, -10]} keepInView={true}>
+            My Hometown <br />
             Taiwan
           </Popup>
         </Marker>
@@ -213,6 +245,9 @@ function Home() {
           </>
         )}
       </Wrapper>*/}
+      <Slogan>
+        Save your favorite memories and share with your loved ones.
+      </Slogan>
     </Container>
   )
 }
