@@ -1,7 +1,14 @@
-import React, { useState, useEffect, useRef, useContext } from "react"
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from "react"
 import styled from "styled-components"
 import { AuthContext } from "./Context/authContext"
-import L from "leaflet"
+import L, { LatLng } from "leaflet"
 import {
   MapContainer,
   TileLayer,
@@ -10,11 +17,15 @@ import {
   Popup,
   GeoJSON,
   ZoomControl,
+  Polyline,
+  useMapEvents,
 } from "react-leaflet"
 import { Feature, GeoJsonObject } from "geojson"
+import { GeoJsonTypes } from "geojson"
 
 import "leaflet/dist/leaflet.css"
-import worldGeoData from "./Utils/custom.geo.json"
+// import worldGeoData from "./Utils/custom.geo"
+import { countries } from "./Utils/custom.geo"
 import homeMarker from "./assets/markers/hometownIcon.png"
 
 const Container = styled.div`
@@ -117,13 +128,27 @@ L.Marker.prototype.options.icon = DefaultIcon
 //     woe_id: 23424791
 //   }
 // }
+interface Props {
+  position: LatLng | null
+  setPosition: Dispatch<SetStateAction<LatLng | null>>
+}
+const TargetArea = (props: Props) => {
+  const { position, setPosition } = props
 
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng)
+    },
+  })
+
+  return <Title />
+}
 function Home() {
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
 
-  console.log("worldGeoData", worldGeoData)
+  console.log("countries", countries)
   // const [hometownBox, setHometownBox] = useState<
   //   google.maps.places.SearchBox | StandaloneSearchBox
   // >()
@@ -140,7 +165,8 @@ function Home() {
   // const { isLoaded, currentUser, isLogin, signUp, signIn } =
   //   useContext(AuthContext)
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
-
+  const [position, setPosition] = useState<LatLng | null>(null)
+  console.log("position", position)
   const myCustomStyle = {
     stroke: false,
     // color: "#2d2d2d",
@@ -149,7 +175,12 @@ function Home() {
     fillColor: "#fff",
     fillOpacity: 1,
   }
+  const polyline = [
+    [40, 135],
+    [60.94190876534587, 207.94735583582917],
+  ]
 
+  const polylineColor = { color: "#2d2d2d", weight: 0.2 }
   return (
     <Container>
       <TitleWrapper>
@@ -158,7 +189,7 @@ function Home() {
       </TitleWrapper>
       <MapContainer
         id="homeMap"
-        center={[51.5, -0.09]}
+        center={[60, 90]}
         zoomControl={false}
         zoom={0}
         scrollWheelZoom={false}
@@ -171,8 +202,11 @@ function Home() {
           backgroundColor: "rgb(255, 255, 255, 0)",
           borderRadius: "10px",
         }}
+        //   click={()=>{
+        //     locationfound(e) {
+        // setPosition(e.latlng)}}}
       >
-        {worldGeoData.features.map((country) => {
+        {countries.features.map((country) => {
           return (
             <GeoJSON
               key={country.properties.name}
@@ -181,11 +215,109 @@ function Home() {
             />
           )
         })}
-
+        <TargetArea position={position} setPosition={setPosition} />
         {/* <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         /> */}
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [40, 135],
+            [60.94190876534587, 207.94735583582917],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [32, 129.19727864639543],
+            [44.119522447002225, 238.84090939374232],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [67.08194834149987, 121],
+            [82.67959375707717, 202.29303247795994],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [67.08194834149987, 75.78115084640598],
+            [80.98178034291453, 75.78115084640598],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [50, 10],
+            [90, -60],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [50, -90],
+            [83, -150],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [85.83307589186336, -223.59693915403705],
+            [83.36240172078469, -257.3462606722642],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [45, -110],
+            [60, -210],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [-10, -70],
+            [-16.58274254777613, -126.567639789134],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [-10, -70],
+            [-16.58274254777613, -126.567639789134],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [20, 10],
+            [-62.2369168861301, -35.1632273439355],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [0, 25],
+            [-41.98777931411351, 44.991411261853955],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [-25, 135],
+            [-62.8847858855777, 172.95758868513195],
+          ]}
+        />
+        <Polyline
+          pathOptions={polylineColor}
+          positions={[
+            [-40, 175],
+            [-21.890407818937252, 227.80023615225105],
+          ]}
+        />
         <Marker position={[42, 121]}>
           <Popup offset={[0, -10]} keepInView={true}>
             My Hometown <br />
