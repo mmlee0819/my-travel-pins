@@ -13,13 +13,15 @@ const GlobalStyle = createGlobalStyle`
   body {
     font-family: 'Jomhuria','Poppins', sans-serif;
    }
-
   #root {
     position: relative;
     min-height: 100vh;
     padding:60px;
-    background-color: #2d2d2d;
+    color:#2d2d2d;
+    background-color: #fff;
   }
+
+ 
 `
 function App() {
   return (
