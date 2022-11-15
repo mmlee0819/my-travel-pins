@@ -87,7 +87,6 @@ const ResultContent = styled(ResultContentWrapper)`
   padding: 5px 0;
   font-family: "Poppins";
   line-height: 16px;
-  height: 16px;
   font-size: 14px;
   cursor: pointer;
 `
@@ -166,7 +165,7 @@ type AutocompleteItem = Hit<{
 interface Props extends Partial<AutocompleteOptions<AutocompleteItem>> {
   qResultIds: string[]
   setQResultIds: Dispatch<SetStateAction<string[]>>
-  invitingIds: string[]
+  invitingIds?: string[]
 }
 interface UserInfoType {
   id: string | DocumentData
@@ -183,7 +182,6 @@ export function Autocomplete(props: Props) {
   const [filteredId, setFilteredId] = useState("")
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [friendStatus, setFriendStatus] = useState("")
-  console.log("friendStatus", friendStatus)
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -237,11 +235,6 @@ export function Autocomplete(props: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
   const { getEnvironmentProps } = autocomplete
 
-  // console.log("autocompleteState", autocompleteState)
-  // console.log("props.qResultIds", props.qResultIds)
-  // console.log("qInputRef.current.value", qInputRef?.current?.value)
-  // console.log("filteredId", filteredId)
-  // console.log("queryResult", queryResult)
   const checkRelation = async (id: string) => {
     if (!isLogin || currentUser === null) return
     const inviterIsMedocRef = doc(
@@ -326,6 +319,16 @@ export function Autocomplete(props: Props) {
     }
   }, [getEnvironmentProps, formRef, qInputRef, panelRef])
 
+  console.log(
+    "aaaa",
+    autocomplete.getInputProps({
+      inputElement: qInputRef.current,
+      placeholder: "Search a friend",
+    })
+  )
+
+  const [clear, setClear] = useState("")
+
   return (
     <>
       <InputWrapper {...autocomplete.getRootProps({})}>
@@ -340,8 +343,7 @@ export function Autocomplete(props: Props) {
             <QueryFriendInput
               ref={qInputRef}
               {...autocomplete.getInputProps({
-                inputElement: qInputRef.current,
-                placeholder: "Search a friend",
+                inputElement: null,
               })}
             />
           </QueryIconWrapper>
@@ -356,20 +358,27 @@ export function Autocomplete(props: Props) {
                 {items.length > 0 &&
                   items.map((item) => {
                     return (
-                      <ResultContentWrapper key={item.objectID}>
+                      <ResultContentWrapper
+                        key={item.objectID}
+                        {...autocomplete.getInputProps({
+                          inputElement: null,
+                        })}
+                        onClick={() => {
+                          getQueryResult(item.objectID)
+                          checkRelation(item.objectID)
+                          setAutocompleteState({
+                            ...autocompleteState,
+                            isOpen: false,
+                          })
+                          if (
+                            qInputRef?.current?.value &&
+                            qInputRef?.current?.value.length !== 0
+                          )
+                            qInputRef.current.value = ""
+                        }}
+                      >
                         <ResultContent
                           {...autocomplete.getItemProps({ item, source })}
-                          onClick={() => {
-                            setAutocompleteState({
-                              ...autocompleteState,
-                              isOpen: false,
-                            })
-                            getQueryResult(item.objectID)
-                            checkRelation(item.objectID)
-                            if (qInputRef.current !== null) {
-                              qInputRef.current.value = ""
-                            }
-                          }}
                         >
                           {item.name}
                         </ResultContent>
@@ -381,7 +390,9 @@ export function Autocomplete(props: Props) {
           })}
         </ResultsSection>
       )}
-      {queryResult && !props.invitingIds.includes(queryResult.id) ? (
+      {queryResult &&
+      props.invitingIds !== undefined &&
+      !props.invitingIds.includes(queryResult.id) ? (
         <FilteredWrapper>
           <UserAvatar src={queryResult.photoURL} />
           <FilteredContent>{queryResult.name}</FilteredContent>

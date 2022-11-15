@@ -1,6 +1,5 @@
 import React from "react"
 import styled from "styled-components"
-import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
 import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
@@ -23,15 +22,10 @@ import {
   TabWrapper,
   TabLink,
   TabTitle,
-  SplitWrapper,
 } from "./components/UIforMemoriesPage"
 
 const Title = styled.div`
   color: #000000;
-`
-
-const BtnLink = styled(Link)`
-  margin: 0 20px;
 `
 
 export const MemoryListWrapper = styled.div`

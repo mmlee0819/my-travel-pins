@@ -87,7 +87,6 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
-    language: "en",
     libraries,
   })
 

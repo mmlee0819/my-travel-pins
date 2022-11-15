@@ -14,26 +14,23 @@ const Wrapper = styled.div`
 
 const FormWrapper = styled.form`
   position: absolute;
-  top: 60px;
+  top: 0px;
   display: flex;
   flex-flow: column wrap;
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
   padding: 30px;
   gap: 20px;
   background-color: #ffffff;
-  opacity: 0.6;
+  opacity: 0.9;
 `
 const Input = styled.input`
   height: 40px;
 `
 const BtnWrapper = styled.div`
-  position: absolute;
-  top: 350px;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-around;
-  margin-top: 20px;
+  justify-content: flex-start;
   margin-bottom: 50px;
   background-color: #ffffff;
   opacity: 0.6;
@@ -45,6 +42,7 @@ const Btn = styled.div`
   padding: 10px;
   border: 1px solid #000000;
   border-radius: 10px;
+  cursor: pointer;
 `
 const Title = styled.div`
   color: #000000;
@@ -104,30 +102,30 @@ function Home() {
               >
                 <Input placeholder="Your hometown"></Input>
               </StandaloneSearchBox>
+              <BtnWrapper>
+                <Btn
+                  onClick={() => {
+                    if (result) {
+                      signUp(
+                        nameRef.current.value,
+                        emailRef.current.value,
+                        pwRef.current.value,
+                        result
+                      )
+                    }
+                  }}
+                >
+                  Sign up
+                </Btn>
+                <Btn
+                  onClick={() => {
+                    signIn(emailRef.current.value, pwRef.current.value)
+                  }}
+                >
+                  Sign in
+                </Btn>
+              </BtnWrapper>
             </FormWrapper>
-            <BtnWrapper>
-              <Btn
-                onClick={() => {
-                  if (result) {
-                    signUp(
-                      nameRef.current.value,
-                      emailRef.current.value,
-                      pwRef.current.value,
-                      result
-                    )
-                  }
-                }}
-              >
-                Sign up
-              </Btn>
-              <Btn
-                onClick={() => {
-                  signIn(emailRef.current.value, pwRef.current.value)
-                }}
-              >
-                Sign in
-              </Btn>
-            </BtnWrapper>
           </>
         )}
       </GoogleMap>

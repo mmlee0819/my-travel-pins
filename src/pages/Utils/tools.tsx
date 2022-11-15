@@ -18,7 +18,7 @@ const ToolsWrapper = styled.div`
   display: flex;
   top: 100px;
   right: 30px;
-  z-index: 100;
+  z-index: 200;
 `
 const DragWrapper = styled(animated.div)`
   position: relative;
@@ -99,6 +99,7 @@ function ToolsRobot() {
               setConvertResult(0)
               setShowExchange(false)
               setShowTools((prev) => !prev)
+              setShowWeather(false)
             } else if ((e.target as Element).id === "robotIcon" && !showTools) {
               setShowTools((prev) => !prev)
             }
@@ -110,8 +111,18 @@ function ToolsRobot() {
               <Weather
                 id="weatherIcon"
                 onClick={(e) => {
-                  if ((e.target as Element).id !== "weatherIcon") return
-                  setShowWeather((prev) => !prev)
+                  if (
+                    (e.target as Element).id === "weatherIcon" &&
+                    !showWeather
+                  ) {
+                    setShowExchange(false)
+                    setShowWeather((prev) => !prev)
+                  } else if (
+                    (e.target as Element).id === "weatherIcon" &&
+                    showWeather
+                  ) {
+                    setShowWeather((prev) => !prev)
+                  }
                 }}
               />
               <CurrencyIcon
@@ -123,6 +134,7 @@ function ToolsRobot() {
                   ) {
                     getRatesData(setCurrenciesData)
                     setShowExchange((prev) => !prev)
+                    setShowWeather(false)
                   } else if (
                     (e.target as Element).id === "currencyIcon" &&
                     showExchange

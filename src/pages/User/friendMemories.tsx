@@ -7,18 +7,13 @@ import { GoogleMap, Marker } from "@react-google-maps/api"
 import {
   Container,
   ContentArea,
-  ContentWrapper,
-  NavWrapper,
   Title,
-  BtnLink,
   TabWrapper,
   SplitWrapper,
 } from "./myFriends"
 import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
   MapWrapper,
-  MemoryListWrapper,
-  MemoryList,
   ImgsWrapper,
   ArticleWrapper,
   BtnReadMore,
@@ -34,6 +29,29 @@ import {
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
 
+const ContentWrapper = styled(ContentArea)`
+  margin: 0 auto;
+  padding: 15px;
+  background-color: #ffffff;
+  gap: 20px;
+  border: none;
+`
+
+const MemoryListWrapper = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+  padding: 10px;
+  background-color: #ffffff;
+  gap: 20px;
+`
+const MemoryList = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  height: 150px;
+  padding: 10px 0;
+  background-color: #ffffff;
+  gap: 20px;
+`
 const TabLink = styled(Link)`
   padding: 5px 8px;
   text-align: center;
@@ -89,20 +107,6 @@ function FriendMemories() {
 
   return (
     <>
-      <NavWrapper>
-        {isLogin && currentUser !== undefined ? (
-          <>
-            <Title>我是好友的回憶列表</Title>
-            <BtnLink to="/">HOME</BtnLink>
-            <BtnLink to={`/${currentUser?.name}`}>My-map</BtnLink>
-            <BtnLink to={`/${currentUser?.name}/my-memories`}>
-              my-memories
-            </BtnLink>
-          </>
-        ) : (
-          <Title>你沒有登入</Title>
-        )}
-      </NavWrapper>
       <Container>
         <TabWrapper>
           <TabLink

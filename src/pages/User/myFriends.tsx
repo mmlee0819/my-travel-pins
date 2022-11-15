@@ -102,7 +102,6 @@ export const RightSplit = styled(LeftSplit)`
 export const ContentWrapper = styled(ContentArea)`
   margin: 0 auto;
   padding: 15px;
-
   gap: 20px;
   border: none;
 `

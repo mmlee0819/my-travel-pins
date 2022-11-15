@@ -1,7 +1,6 @@
 import React from "react"
 import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
-import { Link } from "react-router-dom"
 import {
   GoogleMap,
   Marker,
@@ -33,10 +32,6 @@ const Wrapper = styled.div`
 `
 const Title = styled.div`
   color: #000000;
-`
-
-const BtnLink = styled(Link)`
-  margin: 0 20px;
 `
 
 const SearchWrapper = styled.div`

@@ -46,7 +46,7 @@ const GridArea = styled.div`
   top: 0px;
   min-width: 500px;
   min-height: 300px;
-  z-index: 99;
+  z-index: 150;
 `
 const GridItemWrapper = styled.div`
   display: flex;
@@ -84,7 +84,7 @@ const ExchangesRows = styled.div`
   align-items: center;
   justify-content: start;
   gap: 10%;
-  z-index: 100;
+  z-index: 199;
 `
 const CurrenciesWrapper = styled.div`
   display: flex;
@@ -293,7 +293,7 @@ function CurrencyWidget(props: Props) {
         cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
         width={1000}
         rowHeight={350}
-        z-index={99}
+        z-index={199}
       >
         <GridItemWrapper key="exchange-rate">
           <GridItemContent>Currency Converter</GridItemContent>
