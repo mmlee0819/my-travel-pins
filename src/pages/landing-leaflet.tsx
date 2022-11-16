@@ -5,6 +5,7 @@ import React, {
   useContext,
   Dispatch,
   SetStateAction,
+  MouseEvent,
 } from "react"
 import styled from "styled-components"
 import { AuthContext } from "./Context/authContext"
@@ -20,11 +21,8 @@ import {
   Polyline,
   useMapEvents,
 } from "react-leaflet"
-import { Feature, GeoJsonObject } from "geojson"
-import { GeoJsonTypes } from "geojson"
 
 import "leaflet/dist/leaflet.css"
-// import worldGeoData from "./Utils/custom.geo"
 import { countries } from "./Utils/custom.geo"
 import homeMarker from "./assets/markers/hometownIcon.png"
 
@@ -108,29 +106,55 @@ const DefaultIcon = L.icon({
 })
 
 L.Marker.prototype.options.icon = DefaultIcon
-// interface CountriesFeature extends GeoJsonObject {
-//   type: "Feature"
-//   geometry: {
-//     type: string
-//     coordinates: []
-//   }
-//   properties: {
-//     continent: "North America"
-//     name: "Costa Rica"
-//     ne_id: 1159320525
-//     postal: "CR"
-//     region_un: "Americas"
-//     region_wb: "Latin America & Caribbean"
-//     sovereignt: "Costa Rica"
-//     subregion: "Central America"
-//     subunit: "Costa Rica"
-//     type: "Sovereign country"
-//     woe_id: 23424791
-//   }
-// }
+
 interface Props {
   position: LatLng | null
   setPosition: Dispatch<SetStateAction<LatLng | null>>
+}
+interface CountryType {
+  type: "Feature"
+  properties: {
+    featurecla: string
+    scalerank: number
+    labelrank: number
+    sovereignt: string
+    sov_a3: string
+    adm0_dif: number
+    level: number
+    type: string
+    name: string
+  }
+}
+const myCustomStyle = {
+  stroke: false,
+  fill: true,
+  fillColor: "#fff",
+  fillOpacity: 1,
+}
+
+const polylineColor = { color: "#2d2d2d", weight: 0.2 }
+
+const onEachFeature = (country: any, layer: any) => {
+  layer.on("mouseover", function (e: any) {
+    console.log(e.target.feature.properties.name)
+    if (e.target.feature.properties.name === country.properties.name) {
+      layer.setStyle({
+        stroke: false,
+        fill: true,
+        fillColor: "#ffd500",
+        fillOpacity: 1,
+      })
+    }
+  })
+  layer.on("mouseout", function (e: any) {
+    console.log(e)
+    layer.setStyle({
+      stroke: false,
+      fill: true,
+      fillColor: "#fff",
+      fillOpacity: 1,
+    })
+  })
 }
 const TargetArea = (props: Props) => {
   const { position, setPosition } = props
@@ -167,20 +191,7 @@ function Home() {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
   const [position, setPosition] = useState<LatLng | null>(null)
   console.log("position", position)
-  const myCustomStyle = {
-    stroke: false,
-    // color: "#2d2d2d",
-    // weight: 1,
-    fill: true,
-    fillColor: "#fff",
-    fillOpacity: 1,
-  }
-  const polyline = [
-    [40, 135],
-    [60.94190876534587, 207.94735583582917],
-  ]
 
-  const polylineColor = { color: "#2d2d2d", weight: 0.2 }
   return (
     <Container>
       <TitleWrapper>
@@ -202,9 +213,6 @@ function Home() {
           backgroundColor: "rgb(255, 255, 255, 0)",
           borderRadius: "10px",
         }}
-        //   click={()=>{
-        //     locationfound(e) {
-        // setPosition(e.latlng)}}}
       >
         {countries.features.map((country) => {
           return (
@@ -212,6 +220,8 @@ function Home() {
               key={country.properties.name}
               data={country}
               style={myCustomStyle}
+              onEachFeature={onEachFeature}
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
           )
         })}
