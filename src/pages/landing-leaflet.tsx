@@ -18,13 +18,13 @@ import {
   Popup,
   GeoJSON,
   ZoomControl,
-  Polyline,
   useMapEvents,
 } from "react-leaflet"
 
 import "leaflet/dist/leaflet.css"
 import { countries } from "./Utils/custom.geo"
 import homeMarker from "./assets/markers/hometownIcon.png"
+import PhotoWall from "./Components/photoWall"
 
 const Container = styled.div`
   max-width: 1440px;
@@ -60,6 +60,25 @@ const Slogan = styled.div`
   font-family: "Just Me Again Down Here";
   font-size: 1rem;
 `
+
+// const PhotoWrapper = styled.div`
+//   position: absolute;
+//   display: flex;
+//   top: 140px;
+//   right: 280px;
+//   width: 50px;
+//   height: 40px;
+//   padding: 5px;
+//   background-color: #0a3354d6;
+//   border-radius: 5px;
+//   z-index: 170;
+// `
+
+// const MongoDesert = styled.img`
+//   width: 100%;
+//   height: 100%;
+//   object-fit: cover;
+// `
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -130,9 +149,8 @@ const myCustomStyle = {
   fill: true,
   fillColor: "#fff",
   fillOpacity: 1,
+  zIndex: 50,
 }
-
-const polylineColor = { color: "#2d2d2d", weight: 0.2 }
 
 const onEachFeature = (country: any, layer: any) => {
   layer.on("mouseover", function (e: any) {
@@ -167,12 +185,12 @@ const TargetArea = (props: Props) => {
 
   return <Title />
 }
+
 function Home() {
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
 
-  console.log("countries", countries)
   // const [hometownBox, setHometownBox] = useState<
   //   google.maps.places.SearchBox | StandaloneSearchBox
   // >()
@@ -201,15 +219,15 @@ function Home() {
       <MapContainer
         id="homeMap"
         center={[60, 90]}
-        zoomControl={false}
+        zoomControl={true}
         zoom={0}
-        scrollWheelZoom={false}
-        dragging={false}
+        scrollWheelZoom={true}
+        dragging={true}
         style={{
           margin: "0 auto",
           width: "100%",
           height: "100%",
-          zIndex: "50",
+          zIndex: "30",
           backgroundColor: "rgb(255, 255, 255, 0)",
           borderRadius: "10px",
         }}
@@ -225,109 +243,13 @@ function Home() {
             />
           )
         })}
+
         <TargetArea position={position} setPosition={setPosition} />
         {/* <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         /> */}
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [40, 135],
-            [60.94190876534587, 207.94735583582917],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [32, 129.19727864639543],
-            [44.119522447002225, 238.84090939374232],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [67.08194834149987, 121],
-            [82.67959375707717, 202.29303247795994],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [67.08194834149987, 75.78115084640598],
-            [80.98178034291453, 75.78115084640598],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [50, 10],
-            [90, -60],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [50, -90],
-            [83, -150],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [85.83307589186336, -223.59693915403705],
-            [83.36240172078469, -257.3462606722642],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [45, -110],
-            [60, -210],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [-10, -70],
-            [-16.58274254777613, -126.567639789134],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [-10, -70],
-            [-16.58274254777613, -126.567639789134],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [20, 10],
-            [-62.2369168861301, -35.1632273439355],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [0, 25],
-            [-41.98777931411351, 44.991411261853955],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [-25, 135],
-            [-62.8847858855777, 172.95758868513195],
-          ]}
-        />
-        <Polyline
-          pathOptions={polylineColor}
-          positions={[
-            [-40, 175],
-            [-21.890407818937252, 227.80023615225105],
-          ]}
-        />
+        <PhotoWall />
         <Marker position={[42, 121]}>
           <Popup offset={[0, -10]} keepInView={true}>
             My Hometown <br />
