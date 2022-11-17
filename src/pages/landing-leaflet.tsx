@@ -2,14 +2,11 @@ import React, {
   useState,
   useEffect,
   useRef,
-  useContext,
   Dispatch,
   SetStateAction,
-  MouseEvent,
 } from "react"
 import styled from "styled-components"
-import { AuthContext } from "./Context/authContext"
-import L, { LatLng } from "leaflet"
+import L, { LatLng, LeafletEvent } from "leaflet"
 import {
   MapContainer,
   TileLayer,
@@ -25,6 +22,7 @@ import "leaflet/dist/leaflet.css"
 import { countries } from "./Utils/custom.geo"
 import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
+import { AuthContext } from "./Context/authContext"
 
 const Container = styled.div`
   max-width: 1440px;
@@ -61,24 +59,6 @@ const Slogan = styled.div`
   font-size: 1rem;
 `
 
-// const PhotoWrapper = styled.div`
-//   position: absolute;
-//   display: flex;
-//   top: 140px;
-//   right: 280px;
-//   width: 50px;
-//   height: 40px;
-//   padding: 5px;
-//   background-color: #0a3354d6;
-//   border-radius: 5px;
-//   z-index: 170;
-// `
-
-// const MongoDesert = styled.img`
-//   width: 100%;
-//   height: 100%;
-//   object-fit: cover;
-// `
 const Wrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -121,7 +101,7 @@ const Btn = styled.div`
 
 const DefaultIcon = L.icon({
   iconUrl: homeMarker,
-  iconSize: [40, 30],
+  iconSize: [40, 43],
 })
 
 L.Marker.prototype.options.icon = DefaultIcon
@@ -152,10 +132,9 @@ const myCustomStyle = {
   zIndex: 50,
 }
 
-const onEachFeature = (country: any, layer: any) => {
-  layer.on("mouseover", function (e: any) {
-    console.log(e.target.feature.properties.name)
-    if (e.target.feature.properties.name === country.properties.name) {
+const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
+  layer.on("mouseover", (event: LeafletEvent) => {
+    if (event.target.feature.properties.name === country.properties.name) {
       layer.setStyle({
         stroke: false,
         fill: true,
@@ -164,8 +143,7 @@ const onEachFeature = (country: any, layer: any) => {
       })
     }
   })
-  layer.on("mouseout", function (e: any) {
-    console.log(e)
+  layer.on("mouseout", () => {
     layer.setStyle({
       stroke: false,
       fill: true,
@@ -174,7 +152,7 @@ const onEachFeature = (country: any, layer: any) => {
     })
   })
 }
-const TargetArea = (props: Props) => {
+function TargetArea(props: Props) {
   const { position, setPosition } = props
 
   useMapEvents({
@@ -206,9 +184,10 @@ function Home() {
 
   // const { isLoaded, currentUser, isLogin, signUp, signIn } =
   //   useContext(AuthContext)
-  const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
+
   const [position, setPosition] = useState<LatLng | null>(null)
-  console.log("position", position)
+
+  console.log({ position })
 
   return (
     <Container>
@@ -218,11 +197,13 @@ function Home() {
       </TitleWrapper>
       <MapContainer
         id="homeMap"
-        center={[60, 90]}
-        zoomControl={true}
-        zoom={0}
-        scrollWheelZoom={true}
-        dragging={true}
+        center={[39.9437334482122, 58.35942441225613]}
+        zoomControl={false}
+        zoom={window.innerWidth > 900 && window.innerHeight > 600 ? 1 : 0}
+        scrollWheelZoom={false}
+        zoomSnap={0.5}
+        dragging={false}
+        trackResize
         style={{
           margin: "0 auto",
           width: "100%",
@@ -232,17 +213,15 @@ function Home() {
           borderRadius: "10px",
         }}
       >
-        {countries.features.map((country) => {
-          return (
-            <GeoJSON
-              key={country.properties.name}
-              data={country}
-              style={myCustomStyle}
-              onEachFeature={onEachFeature}
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-          )
-        })}
+        {countries.features.map((country) => (
+          <GeoJSON
+            key={country.properties.name}
+            data={country}
+            style={myCustomStyle}
+            onEachFeature={onEachFeature}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+        ))}
 
         <TargetArea position={position} setPosition={setPosition} />
         {/* <TileLayer
@@ -251,7 +230,7 @@ function Home() {
         /> */}
         <PhotoWall />
         <Marker position={[42, 121]}>
-          <Popup offset={[0, -10]} keepInView={true}>
+          <Popup offset={[0, -10]} keepInView>
             My Hometown <br />
             Taiwan
           </Popup>
@@ -308,7 +287,7 @@ function Home() {
             </FormWrapper>
           </>
         )}
-      </Wrapper>*/}
+      </Wrapper> */}
       <Slogan>
         Save your favorite memories and share with your loved ones.
       </Slogan>
