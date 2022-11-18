@@ -89,16 +89,6 @@ const Title = styled.div`
     font-size: 76px;
   }
 `
-const SubTitle = styled.div`
-  padding-right: 3px;
-  font-size: 28px;
-  font-weight: 400;
-  letter-spacing: 0px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 0.8rem;
-  }
-`
 
 const Slogan = styled.div`
   display: flex;
@@ -162,35 +152,53 @@ const SignInTab = styled(Tab)`
 `
 const Wrapper = styled.div`
   position: absolute;
-  top: 80px;
-  left: 80px;
+  top: 30px;
+  left: 20px;
   display: flex;
   flex-flow: column wrap;
   justify-content: flex-start;
-  width: calc(100% - 600px);
+  width: 50%;
+  padding: 20px 10px;
+  font-family: "Poppins";
+  font-size: 20px;
   background-color: rgb(255, 255, 255, 0.6);
   border-radius: 10px;
-  z-index: 160;
+  box-shadow: 0 8px 6px #0000004c;
+  gap: 15px;
+  z-index: 100;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    width: calc(100% - 400px);
+    top: 20px;
+    font-size: 18px;
   }
 `
 
 const Input = styled.input`
-  width: 80%;
-  height: 40px;
+  padding-left: 10px;
+  margin: 0 auto;
+  width: 90%;
+  height: 28px;
+  line-height: 28px;
+  border: none;
 `
 
 const Btn = styled.div`
-  display: inline-block;
-  width: 80%;
-  margin-top: 15px;
-  padding: 10px;
+  display: flex;
+  margin-top: 10px auto 30px auto;
+  justify-content: center;
+  align-self: center;
+  width: 50%;
+  height: 28px;
+  line-height: 28px;
+  font-size: 20px;
   color: #fff;
   background-color: #034961;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+  }
 `
 
 const DefaultIcon = L.icon({
@@ -262,8 +270,7 @@ function TargetArea(props: Props) {
   return null
 }
 function AuthArea(props: AuthProps) {
-  const { isLoaded, currentUser, isLogin, signUp, signIn } =
-    useContext(AuthContext)
+  const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
   const { isSignUp, isSignIn } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
@@ -285,15 +292,31 @@ function AuthArea(props: AuthProps) {
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignUp && (
           <>
-            <Input ref={nameRef} name="userName" placeholder="name" />
-            <Input ref={emailRef} name="accountEmail" placeholder="xxx@xxxxx" />
+            <Input ref={nameRef} name="userName" placeholder="Name" />
+            <Input
+              ref={emailRef}
+              name="accountEmail"
+              placeholder="Email: name@xxxx.com"
+            />
             <Input
               ref={pwRef}
               name="password"
-              placeholder="at least 6 letters"
+              placeholder="Password: at least 6 letters"
             />
-
-            <Input placeholder="Your hometown"></Input>
+            <StandaloneSearchBox
+              onLoad={onLoad}
+              onPlacesChanged={onPlacesChanged}
+            >
+              <Input
+                placeholder="City: your hometown"
+                style={{
+                  display: "flex",
+                  flex: "1 1 auto",
+                  width: "90%",
+                  margin: "0px auto",
+                }}
+              />
+            </StandaloneSearchBox>
             <Btn
               onClick={() => {
                 if (
@@ -318,11 +341,15 @@ function AuthArea(props: AuthProps) {
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignIn && (
           <>
-            <Input ref={emailRef} name="accountEmail" placeholder="xxx@xxxxx" />
+            <Input
+              ref={emailRef}
+              name="accountEmail"
+              placeholder="Account: name@xxxx.com"
+            />
             <Input
               ref={pwRef}
               name="password"
-              placeholder="at least 6 letters"
+              placeholder="Password: at least 6 letters"
             />
             <Btn
               onClick={() => {
@@ -342,7 +369,7 @@ function AuthArea(props: AuthProps) {
 function ChangeCenter({ mapZoom }: { mapZoom: number }) {
   const miniMap = useMap()
   if (mapZoom === 0.5) {
-    miniMap.flyTo([56.57447264034455, -232.03737924171946], 0)
+    miniMap.flyTo([56.57447264034455, -350.03737924171946], 0)
   } else {
     miniMap.flyTo([30.51620596509747, -210.12413187632802], 1)
   }
@@ -472,9 +499,9 @@ function Home() {
             {/* )} */}
           </>
         )}
-        {/* {(isSignUp || isSignIn) && (
+        {(isSignUp || isSignIn) && (
           <AuthArea isSignUp={isSignUp} isSignIn={isSignIn} />
-        )} */}
+        )}
       </Container>
       <Slogan>
         Save your favorite memories and share with your loved ones.
