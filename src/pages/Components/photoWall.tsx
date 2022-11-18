@@ -5,9 +5,8 @@ import "leaflet/dist/leaflet.css"
 import mongoDesert from "../assets/photoWall/desert.png"
 import galaSki from "../assets/photoWall/galaSki.png"
 import ramen from "../assets/photoWall/ramen.png"
-import euroLeft from "../assets/photoWall/euro.png"
 import euroRight from "../assets/photoWall/euro1.png"
-import greedland from "../assets/photoWall/greedland.png"
+import greenland from "../assets/photoWall/greenland.png"
 import ny from "../assets/photoWall/NY.png"
 import westUS from "../assets/photoWall/westUS.png"
 import peru from "../assets/photoWall/peru.png"
@@ -18,7 +17,7 @@ import newZe from "../assets/photoWall/newZe.png"
 
 const polylineColor = { color: "#2d2d2d", weight: 0.2 }
 const rectangleColor = { color: "#2d2d2d", weight: 5 }
-const MongoImg = () => {
+function MongoImg() {
   return (
     <>
       <Polyline
@@ -51,7 +50,7 @@ const MongoImg = () => {
     </>
   )
 }
-const JapanImg = () => {
+function JapanImg() {
   return (
     <>
       <Polyline
@@ -113,7 +112,7 @@ const JapanImg = () => {
   )
 }
 
-const EuroImg = () => {
+function EuroImg() {
   return (
     <>
       {/* <Rectangle
@@ -167,7 +166,7 @@ const EuroImg = () => {
   )
 }
 
-const GreedlandImg = () => {
+function GreenlandImg() {
   return (
     <>
       <Polyline
@@ -189,7 +188,7 @@ const GreedlandImg = () => {
         <ImageOverlay
           zIndex={200}
           opacity={0.95}
-          url={greedland}
+          url={greenland}
           bounds={
             new LatLngBounds(
               [80.03638597001625, -26.725577122836423],
@@ -202,7 +201,7 @@ const GreedlandImg = () => {
   )
 }
 
-const NYImg = () => {
+function NYImg() {
   return (
     <>
       <Polyline
@@ -227,7 +226,7 @@ const NYImg = () => {
   )
 }
 
-const WestUSImg = () => {
+function WestUSImg() {
   return (
     <>
       <Polyline
@@ -252,22 +251,22 @@ const WestUSImg = () => {
   )
 }
 
-const PeruImg = () => {
+function PeruImg() {
   return (
     <>
       <Polyline
         pathOptions={polylineColor}
         positions={[
           [-10, -70],
-          [-16.58274254777613, -126.567639789134],
+          [-12.470980658060448, -109.73282674472917],
         ]}
       />
       <Rectangle
         pathOptions={rectangleColor}
         bounds={
           new LatLngBounds(
-            [-12.58274254777613, -126.567639789134],
-            [-44.22504447459736, -166.64401797424517]
+            [-10.404225790358948, -116.05789397984469],
+            [-42.02064852555764, -160.3333646256533]
           )
         }
       >
@@ -277,8 +276,8 @@ const PeruImg = () => {
           url={peru}
           bounds={
             new LatLngBounds(
-              [-12.58274254777613, -126.567639789134],
-              [-44.22504447459736, -166.64401797424517]
+              [-10.404225790358948, -116.05789397984469],
+              [-42.02064852555764, -160.3333646256533]
             )
           }
         />
@@ -287,8 +286,8 @@ const PeruImg = () => {
         pathOptions={rectangleColor}
         bounds={
           new LatLngBounds(
-            [-12.58274254777613, -176],
-            [-44.22504447459736, -218.3810258715808]
+            [-10.404225790358948, -165.95564661242264],
+            [-42.02064852555764, -209.52539428785474]
           )
         }
       >
@@ -298,8 +297,8 @@ const PeruImg = () => {
           url={peruLeft}
           bounds={
             new LatLngBounds(
-              [-12.58274254777613, -176],
-              [-44.22504447459736, -218.3810258715808]
+              [-10.404225790358948, -165.95564661242264],
+              [-42.02064852555764, -209.52539428785474]
             )
           }
         />
@@ -308,7 +307,7 @@ const PeruImg = () => {
   )
 }
 
-const EgyptImg = () => {
+function EgyptImg() {
   return (
     <>
       <Polyline
@@ -343,7 +342,7 @@ const EgyptImg = () => {
   )
 }
 
-const AustraliaImg = () => {
+function AustraliaImg() {
   return (
     <>
       <Polyline
@@ -378,7 +377,7 @@ const AustraliaImg = () => {
   )
 }
 
-const NewzelandImg = () => {
+function NewzealandImg() {
   return (
     <>
       <Polyline
@@ -418,13 +417,13 @@ export default function PhotoWall() {
       <JapanImg />
       <MongoImg />
       <EuroImg />
-      <GreedlandImg />
+      <GreenlandImg />
       <NYImg />
       <WestUSImg />
       <PeruImg />
       <EgyptImg />
       <AustraliaImg />
-      <NewzelandImg />
+      <NewzealandImg />
     </>
   )
 }
