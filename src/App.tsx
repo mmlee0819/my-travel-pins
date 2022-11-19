@@ -11,15 +11,17 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
   body {
-    font-family: 'Jomhuria','Poppins', sans-serif;
+    font-family: "Jomhuria","Poppins","sans-serif";
    }
-
   #root {
     position: relative;
     min-height: 100vh;
     padding:60px;
-    background-color: #2d2d2d;
+    color:#fff;
+    background-color: #5594b7;
   }
+
+ 
 `
 function App() {
   return (

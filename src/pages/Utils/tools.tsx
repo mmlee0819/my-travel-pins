@@ -1,23 +1,25 @@
-import React, { useState, useContext } from "react"
-import { ToolContext } from "../Context/toolContext"
+import React, { useState, useContext, useEffect } from "react"
 import { useDrag } from "@use-gesture/react"
 import { useSpring, animated } from "@react-spring/web"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
-import robot from "../assets/robotic1.png"
+import robot from "../assets/chatbot.png"
 import currency from "../assets/whiteCurrencies.png"
 import flight from "../assets/whiteAirplane.png"
 import hsr from "../assets/whiteHSR.png"
 import train from "../assets/whiteTrain.png"
 import tripAdvisor from "../assets/tripadvisor.png"
 import weather from "../assets/whiteWeather.png"
-import CurrencyWidget, { getRatesData } from "../Tools/currencies"
-import WeatherWidget from "../Tools/weather"
+import CurrencyWidget, { getRatesData } from "../Widgets/currencies"
+import WeatherWidget from "../Widgets/weather"
+import FlightWidget from "../Widgets/flight"
+import { ToolContext } from "../Context/toolContext"
+
 const ToolsWrapper = styled.div`
   position: absolute;
   display: flex;
-  top: 100px;
-  right: 30px;
+  top: 80px;
+  right: 35px;
   z-index: 200;
 `
 const DragWrapper = styled(animated.div)`
@@ -72,7 +74,8 @@ function ToolsRobot() {
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
   const [showWeather, setShowWeather] = useState(false)
-  console.log("showWeather", showWeather)
+  const [showFlight, setShowFlight] = useState(false)
+
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -85,11 +88,66 @@ function ToolsRobot() {
     })
   })
 
+  const [loopStyles, setLoopStyles] = useState({
+    loop: { reverse: false },
+    from: { rotateZ: 0 },
+    to: { rotateZ: 0 },
+  })
+
+  const styles = useSpring(loopStyles)
+  useEffect(() => {
+    if (
+      !showTools &&
+      (window.location.href === "https://my-travel-pins.web.app/" ||
+        window.location.href === "https://localhost:3000/")
+    ) {
+      setLoopStyles({
+        loop: { reverse: true },
+        from: { rotateZ: -20 },
+        to: { rotateZ: 20 },
+      })
+    }
+    const handleMouseover = (e: MouseEvent) => {
+      if ((e.target as Element).id === "robotIcon" || showTools) {
+        setLoopStyles({
+          loop: { reverse: false },
+          from: { rotateZ: 0 },
+          to: { rotateZ: 0 },
+        })
+      }
+    }
+    window.addEventListener("mouseover", handleMouseover)
+    return () => {
+      window.removeEventListener("mouseover", handleMouseover)
+    }
+  }, [showTools])
+
+  useEffect(() => {
+    const handleMouseout = (e: MouseEvent) => {
+      if (
+        (e.target as Element).id === "robotIcon" &&
+        !showTools &&
+        (window.location.href === "https://my-travel-pins.web.app/" ||
+          window.location.href === "https://localhost:3000/")
+      ) {
+        setLoopStyles({
+          loop: { reverse: true },
+          from: { rotateZ: -20 },
+          to: { rotateZ: 20 },
+        })
+      }
+    }
+    window.addEventListener("mouseout", handleMouseout)
+    return () => {
+      window.removeEventListener("mouseout", handleMouseout)
+    }
+  }, [showTools])
+
   return (
     <>
       <ToolsWrapper>
         <DragWrapper
-          style={{ x, y }}
+          style={{ x, y, ...styles }}
           {...bindDrag()}
           onClick={(e) => {
             if ((e.target as Element).id === "robotIcon" && showTools) {
@@ -143,7 +201,24 @@ function ToolsRobot() {
                   }
                 }}
               />
-              <FlightIcon id="flightIcon" />
+              <FlightIcon
+                id="flightIcon"
+                // onClick={(e) => {
+                //   if (
+                //     (e.target as Element).id === "flightIcon" &&
+                //     !showFlight
+                //   ) {
+                //     setShowExchange(false)
+                //     setShowWeather(false)
+                //     setShowFlight((prev) => !prev)
+                //   } else if (
+                //     (e.target as Element).id === "flightIcon" &&
+                //     showFlight
+                //   ) {
+                //     setShowFlight((prev) => !prev)
+                //   }
+                // }}
+              />
               <HSRIcon id="hsrIcon" />
               <TrainIcon id="trainIcon" />
               <TAIcon id="tripAdviIcon" />
@@ -153,7 +228,7 @@ function ToolsRobot() {
           )}
         </DragWrapper>
       </ToolsWrapper>
-      {showExchange ? (
+      {showExchange && (
         <CurrencyWidget
           showFrom={showFrom}
           setShowFrom={setShowFrom}
@@ -161,10 +236,9 @@ function ToolsRobot() {
           setShowTo={setShowTo}
           currenciesData={currenciesData}
         />
-      ) : (
-        ""
       )}
-      {showWeather ? <WeatherWidget showWeather={showWeather} /> : ""}
+      {showWeather && <WeatherWidget showWeather={showWeather} />}
+      {showFlight && <FlightWidget showFlight={showFlight} />}
     </>
   )
 }

@@ -5,16 +5,21 @@ import defaultAvatar from "../assets/defaultProfile.png"
 import { AuthContext } from "../Context/authContext"
 
 const HeaderContainer = styled.div`
-  position: fixed;
-  top: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  align-items: end;
-  width: 100%;
-  height: 60px;
-  padding-right: 60px;
-  background-color: #2d2d2d;
+  @media screen and (max-width: 1440px) {
+    position: fixed;
+    top: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: end;
+    height: 60px;
+    width: 100%;
+    max-width: 1440px;
+    padding-right: 60px;
+    color: #fff;
+    background-color: #2d2d2d;
+    z-index: 180;
+  }
 `
 const RowNoWrapper = styled.div`
   display: flex;
@@ -32,7 +37,6 @@ const UserAvatar = styled.div`
 `
 
 const Title = styled.div`
-  color: #ffffff;
   font-size: 2rem;
 `
 
@@ -43,7 +47,6 @@ const LoginArea = styled.div`
   margin-right: 60px;
 `
 const BtnLink = styled(Link)`
-  color: #ffffff;
   text-decoration: none;
   margin: 0 20px;
   &:hover {
@@ -52,7 +55,6 @@ const BtnLink = styled(Link)`
 `
 const Btn = styled.div`
   display: inline-block;
-  color: #ffffff;
   padding: 10px;
   border: 2px solid #ffffff;
   border-radius: 10px;
@@ -62,15 +64,12 @@ const Btn = styled.div`
 function Header() {
   const { currentUser, isLogin, logOut } = useContext(AuthContext)
 
+  if (!isLogin || currentUser === undefined || currentUser === null) return null
   return (
     <HeaderContainer>
       <RowNoWrapper>
         <UserAvatar />
-        <Title>
-          {isLogin && currentUser !== null
-            ? `Hello ${currentUser?.name} !`
-            : "Welcome"}
-        </Title>
+        <Title>{`Hello ${currentUser?.name} !`}</Title>
       </RowNoWrapper>
       {isLogin && currentUser !== undefined && (
         <LoginArea>
