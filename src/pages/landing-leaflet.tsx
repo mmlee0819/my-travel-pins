@@ -155,10 +155,12 @@ const SignInTab = styled(Tab)`
 const TipText = styled.div`
   display: flex;
   padding: 0 15px;
-  border: 1px solid #fff;
   border: none;
   gap: 5px;
   cursor: pointer;
+  &:hover {
+    border-bottom: 3px solid #fff;
+  }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     padding: 2px 10px;
@@ -450,6 +452,7 @@ function Home() {
   const [mapZoom, setMapZoom] = useState<number>(0)
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
+  const [hasRead, setHasRead] = useState(false)
 
   const [fingerRoute, setFingerRoute] = useState({
     lat: 76.28248506785224,
@@ -600,7 +603,7 @@ function Home() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
-              {!showSamplePost && (
+              {!hasRead && !showSamplePost && (
                 <FingerMarker data={fingerRoute} mapZoom={mapZoom} />
               )}
               {(isSignUp || isSignIn) && <ChangeCenter mapZoom={mapZoom} />}
@@ -633,7 +636,14 @@ function Home() {
         &copy; OpenStreetMap
       </Attribution> */}
       {showTips && <TipsContent setShowTips={setShowTips} />}
-      {showSamplePost && <SampleMemory setShowSamplePost={setShowSamplePost} />}
+      {showSamplePost && (
+        <SampleMemory
+          setShowSamplePost={setShowSamplePost}
+          setHasRead={setHasRead}
+          setIsSignUp={setIsSignUp}
+          setIsSignIn={setIsSignIn}
+        />
+      )}
     </>
   )
 }

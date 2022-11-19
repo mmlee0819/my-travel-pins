@@ -53,6 +53,19 @@ const TextNoMargin = styled(Text)`
   margin: 0;
   text-align: justify;
 `
+const LinkText = styled(TextNoMargin)`
+  display: inline-block;
+  padding-left: 15px;
+  color: #5594b7;
+  cursor: pointer;
+  &:hover {
+    border-bottom: 3px solid #034961;
+  }
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    padding: 2px 10px;
+  }
+`
 const Xmark = styled.div`
   position: absolute;
   top: 20px;
@@ -138,8 +151,14 @@ export function TipsContent({
 
 export function SampleMemory({
   setShowSamplePost,
+  setHasRead,
+  setIsSignUp,
+  setIsSignIn,
 }: {
   setShowSamplePost: Dispatch<SetStateAction<boolean>>
+  setHasRead: Dispatch<SetStateAction<boolean>>
+  setIsSignUp: Dispatch<SetStateAction<boolean>>
+  setIsSignIn: Dispatch<SetStateAction<boolean>>
 }) {
   const { isLoaded } = useContext(AuthContext)
   const onStreetLoad = () => {
@@ -163,6 +182,7 @@ export function SampleMemory({
         <Xmark
           onClick={() => {
             setShowSamplePost(false)
+            setHasRead(true)
           }}
         />
         <Text>My First Time Skiing </Text>
@@ -177,6 +197,35 @@ export function SampleMemory({
           As a member, <br />
           you can upload photos, post an article to save your travel memories
           here!
+          <br />
+          <br />
+          Also, you can use Google streetView service below.
+          <br />
+          The location information is based on the marker you added.
+        </Text>
+        <Text>
+          Not a member yet?{" "}
+          <LinkText
+            onClick={() => {
+              setShowSamplePost(false)
+              setHasRead(true)
+              setIsSignUp(true)
+            }}
+          >
+            Sign up
+          </LinkText>
+        </Text>
+        <Text>
+          Already have an account?{" "}
+          <LinkText
+            onClick={() => {
+              setShowSamplePost(false)
+              setHasRead(true)
+              setIsSignIn(true)
+            }}
+          >
+            Sign in
+          </LinkText>
         </Text>
         <TextNoMargin> GALA湯沢スキー場</TextNoMargin>
         {isLoaded && (
