@@ -263,7 +263,7 @@ export function SampleMemory({
   }
   const users = [
     { name: "Henry Chen", avatar: pkcAvatar, msg: "攝影師拍得真好！" },
-    { name: "ChengCheng", avatar: cyuAvatar, msg: "都不揪" },
+    { name: "ChengCheng", avatar: cyuAvatar, msg: "我想認識櫻花妹！" },
     { name: "Lays Wang", avatar: laysAvatar, msg: "爬不起來?" },
   ]
   return (

@@ -380,6 +380,7 @@ function AuthArea(props: AuthProps) {
               placeholder="Email: name@xxxx.com"
             />
             <Input
+              type="password"
               ref={pwRef}
               name="password"
               placeholder="Password: at least 6 letters"
@@ -433,6 +434,7 @@ function AuthArea(props: AuthProps) {
               placeholder="Account: name@xxxx.com"
             />
             <Input
+              type="password"
               ref={pwRef}
               name="password"
               placeholder="Password: at least 6 letters"
@@ -478,8 +480,7 @@ function ChangeCenterBack({ mapZoom }: { mapZoom: number }) {
 
 let cursor = 0
 function Home() {
-  const { isLoaded, currentUser, isLogin, signUp, signIn } =
-    useContext(AuthContext)
+  const { currentUser, isLogin } = useContext(AuthContext)
 
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)

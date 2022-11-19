@@ -1,4 +1,4 @@
-import React from "react"
+import React, { Dispatch, SetStateAction } from "react"
 import { LatLngBounds } from "leaflet"
 import { Polyline, Rectangle, ImageOverlay } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
@@ -30,6 +30,7 @@ function MongoImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [77, 172.29303247795994],
@@ -51,7 +52,11 @@ function MongoImg() {
     </>
   )
 }
-function JapanImg() {
+function JapanImg({
+  setShowSamplePost,
+}: {
+  setShowSamplePost: Dispatch<SetStateAction<boolean>>
+}) {
   return (
     <>
       <Polyline
@@ -69,6 +74,11 @@ function JapanImg() {
             [60.22150512596082, 290.4898699038423]
           )
         }
+        eventHandlers={{
+          click() {
+            setShowSamplePost(true)
+          },
+        }}
       >
         <ImageOverlay
           zIndex={200}
@@ -90,6 +100,7 @@ function JapanImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [55.08931726566487, 330.258093930417],
@@ -145,6 +156,7 @@ function EuroImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [75.98482299549886, 60.17341894104317],
@@ -179,6 +191,7 @@ function GreenlandImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [80.03638597001625, -26.725577122836423],
@@ -214,6 +227,7 @@ function NYImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={new LatLngBounds([85, -190], [73, -150])}
       >
         <ImageOverlay
@@ -239,6 +253,7 @@ function WestUSImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={new LatLngBounds([48, -260], [65, -213])}
       >
         <ImageOverlay
@@ -264,6 +279,7 @@ function PeruImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [-10.404225790358948, -116.05789397984469],
@@ -285,6 +301,7 @@ function PeruImg() {
       </Rectangle>
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [-10.404225790358948, -165.95564661242264],
@@ -320,6 +337,7 @@ function EgyptImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [-47.78325990761666, 28.010915802361357],
@@ -355,6 +373,7 @@ function AustraliaImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [-53.976185641487625, 81.43134728545967],
@@ -390,6 +409,7 @@ function NewzealandImg() {
       />
       <Rectangle
         pathOptions={rectangleColor}
+        interactive={false}
         bounds={
           new LatLngBounds(
             [-26.806685731042855, 220.0114301357182],
@@ -412,10 +432,14 @@ function NewzealandImg() {
     </>
   )
 }
-export default function PhotoWall() {
+export default function PhotoWall({
+  setShowSamplePost,
+}: {
+  setShowSamplePost: Dispatch<SetStateAction<boolean>>
+}) {
   return (
     <>
-      <JapanImg />
+      <JapanImg setShowSamplePost={setShowSamplePost} />
       <MongoImg />
       <EuroImg />
       <GreenlandImg />
