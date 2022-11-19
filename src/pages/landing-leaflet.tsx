@@ -25,7 +25,7 @@ import { countries } from "./Utils/custom.geo"
 import { AuthContext } from "./Context/authContext"
 import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
-import { TipsContent } from "./Components/sampleContent"
+import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/finger.png"
 import tip from "./assets/tip.png"
 
@@ -633,6 +633,7 @@ function Home() {
         &copy; OpenStreetMap
       </Attribution> */}
       {showTips && <TipsContent setShowTips={setShowTips} />}
+      {showSamplePost && <SampleMemory setShowSamplePost={setShowSamplePost} />}
     </>
   )
 }
