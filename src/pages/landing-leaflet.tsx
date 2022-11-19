@@ -25,7 +25,9 @@ import { countries } from "./Utils/custom.geo"
 import { AuthContext } from "./Context/authContext"
 import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
+import { TipsContent } from "./Components/sampleContent"
 import finger from "./assets/finger.png"
+import tip from "./assets/tip.png"
 
 const Attribution = styled.a`
   position: absolute;
@@ -148,6 +150,31 @@ const SignInTab = styled(Tab)`
   &:hover {
     color: ${(props) => !props.isSignIn && "#5594b7"};
     background-color: #fff;
+  }
+`
+const TipText = styled.div`
+  display: flex;
+  padding: 0 15px;
+  border: 1px solid #fff;
+  border: none;
+  gap: 5px;
+  cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    padding: 2px 10px;
+  }
+`
+const TipTab = styled.div`
+  display: flex;
+  width: 30px;
+  height: 30px;
+  background-image: url(${tip});
+  background-size: contain;
+  cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    width: 25px;
+    height: 25px;
   }
 `
 const Wrapper = styled.div`
@@ -273,6 +300,7 @@ function TargetArea(props: Props) {
 
   return null
 }
+
 const fingerIcon = L.icon({
   iconSize: [60, 60],
   iconAnchor: [30, 0],
@@ -281,11 +309,9 @@ const fingerIcon = L.icon({
 
 function FingerMarker({
   data,
-  setShowSamplePost,
   mapZoom,
 }: {
   data: RoutePositionType
-  setShowSamplePost: Dispatch<SetStateAction<boolean>>
   mapZoom: number
 }) {
   const { lat, lng } = data
@@ -296,11 +322,6 @@ function FingerMarker({
     }
   }, [lat, lng, fingerPos])
 
-  useMapEvents({
-    click(e) {
-      setShowSamplePost(true)
-    },
-  })
   return (
     <LeafletTrackingMarker
       icon={fingerIcon}
@@ -309,6 +330,7 @@ function FingerMarker({
     />
   )
 }
+
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
   const { isSignUp, isSignIn } = props
@@ -426,14 +448,16 @@ function Home() {
   const [isSignIn, setIsSignIn] = useState(false)
   console.log({ position })
   const [mapZoom, setMapZoom] = useState<number>(0)
+  const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
+
   const [fingerRoute, setFingerRoute] = useState({
-    lat: 72.85778683843621,
-    lng: 326.121805527722,
+    lat: 76.28248506785224,
+    lng: 308,
   })
   const [routePositions, setRoutePositions] = useState([
-    { lat: 78.85778683843621, lng: 300.121805527722 },
-    { lat: 78.7224158166044, lng: 296.2913378952427 },
+    { lat: 76, lng: 309 },
+    { lat: 77, lng: 310 },
   ])
 
   useEffect(() => {
@@ -444,8 +468,8 @@ function Home() {
       ])
     } else {
       setRoutePositions([
-        { lat: 78.85778683843621, lng: 300.121805527722 },
-        { lat: 78.7224158166044, lng: 296.2913378952427 },
+        { lat: 76, lng: 310 },
+        { lat: 77, lng: 311 },
       ])
     }
   }, [mapZoom])
@@ -533,6 +557,14 @@ function Home() {
           >
             Sign In
           </SignInTab>
+          <TipText
+            onClick={() => {
+              setShowTips((prev) => !prev)
+            }}
+          >
+            <TipTab />
+            Tips
+          </TipText>
         </TabWrapper>
       </HeaderWrapper>
       <Container>
@@ -569,23 +601,17 @@ function Home() {
                 />
               ))}
               {!showSamplePost && (
-                <FingerMarker
-                  data={fingerRoute}
-                  setShowSamplePost={setShowSamplePost}
-                  mapZoom={mapZoom}
-                />
+                <FingerMarker data={fingerRoute} mapZoom={mapZoom} />
               )}
-              {/* <Marker
-                icon={fingerIcon}
-                position={[72.85778683843621, 326.121805527722]}
-              /> */}
               {(isSignUp || isSignIn) && <ChangeCenter mapZoom={mapZoom} />}
               <TargetArea position={position} setPosition={setPosition} />
               {/* <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         /> */}
-              {!isSignUp && !isSignIn && <PhotoWall />}
+              {!isSignUp && !isSignIn && (
+                <PhotoWall setShowSamplePost={setShowSamplePost} />
+              )}
               <Marker position={[42, 121]}>
                 <Popup offset={[0, -10]} keepInView>
                   My Hometown <br />
@@ -606,6 +632,7 @@ function Home() {
       {/* <Attribution href="https://www.openstreetmap.org/copyright">
         &copy; OpenStreetMap
       </Attribution> */}
+      {showTips && <TipsContent setShowTips={setShowTips} />}
     </>
   )
 }
