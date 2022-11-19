@@ -182,16 +182,16 @@ const TipTab = styled.div`
 `
 const Xmark = styled.div`
   position: absolute;
-  right: 30px;
+  right: 50px;
   bottom: 20px;
   background-image: url(${xMark});
   background-size: 100% 100%;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    width: 30px;
-    height: 30px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    right: 30px;
   }
 `
 const Wrapper = styled.div`

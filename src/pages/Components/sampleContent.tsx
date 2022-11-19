@@ -7,6 +7,11 @@ import gala2 from "../assets/samplePhotos/gala2.jpg"
 import gala3 from "../assets/samplePhotos/gala3.jpg"
 import gala4 from "../assets/samplePhotos/gala4.jpg"
 import { AuthContext } from "../Context/authContext"
+import mmAvatar from "../assets/samplePhotos/mmAvatar.jpg"
+import pkcAvatar from "../assets/samplePhotos/pkcAvatar.jpg"
+import cyuAvatar from "../assets/samplePhotos/cyuAvatar.jpg"
+import laysAvatar from "../assets/samplePhotos/laysAvatar.jpg"
+import moreIcon from "../assets/moreIcon.png"
 
 const Container = styled.div`
   position: absolute;
@@ -26,6 +31,7 @@ const ContentArea = styled.div`
   font-size: 4rem;
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
+  box-shadow: 0px 0px 3px 10px #232323c2;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
@@ -48,10 +54,15 @@ const Text = styled.div`
   font-family: "Poppins", "sans-serif";
   font-size: 25px;
   margin: 25px 0;
-
   @media screen and (max-width: 799px), (max-height: 600px) {
     font-size: 18px;
   }
+`
+const ArticleTitle = styled(Text)`
+  font-weight: 700;
+`
+const Reminder = styled(Text)`
+  color: #034961;
 `
 const TextNoMargin = styled(Text)`
   margin: 0;
@@ -119,6 +130,77 @@ const Gala3 = styled(Photo)`
 const Gala4 = styled(Photo)`
   background-image: url(${gala4});
 `
+const MsgNumText = styled.div`
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  padding-right: 20px;
+  border-bottom: 2px solid #d4d4d4;
+`
+const MsgContent = styled.div`
+  display: flex;
+  flex: 1 1 auto;
+  font-size: 16px;
+  padding-left: 8px;
+  background-color: #f6f6f6;
+  border: none;
+  border-radius: 10px;
+`
+const Placeholder = styled(MsgContent)`
+  align-self: center;
+  line-height: 30px;
+  color: #8d8d8d;
+  background-color: #cbcbcb;
+`
+const UserAvatar = styled.div<{ photoURL: string }>`
+  display: flex;
+  align-self: center;
+  margin-right: 5px;
+  width: 30px;
+  height: 30px;
+  background-image: ${(props) => `url(${props.photoURL})`};
+  background-size: 100% 100%;
+  border-radius: 50%;
+`
+const MsgColumnWrapper = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+  width: 100%;
+  height: 300px;
+`
+const MsgRowNoWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  margin: 5px 0;
+`
+const BtnMore = styled.div`
+  position: absolute;
+  right: 40px;
+  display: inline-block;
+  width: 30px;
+  height: 25px;
+  font-size: 16px;
+  background-image: url(${moreIcon});
+  background-size: cover;
+`
+const BtnMsgDelete = styled.div`
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: inline-block;
+  text-align: center;
+  padding: 5px 10px;
+  line-height: 16px;
+  height: 30px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #5594b7;
+  border-radius: 5px;
+  z-index: 30;
+`
+
 export function TipsContent({
   setShowTips,
 }: {
@@ -179,7 +261,11 @@ export function SampleMemory({
       }
     )
   }
-
+  const users = [
+    { name: "Henry Chen", avatar: pkcAvatar, msg: "攝影師拍得真好！" },
+    { name: "ChengCheng", avatar: cyuAvatar, msg: "都不揪" },
+    { name: "Lays Wang", avatar: laysAvatar, msg: "爬不起來?" },
+  ]
   return (
     <Container>
       <ContentArea>
@@ -189,7 +275,7 @@ export function SampleMemory({
             setHasRead(true)
           }}
         />
-        <Text>My First Time Skiing </Text>
+        <ArticleTitle>My First Time Skiing </ArticleTitle>
         <TextNoMargin>Mar.2019</TextNoMargin>
         <PhotoWrapper>
           <Gala3 />
@@ -198,14 +284,47 @@ export function SampleMemory({
           <Gala2 />
         </PhotoWrapper>
         <Text>
-          As a member, <br />
-          you can upload photos, post an article to save your travel memories
-          here!
+          As a member, you can...
           <br />
+          - upload photos, post an article to save your travel memories here!
           <br />
-          Also, you can use Google streetView service below.
+          - leave messages with your friends!
           <br />
-          The location information is based on the marker you added.
+          <Reminder>
+            Note: Only your friends have access to your memories.
+          </Reminder>
+          <br />
+          <MsgNumText>4則留言</MsgNumText>
+          <MsgColumnWrapper>
+            <MsgRowNoWrapper>
+              <UserAvatar photoURL={mmAvatar} />
+              <Placeholder>Leave message...</Placeholder>
+            </MsgRowNoWrapper>
+            <MsgRowNoWrapper>
+              <UserAvatar photoURL={mmAvatar} />
+              <MsgContent>
+                Mika
+                <br />
+                許願：2024冬天去滑雪！
+              </MsgContent>
+              <BtnMore />
+              <BtnMsgDelete>Delete</BtnMsgDelete>
+            </MsgRowNoWrapper>
+            {users.map((user) => (
+              <MsgRowNoWrapper key={user.name}>
+                <UserAvatar photoURL={user.avatar} />
+                <MsgContent>
+                  {user.name}
+                  <br />
+                  {user.msg}
+                </MsgContent>
+              </MsgRowNoWrapper>
+            ))}
+          </MsgColumnWrapper>
+          Also, visitors can see other details about the place you went from
+          Google streetView service!
+          <br />
+          Maybe they will go there too in the future!
         </Text>
 
         <TextNoMargin> GALA湯沢スキー場</TextNoMargin>
@@ -214,7 +333,8 @@ export function SampleMemory({
             <StreetViewService onLoad={onStreetLoad} />
           </StreetModeContainer>
         )}
-        <Text>
+        <br />
+        <TextNoMargin>
           Not a member yet?
           <LinkText
             onClick={() => {
@@ -225,9 +345,9 @@ export function SampleMemory({
           >
             Sign up
           </LinkText>
-        </Text>
-        <Text>
-          Already have an account?{" "}
+        </TextNoMargin>
+        <TextNoMargin>
+          Already have an account?
           <LinkText
             onClick={() => {
               setShowSamplePost(false)
@@ -237,19 +357,18 @@ export function SampleMemory({
           >
             Sign in
           </LinkText>
-        </Text>
-        <Text>
+        </TextNoMargin>
+        <TextNoMargin>
           Not decided yet?
           <LinkText
             onClick={() => {
               setShowSamplePost(false)
               setHasRead(true)
-              setIsSignIn(true)
             }}
           >
             Back to Home
           </LinkText>
-        </Text>
+        </TextNoMargin>
       </ContentArea>
     </Container>
   )
