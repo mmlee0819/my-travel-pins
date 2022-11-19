@@ -7,7 +7,7 @@ import React, {
   useContext,
 } from "react"
 import styled from "styled-components"
-import L, { LatLng, LeafletEvent } from "leaflet"
+import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
 import {
   MapContainer,
   TileLayer,
@@ -18,12 +18,14 @@ import {
   ZoomControl,
   useMapEvents,
 } from "react-leaflet"
+import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
 import { countries } from "./Utils/custom.geo"
+import { AuthContext } from "./Context/authContext"
 import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
-import { AuthContext } from "./Context/authContext"
+import finger from "./assets/finger.png"
 
 const Attribution = styled.a`
   position: absolute;
@@ -44,6 +46,7 @@ const Attribution = styled.a`
     text-decoration: underline;
   }
 `
+
 const Container = styled.div`
   position: relative;
   margin: 0 auto;
@@ -53,29 +56,26 @@ const Container = styled.div`
   background-color: rgb(255, 255, 255, 0.1);
   border-radius: 20px;
 `
-// const TitleWrapper = styled.div`
-//   position: absolute;
-//   top: 30px;
-//   right: 50px;
-//   width: 100%;
-//   margin: 0 auto;
-//   max-width: 1440px;
-//   text-align: right;
-//   font-family: "Jaldi";
-//   color: #fff;
-//   @media screen and (max-width: 900px) and (min-width: 600px),
-//     (max-height: 600px) {
-//     top: 18px;
-//     right: 70px;
-//   }
-// `
+const HeaderWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding-left: 20px;
+  max-width: 1440px;
+  width: 100%;
+  height: 60px;
+  font-family: "Jomhuria";
+  opacity: 1;
+  gap: 20px;
+`
 const Title = styled.div`
   position: absolute;
-  top: 10px;
-  right: 80px;
+  top: 0;
+  right: 10px;
   margin: 0 auto;
   max-width: 1440px;
-  text-align: right;
   font-family: "Jomhuria";
   color: #fff;
   font-size: 90px;
@@ -85,7 +85,6 @@ const Title = styled.div`
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    top: 0px;
     font-size: 76px;
   }
 `
@@ -105,10 +104,12 @@ const TabWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+  align-self: end;
   margin: 0 auto;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
+  height: 40px;
   font-family: "Jomhuria";
   font-size: 40px;
   opacity: 1;
@@ -116,6 +117,7 @@ const TabWrapper = styled.div`
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 28px;
+    height: 30px;
   }
 `
 const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
@@ -129,8 +131,6 @@ const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     padding: 2px 10px;
-    line-height: 28px;
-    font-size: 28px;
   }
 `
 const SignUpTab = styled(Tab)`
@@ -152,13 +152,13 @@ const SignInTab = styled(Tab)`
 `
 const Wrapper = styled.div`
   position: absolute;
-  top: 30px;
-  left: 20px;
+  margin: auto;
+  width: 50%;
+  padding: 20px 10px;
+  top: 0;
   display: flex;
   flex-flow: column wrap;
   justify-content: flex-start;
-  width: 50%;
-  padding: 20px 10px;
   font-family: "Poppins";
   font-size: 20px;
   background-color: rgb(255, 255, 255, 0.6);
@@ -168,7 +168,6 @@ const Wrapper = styled.div`
   z-index: 100;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    top: 20px;
     font-size: 18px;
   }
 `
@@ -176,9 +175,10 @@ const Wrapper = styled.div`
 const Input = styled.input`
   padding-left: 10px;
   margin: 0 auto;
+  padding: 10px 0 10px 10px;
   width: 90%;
-  height: 28px;
-  line-height: 28px;
+  height: 30px;
+  line-height: 30px;
   border: none;
 `
 
@@ -187,20 +187,20 @@ const Btn = styled.div`
   margin-top: 10px auto 30px auto;
   justify-content: center;
   align-self: center;
+  text-align: center;
   width: 50%;
-  height: 28px;
-  line-height: 28px;
-  font-size: 20px;
+  min-height: 30px;
+  line-height: 30px;
+  font-size: 16px;
   color: #fff;
   background-color: #034961;
   border-radius: 5px;
   cursor: pointer;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 16px;
+    font-size: 12px;
   }
 `
-
 const DefaultIcon = L.icon({
   iconUrl: homeMarker,
   iconSize: [40, 43],
@@ -228,6 +228,10 @@ interface CountryType {
     level: number
     type: string
   }
+}
+interface RoutePositionType {
+  lat: number
+  lng: number
 }
 const myCustomStyle = {
   stroke: false,
@@ -268,6 +272,42 @@ function TargetArea(props: Props) {
   })
 
   return null
+}
+const fingerIcon = L.icon({
+  iconSize: [60, 60],
+  iconAnchor: [30, 0],
+  iconUrl: finger,
+})
+
+function FingerMarker({
+  data,
+  setShowSamplePost,
+  mapZoom,
+}: {
+  data: RoutePositionType
+  setShowSamplePost: Dispatch<SetStateAction<boolean>>
+  mapZoom: number
+}) {
+  const { lat, lng } = data
+  const [fingerPos, setFingerPos] = useState<LatLngTuple>([lat, lng])
+  useEffect(() => {
+    if (fingerPos[0] !== lat && fingerPos[1] !== lng) {
+      setFingerPos([lat, lng])
+    }
+  }, [lat, lng, fingerPos])
+
+  useMapEvents({
+    click(e) {
+      setShowSamplePost(true)
+    },
+  })
+  return (
+    <LeafletTrackingMarker
+      icon={fingerIcon}
+      position={[lat, lng]}
+      duration={mapZoom === 0.5 ? 500 : 2500}
+    />
+  )
 }
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
@@ -369,12 +409,14 @@ function AuthArea(props: AuthProps) {
 function ChangeCenter({ mapZoom }: { mapZoom: number }) {
   const miniMap = useMap()
   if (mapZoom === 0.5) {
-    miniMap.flyTo([56.57447264034455, -350.03737924171946], 0)
+    miniMap.flyTo([46.57447264034455, -180.03737924171946], 0.5)
   } else {
-    miniMap.flyTo([30.51620596509747, -210.12413187632802], 1)
+    miniMap.flyTo([30.51620596509747, -130.12413187632802], 1.25)
   }
   return null
 }
+
+let cursor = 0
 function Home() {
   const { isLoaded, currentUser, isLogin, signUp, signIn } =
     useContext(AuthContext)
@@ -384,6 +426,47 @@ function Home() {
   const [isSignIn, setIsSignIn] = useState(false)
   console.log({ position })
   const [mapZoom, setMapZoom] = useState<number>(0)
+  const [showSamplePost, setShowSamplePost] = useState(false)
+  const [fingerRoute, setFingerRoute] = useState({
+    lat: 72.85778683843621,
+    lng: 326.121805527722,
+  })
+  const [routePositions, setRoutePositions] = useState([
+    { lat: 78.85778683843621, lng: 300.121805527722 },
+    { lat: 78.7224158166044, lng: 296.2913378952427 },
+  ])
+
+  useEffect(() => {
+    if (mapZoom === 1.25) {
+      setRoutePositions([
+        { lat: 66.10851411418622, lng: 300.13876852999573 },
+        { lat: 72.70521040764667, lng: 325.564188227921 },
+      ])
+    } else {
+      setRoutePositions([
+        { lat: 78.85778683843621, lng: 300.121805527722 },
+        { lat: 78.7224158166044, lng: 296.2913378952427 },
+      ])
+    }
+  }, [mapZoom])
+
+  useEffect(() => {
+    if (showSamplePost) return
+    setFingerRoute(routePositions[cursor])
+    const interval = setInterval(() => {
+      if (cursor === routePositions.length - 1) {
+        cursor = 0
+        setFingerRoute(routePositions[cursor])
+        return
+      }
+      cursor += 1
+      setFingerRoute(routePositions[cursor])
+    }, 500)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [showSamplePost, routePositions])
+
   console.log("mapZoom", mapZoom)
   const onZoomChange = () => {
     if (
@@ -413,7 +496,7 @@ function Home() {
       ) {
         // console.log("條件2的window.innerWidth", window.innerWidth)
         // console.log("條件2的window.innerHeight", window.innerHeight)
-        setMapZoom(1)
+        setMapZoom(1.25)
       }
     }
     // console.log("初始window.innerWidth", window.innerWidth)
@@ -426,29 +509,32 @@ function Home() {
   }, [mapZoom])
   return (
     <>
-      <Title>My Travel Pins</Title>
-      <TabWrapper>
-        <SignUpTab
-          isSignUp={isSignUp}
-          isSignIn={isSignIn}
-          onClick={() => {
-            setIsSignIn(false)
-            setIsSignUp(true)
-          }}
-        >
-          Sign up
-        </SignUpTab>
-        <SignInTab
-          isSignUp={isSignUp}
-          isSignIn={isSignIn}
-          onClick={() => {
-            setIsSignUp(false)
-            setIsSignIn(true)
-          }}
-        >
-          Sign In
-        </SignInTab>
-      </TabWrapper>
+      <HeaderWrapper>
+        <Title>My Travel Pins</Title>
+
+        <TabWrapper>
+          <SignUpTab
+            isSignUp={isSignUp}
+            isSignIn={isSignIn}
+            onClick={() => {
+              setIsSignIn(false)
+              setIsSignUp(true)
+            }}
+          >
+            Sign up
+          </SignUpTab>
+          <SignInTab
+            isSignUp={isSignUp}
+            isSignIn={isSignIn}
+            onClick={() => {
+              setIsSignUp(false)
+              setIsSignIn(true)
+            }}
+          >
+            Sign In
+          </SignInTab>
+        </TabWrapper>
+      </HeaderWrapper>
       <Container>
         {(!isLogin || currentUser === null) && (
           <>
@@ -482,6 +568,17 @@ function Home() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
+              {!showSamplePost && (
+                <FingerMarker
+                  data={fingerRoute}
+                  setShowSamplePost={setShowSamplePost}
+                  mapZoom={mapZoom}
+                />
+              )}
+              {/* <Marker
+                icon={fingerIcon}
+                position={[72.85778683843621, 326.121805527722]}
+              /> */}
               {(isSignUp || isSignIn) && <ChangeCenter mapZoom={mapZoom} />}
               <TargetArea position={position} setPosition={setPosition} />
               {/* <TileLayer

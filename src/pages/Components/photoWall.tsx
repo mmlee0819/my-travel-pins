@@ -15,8 +15,9 @@ import egypt from "../assets/photoWall/egypt.png"
 import au from "../assets/photoWall/au.png"
 import newZe from "../assets/photoWall/newZe.png"
 
-const polylineColor = { color: "#2d2d2d", weight: 0.2 }
-const rectangleColor = { color: "#2d2d2d", weight: 5 }
+const polylineColor = { color: "#2d2d2d", weight: 0.5 }
+const rectangleColor = { color: "#2d2d2d", weight: 3 }
+const samplePinColor = { color: "#ffd500", weight: 6 }
 function MongoImg() {
   return (
     <>
@@ -61,7 +62,7 @@ function JapanImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={samplePinColor}
         bounds={
           new LatLngBounds(
             [12.793553091440867, 240.88104007774922],
