@@ -27,6 +27,10 @@ const ContentArea = styled.div`
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `
 const SubTitle = styled.div`
   min-height: 60px;
@@ -55,7 +59,7 @@ const TextNoMargin = styled(Text)`
 `
 const LinkText = styled(TextNoMargin)`
   display: inline-block;
-  padding-left: 15px;
+  margin-left: 15px;
   color: #5594b7;
   cursor: pointer;
   &:hover {
@@ -66,7 +70,7 @@ const LinkText = styled(TextNoMargin)`
     padding: 2px 10px;
   }
 `
-const Xmark = styled.div`
+const XmarkTop = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
@@ -123,7 +127,7 @@ export function TipsContent({
   return (
     <Container>
       <ContentArea>
-        <Xmark
+        <XmarkTop
           onClick={() => {
             setShowTips(false)
           }}
@@ -179,7 +183,7 @@ export function SampleMemory({
   return (
     <Container>
       <ContentArea>
-        <Xmark
+        <XmarkTop
           onClick={() => {
             setShowSamplePost(false)
             setHasRead(true)
@@ -203,8 +207,15 @@ export function SampleMemory({
           <br />
           The location information is based on the marker you added.
         </Text>
+
+        <TextNoMargin> GALA湯沢スキー場</TextNoMargin>
+        {isLoaded && (
+          <StreetModeContainer id="street-mode-container">
+            <StreetViewService onLoad={onStreetLoad} />
+          </StreetModeContainer>
+        )}
         <Text>
-          Not a member yet?{" "}
+          Not a member yet?
           <LinkText
             onClick={() => {
               setShowSamplePost(false)
@@ -227,12 +238,18 @@ export function SampleMemory({
             Sign in
           </LinkText>
         </Text>
-        <TextNoMargin> GALA湯沢スキー場</TextNoMargin>
-        {isLoaded && (
-          <StreetModeContainer id="street-mode-container">
-            <StreetViewService onLoad={onStreetLoad} />
-          </StreetModeContainer>
-        )}
+        <Text>
+          Not decided yet?
+          <LinkText
+            onClick={() => {
+              setShowSamplePost(false)
+              setHasRead(true)
+              setIsSignIn(true)
+            }}
+          >
+            Back to Home
+          </LinkText>
+        </Text>
       </ContentArea>
     </Container>
   )

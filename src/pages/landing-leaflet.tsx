@@ -28,6 +28,7 @@ import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/finger.png"
 import tip from "./assets/tip.png"
+import xMark from "./assets/x-mark.png"
 
 const Attribution = styled.a`
   position: absolute;
@@ -179,6 +180,20 @@ const TipTab = styled.div`
     height: 25px;
   }
 `
+const Xmark = styled.div`
+  position: absolute;
+  right: 30px;
+  bottom: 20px;
+  background-image: url(${xMark});
+  background-size: 100% 100%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  @media screen and (max-width: 799px), (max-height: 600px) {
+    width: 30px;
+    height: 30px;
+  }
+`
 const Wrapper = styled.div`
   position: absolute;
   margin: auto;
@@ -245,6 +260,8 @@ interface Props {
 interface AuthProps {
   isSignUp: boolean
   isSignIn: boolean
+  setIsSignUp: Dispatch<SetStateAction<boolean>>
+  setIsSignIn: Dispatch<SetStateAction<boolean>>
 }
 
 interface CountryType {
@@ -335,7 +352,7 @@ function FingerMarker({
 
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
-  const { isSignUp, isSignIn } = props
+  const { isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
@@ -400,6 +417,11 @@ function AuthArea(props: AuthProps) {
             >
               Create an account
             </Btn>
+            <Xmark
+              onClick={() => {
+                setIsSignUp(false)
+              }}
+            />
           </>
         )}
       {(!isLogin || currentUser === null || currentUser === undefined) &&
@@ -424,6 +446,11 @@ function AuthArea(props: AuthProps) {
             >
               Sign in
             </Btn>
+            <Xmark
+              onClick={() => {
+                setIsSignIn(false)
+              }}
+            />
           </>
         )}
     </Wrapper>
@@ -436,6 +463,15 @@ function ChangeCenter({ mapZoom }: { mapZoom: number }) {
     miniMap.flyTo([46.57447264034455, -180.03737924171946], 0.5)
   } else {
     miniMap.flyTo([30.51620596509747, -130.12413187632802], 1.25)
+  }
+  return null
+}
+function ChangeCenterBack({ mapZoom }: { mapZoom: number }) {
+  const originMap = useMap()
+  if (mapZoom === 0.5) {
+    originMap.flyTo([39.9437334482122, 65.35942441225613], 0.5)
+  } else {
+    originMap.flyTo([39.9437334482122, 65.35942441225613], 1.25)
   }
   return null
 }
@@ -607,13 +643,17 @@ function Home() {
                 <FingerMarker data={fingerRoute} mapZoom={mapZoom} />
               )}
               {(isSignUp || isSignIn) && <ChangeCenter mapZoom={mapZoom} />}
+              {}
               <TargetArea position={position} setPosition={setPosition} />
               {/* <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         /> */}
               {!isSignUp && !isSignIn && (
-                <PhotoWall setShowSamplePost={setShowSamplePost} />
+                <>
+                  <ChangeCenterBack mapZoom={mapZoom} />
+                  <PhotoWall setShowSamplePost={setShowSamplePost} />
+                </>
               )}
               <Marker position={[42, 121]}>
                 <Popup offset={[0, -10]} keepInView>
@@ -626,7 +666,12 @@ function Home() {
           </>
         )}
         {(isSignUp || isSignIn) && (
-          <AuthArea isSignUp={isSignUp} isSignIn={isSignIn} />
+          <AuthArea
+            isSignUp={isSignUp}
+            isSignIn={isSignIn}
+            setIsSignUp={setIsSignUp}
+            setIsSignIn={setIsSignIn}
+          />
         )}
       </Container>
       <Slogan>
