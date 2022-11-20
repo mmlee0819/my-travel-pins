@@ -51,7 +51,11 @@ const Text = styled.div`
   }
 `
 const ArticleTitle = styled(Text)`
+  min-height: 40px;
   font-weight: 700;
+  @media screen and (max-width: 799px), (max-height: 600px) {
+    min-height: 30px;
+  }
 `
 const Reminder = styled(Text)`
   color: #034961;

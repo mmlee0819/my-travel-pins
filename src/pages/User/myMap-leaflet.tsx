@@ -708,6 +708,7 @@ export default function MyMap() {
                 backgroundColor: "rgb(255, 255, 255, 0)",
                 borderRadius: "10px",
               }}
+              minZoom={mapZoom === "lg" ? 2 : 1}
             >
               <ZoomControl position="bottomright" />
               {countries.features.map((country) => (
