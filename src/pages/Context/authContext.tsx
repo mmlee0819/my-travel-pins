@@ -38,6 +38,16 @@ interface AuthContextType {
   isLoaded: boolean
   mapZoom: string
   setMapZoom: (mapZoom: string) => void
+  isMyMap: boolean
+  setIsMyMap: (isMyMap: boolean) => void
+  isMyMemory: boolean
+  setIsMyMemory: (isMyMemory: boolean) => void
+  isMyFriend: boolean
+  setIsMyFriend: (isMyFriend: boolean) => void
+  isFriendHome: boolean
+  setIsFriendHome: (isFriendHome: boolean) => void
+  isFriendMemory: boolean
+  setIsFriendMemory: (isFriendMemory: boolean) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -67,6 +77,16 @@ export const AuthContext = createContext<AuthContextType>({
   isLoaded: true,
   mapZoom: "lg",
   setMapZoom: (mapZoom: string) => Response,
+  isMyMap: false,
+  setIsMyMap: (isMyMap: boolean) => Response,
+  isMyMemory: false,
+  setIsMyMemory: (isMyMemory: boolean) => Response,
+  isMyFriend: false,
+  setIsMyFriend: (isMyFriend: boolean) => Response,
+  isFriendHome: false,
+  setIsFriendHome: (isFriendHome: boolean) => Response,
+  isFriendMemory: false,
+  setIsFriendMemory: (isFriendMemory: boolean) => Response,
 })
 
 interface Props {
@@ -92,6 +112,11 @@ const libraries: LoadScriptProps["libraries"] = ["places"]
 
 export function AuthContextProvider({ children }: Props) {
   const [isLogin, setIsLogin] = useState(false)
+  const [isMyMap, setIsMyMap] = useState(false)
+  const [isMyMemory, setIsMyMemory] = useState(false)
+  const [isMyFriend, setIsMyFriend] = useState(false)
+  const [isFriendHome, setIsFriendHome] = useState(false)
+  const [isFriendMemory, setIsFriendMemory] = useState(false)
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
@@ -150,6 +175,7 @@ export function AuthContextProvider({ children }: Props) {
           const userInfo: DocumentData | undefined = docSnap.data()
           setCurrentUser(userInfo)
           setIsLogin(true)
+          setIsMyMap(true)
           navigate(`/${userInfo?.name}`)
         } else {
           setIsLogin(false)
@@ -202,6 +228,7 @@ export function AuthContextProvider({ children }: Props) {
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)
         setIsLogin(true)
+        setIsMyMap(true)
         console.log("註冊完成，已登入")
         navigate(`/${userInfo?.name}`)
       }
@@ -226,6 +253,7 @@ export function AuthContextProvider({ children }: Props) {
         setCurrentUser(userInfo)
         setIsLogin(true)
         setIsLogin(true)
+        setIsMyMap(true)
         console.log("已登入")
         navigate(`/${userInfo?.name}`)
       }
@@ -259,6 +287,16 @@ export function AuthContextProvider({ children }: Props) {
         isLoaded,
         mapZoom,
         setMapZoom,
+        isMyMap,
+        setIsMyMap,
+        isMyMemory,
+        setIsMyMemory,
+        isMyFriend,
+        setIsMyFriend,
+        isFriendHome,
+        setIsFriendHome,
+        isFriendMemory,
+        setIsFriendMemory,
       }}
     >
       {children}

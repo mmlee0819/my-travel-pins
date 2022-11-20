@@ -19,12 +19,12 @@ const HeaderContainer = styled.div`
   opacity: 1;
   gap: 20px;
 `
-const BtnWrapper = styled.div`
+const TabWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
   align-self: end;
-  margin: 10px 20px 5px 20px;
+  margin: 10px 20px 3px 20px;
   max-width: 1440px;
   width: 100%;
   height: 40px;
@@ -90,33 +90,58 @@ const Title = styled.div`
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 76px;
+    font-size: 60px;
   }
 `
 
-const LoginArea = styled.div`
-  position: relative;
+const Tab = styled.div`
   display: flex;
-  align-items: center;
-  margin-right: 60px;
-`
-const BtnLink = styled(Link)`
+  padding: 0 15px;
+  color: #fff;
+  background-color: none;
+  border: 1px solid #fff;
+  border: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
   text-decoration: none;
-  margin: 0 20px;
+  cursor: pointer;
   &:hover {
-    text-decoration: underline;
+    color: #5594b7;
+    background-color: #fff;
+    box-shadow: 3px 3px #2d2d2d;
+  }
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    padding: 2px 10px;
   }
 `
-const Btn = styled.div`
-  display: inline-block;
-  padding: 10px;
-  border: 2px solid #ffffff;
-  border-radius: 10px;
-  cursor: pointer;
+const CurrentTab = styled(Tab)`
+  color: #034961;
+  background-color: #fff;
+  cursor: default;
+  &:hover {
+    color: #034961;
+    background-color: #fff;
+  }
 `
 
 function Header() {
-  const { currentUser, isLogin, logOut } = useContext(AuthContext)
+  const {
+    currentUser,
+    isLogin,
+    logOut,
+    navigate,
+    isMyMap,
+    setIsMyMap,
+    isMyMemory,
+    setIsMyMemory,
+    isMyFriend,
+    setIsMyFriend,
+    isFriendHome,
+    setIsFriendHome,
+    isFriendMemory,
+    setIsFriendMemory,
+  } = useContext(AuthContext)
 
   if (
     !isLogin ||
@@ -130,7 +155,88 @@ function Header() {
     <HeaderContainer>
       <UserAvatar />
       <Title>{`Hello ${currentUser?.name} !`}</Title>
-      <BtnWrapper>
+      <TabWrapper>
+        {isMyMap && (
+          <>
+            <CurrentTab>My Map</CurrentTab>
+            <Tab
+              to={`/${currentUser.name}/my-memories`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsMyFriend(false)
+                setIsMyMemory(true)
+              }}
+            >
+              My Memories
+            </Tab>
+            <Tab
+              to={`/${currentUser.name}/my-friends`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsMyMemory(false)
+                setIsMyFriend(true)
+              }}
+            >
+              My Friends
+            </Tab>
+          </>
+        )}
+        {isMyMemory && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <CurrentTab>My Memories</CurrentTab>
+            <Tab
+              to={`/${currentUser.name}/my-friends`}
+              as={Link}
+              onClick={() => {
+                setIsMyMemory(false)
+                setIsMyMap(false)
+                setIsMyFriend(true)
+              }}
+            >
+              My Friends
+            </Tab>
+          </>
+        )}
+        {isMyFriend && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <Tab to={`/${currentUser.name}/my-memories`} as={Link}>
+              My Memories
+            </Tab>
+            <CurrentTab
+              onClick={() => {
+                setIsMyMemory(false)
+                setIsMyMap(false)
+                setIsMyFriend(true)
+              }}
+            >
+              My Friends
+            </CurrentTab>
+          </>
+        )}
         <BtnText
           onClick={() => {
             logOut()
@@ -139,15 +245,7 @@ function Header() {
           <BtnLogout />
           Sign out
         </BtnText>
-      </BtnWrapper>
-
-      {/* {isLogin && currentUser !== undefined && (
-        <LoginArea>
-          <BtnLink to={`/${currentUser.name}`}>my-map</BtnLink>
-          <BtnLink to={`/${currentUser.name}/my-memories`}>my-memories</BtnLink>
-          <BtnLink to={`/${currentUser.name}/my-friends`}>my-friends</BtnLink>
-        </LoginArea>
-      )} */}
+      </TabWrapper>
     </HeaderContainer>
   )
 }
