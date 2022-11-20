@@ -23,7 +23,6 @@ import { countries } from "../Utils/customGeo"
 import homeMarker from "../assets/markers/hometownIcon.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
-import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
 import StreetView, { containerStyle } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
@@ -701,26 +700,36 @@ export default function MyMap() {
                 <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
                   Hometown {currentUser?.hometownName}
                 </Tooltip>
-                {/* <Popup offset={[0, -10]} keepInView>
-                  My Hometown <br />
-                  {currentUser?.hometownName}
-                </Popup> */}
               </Marker>
               {markers?.map((marker) => {
                 return (
-                  <Marker
-                    key={marker.location.placeId}
-                    position={[marker.location.lat, marker.location.lng]}
-                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                    // onClick={(e: google.maps.MapMouseEvent) => {
-                    //   choosePinOnMap(
-                    //     e,
-                    //     markers,
-                    //     setSelectedMarker,
-                    //     setShowInfoWindow
-                    //   )
-                    // }}
-                  />
+                  <>
+                    <Marker
+                      key={marker.location.placeId}
+                      position={[marker.location.lat, marker.location.lng]}
+                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    >
+                      <Popup
+                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                        keepInView
+                      >
+                        <PinInfoArea
+                          onClick={() => {
+                            setShowMemory(true)
+                          }}
+                        >
+                          <PinInfoImg
+                            src={
+                              marker.albumURLs
+                                ? marker?.albumURLs[0]
+                                : defaultImage
+                            }
+                          />
+                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                        </PinInfoArea>
+                      </Popup>
+                    </Marker>
+                  </>
                 )
               })}
             </MapContainer>
@@ -731,36 +740,6 @@ export default function MyMap() {
 }
 
 // {
-//   selectedMarker && (
-//     <>
-//       <InfoWindow
-//         onLoad={onInfoWinLoad}
-//         onCloseClick={() => {
-//           setSelectedMarker(undefined)
-//         }}
-//         position={{
-//           lat: selectedMarker?.location?.lat,
-//           lng: selectedMarker?.location?.lng,
-//         }}
-//         options={{
-//           pixelOffset: new window.google.maps.Size(0, -40),
-//         }}
-//       >
-//         <PinInfoArea
-//           onClick={() => {
-//             setShowMemory(true)
-//           }}
-//         >
-//           <PinInfoImg
-//             src={
-//               selectedMarker.albumURLs
-//                 ? selectedMarker?.albumURLs[0]
-//                 : defaultImage
-//             }
-//           />
-//           <PinInfoTitle>{selectedMarker?.location?.name}</PinInfoTitle>
-//         </PinInfoArea>
-//       </InfoWindow>
 //       {selectedMarker && showInfoWindow && showMemory && (
 //         <StreetView
 //           selectedMarker={selectedMarker}
