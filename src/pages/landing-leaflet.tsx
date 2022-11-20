@@ -610,7 +610,6 @@ function Home() {
       <Container>
         {(!isLogin || currentUser === null) && (
           <>
-            {/* {!isSignUp && !isSignIn && ( */}
             <MapContainer
               id="homeMap"
               center={[39.9437334482122, 65.35942441225613]}
@@ -663,7 +662,6 @@ function Home() {
                 </Popup>
               </Marker>
             </MapContainer>
-            {/* )} */}
           </>
         )}
         {(isSignUp || isSignIn) && (

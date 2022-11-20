@@ -6,6 +6,8 @@ import App from "./App"
 import Home from "./pages/landing-leaflet"
 // import Home from "./pages/home"
 import User from "./pages/User/myMap"
+import MyMap from "./pages/User/myMap-leaflet"
+
 import MyMemories from "./pages/User/myMemories"
 import MyFriends from "./pages/User/myFriends"
 import FriendsHome from "./pages/User/friendHome"
@@ -15,26 +17,24 @@ import reportWebVitals from "./reportWebVitals"
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 root.render(
-  <>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<Home />}></Route>
-          <Route path="/:user" element={<User />}></Route>
-          <Route path="/:user/my-memories" element={<MyMemories />}></Route>
-          <Route path="/:user/my-friends" element={<MyFriends />}></Route>
-          <Route
-            path="/:user/my-friend/:friendName/:friendId"
-            element={<FriendsHome />}
-          ></Route>
-          <Route
-            path="/:user/my-friend/:friendName/:friendId/memories"
-            element={<FriendMemories />}
-          ></Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </>
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<App />}>
+        <Route index element={<Home />} />
+        <Route path="/:user" element={<MyMap />} />
+        <Route path="/:user/my-memories" element={<MyMemories />} />
+        <Route path="/:user/my-friends" element={<MyFriends />} />
+        <Route
+          path="/:user/my-friend/:friendName/:friendId"
+          element={<FriendsHome />}
+        />
+        <Route
+          path="/:user/my-friend/:friendName/:friendId/memories"
+          element={<FriendMemories />}
+        />
+      </Route>
+    </Routes>
+  </BrowserRouter>
 )
 
 // If you want to start measuring performance in your app, pass a function

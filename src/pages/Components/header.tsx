@@ -57,7 +57,7 @@ const BtnLogout = styled.div`
   width: 30px;
   height: 30px;
   background-image: url(${logoutIcon});
-  background-size: contain;
+  background-size: 100% 100%;
   cursor: pointer;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
