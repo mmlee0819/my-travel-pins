@@ -35,9 +35,11 @@ import {
 } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
-import { choosePinOnMap, getPins } from "./ts_fn_commonUse"
+import { getPins, PinContent } from "./ts_fn_commonUse"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
+import DetailMemoryOnMap from "../Components/detailMemoryOnMap"
+
 const Container = styled.div`
   position: relative;
   margin: 0 auto;
@@ -252,6 +254,7 @@ export const PinInfoTitle = styled.div`
   font-size: 12px;
   font-weight: 700;
 `
+
 interface CenterType {
   center: LatLng | null
   setCenter: Dispatch<SetStateAction<LatLng | null>>
@@ -380,8 +383,8 @@ export default function MyMap() {
     },
   })
   console.log({ center })
-  const [markers, setMarkers] = useState<DocumentData[]>([])
-  const [selectedMarker, setSelectedMarker] = useState<DocumentData>()
+  const [markers, setMarkers] = useState<DocumentData[] | PinContent[]>([])
+  const [selectedMarker, setSelectedMarker] = useState<PinContent>()
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
@@ -445,9 +448,6 @@ export default function MyMap() {
     } else console.log("失敗啦")
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
-  const onInfoWinLoad = (infoWindow: google.maps.InfoWindow) => {
-    console.log("infoWindow: ", infoWindow)
-  }
 
   const addPin = async () => {
     if (!newPin) return
@@ -729,49 +729,52 @@ export default function MyMap() {
                   Hometown {currentUser?.hometownName}
                 </Tooltip>
               </Marker>
-              {markers?.map((marker) => {
+              {markers?.map((marker: any) => {
                 return (
-                  <Marker
-                    key={marker.location.placeId}
-                    position={[marker.location.lat, marker.location.lng]}
-                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                    eventHandlers={{
-                      click() {
-                        setShowPostArea(false)
-                      },
-                    }}
-                  >
-                    <Popup
-                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                      keepInView
+                  <>
+                    <Marker
+                      key={marker.location.placeId}
+                      position={[marker.location.lat, marker.location.lng]}
+                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                      eventHandlers={{
+                        click() {
+                          setShowPostArea(false)
+                          setSelectedMarker(marker)
+                        },
+                      }}
                     >
-                      <PinInfoArea
-                        onClick={() => {
-                          setShowMemory(true)
-                        }}
+                      <Popup
+                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                        keepInView
                       >
-                        <PinInfoImg
-                          src={
-                            marker.albumURLs
-                              ? marker?.albumURLs[0]
-                              : defaultImage
-                          }
-                        />
-                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                      </PinInfoArea>
-                      {showMemory && (
-                        <StreetView
-                          selectedMarker={marker}
-                          setShowMemory={setShowMemory}
-                        />
-                      )}
-                    </Popup>
-                  </Marker>
+                        <PinInfoArea
+                          onClick={() => {
+                            setShowMemory(true)
+                          }}
+                        >
+                          <PinInfoImg
+                            src={
+                              marker.albumURLs
+                                ? marker?.albumURLs[0]
+                                : defaultImage
+                            }
+                          />
+                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                        </PinInfoArea>
+                      </Popup>
+                    </Marker>
+                  </>
                 )
               })}
             </MapContainer>
           </Container>
         )}
+      {showMemory && (
+        <DetailMemoryOnMap
+          selectedMarker={selectedMarker}
+          setShowMemory={setShowMemory}
+        />
+      )}
     </>
   )
 }
