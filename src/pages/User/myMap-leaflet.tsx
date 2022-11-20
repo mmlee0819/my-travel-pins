@@ -52,56 +52,50 @@ const Container = styled.div`
 const Title = styled.div`
   color: #000000;
 `
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ hasAddPin: boolean }>`
   position: absolute;
   margin: auto;
-  width: 30%;
-  min-height: 100px;
+  width: 50%;
+  height: ${(props) => (props.hasAddPin ? "100%" : "200px")};
   padding: 20px 10px;
   top: 0;
   right: 0;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   justify-content: flex-start;
   font-family: "Poppins";
   font-size: 20px;
   background-color: #2d2d2d;
-  opacity: 0.8;
+  opacity: 1;
   border-radius: 10px;
   box-shadow: 0 8px 6px #0000004c;
   z-index: 60;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 16px;
   }
 `
-// const SearchWrapper = styled.div`
-//   position: absolute;
-//   top: 80px;
-//   left: 30px;
-//   display: flex;
-//   flex-flow: column wrap;
-//   width: 30%;
-//   background-color: #ffffff;
-//   padding: 10px;
-//   opacity: 0.6;
-//   gap: 20px;
-//   font-size: 14px;
-//   z-index: 300;
-// `
+
 const Input = styled.input`
   width: 100%;
   height: 30px;
   padding-left: 10px;
-  margin-bottom: 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
   font-size: 18px;
   color: #2d2d2d;
   background-color: #ffffff;
-  border: 3px solid #f99c62;
-  border-radius: 10px;
+  border: 3px solid #ffffff;
+  border-radius: 5px;
   opacity: 1;
   &:focus {
     outline: #f99c62;
+    border: 3px solid #f99c62;
   }
 `
 const StepText = styled.div`
@@ -114,6 +108,7 @@ const StepText = styled.div`
   gap: 5px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
+    font-size: 30px;
     padding: 2px 10px;
   }
 `
@@ -151,61 +146,58 @@ const BtnAddPin = styled.div`
   }
 `
 
-const BtnUpload = styled.button`
-  display: flex;
-  justify-content: center;
-  align-self: start;
-  align-items: center;
-  padding: 10px;
-  height: 30px;
-  color: #ffffff;
-  background-color: #5197ff;
-  border: none;
-  opacity: 0.8;
-  border-radius: 10px;
-  cursor: pointer;
-`
-const BtnPost = styled(BtnAddPin)`
-  margin-top: 20px;
-`
-const BtnCancel = styled(BtnPost)``
-const PostBtnWrapper = styled(Wrapper)`
-  justify-content: space-between;
-  margin-bottom: 10px;
-`
-const CancelReminder = styled(Title)`
+const CancelReminder = styled(BtnText)`
+  margin-top: 30px;
+  color: #fff;
   text-align: end;
 `
-const PostArea = styled.div`
-  position: absolute;
-  top: 20px;
-  right: 60px;
-  display: flex;
-  flex-flow: column nowrap;
-  background-color: #ffffff;
-  width: 40%;
-  padding: 10px;
-  height: 100%;
-  font-size: 14px;
-  opacity: 0.6;
-`
-const ArticleTitleInput = styled.input`
-  background-color: #ffffff;
-  border: 1px solid #373232ad;
-  margin-bottom: 3px;
-`
+
 const UploadPhotoWrapper = styled.div`
-  position: relative;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+`
+const BtnWrapper = styled(UploadPhotoWrapper)`
+  margin-top: 15px;
 `
 const UrlsImgWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: row nowrap;
+  padding-left: 5px;
 `
-const ArticleWrapper = styled(UploadPhotoWrapper)``
-const Textarea = styled.textarea``
+const BtnUpload = styled.button`
+  display: flex;
+  align-self: center;
+  align-items: center;
+  padding: 10px;
+  height: 30px;
+  color: #ffffff;
+  background-color: #5594b7;
+  border: none;
+  opacity: 1;
+  border-radius: 10px;
+  cursor: pointer;
+`
+const BtnConfirm = styled(BtnUpload)`
+  background-color: #f99c62;
+`
+const BtnCancel = styled(BtnUpload)`
+  background-color: #034961;
+`
+const ArticleWrapper = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+`
+const Textarea = styled.textarea`
+  padding-left: 10px;
+  margin-top: 5px;
+  border-radius: 5px;
+  &:focus {
+    outline: #f99c62;
+    border: 3px solid #f99c62;
+  }
+`
 const UploadImgLabel = styled.label`
   display: flex;
   align-items: center;
@@ -215,7 +207,16 @@ const UploadImgLabel = styled.label`
 const UploadImgIcon = styled.img`
   width: 30px;
   height: 30px;
-  z-index: 3;
+`
+const UploadedPhoto = styled.img`
+  margin-top: 15px;
+  width: 100px;
+  height: 100px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    width: 80px;
+    height: 80px;
+  }
 `
 
 const UploadImgInput = styled.input`
@@ -244,11 +245,6 @@ interface Position {
   name?: string | undefined
   lat: number | undefined
   lng: number | undefined
-}
-interface Hometown {
-  lat?: number | null
-  lng?: number | null
-  name?: string | null
 }
 
 interface CountryType {
@@ -307,6 +303,26 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     })
   })
 }
+function ChangeCenter() {
+  const { mapZoom } = useContext(AuthContext)
+  const miniMap = useMap()
+  if (mapZoom === "lg") {
+    miniMap.flyTo([45, 179], 2)
+  } else {
+    miniMap.flyTo([42, 167], 1)
+  }
+  return null
+}
+function ChangeCenterBack() {
+  const { mapZoom } = useContext(AuthContext)
+  const originMap = useMap()
+  if (mapZoom === "lg") {
+    originMap.flyTo([45, 50], 2)
+  } else {
+    originMap.flyTo([41, 121], 1)
+  }
+  return null
+}
 const DefaultIcon = L.icon({
   iconUrl: homeMarker,
   iconSize: [40, 43],
@@ -325,8 +341,15 @@ const mdNewPinIcon = L.icon({
 })
 
 export default function MyMap() {
-  const { isLoaded, isLogin, currentUser, navigate, mapZoom } =
-    useContext(AuthContext)
+  const {
+    isLoaded,
+    isLogin,
+    currentUser,
+    navigate,
+    mapZoom,
+    setIsMyMap,
+    setIsMyMemory,
+  } = useContext(AuthContext)
   console.log("currentUser", currentUser)
   const [center, setCenter] = useState<LatLng | null>(null)
   const [location, setLocation] = useState<google.maps.LatLng | Position>()
@@ -343,7 +366,6 @@ export default function MyMap() {
   console.log({ center })
   const [markers, setMarkers] = useState<DocumentData[]>([])
   const [selectedMarker, setSelectedMarker] = useState<DocumentData>()
-  // const [hometown, setHometown] = useState<Hometown>()
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
@@ -376,10 +398,6 @@ export default function MyMap() {
       )
     } else return
   }, [currentUser?.id])
-
-  const onMkLoad = (marker: google.maps.Marker) => {
-    console.log(" marker", marker)
-  }
 
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
@@ -435,6 +453,7 @@ export default function MyMap() {
     setHasUpload(false)
     setHasFetched(false)
   }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilesName([])
     setPhotos([])
@@ -512,6 +531,8 @@ export default function MyMap() {
       setUploadProgress(0)
       setUrls([])
       if (currentUser) {
+        setIsMyMap(false)
+        setIsMyMemory(true)
         navigate(`/${currentUser.name}/my-memories`)
       }
     } catch (error) {
@@ -550,10 +571,10 @@ export default function MyMap() {
         typeof currentUser?.hometownLat === "number" &&
         typeof currentUser?.hometownLng === "number" && (
           <Container>
-            {!hasAddPin && (
-              <>
-                <Wrapper>
-                  <StepText>To remember your trip</StepText>
+            <Wrapper hasAddPin={hasAddPin}>
+              <StepText>To remember your trip</StepText>
+              {!hasAddPin && (
+                <>
                   <StepText>Step 1: Pin a place!</StepText>
                   <StandaloneSearchBox
                     onLoad={onLoad}
@@ -565,9 +586,73 @@ export default function MyMap() {
                     Confirm to pin
                     <BtnAddPin />
                   </BtnText>
-                </Wrapper>
-              </>
-            )}
+                </>
+              )}
+              {hasAddPin && !hasPosted && (
+                <>
+                  <StepText>Step 2: Log your memory</StepText>
+
+                  <ArticleWrapper>
+                    <Input
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
+                      }}
+                    />
+                    <Input
+                      type="date"
+                      placeholder="When did you go there?"
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                    />
+                    <Textarea
+                      placeholder="What's on your mind?"
+                      rows={6}
+                      onChange={(e) => {
+                        setArtiContent(e.target.value)
+                      }}
+                    />
+                  </ArticleWrapper>
+                  {hasUpload && urls ? (
+                    <UrlsImgWrapper>
+                      {urls.map((url) => {
+                        console.log(url)
+                        return <UploadedPhoto key={url} src={url} />
+                      })}
+                    </UrlsImgWrapper>
+                  ) : (
+                    <UploadPhotoWrapper>
+                      <UploadImgLabel>
+                        <UploadImgIcon src={uploadIcon} />
+                        {filesName.length !== 0
+                          ? filesName.map((fileName) => {
+                              return `\n${fileName}`
+                            })
+                          : "Choose photos"}
+                        <UploadImgInput
+                          type="file"
+                          accept="image/*"
+                          multiple={true}
+                          onChange={(e) => {
+                            handleChange(e)
+                          }}
+                        />
+                      </UploadImgLabel>
+                      <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
+                    </UploadPhotoWrapper>
+                  )}
+                  <BtnWrapper>
+                    <BtnConfirm onClick={addMemory}>Confirm to post</BtnConfirm>
+                    <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
+                  </BtnWrapper>
+                  <CancelReminder>
+                    If you cancel to post,
+                    <br /> all content and uploaded files will not be preserved.
+                  </CancelReminder>
+                </>
+              )}
+            </Wrapper>
 
             <MapContainer
               id="my-Map"
@@ -607,6 +692,8 @@ export default function MyMap() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
+              {hasAddPin && !hasPosted && <ChangeCenter />}
+              {!hasAddPin && !hasPosted && <ChangeCenterBack />}
               <TargetArea center={center} setCenter={setCenter} />
               <Marker
                 position={[currentUser?.hometownLat, currentUser?.hometownLng]}
@@ -623,7 +710,6 @@ export default function MyMap() {
                 return (
                   <Marker
                     key={marker.location.placeId}
-                    // onLoad={onMkLoad}
                     position={[marker.location.lat, marker.location.lng]}
                     icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
                     // onClick={(e: google.maps.MapMouseEvent) => {
@@ -643,86 +729,6 @@ export default function MyMap() {
     </>
   )
 }
-
-// ;<SearchWrapper>
-//   <Title>Add a new memory</Title>
-//   <Title>Step 1 : Where did you go?</Title>
-//   {hasAddPin ? (
-//     <Title>{newPin.location.name}</Title>
-//   ) : (
-//     <StandaloneSearchBox onLoad={onLoad} onPlacesChanged={onPlacesChanged}>
-//       <Input placeholder="City, Address..."></Input>
-//     </StandaloneSearchBox>
-//   )}
-//   {!hasAddPin && <BtnAddPin onClick={addPin}>Confirm to add pin</BtnAddPin>}
-//   <Title>Step 2 : Write something to save your memory!</Title>
-// </SearchWrapper>
-// {
-//   hasAddPin && !hasPosted ? (
-//     <PostArea>
-//       <ArticleWrapper>
-//         <ArticleTitleInput
-//           placeholder="Title"
-//           onChange={(e) => {
-//             setArtiTitle(e.target.value)
-//           }}
-//         ></ArticleTitleInput>
-//         <ArticleTitleInput
-//           type="date"
-//           placeholder="When did you go there?"
-//           onChange={(e) => {
-//             setTravelDate(e.target.value)
-//           }}
-//         ></ArticleTitleInput>
-//         <Textarea
-//           placeholder="What's on your mind?"
-//           rows={6}
-//           onChange={(e) => {
-//             setArtiContent(e.target.value)
-//           }}
-//         />
-//       </ArticleWrapper>
-//       {hasUpload && urls ? (
-//         <UrlsImgWrapper>
-//           {urls.map((url) => {
-//             console.log(url)
-//             return <UploadImgIcon key={url} src={url} />
-//           })}
-//         </UrlsImgWrapper>
-//       ) : (
-//         <UploadPhotoWrapper>
-//           <UploadImgLabel>
-//             <UploadImgIcon src={uploadIcon} />
-//             {filesName.length !== 0
-//               ? filesName.map((fileName) => {
-//                   return `\n${fileName}`
-//                 })
-//               : "Choose photos"}
-//             <UploadImgInput
-//               type="file"
-//               accept="image/*"
-//               multiple={true}
-//               onChange={(e) => {
-//                 handleChange(e)
-//               }}
-//             />
-//           </UploadImgLabel>
-//           <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
-//         </UploadPhotoWrapper>
-//       )}
-//       <PostBtnWrapper>
-//         <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
-//         <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
-//       </PostBtnWrapper>
-//       <CancelReminder>
-//         If you click `Cancel`, all content and uploaded files will not be
-//         preserved.
-//       </CancelReminder>
-//     </PostArea>
-//   ) : (
-//     ""
-//   )
-// }
 
 // {
 //   selectedMarker && (
