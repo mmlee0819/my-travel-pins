@@ -8,7 +8,7 @@ import {
   SetStateAction,
 } from "react"
 import styled from "styled-components"
-import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
+import L, { LatLng, LeafletEvent } from "leaflet"
 import {
   MapContainer,
   Tooltip,
@@ -22,7 +22,6 @@ import {
 import "leaflet/dist/leaflet.css"
 import { countries } from "../Utils/customGeo"
 import homeMarker from "../assets/markers/hometownIcon.png"
-import { TabWrapper, SplitWrapper } from "./myFriends"
 import { AuthContext } from "../Context/authContext"
 import { db } from "../Utils/firebase"
 import {
@@ -63,50 +62,9 @@ export const PinInfoTitle = styled.div`
   font-weight: 700;
 `
 
-const TabLink = styled(Link)`
-  padding: 5px 8px;
-  text-align: center;
-  color: #000000;
-  text-decoration: none;
-  cursor: pointer;
-  &:visited {
-    color: #000000;
-  }
-  &:hover {
-    color: #2d65be;
-  }
-  &:active {
-    color: #000000;
-  }
-`
-const TabTitle = styled.div`
-  padding: 5px 8px;
-  width: 130px;
-  text-align: center;
-  color: #2d65be;
-  border: 1px solid #beb9b9;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  border-bottom: none;
-`
-const LeftSplit = styled.div`
-  width: 31px;
-  border-top: 1px solid #beb9b9;
-`
-const RightSplit = styled(LeftSplit)`
-  flex: 1 1 auto;
-  margin-left: 128px;
-`
-
 interface CenterType {
   center: LatLng | null
   setCenter: Dispatch<SetStateAction<LatLng | null>>
-}
-interface Position {
-  placeId?: string | undefined
-  name?: string | undefined
-  lat: number | undefined
-  lng: number | undefined
 }
 
 interface CountryType {
@@ -128,18 +86,6 @@ const myCustomStyle = {
   fillColor: "#fff",
   fillOpacity: 1,
   zIndex: 50,
-}
-
-function TargetArea(props: CenterType) {
-  const { center, setCenter } = props
-
-  useMapEvents({
-    click(e) {
-      setCenter(e.latlng)
-    },
-  })
-
-  return null
 }
 
 const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
@@ -165,26 +111,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     })
   })
 }
-function ChangeCenter() {
-  const { mapZoom } = useContext(AuthContext)
-  const miniMap = useMap()
-  if (mapZoom === "lg") {
-    miniMap.flyTo([45, 179], 2)
-  } else {
-    miniMap.flyTo([42, 167], 1)
-  }
-  return null
-}
-function ChangeCenterBack() {
-  const { mapZoom } = useContext(AuthContext)
-  const originMap = useMap()
-  if (mapZoom === "lg") {
-    originMap.flyTo([45, 50], 2)
-  } else {
-    originMap.flyTo([41, 121], 1)
-  }
-  return null
-}
+
 const DefaultIcon = L.icon({
   iconUrl: homeMarker,
   iconSize: [40, 43],
@@ -203,15 +130,22 @@ const mdNewPinIcon = L.icon({
 })
 
 function FriendsMap() {
-  const { isLoaded, currentUser, mapZoom } = useContext(AuthContext)
+  const {
+    isLoaded,
+    currentUser,
+    mapZoom,
+    setIsMyMap,
+    setIsMyMemory,
+    setIsMyFriend,
+    setIsFriendHome,
+    setIsFriendMemory,
+  } = useContext(AuthContext)
 
-  // const [center, setCenter] = useState<LatLng | null>(null)
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
   const [markers, setMarkers] = useState<
     DocumentData[] | DefinedDocumentData[] | PinContent[]
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
-  const [showInfoWindow, setShowInfoWindow] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
 
   console.log("markers", markers)
@@ -230,11 +164,15 @@ function FriendsMap() {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setFriendInfo(docSnap.data())
-        // setHometownText(docSnap.data().hometownName)
       } else {
         console.log("No such document!")
       }
     }
+    setIsMyMap(false)
+    setIsMyMemory(false)
+    setIsMyFriend(false)
+    setIsFriendMemory(false)
+    setIsFriendHome(true)
     getFriendInfo()
   }, [friendId])
 
@@ -297,7 +235,6 @@ function FriendsMap() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
-              {/* <TargetArea center={center} setCenter={setCenter} /> */}
               <Marker
                 position={[friendInfo?.hometownLat, friendInfo?.hometownLng]}
               >
@@ -343,16 +280,6 @@ function FriendsMap() {
               })}
             </MapContainer>
           )}
-        <TabWrapper>
-          <TabTitle>{`${friendName}'s Map`}</TabTitle>
-          <TabLink
-            to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
-          >{`${friendName}'s Memories`}</TabLink>
-        </TabWrapper>
-        <SplitWrapper>
-          <LeftSplit />
-          <RightSplit />
-        </SplitWrapper>
       </Container>
       {showMemory && (
         <DetailMemoryOnMap

@@ -10,12 +10,10 @@ import styled from "styled-components"
 import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
 import {
   MapContainer,
-  TileLayer,
   useMap,
   Marker,
   Popup,
   GeoJSON,
-  ZoomControl,
   useMapEvents,
 } from "react-leaflet"
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
@@ -287,69 +285,6 @@ const myCustomStyle = {
   zIndex: 50,
 }
 
-const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
-  layer.on("mouseover", (event: LeafletEvent) => {
-    if (event.target.feature.properties.name === country.properties.name) {
-      layer.setStyle({
-        stroke: false,
-        fill: true,
-        fillColor: "#ffd500",
-        fillOpacity: 1,
-      })
-    }
-  })
-  layer.on("mouseout", () => {
-    layer.setStyle({
-      stroke: false,
-      fill: true,
-      fillColor: "#fff",
-      fillOpacity: 1,
-    })
-  })
-}
-
-function TargetArea(props: Props) {
-  const { position, setPosition } = props
-
-  useMapEvents({
-    click(e) {
-      setPosition(e.latlng)
-    },
-  })
-
-  return null
-}
-
-const fingerIcon = L.icon({
-  iconSize: [60, 60],
-  iconAnchor: [30, 0],
-  iconUrl: finger,
-})
-
-function FingerMarker({
-  data,
-  mapZoom,
-}: {
-  data: RoutePositionType
-  mapZoom: number
-}) {
-  const { lat, lng } = data
-  const [fingerPos, setFingerPos] = useState<LatLngTuple>([lat, lng])
-  useEffect(() => {
-    if (fingerPos[0] !== lat && fingerPos[1] !== lng) {
-      setFingerPos([lat, lng])
-    }
-  }, [lat, lng, fingerPos])
-
-  return (
-    <LeafletTrackingMarker
-      icon={fingerIcon}
-      position={[lat, lng]}
-      duration={mapZoom === 0.5 ? 500 : 2500}
-    />
-  )
-}
-
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
   const { isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
@@ -458,19 +393,77 @@ function AuthArea(props: AuthProps) {
     </Wrapper>
   )
 }
+const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
+  layer.on("mouseover", (event: LeafletEvent) => {
+    if (event.target.feature.properties.name === country.properties.name) {
+      layer.setStyle({
+        stroke: false,
+        fill: true,
+        fillColor: "#ffd500",
+        fillOpacity: 1,
+      })
+    }
+  })
+  layer.on("mouseout", () => {
+    layer.setStyle({
+      stroke: false,
+      fill: true,
+      fillColor: "#fff",
+      fillOpacity: 1,
+    })
+  })
+}
 
-function ChangeCenter({ mapZoom }: { mapZoom: number }) {
+function TargetArea(props: Props) {
+  const { position, setPosition } = props
+
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng)
+    },
+  })
+
+  return null
+}
+
+const fingerIcon = L.icon({
+  iconSize: [60, 60],
+  iconAnchor: [30, 0],
+  iconUrl: finger,
+})
+
+function FingerMarker({ data }: { data: RoutePositionType }) {
+  const { lat, lng } = data
+  const { mapZoom } = useContext(AuthContext)
+  const [fingerPos, setFingerPos] = useState<LatLngTuple>([lat, lng])
+  useEffect(() => {
+    if (fingerPos[0] !== lat && fingerPos[1] !== lng) {
+      setFingerPos([lat, lng])
+    }
+  }, [lat, lng, fingerPos])
+
+  return (
+    <LeafletTrackingMarker
+      icon={fingerIcon}
+      position={[lat, lng]}
+      duration={mapZoom === "md" ? 500 : 2500}
+    />
+  )
+}
+function ChangeCenter() {
+  const { mapZoom } = useContext(AuthContext)
   const miniMap = useMap()
-  if (mapZoom === 0.5) {
+  if (mapZoom === "md") {
     miniMap.flyTo([46.57447264034455, -180.03737924171946], 0.5)
   } else {
     miniMap.flyTo([30.51620596509747, -130.12413187632802], 1.25)
   }
   return null
 }
-function ChangeCenterBack({ mapZoom }: { mapZoom: number }) {
+function ChangeCenterBack() {
+  const { mapZoom } = useContext(AuthContext)
   const originMap = useMap()
-  if (mapZoom === 0.5) {
+  if (mapZoom === "md") {
     originMap.flyTo([39.9437334482122, 65.35942441225613], 0.5)
   } else {
     originMap.flyTo([39.9437334482122, 65.35942441225613], 1.25)
@@ -480,13 +473,13 @@ function ChangeCenterBack({ mapZoom }: { mapZoom: number }) {
 
 let cursor = 0
 function Home() {
-  const { currentUser, isLogin } = useContext(AuthContext)
+  const { currentUser, isLogin, mapZoom } = useContext(AuthContext)
 
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
   console.log({ position })
-  const [mapZoom, setMapZoom] = useState<number>(0)
+  // const [mapZoom, setMapZoom] = useState<number>(0)
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
   const [hasRead, setHasRead] = useState(false)
@@ -501,7 +494,7 @@ function Home() {
   ])
 
   useEffect(() => {
-    if (mapZoom === 1.25) {
+    if (mapZoom === "lg") {
       setRoutePositions([
         { lat: 66.10851411418622, lng: 300.13876852999573 },
         { lat: 72.70521040764667, lng: 325.564188227921 },
@@ -531,51 +524,10 @@ function Home() {
     }
   }, [showSamplePost, routePositions])
 
-  console.log("mapZoom", mapZoom)
-  const onZoomChange = () => {
-    if (
-      (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
-      (window.innerWidth > window.innerHeight && window.innerHeight < 600)
-    ) {
-      setMapZoom(0.5)
-    } else if (window.innerWidth > 900 && window.innerHeight > 600) {
-      setMapZoom(1.25)
-    }
-  }
-  useEffect(() => {
-    const handleResize = () => {
-      // console.log("resize的window.innerWidth", window.innerWidth)
-      // console.log("resize的window.innerHeight", window.innerHeight)
-      if (
-        (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
-        (window.innerWidth > window.innerHeight && window.innerHeight < 600)
-      ) {
-        // console.log("條件1的window.innerWidth", window.innerWidth)
-        // console.log("條件1的window.innerHeight", window.innerHeight)
-        setMapZoom(0)
-      } else if (
-        window.innerWidth > window.innerHeight &&
-        window.innerWidth > 900 &&
-        window.innerHeight > 600
-      ) {
-        // console.log("條件2的window.innerWidth", window.innerWidth)
-        // console.log("條件2的window.innerHeight", window.innerHeight)
-        setMapZoom(1.25)
-      }
-    }
-    // console.log("初始window.innerWidth", window.innerWidth)
-    // console.log("初始window.innerHeight", window.innerHeight)
-    onZoomChange()
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [mapZoom])
   return (
     <>
       <HeaderWrapper>
         <Title>My Travel Pins</Title>
-
         <TabWrapper>
           <SignUpTab
             isSignUp={isSignUp}
@@ -640,9 +592,9 @@ function Home() {
                 />
               ))}
               {!hasRead && !showSamplePost && (
-                <FingerMarker data={fingerRoute} mapZoom={mapZoom} />
+                <FingerMarker data={fingerRoute} />
               )}
-              {(isSignUp || isSignIn) && <ChangeCenter mapZoom={mapZoom} />}
+              {(isSignUp || isSignIn) && <ChangeCenter />}
               {}
               <TargetArea position={position} setPosition={setPosition} />
               {/* <TileLayer
@@ -651,7 +603,7 @@ function Home() {
         /> */}
               {!isSignUp && !isSignIn && (
                 <>
-                  <ChangeCenterBack mapZoom={mapZoom} />
+                  <ChangeCenterBack />
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
                 </>
               )}

@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useState, useContext, useEffect } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import defaultAvatar from "../assets/defaultProfile.png"
@@ -142,6 +142,22 @@ function Header() {
     isFriendMemory,
     setIsFriendMemory,
   } = useContext(AuthContext)
+  const [friendId, setFriendId] = useState("")
+  const [friendName, setFriendName] = useState("")
+
+  useEffect(() => {
+    if (isFriendHome || isFriendMemory) {
+      const url = window.location.href
+      const splitUrlArr = url.split("/")
+      const newfriendId = splitUrlArr.slice(-1)[0]
+      let newfriendName = splitUrlArr.slice(-2, -1)[0]
+      if (newfriendName[0] === "%") {
+        newfriendName = decodeURI(newfriendName)
+      }
+      setFriendId(newfriendId)
+      setFriendName(newfriendName)
+    } else return
+  }, [isFriendHome, isFriendMemory])
 
   if (
     !isLogin ||
@@ -234,6 +250,63 @@ function Header() {
               }}
             >
               My Friends
+            </CurrentTab>
+          </>
+        )}
+        {isFriendHome && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <CurrentTab
+              onClick={() => {
+                setIsMyMap(false)
+                setIsFriendMemory(false)
+                setIsFriendHome(true)
+              }}
+            >
+              {`${friendName}'s Map`}
+            </CurrentTab>
+            <Tab
+              to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
+              as={Link}
+            >
+              {`${friendName}'s Memories`}
+            </Tab>
+          </>
+        )}
+        {isFriendMemory && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <Tab>{`${friendName}'s Map`}</Tab>
+            <CurrentTab
+              to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(true)
+              }}
+            >
+              {`${friendName}'s Memories`}
             </CurrentTab>
           </>
         )}

@@ -121,6 +121,13 @@ export function AuthContextProvider({ children }: Props) {
     UserInfoType | DocumentData | undefined
   >()
   const [mapZoom, setMapZoom] = useState<string>("lg")
+  console.log("mapZoom", mapZoom)
+  const navigate = useNavigate()
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: myGoogleApiKey!,
+    libraries,
+  })
+
   const onZoomChange = () => {
     if (
       (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
@@ -160,11 +167,6 @@ export function AuthContextProvider({ children }: Props) {
       window.removeEventListener("resize", handleResize)
     }
   }, [mapZoom])
-  const navigate = useNavigate()
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: myGoogleApiKey!,
-    libraries,
-  })
 
   useEffect(() => {
     const checkLoginStatus = onAuthStateChanged(auth, async (user) => {
