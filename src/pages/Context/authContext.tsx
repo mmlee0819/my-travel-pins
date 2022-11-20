@@ -1,18 +1,24 @@
-import React from "react"
-import { createContext, useState, useEffect, ReactNode } from "react"
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  Dispatch,
+} from "react"
 import { useNavigate } from "react-router-dom"
+import { useJsApiLoader, LoadScriptProps } from "@react-google-maps/api"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "firebase/auth"
-import { auth, db, storage } from "../Utils/firebase"
+
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import { useJsApiLoader, LoadScriptProps } from "@react-google-maps/api"
-
+import { auth, db, storage } from "../Utils/firebase"
 import { myGoogleApiKey } from "../Utils/gmap"
+
 declare module "*.png"
 
 interface AuthContextType {
@@ -30,6 +36,18 @@ interface AuthContextType {
   setIsLogin: (isLogin: boolean) => void
   navigate: (path: string) => void
   isLoaded: boolean
+  mapZoom: string
+  setMapZoom: (mapZoom: string) => void
+  isMyMap: boolean
+  setIsMyMap: (isMyMap: boolean) => void
+  isMyMemory: boolean
+  setIsMyMemory: (isMyMemory: boolean) => void
+  isMyFriend: boolean
+  setIsMyFriend: (isMyFriend: boolean) => void
+  isFriendHome: boolean
+  setIsFriendHome: (isFriendHome: boolean) => void
+  isFriendMemory: boolean
+  setIsFriendMemory: (isFriendMemory: boolean) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -57,6 +75,18 @@ export const AuthContext = createContext<AuthContextType>({
   logOut: () => Response,
   navigate: (path: string) => Response,
   isLoaded: true,
+  mapZoom: "lg",
+  setMapZoom: (mapZoom: string) => Response,
+  isMyMap: false,
+  setIsMyMap: (isMyMap: boolean) => Response,
+  isMyMemory: false,
+  setIsMyMemory: (isMyMemory: boolean) => Response,
+  isMyFriend: false,
+  setIsMyFriend: (isMyFriend: boolean) => Response,
+  isFriendHome: false,
+  setIsFriendHome: (isFriendHome: boolean) => Response,
+  isFriendMemory: false,
+  setIsFriendMemory: (isFriendMemory: boolean) => Response,
 })
 
 interface Props {
@@ -73,33 +103,85 @@ export interface UserInfoType {
   hometownLng: number
   friends: string[]
 }
+
 export interface DocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
+
 const libraries: LoadScriptProps["libraries"] = ["places"]
-export const AuthContextProvider = ({ children }: Props) => {
+
+export function AuthContextProvider({ children }: Props) {
   const [isLogin, setIsLogin] = useState(false)
+  const [isMyMap, setIsMyMap] = useState(false)
+  const [isMyMemory, setIsMyMemory] = useState(false)
+  const [isMyFriend, setIsMyFriend] = useState(false)
+  const [isFriendHome, setIsFriendHome] = useState(false)
+  const [isFriendMemory, setIsFriendMemory] = useState(false)
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
-
+  const [mapZoom, setMapZoom] = useState<string>("lg")
+  const onZoomChange = () => {
+    if (
+      (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
+      (window.innerWidth > window.innerHeight && window.innerHeight < 600)
+    ) {
+      setMapZoom("md")
+    } else if (window.innerWidth > 900 && window.innerHeight > 600) {
+      setMapZoom("lg")
+    }
+  }
+  useEffect(() => {
+    const handleResize = () => {
+      // console.log("resize的window.innerWidth", window.innerWidth)
+      // console.log("resize的window.innerHeight", window.innerHeight)
+      if (
+        (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
+        (window.innerWidth > window.innerHeight && window.innerHeight < 600)
+      ) {
+        // console.log("條件1的window.innerWidth", window.innerWidth)
+        // console.log("條件1的window.innerHeight", window.innerHeight)
+        setMapZoom("md")
+      } else if (
+        window.innerWidth > window.innerHeight &&
+        window.innerWidth > 900 &&
+        window.innerHeight > 600
+      ) {
+        // console.log("條件2的window.innerWidth", window.innerWidth)
+        // console.log("條件2的window.innerHeight", window.innerHeight)
+        setMapZoom("lg")
+      }
+    }
+    // console.log("初始window.innerWidth", window.innerWidth)
+    // console.log("初始window.innerHeight", window.innerHeight)
+    onZoomChange()
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [mapZoom])
   const navigate = useNavigate()
-
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: myGoogleApiKey!,
     libraries,
   })
 
   useEffect(() => {
-    const checkLoginStatus = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser !== null) {
-        const docRef = doc(db, "users", currentUser.uid)
-        const docSnap = await getDoc(docRef)
-        const userInfo: DocumentData = docSnap.data()!
-        setCurrentUser(userInfo)
-        setIsLogin(true)
-      } else {
-        setIsLogin(false)
+    const checkLoginStatus = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user !== null) {
+          const docRef = doc(db, "users", user.uid)
+          const docSnap = await getDoc(docRef)
+          const userInfo: DocumentData | undefined = docSnap.data()
+          setCurrentUser(userInfo)
+          setIsLogin(true)
+          setIsMyMap(true)
+          navigate(`/${userInfo?.name}`)
+        } else {
+          setIsLogin(false)
+        }
+      } catch (error) {
+        console.log(error)
       }
     })
     return checkLoginStatus
@@ -118,8 +200,8 @@ export const AuthContextProvider = ({ children }: Props) => {
       let UpdatedName = ""
       if (engLetter.test(name[0])) {
         const namesArr = name.split(" ")
-        const newNameArr = namesArr.map((name) => {
-          const newName = name.charAt(0).toUpperCase() + name.slice(1)
+        const newNameArr = namesArr.map((word) => {
+          const newName = word.charAt(0).toUpperCase() + word.slice(1)
           return newName
         })
         UpdatedName = newNameArr.join(" ")
@@ -131,7 +213,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       )
       const avatarPathRef = ref(storage, "defaultProfile.png")
       const defaultAvatar = await getDownloadURL(avatarPathRef)
-      const user = userCredential.user
+      const { user } = userCredential
       if (user) {
         const userInfo = {
           id: user.uid,
@@ -146,8 +228,9 @@ export const AuthContextProvider = ({ children }: Props) => {
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)
         setIsLogin(true)
+        setIsMyMap(true)
         console.log("註冊完成，已登入")
-        navigate(`/${currentUser?.name}`)
+        navigate(`/${userInfo?.name}`)
       }
     } catch (error: unknown) {
       console.log(error)
@@ -170,6 +253,7 @@ export const AuthContextProvider = ({ children }: Props) => {
         setCurrentUser(userInfo)
         setIsLogin(true)
         setIsLogin(true)
+        setIsMyMap(true)
         console.log("已登入")
         navigate(`/${userInfo?.name}`)
       }
@@ -201,6 +285,18 @@ export const AuthContextProvider = ({ children }: Props) => {
         setIsLogin,
         navigate,
         isLoaded,
+        mapZoom,
+        setMapZoom,
+        isMyMap,
+        setIsMyMap,
+        isMyMemory,
+        setIsMyMemory,
+        isMyFriend,
+        setIsMyFriend,
+        isFriendHome,
+        setIsFriendHome,
+        isFriendMemory,
+        setIsFriendMemory,
       }}
     >
       {children}

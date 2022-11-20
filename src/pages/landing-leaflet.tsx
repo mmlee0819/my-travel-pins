@@ -21,12 +21,12 @@ import {
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
-import { countries } from "./Utils/custom.geo"
+import { countries } from "./Utils/customGeo"
 import { AuthContext } from "./Context/authContext"
 import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
-import finger from "./assets/finger.png"
+import finger from "./assets/buttons/finger.png"
 import tip from "./assets/tip.png"
 import xMark from "./assets/x-mark.png"
 
@@ -610,7 +610,6 @@ function Home() {
       <Container>
         {(!isLogin || currentUser === null) && (
           <>
-            {/* {!isSignUp && !isSignIn && ( */}
             <MapContainer
               id="homeMap"
               center={[39.9437334482122, 65.35942441225613]}
@@ -663,7 +662,6 @@ function Home() {
                 </Popup>
               </Marker>
             </MapContainer>
-            {/* )} */}
           </>
         )}
         {(isSignUp || isSignIn) && (

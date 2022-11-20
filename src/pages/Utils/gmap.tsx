@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService } from "@react-google-maps/api"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
-import backIcon from "../assets/back.png"
+import backIcon from "../assets/buttons/back.png"
 import {
   MessagesType,
   addMsg,
@@ -160,8 +160,11 @@ interface PropsFromStreetView {
 
 export const containerStyle = {
   marginTop: "10px",
-  minHeight: "calc(100vh - 120px)",
   width: "100%",
+  height: "100%",
+  minHeight: "calc(100vh - 120px)",
+  borderRadius: "10px",
+  zIndex: 30,
 }
 
 export const centerSchool = {
@@ -171,7 +174,7 @@ export const centerSchool = {
 
 export const myGoogleApiKey = process.env.REACT_APP_google_API_KEY
 
-const PinContentInStreetView = (props: Props) => {
+function PinContentInStreetView(props: Props) {
   const { selectedMarker, setShowMemory } = props
   return (
     <ColumnWrapper>
