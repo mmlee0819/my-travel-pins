@@ -82,7 +82,7 @@ function FriendsHome() {
   const [markers, setMarkers] = useState<
     DocumentData[] | DefinedDocumentData[] | PinContent[]
   >([])
-  const [selectedMarker, setSelectedMarker] = useState<PinContent>()
+  const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showInfoWindow, setShowInfoWindow] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   console.log("hometownText", hometownText)
@@ -114,8 +114,9 @@ function FriendsHome() {
     const getAllPinsOfFriend = async () => {
       const q = query(collection(db, "pins"), where("userId", "==", friendId))
       const querySnapshot = await getDocs(q)
-      const newMarkers: DefinedDocumentData[] | PinContent[] = []
-      querySnapshot.forEach((doc) => {
+      // const newMarkers: DocumentData[] | PinContent[] = []
+      const newMarkers: any[] = []
+      querySnapshot.forEach((doc: any) => {
         newMarkers.push(doc.data())
       })
       setMarkers(newMarkers)
@@ -218,14 +219,14 @@ function FriendsHome() {
                         marker.location.lng
                       )
                     }
-                    onClick={(e: google.maps.MapMouseEvent) => {
-                      choosePinOnMap(
-                        e,
-                        markers,
-                        setSelectedMarker,
-                        setShowInfoWindow
-                      )
-                    }}
+                    //   onClick={(e: google.maps.MapMouseEvent) => {
+                    //     choosePinOnMap(
+                    //       e,
+                    //       markers,
+                    //       setSelectedMarker,
+                    //       setShowInfoWindow
+                    //     )
+                    //   }}
                   />
                 )
               })}
