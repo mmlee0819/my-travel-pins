@@ -132,6 +132,23 @@ const BtnText = styled.div`
   }
 `
 const BtnAddPin = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  display: flex;
+  width: 60px;
+  height: 60px;
+  background-image: url(${addPinIcon});
+  background-size: 100% 100%;
+  z-index: 60;
+  cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    width: 40px;
+    height: 40px;
+  }
+`
+const BtnConfirmAddPin = styled.div`
   display: flex;
   width: 40px;
   height: 40px;
@@ -381,6 +398,7 @@ export default function MyMap() {
   const [hasFetched, setHasFetched] = useState(false)
   const [showInfoWindow, setShowInfoWindow] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
+  const [showPostArea, setShowPostArea] = useState(false)
 
   console.log("markers", markers)
   console.log("selectedMarker", selectedMarker)
@@ -570,88 +588,98 @@ export default function MyMap() {
         typeof currentUser?.hometownLat === "number" &&
         typeof currentUser?.hometownLng === "number" && (
           <Container>
-            <Wrapper hasAddPin={hasAddPin}>
-              <StepText>To remember your trip</StepText>
-              {!hasAddPin && (
-                <>
-                  <StepText>Step 1: Pin a place!</StepText>
-                  <StandaloneSearchBox
-                    onLoad={onLoad}
-                    onPlacesChanged={onPlacesChanged}
-                  >
-                    <Input placeholder="Where did you go?"></Input>
-                  </StandaloneSearchBox>
-                  <BtnText onClick={addPin}>
-                    Confirm to pin
-                    <BtnAddPin />
-                  </BtnText>
-                </>
-              )}
-              {hasAddPin && !hasPosted && (
-                <>
-                  <StepText>Step 2: Log your memory</StepText>
-
-                  <ArticleWrapper>
-                    <Input
-                      placeholder="Title"
-                      onChange={(e) => {
-                        setArtiTitle(e.target.value)
-                      }}
-                    />
-                    <Input
-                      type="date"
-                      placeholder="When did you go there?"
-                      onChange={(e) => {
-                        setTravelDate(e.target.value)
-                      }}
-                    />
-                    <Textarea
-                      placeholder="What's on your mind?"
-                      rows={6}
-                      onChange={(e) => {
-                        setArtiContent(e.target.value)
-                      }}
-                    />
-                  </ArticleWrapper>
-                  {hasUpload && urls ? (
-                    <UrlsImgWrapper>
-                      {urls.map((url) => {
-                        console.log(url)
-                        return <UploadedPhoto key={url} src={url} />
-                      })}
-                    </UrlsImgWrapper>
-                  ) : (
-                    <UploadPhotoWrapper>
-                      <UploadImgLabel>
-                        <UploadImgIcon src={uploadIcon} />
-                        {filesName.length !== 0
-                          ? filesName.map((fileName) => {
-                              return `\n${fileName}`
-                            })
-                          : "Choose photos"}
-                        <UploadImgInput
-                          type="file"
-                          accept="image/*"
-                          multiple={true}
-                          onChange={(e) => {
-                            handleChange(e)
-                          }}
-                        />
-                      </UploadImgLabel>
-                      <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
-                    </UploadPhotoWrapper>
-                  )}
-                  <BtnWrapper>
-                    <BtnConfirm onClick={addMemory}>Confirm to post</BtnConfirm>
-                    <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
-                  </BtnWrapper>
-                  <CancelReminder>
-                    If you cancel to post,
-                    <br /> all content and uploaded files will not be preserved.
-                  </CancelReminder>
-                </>
-              )}
-            </Wrapper>
+            {!showPostArea && (
+              <BtnAddPin
+                onClick={() => {
+                  setShowPostArea(true)
+                }}
+              />
+            )}
+            {showPostArea && (
+              <Wrapper hasAddPin={hasAddPin}>
+                <StepText>To remember your trip</StepText>
+                {!hasAddPin && (
+                  <>
+                    <StepText>Step 1: Pin a place!</StepText>
+                    <StandaloneSearchBox
+                      onLoad={onLoad}
+                      onPlacesChanged={onPlacesChanged}
+                    >
+                      <Input placeholder="Where did you go?"></Input>
+                    </StandaloneSearchBox>
+                    <BtnText onClick={addPin}>
+                      Confirm to pin
+                      <BtnConfirmAddPin />
+                    </BtnText>
+                  </>
+                )}
+                {hasAddPin && !hasPosted && (
+                  <>
+                    <StepText>Step 2: Log your memory</StepText>
+                    <ArticleWrapper>
+                      <Input
+                        placeholder="Title"
+                        onChange={(e) => {
+                          setArtiTitle(e.target.value)
+                        }}
+                      />
+                      <Input
+                        type="date"
+                        onChange={(e) => {
+                          setTravelDate(e.target.value)
+                        }}
+                      />
+                      <Textarea
+                        placeholder="What's on your mind?"
+                        rows={6}
+                        onChange={(e) => {
+                          setArtiContent(e.target.value)
+                        }}
+                      />
+                    </ArticleWrapper>
+                    {hasUpload && urls ? (
+                      <UrlsImgWrapper>
+                        {urls.map((url) => {
+                          console.log(url)
+                          return <UploadedPhoto key={url} src={url} />
+                        })}
+                      </UrlsImgWrapper>
+                    ) : (
+                      <UploadPhotoWrapper>
+                        <UploadImgLabel>
+                          <UploadImgIcon src={uploadIcon} />
+                          {filesName.length !== 0
+                            ? filesName.map((fileName) => {
+                                return `\n${fileName}`
+                              })
+                            : "Choose photos"}
+                          <UploadImgInput
+                            type="file"
+                            accept="image/*"
+                            multiple={true}
+                            onChange={(e) => {
+                              handleChange(e)
+                            }}
+                          />
+                        </UploadImgLabel>
+                        <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
+                      </UploadPhotoWrapper>
+                    )}
+                    <BtnWrapper>
+                      <BtnConfirm onClick={addMemory}>
+                        Confirm to post
+                      </BtnConfirm>
+                      <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
+                    </BtnWrapper>
+                    <CancelReminder>
+                      If you cancel to post,
+                      <br /> all content and uploaded files will not be
+                      preserved.
+                    </CancelReminder>
+                  </>
+                )}
+              </Wrapper>
+            )}
 
             <MapContainer
               id="my-Map"
@@ -703,33 +731,42 @@ export default function MyMap() {
               </Marker>
               {markers?.map((marker) => {
                 return (
-                  <>
-                    <Marker
-                      key={marker.location.placeId}
-                      position={[marker.location.lat, marker.location.lng]}
-                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                  <Marker
+                    key={marker.location.placeId}
+                    position={[marker.location.lat, marker.location.lng]}
+                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    eventHandlers={{
+                      click() {
+                        setShowPostArea(false)
+                      },
+                    }}
+                  >
+                    <Popup
+                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      keepInView
                     >
-                      <Popup
-                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView
+                      <PinInfoArea
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
                       >
-                        <PinInfoArea
-                          onClick={() => {
-                            setShowMemory(true)
-                          }}
-                        >
-                          <PinInfoImg
-                            src={
-                              marker.albumURLs
-                                ? marker?.albumURLs[0]
-                                : defaultImage
-                            }
-                          />
-                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                        </PinInfoArea>
-                      </Popup>
-                    </Marker>
-                  </>
+                        <PinInfoImg
+                          src={
+                            marker.albumURLs
+                              ? marker?.albumURLs[0]
+                              : defaultImage
+                          }
+                        />
+                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                      </PinInfoArea>
+                      {showMemory && (
+                        <StreetView
+                          selectedMarker={marker}
+                          setShowMemory={setShowMemory}
+                        />
+                      )}
+                    </Popup>
+                  </Marker>
                 )
               })}
             </MapContainer>
@@ -738,14 +775,3 @@ export default function MyMap() {
     </>
   )
 }
-
-// {
-//       {selectedMarker && showInfoWindow && showMemory && (
-//         <StreetView
-//           selectedMarker={selectedMarker}
-//           setShowMemory={setShowMemory}
-//         />
-//       )}
-//     </>
-//   )
-// }
