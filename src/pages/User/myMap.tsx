@@ -7,7 +7,9 @@ import {
   StandaloneSearchBox,
   InfoWindow,
 } from "@react-google-maps/api"
+
 import { darkMap } from "./darkMap"
+import geoContinent from "../Utils/GMcustom.geo.json"
 import { AuthContext } from "../Context/authContext"
 import homeIcon from "./homeIcon.png"
 import uploadIcon from "./uploadImgIcon.png"
@@ -46,6 +48,7 @@ const SearchWrapper = styled.div`
   opacity: 0.6;
   gap: 20px;
   font-size: 14px;
+  z-index: 300;
 `
 const Input = styled.input`
   width: 100%;
@@ -223,9 +226,9 @@ export default function User() {
     } else return
   }, [currentUser?.id])
 
-  // const onMkLoad = (marker: google.maps.Marker) => {
-  //   console.log(" marker", marker)
-  // }
+  const onMkLoad = (marker: google.maps.Marker) => {
+    console.log(" marker", marker)
+  }
 
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
@@ -386,6 +389,67 @@ export default function User() {
     setUploadProgress(0)
     setUrls([])
   }
+
+  const geoLoad = () => {
+    const geoMap = new google.maps.Map(
+      document.getElementById("my-map") as HTMLElement,
+      {
+        mapId: "f147fe4f96bd6f2e",
+        center: {
+          lat: selectedMarker?.location?.lat || currentUser?.hometownLat,
+          lng: selectedMarker?.location?.lng || currentUser?.hometownLng,
+        },
+        zoom: window.innerWidth > 900 && window.innerHeight > 600 ? 3 : 2,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        heading: 0,
+        tilt: 300,
+      }
+    )
+
+    geoMap.data.addGeoJson(geoContinent)
+    geoMap.data.setStyle({
+      fillColor: "#ffffff",
+      fillOpacity: 1,
+      strokeWeight: 0,
+      zIndex: 30,
+      visible: true,
+      clickable: true,
+    })
+
+    geoMap.data.addListener("mouseover", function (event: any) {
+      geoMap.data.overrideStyle(event.feature, {
+        fillColor: "#fffd8b",
+      })
+    })
+    geoMap.data.addListener("mouseout", function (event: any) {
+      geoMap.data.overrideStyle(event.feature, {
+        fillColor: "#fff",
+      })
+    })
+  }
+  // useEffect(() => {
+  //   const handleMouseOver = (event: any) => {
+  //     geoMap.data.overrideStyle(event.feature, {
+  //       fillColor: "#fffd8b",
+  //     })
+  //   }
+  //   geoMap.data.addListener("mouseover", handleMouseOver)
+  //   return () => {
+  //     geoMap.data.removeListener("mouseover", handleMouseOver)
+  //   }
+  // }, [])
+  // useEffect(() => {
+  //   const handleMouseOut = (event: any) => {
+  //     geoMap.data.overrideStyle(event.feature, {
+  //       fillColor: "#fff",
+  //     })
+  //   }
+  //   geoMap.data.addListener("mouseout", handleMouseOut)
+  //   return () => {
+  //     geoMap.data.removeListener("mouseout", handleMouseOut)
+  //   }
+  // }, [])
   if (!isLogin || currentUser === undefined || currentUser === null)
     return <Title>你沒有登入</Title>
 
@@ -396,211 +460,219 @@ export default function User() {
       typeof currentUser?.hometownLng === "number" ? (
         <GoogleMap
           id="my-map"
-          mapTypeId="94ce067fe76ff36f"
+          mapTypeId="f147fe4f96bd6f2e"
           mapContainerStyle={containerStyle}
           center={{
             lat: selectedMarker?.location?.lat || currentUser?.hometownLat,
             lng: selectedMarker?.location?.lng || currentUser?.hometownLng,
           }}
           zoom={selectedMarker ? 6 : 2}
-          options={{ draggable: true, styles: darkMap }}
+          options={{
+            draggable: true,
+          }}
         >
-          <SearchWrapper>
-            <Title>Add a new memory</Title>
-            <Title>Step 1 : Where did you go?</Title>
-            {hasAddPin ? (
-              <Title>{newPin.location.name}</Title>
-            ) : (
-              <StandaloneSearchBox
-                onLoad={onLoad}
-                onPlacesChanged={onPlacesChanged}
-              >
-                <Input placeholder="City, Address..."></Input>
-              </StandaloneSearchBox>
-            )}
-            {hasAddPin ? (
-              ""
-            ) : (
-              <BtnAddPin onClick={addPin}>Confirm to add pin</BtnAddPin>
-            )}
-            <Title>Step 2 : Write something to save your memory!</Title>
-          </SearchWrapper>
-          {hasAddPin && !hasPosted ? (
-            <PostArea>
-              <ArticleWrapper>
-                <ArticleTitleInput
-                  placeholder="Title"
-                  onChange={(e) => {
-                    setArtiTitle(e.target.value)
-                  }}
-                ></ArticleTitleInput>
-                <ArticleTitleInput
-                  type="date"
-                  placeholder="When did you go there?"
-                  onChange={(e) => {
-                    setTravelDate(e.target.value)
-                  }}
-                ></ArticleTitleInput>
-                <Textarea
-                  placeholder="What's on your mind?"
-                  rows={6}
-                  onChange={(e) => {
-                    setArtiContent(e.target.value)
-                  }}
-                />
-              </ArticleWrapper>
-              {hasUpload && urls ? (
-                <UrlsImgWrapper>
-                  {urls.map((url) => {
-                    console.log(url)
-                    return <UploadImgIcon key={url} src={url} />
-                  })}
-                </UrlsImgWrapper>
+          <GoogleMap
+            mapTypeId="f147fe4f96bd6f2e"
+            onLoad={geoLoad}
+            mapContainerStyle={{ marginTop: "0", minHeight: "100vh" }}
+          >
+            <SearchWrapper>
+              <Title>Add a new memory</Title>
+              <Title>Step 1 : Where did you go?</Title>
+              {hasAddPin ? (
+                <Title>{newPin.location.name}</Title>
               ) : (
-                <UploadPhotoWrapper>
-                  <UploadImgLabel>
-                    <UploadImgIcon src={uploadIcon} />
-                    {filesName.length !== 0
-                      ? filesName.map((fileName) => {
-                          return `\n${fileName}`
-                        })
-                      : "Choose photos"}
-                    <UploadImgInput
-                      type="file"
-                      accept="image/*"
-                      multiple={true}
-                      onChange={(e) => {
-                        handleChange(e)
-                      }}
-                    />
-                  </UploadImgLabel>
-                  <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
-                </UploadPhotoWrapper>
+                <StandaloneSearchBox
+                  onLoad={onLoad}
+                  onPlacesChanged={onPlacesChanged}
+                >
+                  <Input placeholder="City, Address..."></Input>
+                </StandaloneSearchBox>
               )}
-              <PostBtnWrapper>
-                <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
-                <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
-              </PostBtnWrapper>
-              <CancelReminder>
-                If you click `Cancel`, all content and uploaded files will not
-                be preserved.
-              </CancelReminder>
-            </PostArea>
-          ) : (
-            ""
-          )}
-          {typeof center?.lat === "number" &&
-          typeof center?.lng === "number" ? (
-            <Marker
-              // onLoad={onMkLoad}
-              position={{
-                lat: currentUser?.hometownLat,
-                lng: currentUser?.hometownLng,
-              }}
-              icon={homeIcon}
-              onClick={() => {
-                if (
-                  typeof currentUser?.hometownLat === "number" &&
-                  typeof currentUser?.hometownLng === "number" &&
-                  typeof currentUser?.hometownName === "string"
-                ) {
-                  setHometown({
-                    lat: currentUser?.hometownLat,
-                    lng: currentUser?.hometownLng,
-                    name: currentUser?.hometownName,
-                  })
-                }
-              }}
-            />
-          ) : (
-            ""
-          )}
-          {hometown && hometown?.name ? (
-            <InfoWindow
-              onLoad={onInfoWinLoad}
-              position={{
-                lat: currentUser?.hometownLat,
-                lng: currentUser?.hometownLng,
-              }}
-              options={{
-                pixelOffset: new window.google.maps.Size(0, -50),
-              }}
-              onCloseClick={() => {
-                setHometown({})
-              }}
-            >
-              <PinInfoArea>
-                <PinInfoTitle>
-                  {hometown && hometown?.name !== ""
-                    ? `My Hometown ${hometown?.name}`
-                    : ""}
-                </PinInfoTitle>
-              </PinInfoArea>
-            </InfoWindow>
-          ) : (
-            ""
-          )}
-          {markers?.map((marker) => {
-            return (
+              {!hasAddPin && (
+                <BtnAddPin onClick={addPin}>Confirm to add pin</BtnAddPin>
+              )}
+              <Title>Step 2 : Write something to save your memory!</Title>
+            </SearchWrapper>
+            {hasAddPin && !hasPosted ? (
+              <PostArea>
+                <ArticleWrapper>
+                  <ArticleTitleInput
+                    placeholder="Title"
+                    onChange={(e) => {
+                      setArtiTitle(e.target.value)
+                    }}
+                  ></ArticleTitleInput>
+                  <ArticleTitleInput
+                    type="date"
+                    placeholder="When did you go there?"
+                    onChange={(e) => {
+                      setTravelDate(e.target.value)
+                    }}
+                  ></ArticleTitleInput>
+                  <Textarea
+                    placeholder="What's on your mind?"
+                    rows={6}
+                    onChange={(e) => {
+                      setArtiContent(e.target.value)
+                    }}
+                  />
+                </ArticleWrapper>
+                {hasUpload && urls ? (
+                  <UrlsImgWrapper>
+                    {urls.map((url) => {
+                      console.log(url)
+                      return <UploadImgIcon key={url} src={url} />
+                    })}
+                  </UrlsImgWrapper>
+                ) : (
+                  <UploadPhotoWrapper>
+                    <UploadImgLabel>
+                      <UploadImgIcon src={uploadIcon} />
+                      {filesName.length !== 0
+                        ? filesName.map((fileName) => {
+                            return `\n${fileName}`
+                          })
+                        : "Choose photos"}
+                      <UploadImgInput
+                        type="file"
+                        accept="image/*"
+                        multiple={true}
+                        onChange={(e) => {
+                          handleChange(e)
+                        }}
+                      />
+                    </UploadImgLabel>
+                    <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
+                  </UploadPhotoWrapper>
+                )}
+                <PostBtnWrapper>
+                  <BtnPost onClick={addMemory}>Confirm to post</BtnPost>
+                  <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
+                </PostBtnWrapper>
+                <CancelReminder>
+                  If you click `Cancel`, all content and uploaded files will not
+                  be preserved.
+                </CancelReminder>
+              </PostArea>
+            ) : (
+              ""
+            )}
+            {typeof center?.lat === "number" &&
+            typeof center?.lng === "number" ? (
               <Marker
-                key={marker.location.placeId}
-                // onLoad={onMkLoad}
-                draggable={true}
-                position={
-                  new google.maps.LatLng(
-                    marker.location.lat,
-                    marker.location.lng
-                  )
-                }
-                onClick={(e: google.maps.MapMouseEvent) => {
-                  choosePinOnMap(
-                    e,
-                    markers,
-                    setSelectedMarker,
-                    setShowInfoWindow
-                  )
+                position={{
+                  lat: currentUser?.hometownLat,
+                  lng: currentUser?.hometownLng,
+                }}
+                icon={homeIcon}
+                options={{ zIndex: 120 }}
+                onClick={() => {
+                  if (
+                    typeof currentUser?.hometownLat === "number" &&
+                    typeof currentUser?.hometownLng === "number" &&
+                    typeof currentUser?.hometownName === "string"
+                  ) {
+                    setHometown({
+                      lat: currentUser?.hometownLat,
+                      lng: currentUser?.hometownLng,
+                      name: currentUser?.hometownName,
+                    })
+                  }
                 }}
               />
-            )
-          })}
-          {selectedMarker && (
-            <>
+            ) : (
+              ""
+            )}
+            {hometown && hometown?.name ? (
               <InfoWindow
                 onLoad={onInfoWinLoad}
-                onCloseClick={() => {
-                  setSelectedMarker(undefined)
-                }}
                 position={{
-                  lat: selectedMarker?.location?.lat,
-                  lng: selectedMarker?.location?.lng,
+                  lat: currentUser?.hometownLat,
+                  lng: currentUser?.hometownLng,
                 }}
                 options={{
-                  pixelOffset: new window.google.maps.Size(0, -40),
+                  pixelOffset: new window.google.maps.Size(0, -50),
+                }}
+                onCloseClick={() => {
+                  setHometown({})
                 }}
               >
-                <PinInfoArea
-                  onClick={() => {
-                    setShowMemory(true)
-                  }}
-                >
-                  <PinInfoImg
-                    src={
-                      selectedMarker.albumURLs
-                        ? selectedMarker?.albumURLs[0]
-                        : defaultImage
-                    }
-                  />
-                  <PinInfoTitle>{selectedMarker?.location?.name}</PinInfoTitle>
+                <PinInfoArea>
+                  <PinInfoTitle>
+                    {hometown && hometown?.name !== ""
+                      ? `My Hometown ${hometown?.name}`
+                      : ""}
+                  </PinInfoTitle>
                 </PinInfoArea>
               </InfoWindow>
-              {selectedMarker && showInfoWindow && showMemory && (
-                <StreetView
-                  selectedMarker={selectedMarker}
-                  setShowMemory={setShowMemory}
+            ) : (
+              ""
+            )}
+            {markers?.map((marker) => {
+              return (
+                <Marker
+                  key={marker.location.placeId}
+                  // onLoad={onMkLoad}
+                  draggable={true}
+                  position={
+                    new google.maps.LatLng(
+                      marker.location.lat,
+                      marker.location.lng
+                    )
+                  }
+                  onClick={(e: google.maps.MapMouseEvent) => {
+                    choosePinOnMap(
+                      e,
+                      markers,
+                      setSelectedMarker,
+                      setShowInfoWindow
+                    )
+                  }}
                 />
-              )}
-            </>
-          )}
+              )
+            })}
+            {selectedMarker && (
+              <>
+                <InfoWindow
+                  onLoad={onInfoWinLoad}
+                  onCloseClick={() => {
+                    setSelectedMarker(undefined)
+                  }}
+                  position={{
+                    lat: selectedMarker?.location?.lat,
+                    lng: selectedMarker?.location?.lng,
+                  }}
+                  options={{
+                    pixelOffset: new window.google.maps.Size(0, -40),
+                  }}
+                >
+                  <PinInfoArea
+                    onClick={() => {
+                      setShowMemory(true)
+                    }}
+                  >
+                    <PinInfoImg
+                      src={
+                        selectedMarker.albumURLs
+                          ? selectedMarker?.albumURLs[0]
+                          : defaultImage
+                      }
+                    />
+                    <PinInfoTitle>
+                      {selectedMarker?.location?.name}
+                    </PinInfoTitle>
+                  </PinInfoArea>
+                </InfoWindow>
+                {selectedMarker && showInfoWindow && showMemory && (
+                  <StreetView
+                    selectedMarker={selectedMarker}
+                    setShowMemory={setShowMemory}
+                  />
+                )}
+              </>
+            )}
+          </GoogleMap>
         </GoogleMap>
       ) : (
         ""
