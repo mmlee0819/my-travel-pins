@@ -48,6 +48,11 @@ interface AuthContextType {
   setIsFriendHome: (isFriendHome: boolean) => void
   isFriendMemory: boolean
   setIsFriendMemory: (isFriendMemory: boolean) => void
+  currentFriendInfo: {
+    name: string
+    id: string
+  }
+  setCurrentFriendInfo: (currentFriendInfo: CurrentFriendInfoType) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -87,12 +92,21 @@ export const AuthContext = createContext<AuthContextType>({
   setIsFriendHome: (isFriendHome: boolean) => Response,
   isFriendMemory: false,
   setIsFriendMemory: (isFriendMemory: boolean) => Response,
+  currentFriendInfo: {
+    name: "",
+    id: "",
+  },
+  setCurrentFriendInfo: (currentFriendInfo: CurrentFriendInfoType) => Response,
 })
 
 interface Props {
   children?: ReactNode
 }
 
+interface CurrentFriendInfoType {
+  name: string
+  id: string
+}
 export interface UserInfoType {
   id: string | DocumentData
   name: string | DocumentData
@@ -117,6 +131,15 @@ export function AuthContextProvider({ children }: Props) {
   const [isMyFriend, setIsMyFriend] = useState(false)
   const [isFriendHome, setIsFriendHome] = useState(false)
   const [isFriendMemory, setIsFriendMemory] = useState(false)
+  const [currentFriendInfo, setCurrentFriendInfo] = useState({
+    name: "",
+    id: "",
+  })
+  console.log({ isMyMap })
+  console.log({ isMyMemory })
+  console.log({ isMyFriend })
+  console.log({ isFriendHome })
+  console.log({ isFriendMemory })
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
@@ -230,6 +253,7 @@ export function AuthContextProvider({ children }: Props) {
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)
         setIsLogin(true)
+        setIsMyFriend(false)
         setIsMyMap(true)
         console.log("註冊完成，已登入")
         navigate(`/${userInfo?.name}`)
@@ -255,6 +279,7 @@ export function AuthContextProvider({ children }: Props) {
         setCurrentUser(userInfo)
         setIsLogin(true)
         setIsLogin(true)
+        setIsMyFriend(false)
         setIsMyMap(true)
         console.log("已登入")
         navigate(`/${userInfo?.name}`)
@@ -299,6 +324,8 @@ export function AuthContextProvider({ children }: Props) {
         setIsFriendHome,
         isFriendMemory,
         setIsFriendMemory,
+        currentFriendInfo,
+        setCurrentFriendInfo,
       }}
     >
       {children}

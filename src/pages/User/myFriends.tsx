@@ -146,7 +146,7 @@ const today = `${new Date().getFullYear()}-${
 }-${new Date().getDate()}`
 
 export default function MyFriends() {
-  const { currentUser, isLogin } = useContext(AuthContext)
+  const { currentUser, isLogin, setCurrentFriendInfo } = useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
     DocumentData | DefinedDocumentData
@@ -421,6 +421,12 @@ export default function MyFriends() {
                       to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
                       as={Link}
                       id={friend.id}
+                      onClick={() => {
+                        setCurrentFriendInfo({
+                          name: friend.name,
+                          id: friend.id,
+                        })
+                      }}
                     >
                       Visit friend
                     </BtnVisitLink>

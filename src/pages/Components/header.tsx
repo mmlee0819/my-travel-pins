@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react"
+import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import defaultAvatar from "../assets/defaultProfile.png"
@@ -130,7 +130,6 @@ function Header() {
     currentUser,
     isLogin,
     logOut,
-    navigate,
     isMyMap,
     setIsMyMap,
     isMyMemory,
@@ -141,23 +140,8 @@ function Header() {
     setIsFriendHome,
     isFriendMemory,
     setIsFriendMemory,
+    currentFriendInfo,
   } = useContext(AuthContext)
-  const [friendId, setFriendId] = useState("")
-  const [friendName, setFriendName] = useState("")
-
-  useEffect(() => {
-    if (isFriendHome || isFriendMemory) {
-      const url = window.location.href
-      const splitUrlArr = url.split("/")
-      const newfriendId = splitUrlArr.slice(-1)[0]
-      let newfriendName = splitUrlArr.slice(-2, -1)[0]
-      if (newfriendName[0] === "%") {
-        newfriendName = decodeURI(newfriendName)
-      }
-      setFriendId(newfriendId)
-      setFriendName(newfriendName)
-    } else return
-  }, [isFriendHome, isFriendMemory])
 
   if (
     !isLogin ||
@@ -181,6 +165,8 @@ function Header() {
               onClick={() => {
                 setIsMyMap(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMemory(true)
               }}
             >
@@ -192,6 +178,8 @@ function Header() {
               onClick={() => {
                 setIsMyMap(false)
                 setIsMyMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
@@ -207,6 +195,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMap(true)
               }}
             >
@@ -219,6 +209,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyMap(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
@@ -234,6 +226,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMap(true)
               }}
             >
@@ -246,6 +240,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyMap(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
@@ -261,25 +257,26 @@ function Header() {
               onClick={() => {
                 setIsFriendHome(false)
                 setIsFriendMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMap(true)
               }}
             >
               My Map
             </Tab>
-            <CurrentTab
+            <CurrentTab>{`${currentFriendInfo?.name}'s Map`}</CurrentTab>
+            <Tab
+              to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}/memories`}
+              as={Link}
               onClick={() => {
                 setIsMyMap(false)
-                setIsFriendMemory(false)
-                setIsFriendHome(true)
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(true)
               }}
             >
-              {`${friendName}'s Map`}
-            </CurrentTab>
-            <Tab
-              to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
-              as={Link}
-            >
-              {`${friendName}'s Memories`}
+              {`${currentFriendInfo?.name}'s Memories`}
             </Tab>
           </>
         )}
@@ -289,6 +286,8 @@ function Header() {
               to={`/${currentUser.name}`}
               as={Link}
               onClick={() => {
+                setIsMyMemory(false)
+                setIsMyFriend(false)
                 setIsFriendHome(false)
                 setIsFriendMemory(false)
                 setIsMyMap(true)
@@ -296,18 +295,18 @@ function Header() {
             >
               My Map
             </Tab>
-            <Tab>{`${friendName}'s Map`}</Tab>
-            <CurrentTab
-              to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}/memories`}
+            <Tab
+              to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}`}
               as={Link}
               onClick={() => {
                 setIsMyMap(false)
-                setIsFriendHome(false)
-                setIsFriendMemory(true)
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsFriendMemory(false)
+                setIsFriendHome(true)
               }}
-            >
-              {`${friendName}'s Memories`}
-            </CurrentTab>
+            >{`${currentFriendInfo?.name}'s Map`}</Tab>
+            <CurrentTab>{`${currentFriendInfo?.name}'s Memories`}</CurrentTab>
           </>
         )}
         <BtnText
