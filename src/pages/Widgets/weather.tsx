@@ -21,14 +21,34 @@ import {
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 import { AuthContext } from "../Context/authContext"
+import xMark from "../assets/x-mark.png"
 
+const Xmark = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 30px;
+  background-image: url(${xMark});
+  background-size: 100% 100%;
+  width: 40px;
+  height: 40px;
+  z-index: 188;
+  cursor: pointer;
+
+  @media screen and (max-width: 799px), (max-height: 600px) {
+    width: 30px;
+    height: 30px;
+  }
+`
 const GridArea = styled.div`
   font-family: "Poppins";
   position: absolute;
   display: flex;
   top: 0px;
-  min-width: 40vw;
-  min-height: 50vh;
+  left: 20px;
+  height: 350px;
+  min-width: 30vw;
+  min-height: 30vh;
+
   z-index: 150;
 `
 const GridItemWrapper = styled.div`
@@ -36,8 +56,10 @@ const GridItemWrapper = styled.div`
   flex-flow: column wrap;
   width: 100%;
   min-height: 50vh;
-  font-size: 12px;
+  font-size: 16px;
   color: #ffffff;
+  background-color: #ffffff;
+  box-shadow: 3px 5px 3px #2d2d2d;
   background: #2d2d2d;
 `
 
@@ -47,16 +69,25 @@ const Input = styled.input`
   left: 0;
   padding-left: 8px;
   width: 100%;
-  height: 30px;
+  line-height: 40px;
+  height: 40px;
   font-size: 15px;
   color: #2d2d2d;
   background-color: #ffffff;
   border: 1px solid #000000;
-  opacity: 0.8;
+  opacity: 1;
   z-index: 199;
+  &:focus {
+    outline: #f99c62;
+    border: 3px solid #f99c62;
+  }
+  ::placeholder {
+    font-size: 16px;
+  }
 `
 
 const CurrentWeatherInfoArea = styled.div`
+  height: auto;
   padding: 5px;
   background-color: #f99c62;
   border: 1px solid #f99c62;
@@ -69,14 +100,14 @@ const CurrentWeatherImg = styled.img`
 const CurrentWeatherTitle = styled.div`
   text-align: center;
   color: #2b2a2a;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 500;
 `
 const CurrentWeatherText = styled.div`
   padding-right: 5px;
   text-align: start;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 700;
 `
 const ForecastWeatherImg = styled.img`
@@ -103,8 +134,12 @@ const RowWrapper = styled.div`
   gap: 5px;
 `
 const ForecastRowWrapper = styled(RowWrapper)`
+  font-size: 24px;
   gap: 0;
   justify-content: space-around;
+  @media screen and (max-width: 799px), (max-height: 600px) {
+    font-size: 18px;
+  }
 `
 const ColumnWrapper = styled.div`
   display: flex;
@@ -116,6 +151,7 @@ const ForecastColumnArea = styled(ColumnWrapper)`
   min-height: 50%;
 `
 const WeatherContentArea = styled.div`
+  position: relative;
   min-width: 50vw;
   padding: 5px;
   background-color: #ffffff;
@@ -140,11 +176,11 @@ const PopText = styled(ForecastWeatherText)`
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const layouts = {
-  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 2, maxH: 1 }],
-  md: [{ i: "exRate-2", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  sm: [{ i: "exRate-3", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-4", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
+  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 3, maxH: 2 }],
+  md: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
+  sm: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
 }
 
 interface Props {
@@ -201,6 +237,7 @@ const myOpenweatherApiKey = process.env.REACT_APP_openweather_API_KEY
 function WeatherWidget(props: Props) {
   const { showWeather } = props
   const { isLoaded, currentUser } = useContext(AuthContext)
+  const [showForecast, setShowForecast] = useState(false)
   const [location, setLocation] = useState<LocationType>({
     lat: 0,
     lng: 0,
@@ -229,7 +266,7 @@ function WeatherWidget(props: Props) {
   const [dates, setDates] = useState<string[]>([])
   const [maxTemps, setMaxTemps] = useState<number[]>([])
   const [minTemps, setMinTemps] = useState<number[]>([])
-  console.log("forecastStatus", forecastStatus)
+
   const options = {
     responsive: true,
     plugins: {
@@ -239,13 +276,14 @@ function WeatherWidget(props: Props) {
       title: {
         display: true,
         text: `${location.name} 8-day forecast`,
+        size: "25px",
       },
     },
     scales: {
       y: {
-        min: currWeatherStatus.temp - 10,
-        max: currWeatherStatus.temp + 10,
-        stepSize: 5,
+        min: minTemps[0] - 5,
+        max: maxTemps[0] + 5,
+        stepSize: 10,
       },
     },
   }
@@ -287,6 +325,7 @@ function WeatherWidget(props: Props) {
             lng: newLng,
             name: placeName,
           })
+          setShowForecast(true)
         }
       }
     } else console.log("失敗啦")
@@ -356,9 +395,9 @@ function WeatherWidget(props: Props) {
         key="tools"
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
-        width={1000}
-        rowHeight={350}
-        z-index={199}
+        width={150}
+        rowHeight={300}
+        z-index={180}
       >
         <GridItemWrapper key="weather-query">
           {isLoaded ? (
@@ -366,12 +405,14 @@ function WeatherWidget(props: Props) {
               <GoogleMap
                 mapTypeId="1742ed94a3f0f03"
                 mapContainerStyle={{
-                  minHeight: "100%",
+                  minHeight: "calc(100% - 20px)",
                   width: "100%",
+                  marginTop: "40px",
+                  top: "-5px",
                 }}
                 center={{
-                  lat: location?.lat,
-                  lng: location?.lng,
+                  lat: location?.lat || 45,
+                  lng: location?.lng || 130,
                 }}
                 zoom={location?.name === "" ? 1 : 6}
                 options={{
@@ -380,7 +421,9 @@ function WeatherWidget(props: Props) {
                   streetViewControl: false,
                   scaleControl: false,
                   fullscreenControl: false,
+                  zoomControl: false,
                   mapId: "1742ed94a3f0f03",
+                  minZoom: 0.8,
                 }}
               >
                 {location.name !== "" &&
@@ -432,8 +475,18 @@ function WeatherWidget(props: Props) {
               >
                 <Input placeholder="Search a place" />
               </StandaloneSearchBox>
-              {location.name !== "" ? (
+              {location.name !== "" && showForecast ? (
                 <WeatherContentArea>
+                  <Xmark
+                    onClick={() => {
+                      setShowForecast(false)
+                      setLocation({
+                        lat: 0,
+                        lng: 0,
+                        name: "",
+                      })
+                    }}
+                  />
                   <ForecastRowWrapper>
                     <Line options={options} data={data} />
                     {forecastStatus.map((item) => {
