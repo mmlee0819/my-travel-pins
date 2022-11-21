@@ -4,13 +4,7 @@ import { Link } from "react-router-dom"
 import { useState, useContext, useEffect } from "react"
 import { AuthContext } from "../Context/authContext"
 import { GoogleMap, Marker } from "@react-google-maps/api"
-import {
-  Container,
-  ContentArea,
-  Title,
-  TabWrapper,
-  SplitWrapper,
-} from "./myFriends"
+
 import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
   MapWrapper,
@@ -20,23 +14,30 @@ import {
   MemoryImg,
 } from "./myMemories"
 import {
-  DetailMapWrapper,
-  DetailImgsWrapper,
-  DetailArticleWrapper,
+  ContentArea,
+  ContentWrapper,
   DetailContentWrapper,
+  DetailArticleWrapper,
   DetailImg,
+  DetailImgsWrapper,
+  DetailMapWrapper,
 } from "./components/UIforMemoriesPage"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
 
-const ContentWrapper = styled(ContentArea)`
+const Container = styled.div`
+  position: relative;
   margin: 0 auto;
-  padding: 15px;
-  background-color: #ffffff;
-  gap: 20px;
-  border: none;
+  max-width: 1440px;
+  width: 100%;
+  color: #2d2d2d;
+  height: calc(100vh - 120px);
+  background-color: rgb(255, 255, 255, 0.1);
+  border-radius: 20px;
 `
-
+const Title = styled.div`
+  color: #000000;
+`
 const MemoryListWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -51,40 +52,6 @@ const MemoryList = styled.div`
   padding: 10px 0;
   background-color: #ffffff;
   gap: 20px;
-`
-const TabLink = styled(Link)`
-  padding: 5px 8px;
-  text-align: center;
-  color: #000000;
-  text-decoration: none;
-  cursor: pointer;
-  &:visited {
-    color: #000000;
-  }
-  &:hover {
-    color: #2d65be;
-  }
-  &:active {
-    color: #000000;
-  }
-`
-const TabTitle = styled.div`
-  padding: 5px 8px;
-  width: 130px;
-  text-align: center;
-  color: #2d65be;
-  border: 1px solid #beb9b9;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  border-bottom: none;
-`
-const LeftSplit = styled.div`
-  width: 154px;
-  border-top: 1px solid #beb9b9;
-`
-const RightSplit = styled(LeftSplit)`
-  flex: 1 1 auto;
-  margin-left: 128px;
 `
 
 function FriendMemories() {
@@ -108,16 +75,6 @@ function FriendMemories() {
   return (
     <>
       <Container>
-        <TabWrapper>
-          <TabLink
-            to={`/${currentUser?.name}/my-friend/${friendName}/${friendId}`}
-          >{`${friendName}'s Map`}</TabLink>
-          <TabTitle>{`${friendName}'s Memories`}</TabTitle>
-        </TabWrapper>
-        <SplitWrapper>
-          <LeftSplit />
-          <RightSplit />
-        </SplitWrapper>
         <ContentArea>
           <ContentWrapper>
             {isLoaded ? (

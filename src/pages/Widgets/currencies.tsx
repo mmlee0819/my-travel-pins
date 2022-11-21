@@ -43,15 +43,15 @@ const GridArea = styled.div`
   font-family: "Poppins";
   position: absolute;
   display: flex;
-  top: 0px;
-  min-width: 500px;
+  top: 80px;
+  min-width: 520px;
   min-height: 300px;
   z-index: 150;
 `
 const GridItemWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  font-size: 12px;
+  font-size: 18px;
   color: #ffffff;
   background: #2d2d2d;
 `
@@ -60,12 +60,13 @@ const GridItemContent = styled.div`
   padding: 8px;
 `
 const BtnClick = styled.div`
-  display: flex;
+  display: inline-block;
   align-items: center;
   margin-top: 20px;
   margin-left: 8px;
+  width: fit-content;
   padding: 5px;
-  width: 90px;
+  padding-right: 15px;
   height: 30px;
   line-height: 20px;
   text-align: center;
@@ -82,7 +83,7 @@ const ExchangesRows = styled.div`
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   gap: 10%;
   z-index: 199;
 `
@@ -90,28 +91,29 @@ const CurrenciesWrapper = styled.div`
   display: flex;
   flex-flow: row wrap;
   margin-top: 5px;
-  width: 420px;
+  width: 600px;
 `
 const CurrencyRow = styled(ExchangesRows)`
   padding: 5px 0;
-  width: 140px;
+  width: 200px;
   color: #000000;
   background-color: #ffffff;
   border: none;
   gap: 2%;
 `
+
 const ExchangesTitle = styled.div`
-  font-size: 12px;
-  width: 140px;
+  font-size: 18px;
+  padding: 8px;
   margin-top: 20px;
 `
 const AmountTitle = styled(ExchangesTitle)`
-  width: 100px;
   margin-top: 20px;
 `
 const Credits = styled.a`
-  width: 160px;
   padding: 8px;
+  margin-top: 10px;
+  font-size: 16px;
   text-decoration: underline;
   &:visited {
     color: #ffffff;
@@ -132,18 +134,19 @@ const FlagImg = styled.img`
 const WhiteInputArea = styled.div`
   align-items: center;
   line-height: 20px;
+  margin-right: 15px;
   width: 140px;
-  height: 20px;
+  height: 30px;
   background-color: #ffffff;
   border-radius: 5px;
   cursor: pointer;
 `
 const WhiteInputTitle = styled(WhiteInputArea)``
 const AmountInput = styled.input`
-  font-size: 12px;
+  font-size: 18px;
   line-height: 20px;
-  width: 100px;
-  height: 20px;
+  width: 140px;
+  height: 30px;
   background-color: #ffffff;
   border-radius: 5px;
 `
@@ -231,7 +234,7 @@ const calculateRates = (
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const layouts = {
-  lg: [{ i: "exRate-1", x: 0, y: 0, w: 3, h: 1, maxW: 1, maxH: 1 }],
+  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 2, maxH: 1 }],
   md: [{ i: "exRate-2", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
   sm: [{ i: "exRate-3", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
   xs: [{ i: "exRate-4", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
@@ -290,9 +293,9 @@ function CurrencyWidget(props: Props) {
         layouts={layouts}
         key="tools"
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
+        cols={{ lg: 2.5, md: 4, sm: 3, xs: 2, xxs: 1 }}
         width={1000}
-        rowHeight={350}
+        rowHeight={500}
         z-index={199}
       >
         <GridItemWrapper key="exchange-rate">

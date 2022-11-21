@@ -7,7 +7,7 @@ import Home from "./pages/landing-leaflet"
 // import Home from "./pages/home"
 import User from "./pages/User/myMap"
 import MyMap from "./pages/User/myMap-leaflet"
-
+import FriendsMap from "./pages/User/friendMap-leaflet"
 import MyMemories from "./pages/User/myMemories"
 import MyFriends from "./pages/User/myFriends"
 import FriendsHome from "./pages/User/friendHome"
@@ -26,7 +26,7 @@ root.render(
         <Route path="/:user/my-friends" element={<MyFriends />} />
         <Route
           path="/:user/my-friend/:friendName/:friendId"
-          element={<FriendsHome />}
+          element={<FriendsMap />}
         />
         <Route
           path="/:user/my-friend/:friendName/:friendId/memories"

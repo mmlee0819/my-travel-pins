@@ -41,6 +41,7 @@ const TabWrapper = styled.div`
 
 const BtnText = styled.div`
   display: flex;
+  margin-left: 10px;
   border: none;
   gap: 5px;
   cursor: pointer;
@@ -130,7 +131,6 @@ function Header() {
     currentUser,
     isLogin,
     logOut,
-    navigate,
     isMyMap,
     setIsMyMap,
     isMyMemory,
@@ -141,6 +141,7 @@ function Header() {
     setIsFriendHome,
     isFriendMemory,
     setIsFriendMemory,
+    currentFriendInfo,
   } = useContext(AuthContext)
 
   if (
@@ -165,6 +166,8 @@ function Header() {
               onClick={() => {
                 setIsMyMap(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMemory(true)
               }}
             >
@@ -176,6 +179,8 @@ function Header() {
               onClick={() => {
                 setIsMyMap(false)
                 setIsMyMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
@@ -191,6 +196,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMap(true)
               }}
             >
@@ -203,6 +210,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyMap(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
@@ -218,6 +227,8 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyMap(true)
               }}
             >
@@ -230,11 +241,73 @@ function Header() {
               onClick={() => {
                 setIsMyMemory(false)
                 setIsMyMap(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
                 setIsMyFriend(true)
               }}
             >
               My Friends
             </CurrentTab>
+          </>
+        )}
+        {isFriendHome && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <CurrentTab>{`${currentFriendInfo?.name}'s Map`}</CurrentTab>
+            <Tab
+              to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}/memories`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(true)
+              }}
+            >
+              {`${currentFriendInfo?.name}'s Memories`}
+            </Tab>
+          </>
+        )}
+        {isFriendMemory && (
+          <>
+            <Tab
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyMap(true)
+              }}
+            >
+              My Map
+            </Tab>
+            <Tab
+              to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsMyMemory(false)
+                setIsMyFriend(false)
+                setIsFriendMemory(false)
+                setIsFriendHome(true)
+              }}
+            >{`${currentFriendInfo?.name}'s Map`}</Tab>
+            <CurrentTab>{`${currentFriendInfo?.name}'s Memories`}</CurrentTab>
           </>
         )}
         <BtnText

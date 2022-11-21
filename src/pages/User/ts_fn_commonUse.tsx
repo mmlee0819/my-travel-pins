@@ -24,7 +24,7 @@ export interface PinContent {
   userId?: string
   name?: string
   placeId?: string
-  location?: {
+  location: {
     placeId: string
     lat: number
     lng: number

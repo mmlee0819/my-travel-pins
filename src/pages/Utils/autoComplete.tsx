@@ -1,6 +1,15 @@
-import React, { Dispatch, SetStateAction } from "react"
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useContext,
+} from "react"
 import styled from "styled-components"
-import { useState, useRef, useEffect, useMemo, useContext } from "react"
+import { getDoc, doc, setDoc } from "firebase/firestore"
+import { DocumentData } from "@firebase/firestore-types"
 import algoliasearch from "algoliasearch/lite"
 import {
   AutocompleteOptions,
@@ -9,85 +18,145 @@ import {
 } from "@algolia/autocomplete-core"
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
-import queryFriendImg from "../assets/034961magnifying-friends.png"
-import { db } from "../Utils/firebase"
-import { getDoc, doc, setDoc } from "firebase/firestore"
-import { DocumentData } from "@firebase/firestore-types"
+import { db } from "./firebase"
 import { AuthContext } from "../Context/authContext"
+import queryFriendImg from "../assets/034961magnifying-friends.png"
+
+/* eslint-disable react/jsx-props-no-spreading */
 
 const InputWrapper = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  margin: 0;
-  margin-bottom: 5px;
+  flex-flow: column wrap;
+  height: 4;
+  line-height: 40px;
+  margin: 15px 10px;
   padding: 0;
   align-items: center;
   gap: 8px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    line-height: 30px;
+    height: 30px;
+  }
 `
-const QueryForm = styled.form``
+const QueryForm = styled.form`
+  width: 100%;
+`
 const QueryFriendInput = styled.input`
   display: flex;
   flex: 1 1 auto;
-  padding-left: 22px;
-  width: 70%;
-  font-size: 16px;
-  line-height: 24px;
-  height: 24px;
+  padding-left: 40px;
+  width: 100%;
+  font-size: 20px;
+  line-height: 40px;
+  height: 40px;
+  border-radius: 5px;
+  border: 1px solid #8c8c8c;
   &:focus {
     color: #034961;
-    outline: 1px solid #fbcb63;
+    outline: 3px solid #fbcb63;
     border: none;
-    border-radius: 5px;
   }
   ::placeholder {
-    font-size: 12px;
+    font-size: 16px;
+  }
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    padding-left: 32px;
+    line-height: 30px;
+    height: 30px;
   }
 `
 const QueryIconWrapper = styled.div`
   position: relative;
   display: flex;
   min-width: 22px;
-  line-height: 22px;
-  height: 22px;
+  line-height: 40px;
+  height: 40px;
   border-radius: 5px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    line-height: 30px;
+    height: 30px;
+  }
 `
 const Label = styled.label``
 const BtnQueryIcon = styled.button`
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 18px;
-  height: 18px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 5px;
   background-image: url(${queryFriendImg});
   background-size: contain;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+  }
 `
 
 const ResultsSection = styled.div`
+  position: absolute;
+  top: 65px;
+  left: 0px;
   display: flex;
   flex-flow: column wrap;
-  padding: 5px;
+  width: 100%;
+  padding: 5px 25px;
   margin-bottom: 20px;
-  border: 1px solid #cfcfcf;
+  background-color: #fff;
+  z-index: 20;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    top: 55px;
+  }
 `
 const Section = styled.section`
-  font-size: 16px;
+  font-size: 20px;
 `
 
 const ResultContentWrapper = styled.div`
-  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 5px;
+  font-family: "Poppins";
+  font-size: 20px;
   &:hover {
     padding-left: 5px;
     background-color: #e6e6e6;
+    border: none;
     border-radius: 5px;
   }
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
+`
+const Avatar = styled.div<{ avatarURL: string }>`
+  display: flex;
+  align-self: center;
+  margin-right: 5px;
+  width: 30px;
+  height: 30px;
+  background-image: ${(props) => `url(${props.avatarURL})`};
+  background-size: 100% 100%;
+  /* border-radius: 50%; */
 `
 const ResultContent = styled(ResultContentWrapper)`
-  padding: 5px 0;
+  display: flex;
+  align-items: center;
+
+  padding: 10px 0;
   font-family: "Poppins";
   line-height: 16px;
   font-size: 14px;
+  gap: 20px;
   cursor: pointer;
 `
 export const FilteredWrapper = styled.div`
@@ -95,8 +164,8 @@ export const FilteredWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  line-height: 16px;
-  height: 16px;
+  line-height: 30px;
+  height: 30px;
   margin-top: 10px;
   margin-bottom: 20px;
 `
@@ -104,13 +173,13 @@ export const FilteredContent = styled.div`
   margin: 2px;
   align-self: center;
   font-family: "Poppins";
-  line-height: 16px;
-  height: 16px;
-  font-size: 12px;
+  line-height: 20px;
+  height: 20px;
+  font-size: 18px;
 `
 export const UserAvatar = styled.img`
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
 `
 
 export const BtnDefault = styled.div`
@@ -119,9 +188,9 @@ export const BtnDefault = styled.div`
   padding: 1px 5px;
   align-self: center;
   font-family: "Poppins";
-  line-height: 16px;
-  height: 16px;
-  font-size: 12px;
+  line-height: 30px;
+  height: 30px;
+  font-size: 20px;
   color: #ffffff;
   background-color: #3490ca;
   border-radius: 3px;
@@ -133,10 +202,10 @@ export const BtnWrapper = styled.div`
   flex-flow: row nowrap;
   margin-top: 10px;
   margin-bottom: 20px;
-  width: 10%;
-  height: 16px;
-  line-height: 16px;
-  font-size: 12px;
+  width: 20%;
+  height: 30px;
+  line-height: 30px;
+  font-size: 24px;
   gap: 10px;
 `
 
@@ -144,7 +213,9 @@ export const BtnAccept = styled.div`
   width: 48%;
   text-align: center;
   font-family: "Poppins";
-  font-size: 12px;
+  line-height: 30px;
+  height: 30px;
+  font-size: 20px;
   color: #ffffff;
   background-color: #34ca9d;
   border-radius: 3px;
@@ -159,7 +230,11 @@ const searchClient = algoliasearch(
   "f31f1435408c2dda975160ac96a5e625"
 )
 type AutocompleteItem = Hit<{
+  id: string
   name: string
+  photoURL: string
+  email: string
+  hometownName: string
 }>
 
 interface Props extends Partial<AutocompleteOptions<AutocompleteItem>> {
@@ -253,23 +328,19 @@ export function Autocomplete(props: Props) {
     const receiverIsMeDocSnap = await getDoc(receiverIsMeDocRef)
     if (friendDocSnap.exists() && friendDocSnap.data().friends?.includes(id)) {
       setFriendStatus("alreadyFriend")
-      return
     } else if (
       inviterIsMeDocSnap.exists() &&
       inviterIsMeDocSnap.data().status === "pending"
     ) {
       setFriendStatus("awaitingReply")
-      return
     } else if (
       receiverIsMeDocSnap.exists() &&
       receiverIsMeDocSnap.data().status === "pending"
     ) {
       setFriendStatus("acceptOrDeny")
-      return
     } else {
       console.log("No such document!")
       setFriendStatus("")
-      return
     }
   }
   const getQueryResult = async (id: string) => {
@@ -357,6 +428,7 @@ export function Autocomplete(props: Props) {
               <Section key={`source-${index}`} {...autocomplete.getListProps()}>
                 {items.length > 0 &&
                   items.map((item) => {
+                    console.log({ item })
                     return (
                       <ResultContentWrapper
                         key={item.objectID}
@@ -380,8 +452,10 @@ export function Autocomplete(props: Props) {
                         <ResultContent
                           {...autocomplete.getItemProps({ item, source })}
                         >
+                          <Avatar avatarURL={item?.photoURL} />
                           {item.name}
                         </ResultContent>
+                        {item.hometownName}
                       </ResultContentWrapper>
                     )
                   })}
