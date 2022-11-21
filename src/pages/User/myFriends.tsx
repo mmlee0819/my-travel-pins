@@ -94,9 +94,9 @@ const FilteredContent = styled.div`
   margin: 2px;
   align-self: center;
   font-family: "Poppins";
-  line-height: 16px;
-  height: 16px;
-  font-size: 24px;
+  line-height: 20px;
+  height: 20px;
+  font-size: 20px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 18px;
@@ -315,9 +315,11 @@ export default function MyFriends() {
             ? invitingList.map((inviting: DocumentData) => {
                 return (
                   <FilteredWrapper key={inviting.id}>
-                    <UserAvatar src={inviting.photoURL} />
-                    <FilteredContent>{inviting.name}</FilteredContent>
-                    <FilteredContent>{inviting.hometownName}</FilteredContent>
+                    <FilteredWrapper>
+                      <UserAvatar src={inviting.photoURL} />
+                      <FilteredContent>{inviting.name}</FilteredContent>
+                      <FilteredContent>{inviting.hometownName}</FilteredContent>
+                    </FilteredWrapper>
                     <FilteredContent>Awaiting reply</FilteredContent>
                   </FilteredWrapper>
                 )

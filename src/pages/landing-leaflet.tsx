@@ -27,7 +27,7 @@ import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/buttons/finger.png"
 import tip from "./assets/tip.png"
 import xMark from "./assets/x-mark.png"
-
+// import home from "./assets/markers/home.png"
 const Attribution = styled.a`
   position: absolute;
   bottom: 0;

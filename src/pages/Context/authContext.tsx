@@ -135,11 +135,6 @@ export function AuthContextProvider({ children }: Props) {
     name: "",
     id: "",
   })
-  console.log({ isMyMap })
-  console.log({ isMyMemory })
-  console.log({ isMyFriend })
-  console.log({ isFriendHome })
-  console.log({ isFriendMemory })
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()

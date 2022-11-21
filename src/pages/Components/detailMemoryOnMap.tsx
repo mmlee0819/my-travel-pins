@@ -211,6 +211,7 @@ export default function DetailMemoryOnMap(props: Props) {
   const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
   console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
+  const [showDelete, setShowDelete] = useState(false)
 
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
@@ -317,19 +318,25 @@ export default function DetailMemoryOnMap(props: Props) {
                         {currentUser !== null &&
                           item.messenger === currentUser?.id && (
                             <>
-                              <BtnMore />
-                              <BtnMsgDelete
+                              <BtnMore
                                 onClick={() => {
-                                  if (
-                                    selectedMarker !== undefined &&
-                                    typeof selectedMarker?.id === "string"
-                                  ) {
-                                    deleteMsg(selectedMarker?.id, item)
-                                  }
+                                  setShowDelete((prev) => !prev)
                                 }}
-                              >
-                                Delete
-                              </BtnMsgDelete>
+                              />
+                              {showDelete && (
+                                <BtnMsgDelete
+                                  onClick={() => {
+                                    if (
+                                      selectedMarker !== undefined &&
+                                      typeof selectedMarker?.id === "string"
+                                    ) {
+                                      deleteMsg(selectedMarker?.id, item)
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </BtnMsgDelete>
+                              )}
                             </>
                           )}
                       </MsgRowNoWrapper>

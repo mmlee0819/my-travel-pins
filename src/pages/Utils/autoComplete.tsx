@@ -47,17 +47,18 @@ const QueryFriendInput = styled.input`
   flex: 1 1 auto;
   padding-left: 40px;
   width: 100%;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 40px;
   height: 40px;
   border-radius: 5px;
+  border: 1px solid #8c8c8c;
   &:focus {
     color: #034961;
     outline: 3px solid #fbcb63;
     border: none;
   }
   ::placeholder {
-    font-size: 12px;
+    font-size: 16px;
   }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -116,22 +117,46 @@ const ResultsSection = styled.div`
   }
 `
 const Section = styled.section`
-  font-size: 16px;
+  font-size: 20px;
 `
 
 const ResultContentWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 5px;
+  font-family: "Poppins";
+  font-size: 20px;
   &:hover {
     padding-left: 5px;
     background-color: #e6e6e6;
     border: none;
     border-radius: 5px;
   }
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
+`
+const Avatar = styled.div<{ avatarURL: string }>`
+  display: flex;
+  align-self: center;
+  margin-right: 5px;
+  width: 30px;
+  height: 30px;
+  background-image: ${(props) => `url(${props.avatarURL})`};
+  background-size: 100% 100%;
+  /* border-radius: 50%; */
 `
 const ResultContent = styled(ResultContentWrapper)`
+  display: flex;
+  align-items: center;
+
   padding: 10px 0;
   font-family: "Poppins";
   line-height: 16px;
   font-size: 14px;
+  gap: 20px;
   cursor: pointer;
 `
 export const FilteredWrapper = styled.div`
@@ -139,8 +164,8 @@ export const FilteredWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  line-height: 16px;
-  height: 16px;
+  line-height: 30px;
+  height: 30px;
   margin-top: 10px;
   margin-bottom: 20px;
 `
@@ -148,13 +173,13 @@ export const FilteredContent = styled.div`
   margin: 2px;
   align-self: center;
   font-family: "Poppins";
-  line-height: 16px;
-  height: 16px;
-  font-size: 12px;
+  line-height: 20px;
+  height: 20px;
+  font-size: 18px;
 `
 export const UserAvatar = styled.img`
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
 `
 
 export const BtnDefault = styled.div`
@@ -163,9 +188,9 @@ export const BtnDefault = styled.div`
   padding: 1px 5px;
   align-self: center;
   font-family: "Poppins";
-  line-height: 16px;
-  height: 16px;
-  font-size: 12px;
+  line-height: 30px;
+  height: 30px;
+  font-size: 20px;
   color: #ffffff;
   background-color: #3490ca;
   border-radius: 3px;
@@ -177,10 +202,10 @@ export const BtnWrapper = styled.div`
   flex-flow: row nowrap;
   margin-top: 10px;
   margin-bottom: 20px;
-  width: 10%;
-  height: 16px;
-  line-height: 16px;
-  font-size: 12px;
+  width: 20%;
+  height: 30px;
+  line-height: 30px;
+  font-size: 24px;
   gap: 10px;
 `
 
@@ -188,7 +213,9 @@ export const BtnAccept = styled.div`
   width: 48%;
   text-align: center;
   font-family: "Poppins";
-  font-size: 12px;
+  line-height: 30px;
+  height: 30px;
+  font-size: 20px;
   color: #ffffff;
   background-color: #34ca9d;
   border-radius: 3px;
@@ -203,7 +230,11 @@ const searchClient = algoliasearch(
   "f31f1435408c2dda975160ac96a5e625"
 )
 type AutocompleteItem = Hit<{
+  id: string
   name: string
+  photoURL: string
+  email: string
+  hometownName: string
 }>
 
 interface Props extends Partial<AutocompleteOptions<AutocompleteItem>> {
@@ -397,6 +428,7 @@ export function Autocomplete(props: Props) {
               <Section key={`source-${index}`} {...autocomplete.getListProps()}>
                 {items.length > 0 &&
                   items.map((item) => {
+                    console.log({ item })
                     return (
                       <ResultContentWrapper
                         key={item.objectID}
@@ -420,8 +452,10 @@ export function Autocomplete(props: Props) {
                         <ResultContent
                           {...autocomplete.getItemProps({ item, source })}
                         >
+                          <Avatar avatarURL={item?.photoURL} />
                           {item.name}
                         </ResultContent>
+                        {item.hometownName}
                       </ResultContentWrapper>
                     )
                   })}

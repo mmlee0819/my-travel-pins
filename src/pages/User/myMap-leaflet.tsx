@@ -21,6 +21,7 @@ import {
 import "leaflet/dist/leaflet.css"
 import { countries } from "../Utils/customGeo"
 import homeMarker from "../assets/markers/hometownIcon.png"
+import home from "../assets/markers/home.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
 import uploadIcon from "./uploadImgIcon.png"
@@ -343,7 +344,7 @@ function ChangeCenterBack() {
   return null
 }
 const DefaultIcon = L.icon({
-  iconUrl: homeMarker,
+  iconUrl: home,
   iconSize: [40, 43],
   iconAnchor: [40, 443],
 })

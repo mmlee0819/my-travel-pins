@@ -41,6 +41,7 @@ const TabWrapper = styled.div`
 
 const BtnText = styled.div`
   display: flex;
+  margin-left: 10px;
   border: none;
   gap: 5px;
   cursor: pointer;
