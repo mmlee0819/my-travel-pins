@@ -7,7 +7,6 @@ import {
   Autocomplete,
   FilteredWrapper,
   UserAvatar,
-  FilteredContent,
   BtnDefault,
   BtnAccept,
   BtnDeny,
@@ -25,81 +24,22 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { DefinedDocumentData } from "./ts_fn_commonUse"
-export const NavWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 80%;
-  margin: 0 auto;
-`
-export const Title = styled.div`
-  color: #000000;
-`
-
-export const BtnLink = styled(Link)`
-  margin: 0 20px;
-`
 
 export const Container = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  margin: 0 20px;
-  font-size: 14px;
+  position: relative;
+  margin: 0 auto;
+  max-width: 1440px;
+  width: 100%;
+  color: #2d2d2d;
+  height: calc(100vh - 120px);
+  background-color: rgb(255, 255, 255, 0.1);
+  border-radius: 20px;
 `
-export const TabWrapper = styled(Container)`
-  flex-flow: row nowrap;
-  margin: 30px auto 0 30px;
-  font-size: 20px;
-  gap: 30px;
-`
-export const TabLink = styled(Link)`
-  padding: 5px 8px;
-  width: 100px;
-  text-align: center;
-  color: #f99c62;
-  text-decoration: none;
-  cursor: pointer;
-  &:visited {
-    color: #f99c62;
-  }
-  &:hover {
-    color: #84e2ff;
-  }
-  &:active {
-    color: #f99c62;
-  }
-`
-export const TabTitle = styled.div`
-  padding: 5px 8px;
-  width: 100px;
-  text-align: center;
-  color: #84e2ff;
-  border: 1px solid #beb9b9;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  border-bottom: none;
-`
+
 export const ContentArea = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  width: 100%;
-  border: 1px solid #beb9b9;
-  border-top: none;
-`
-export const SplitWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  margin: 0;
-  padding: 0;
-`
-export const LeftSplit = styled.div`
-  width: 291px;
-  border-top: 1px solid #beb9b9;
-`
-export const RightSplit = styled(LeftSplit)`
-  flex: 1 1 auto;
-  margin-left: 98px;
-`
-export const ContentWrapper = styled(ContentArea)`
+  height: 100%;
   margin: 0 auto;
   padding: 15px;
   gap: 20px;
@@ -107,18 +47,29 @@ export const ContentWrapper = styled(ContentArea)`
 `
 
 const InviWrapper = styled.div`
+  position: relative;
   display: flex;
   flex-flow: column wrap;
   padding: 5px 8px;
-  width: 40%;
+  width: 50%;
   background-color: #ffffff;
-  border: 1px solid #beb9b9;
+  border: none;
+  box-shadow: (8px 3px #beb9b9);
+  opacity: 0.9;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `
-const FriendsWrapper = styled(InviWrapper)`
-  width: 60%;
-`
+const FriendsWrapper = styled(InviWrapper)``
 const ContentTitle = styled.div`
-  font-size: 1rem;
+  padding: 10px;
+  font-size: 50px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 40px;
+  }
 `
 const RowWrapper = styled.div`
   display: flex;
@@ -138,6 +89,18 @@ const BtnWrapper = styled.div`
 `
 const BtnVisitLink = styled(BtnDefault)`
   text-decoration: none;
+`
+const FilteredContent = styled.div`
+  margin: 2px;
+  align-self: center;
+  font-family: "Poppins";
+  line-height: 16px;
+  height: 16px;
+  font-size: 24px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
 `
 
 const usersRef = collection(db, "users")
@@ -341,105 +304,97 @@ export default function MyFriends() {
   }
   return (
     <Container>
-      <TabWrapper>
-        <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
-        <TabLink to={`/${currentUser?.name}/my-memories`}>My Memories</TabLink>
-        <TabTitle>My Friends</TabTitle>
-      </TabWrapper>
-      <SplitWrapper>
-        <LeftSplit />
-        <RightSplit />
-      </SplitWrapper>
       <ContentArea>
-        <ContentWrapper>
-          <InviWrapper>
-            <Autocomplete
-              qResultIds={qResultIds}
-              setQResultIds={setQResultIds}
-              invitingIds={invitingIds}
-            />
-            {invitingList.length !== 0
-              ? invitingList.map((inviting: DocumentData) => {
-                  return (
-                    <FilteredWrapper key={inviting.id}>
-                      <UserAvatar src={inviting.photoURL} />
-                      <FilteredContent>{inviting.name}</FilteredContent>
-                      <FilteredContent>{inviting.hometownName}</FilteredContent>
-                      <FilteredContent>Awaiting reply</FilteredContent>
-                    </FilteredWrapper>
-                  )
-                })
-              : ""}
-            <ContentTitle>They want to be your friend ...</ContentTitle>
-            {beInvitedList.length !== 0
-              ? beInvitedList.map((invited: DocumentData) => {
-                  return (
-                    <RowWrapper key={invited.id}>
-                      <FilteredWrapper>
-                        <UserAvatar src={invited.photoURL} />
-                        <FilteredContent>{invited.name}</FilteredContent>
-                        <FilteredContent>
-                          {invited.hometownName}
-                        </FilteredContent>
-                      </FilteredWrapper>
-                      <BtnWrapper>
-                        <BtnAccept
-                          id={invited.id}
-                          onClick={(
-                            e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                          ) => {
-                            acceptFriendReq(e)
-                          }}
-                        >
-                          Accept
-                        </BtnAccept>
-                        <BtnDeny
-                          id={invited.id}
-                          onClick={(
-                            e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                          ) => {
-                            denyFriendReq(e)
-                          }}
-                        >
-                          Deny
-                        </BtnDeny>
-                      </BtnWrapper>
-                    </RowWrapper>
-                  )
-                })
-              : "none"}
-          </InviWrapper>
-          <FriendsWrapper>
-            {friends.length !== 0 ? (
-              friends.map((friend: DocumentData) => {
+        <InviWrapper>
+          <Autocomplete
+            qResultIds={qResultIds}
+            setQResultIds={setQResultIds}
+            invitingIds={invitingIds}
+          />
+          {invitingList.length !== 0
+            ? invitingList.map((inviting: DocumentData) => {
                 return (
-                  <FilteredWrapper key={friend.id}>
-                    <UserAvatar src={friend.photoURL} />
-                    <FilteredContent>{friend.name}</FilteredContent>
-                    <FilteredContent>{friend.hometownName}</FilteredContent>
-                    <BtnVisitLink
-                      to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
-                      as={Link}
-                      id={friend.id}
-                      onClick={() => {
-                        setCurrentFriendInfo({
-                          name: friend.name,
-                          id: friend.id,
-                        })
-                      }}
-                    >
-                      Visit friend
-                    </BtnVisitLink>
+                  <FilteredWrapper key={inviting.id}>
+                    <UserAvatar src={inviting.photoURL} />
+                    <FilteredContent>{inviting.name}</FilteredContent>
+                    <FilteredContent>{inviting.hometownName}</FilteredContent>
+                    <FilteredContent>Awaiting reply</FilteredContent>
                   </FilteredWrapper>
                 )
               })
-            ) : (
-              <>
-                <FilteredContent>No friends</FilteredContent>
-              </>
-            )}
-          </FriendsWrapper>
-        </ContentWrapper>
+            : ""}
+          <ContentTitle>They want to be your friend ...</ContentTitle>
+          {beInvitedList.length !== 0
+            ? beInvitedList.map((invited: DocumentData) => {
+                return (
+                  <RowWrapper key={invited.id}>
+                    <FilteredWrapper>
+                      <UserAvatar src={invited.photoURL} />
+                      <FilteredContent>{invited.name}</FilteredContent>
+                      <FilteredContent>{invited.hometownName}</FilteredContent>
+                    </FilteredWrapper>
+                    <BtnWrapper>
+                      <BtnAccept
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          acceptFriendReq(e)
+                        }}
+                      >
+                        Accept
+                      </BtnAccept>
+                      <BtnDeny
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          denyFriendReq(e)
+                        }}
+                      >
+                        Deny
+                      </BtnDeny>
+                    </BtnWrapper>
+                  </RowWrapper>
+                )
+              })
+            : "none"}
+        </InviWrapper>
+        <FriendsWrapper>
+          <ContentTitle>
+            Here are your friends.
+            <br />
+            Visit someone!
+          </ContentTitle>
+          {friends.length !== 0 ? (
+            friends.map((friend: DocumentData) => {
+              return (
+                <FilteredWrapper key={friend.id}>
+                  <UserAvatar src={friend.photoURL} />
+                  <FilteredContent>{friend.name}</FilteredContent>
+                  <FilteredContent>{friend.hometownName}</FilteredContent>
+                  <BtnVisitLink
+                    to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
+                    as={Link}
+                    id={friend.id}
+                    onClick={() => {
+                      setCurrentFriendInfo({
+                        name: friend.name,
+                        id: friend.id,
+                      })
+                    }}
+                  >
+                    Visit friend
+                  </BtnVisitLink>
+                </FilteredWrapper>
+              )
+            })
+          ) : (
+            <>
+              <FilteredContent>No friends</FilteredContent>
+            </>
+          )}
+        </FriendsWrapper>
       </ContentArea>
     </Container>
   )
