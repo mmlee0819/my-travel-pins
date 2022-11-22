@@ -84,14 +84,14 @@ const Title = styled.div`
   max-width: 1440px;
   font-family: "Jomhuria";
   color: #fff;
-  font-size: 90px;
+  font-size: 40px;
   font-weight: 400;
-  letter-spacing: 4px;
+  letter-spacing: 2px;
   line-height: 76px;
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 60px;
+    font-size: 30px;
   }
 `
 
@@ -234,20 +234,20 @@ function Header() {
             >
               My Map
             </Tab>
-            <Tab to={`/${currentUser.name}/my-memories`} as={Link}>
-              My Memories
-            </Tab>
-            <CurrentTab
+            <Tab
+              to={`/${currentUser.name}/my-memories`}
+              as={Link}
               onClick={() => {
-                setIsMyMemory(false)
                 setIsMyMap(false)
                 setIsFriendHome(false)
                 setIsFriendMemory(false)
-                setIsMyFriend(true)
+                setIsMyFriend(false)
+                setIsMyMemory(true)
               }}
             >
-              My Friends
-            </CurrentTab>
+              My Memories
+            </Tab>
+            <CurrentTab>My Friends</CurrentTab>
           </>
         )}
         {isFriendHome && (
