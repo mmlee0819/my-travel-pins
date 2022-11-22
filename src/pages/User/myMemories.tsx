@@ -19,6 +19,10 @@ import {
   DetailMapWrapper,
   Container,
   ContentArea,
+  ArticleWrapper,
+  ImgWrapper,
+  MemoryImg,
+  MemoryList,
 } from "./components/UIforMemoriesPage"
 
 const Text = styled.div`
@@ -34,23 +38,6 @@ const Title = styled(Text)`
   }
 `
 
-export const MemoryListWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  width: 100%;
-  margin: 10px auto;
-  width: 100%;
-  padding: 10px;
-  gap: 20px;
-`
-
-export const MemoryList = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  height: 450px;
-  padding: 10px 0;
-  gap: 20px;
-`
 const BtnWrapper = styled.div`
   display: flex;
   flex: 1 1 auto;
@@ -88,20 +75,6 @@ const BtnDelete = styled.img`
   cursor: pointer;
 `
 
-const ImgWrapper = styled.div`
-  position: relative;
-  display: block;
-  width: 40%;
-`
-const MemoryImg = styled.img`
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-`
 const BgOverlay = styled.div`
   position: absolute;
   top: 0;
@@ -142,30 +115,6 @@ const DeleteTargetText = styled(Title)`
   }
 `
 
-export const ArticleWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  min-width: 40%;
-  margin: 10px 0;
-  font-family: "Poppins";
-  font-size: 20px;
-  gap: 20px;
-  border: none;
-
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    gap: 10px;
-    font-size: 16px;
-  }
-`
-export const MapWrapper = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  text-align: center;
-  height: 100%;
-  width: 20%;
-  font-size: 14px;
-`
 export const BtnReadMore = styled.div`
   display: flex;
   align-self: end;
