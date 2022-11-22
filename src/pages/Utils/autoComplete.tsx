@@ -506,6 +506,11 @@ export function Autocomplete(props: Props) {
           })}
         </ResultsSection>
       )}
+      {!autocompleteState.isOpen && qInputRef?.current?.value !== "" && (
+        <ResultsSection>
+          <NoMatchText>No matches found</NoMatchText>
+        </ResultsSection>
+      )}
       {queryResult &&
         props.invitingIds !== undefined &&
         !props.invitingIds.includes(queryResult.id) && (
@@ -538,11 +543,6 @@ export function Autocomplete(props: Props) {
             )}
           </FilteredWrapper>
         )}
-      {!queryResult && qInputRef?.current?.value !== "" && (
-        <ResultsSection>
-          <NoMatchText>No matches found</NoMatchText>
-        </ResultsSection>
-      )}
     </>
   )
 }

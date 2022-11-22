@@ -417,36 +417,38 @@ export default function MyFriends() {
         </InviWrapper>
         <FriendsWrapper>
           <ContentTitle>Here are your friends!</ContentTitle>
-          {friends.length !== 0 ? (
-            friends.map((friend: DocumentData) => {
-              return (
-                <FilteredWrapper key={friend.id}>
-                  <Avatar src={friend.photoURL} />
-                  <NameText>{friend.name}</NameText>
-                  <NameText>{friend.hometownName}</NameText>
-                  <BtnWrapper>
-                    <BtnVisitLink
-                      to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
-                      as={Link}
-                      id={friend.id}
-                      onClick={() => {
-                        setCurrentFriendInfo({
-                          name: friend.name,
-                          id: friend.id,
-                        })
-                      }}
-                    >
-                      Visit friend
-                    </BtnVisitLink>
-                  </BtnWrapper>
-                </FilteredWrapper>
-              )
-            })
-          ) : (
-            <>
-              <FilteredContent>No friends</FilteredContent>
-            </>
-          )}
+          <ContentWrapper>
+            {friends.length !== 0 ? (
+              friends.map((friend: DocumentData) => {
+                return (
+                  <FilteredWrapper key={friend.id}>
+                    <Avatar src={friend.photoURL} />
+                    <NameText>{friend.name}</NameText>
+                    <NameText>{friend.hometownName}</NameText>
+                    <BtnWrapper>
+                      <BtnVisitLink
+                        to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
+                        as={Link}
+                        id={friend.id}
+                        onClick={() => {
+                          setCurrentFriendInfo({
+                            name: friend.name,
+                            id: friend.id,
+                          })
+                        }}
+                      >
+                        Visit friend
+                      </BtnVisitLink>
+                    </BtnWrapper>
+                  </FilteredWrapper>
+                )
+              })
+            ) : (
+              <>
+                <FilteredContent>No friends</FilteredContent>
+              </>
+            )}
+          </ContentWrapper>
         </FriendsWrapper>
       </ContentArea>
     </Container>
