@@ -1,8 +1,7 @@
 import React from "react"
 import styled from "styled-components"
 import { useState, useContext, useEffect, useRef } from "react"
-import { StreetViewService } from "@react-google-maps/api"
-import { GoogleMap, Marker } from "@react-google-maps/api"
+import { GoogleMap, Marker, StreetViewService } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
 import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
@@ -31,6 +30,8 @@ import {
 
 import defaultImage from "../assets/defaultImage.png"
 import moreIcon from "../assets/buttons/moreIcon.png"
+import moreHoverIcon from "../assets/buttons/moreHover.png"
+
 const Text = styled.div`
   color: ${(props) => props.theme.color.bgDark};
   min-width: 30%;
@@ -80,19 +81,9 @@ export const BtnReadMore = styled.div`
   border-radius: 5px;
   cursor: pointer;
 `
-const ArticleTitle = styled(Text)`
-  min-height: 40px;
-  font-weight: 700;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    min-height: 30px;
-  }
-`
-const TextNoMargin = styled(Text)`
-  margin: 0;
-  text-align: justify;
-`
 
 const StreetModeContainer = styled.div`
+  width: 100%;
   height: 40vh;
   margin-bottom: 20px;
 `
@@ -162,15 +153,20 @@ const MsgRowNoWrapper = styled.div`
   justify-content: flex-start;
   margin: 5px 0;
 `
-const BtnMore = styled.div`
+const BtnMore = styled.div<{ showDelete: boolean }>`
   position: absolute;
   right: 40px;
   display: inline-block;
   width: 30px;
   height: 25px;
   font-size: 16px;
-  background-image: url(${moreIcon});
+  background-image: ${(props) =>
+    props.showDelete ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
   background-size: cover;
+  cursor: pointer;
+  &:hover {
+    background-image: url(${moreHoverIcon});
+  }
 `
 const BtnMsgDelete = styled.div`
   position: absolute;
@@ -186,6 +182,7 @@ const BtnMsgDelete = styled.div`
   background-color: #5594b7;
   border-radius: 5px;
   z-index: 120;
+  cursor: pointer;
 `
 
 const MsgInput = styled.input`
@@ -257,18 +254,19 @@ function FriendMemories() {
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
     setMessengerInfo([])
+    console.log({ messages })
     messages.map((item: DocumentData | MessagesType) => {
       queryMessengerInfo(item.messenger, setMessengerInfo)
     })
   }, [messages])
 
   useEffect(() => {
-    if (!memory?.id || messages === undefined) return
+    if (!memory?.id) return
+
     checkRealTimePinMessages(memory?.id, setMessages)
     return checkRealTimePinMessages(memory?.id, setMessages)
   }, [memory?.id])
-  console.log(memory?.location?.lat)
-  console.log(memory?.location?.lng)
+
   const onStreetLoad = () => {
     if (
       memory !== undefined &&
@@ -294,7 +292,6 @@ function FriendMemories() {
         <ContentWrapper>
           {isLoaded && memories ? (
             memories.map((item: DocumentData, index: number) => {
-              console.log(item)
               return (
                 <>
                   <MemoryList key={item.id}>
@@ -302,18 +299,13 @@ function FriendMemories() {
                       {item?.albumURLs ? (
                         <MemoryImg src={item?.albumURLs[0]} />
                       ) : (
-                        <>
-                          <MemoryImg src={defaultImage} />
-
-                          <Text>No photo uploaded</Text>
-                        </>
+                        <MemoryImg src={defaultImage} />
                       )}
                     </ImgWrapper>
                     <ArticleWrapper>
                       <Title>{item?.article?.title}</Title>
                       <Text>{item?.article?.travelDate}</Text>
                       <Text>{item?.location?.name}</Text>
-                      {/* <Title>{item?.article?.content}</Title> */}
                       <BtnWrapper>
                         <BtnBlue
                           id={item?.id}
@@ -346,12 +338,12 @@ function FriendMemories() {
                       </BtnWrapper>
                     </ArticleWrapper>
                   </MemoryList>
-
                   {memory && memoryIsShow && memory?.id === item.id && (
                     <DetailContentWrapper
                       key={`${memory?.id}-${memory?.location.placeId}`}
                     >
                       <ContentArea>
+                        <Text>{memory?.article?.content}</Text>
                         <PhotoWrapper>
                           {memory?.albumURLs?.map((photoUrl: string) => {
                             return (
@@ -359,7 +351,6 @@ function FriendMemories() {
                             )
                           })}
                         </PhotoWrapper>
-                        <Text>{memory?.article?.content}</Text>
                         <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
                         <MsgColumnWrapper>
                           <MsgRowNoWrapper>
@@ -398,6 +389,7 @@ function FriendMemories() {
                                       item.messenger === currentUser?.id && (
                                         <>
                                           <BtnMore
+                                            showDelete={showDelete}
                                             onClick={() => {
                                               setShowDelete((prev) => !prev)
                                             }}
@@ -423,43 +415,40 @@ function FriendMemories() {
                               }
                             )}
                         </MsgColumnWrapper>
-
+                        <Title>{memory?.location?.name}</Title>
                         {isLoaded && (
                           <StreetModeContainer id="street-mode-container">
                             <StreetViewService onLoad={onStreetLoad} />
                           </StreetModeContainer>
                         )}
                       </ContentArea>
-                      {memoryIsShow && (
-                        <DetailMapWrapper>
-                          <Title>{memory?.location?.name}</Title>
-                          <GoogleMap
-                            mapContainerStyle={{
-                              height: "300px",
-                              width: "100%",
-                            }}
-                            center={{
+                      <DetailMapWrapper>
+                        <GoogleMap
+                          mapContainerStyle={{
+                            height: "300px",
+                            width: "100%",
+                          }}
+                          center={{
+                            lat: memory?.location.lat,
+                            lng: memory?.location.lng,
+                          }}
+                          zoom={14}
+                          options={{
+                            draggable: true,
+                            mapTypeControl: false,
+                            streetViewControl: false,
+                            scaleControl: false,
+                            fullscreenControl: false,
+                          }}
+                        >
+                          <Marker
+                            position={{
                               lat: memory?.location.lat,
                               lng: memory?.location.lng,
                             }}
-                            zoom={14}
-                            options={{
-                              draggable: true,
-                              mapTypeControl: false,
-                              streetViewControl: false,
-                              scaleControl: false,
-                              fullscreenControl: false,
-                            }}
-                          >
-                            <Marker
-                              position={{
-                                lat: memory?.location.lat,
-                                lng: memory?.location.lng,
-                              }}
-                            />
-                          </GoogleMap>
-                        </DetailMapWrapper>
-                      )}
+                          />
+                        </GoogleMap>
+                      </DetailMapWrapper>
                     </DetailContentWrapper>
                   )}
                 </>

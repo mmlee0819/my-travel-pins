@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService } from "@react-google-maps/api"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
-
-import moreIcon from "../assets/moreIcon.png"
+import moreIcon from "../assets/buttons/moreIcon.png"
 import xMark from "../assets/x-mark.png"
 import {
   MessagesType,
@@ -56,9 +55,6 @@ const ArticleTitle = styled(Text)`
   @media screen and (max-width: 799px), (max-height: 600px) {
     min-height: 30px;
   }
-`
-const Reminder = styled(Text)`
-  color: #034961;
 `
 const TextNoMargin = styled(Text)`
   margin: 0;
