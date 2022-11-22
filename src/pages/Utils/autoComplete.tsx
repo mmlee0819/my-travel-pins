@@ -29,7 +29,7 @@ const InputWrapper = styled.div`
   flex-flow: column wrap;
   height: 4;
   line-height: 40px;
-  margin: 15px 10px;
+  margin: 15px 5px;
   padding: 0;
   align-items: center;
   gap: 8px;
@@ -83,8 +83,8 @@ const QueryIconWrapper = styled.div`
 const Label = styled.label``
 const BtnQueryIcon = styled.button`
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 5px;
+  left: 5px;
   width: 30px;
   height: 30px;
   border: none;
@@ -94,7 +94,7 @@ const BtnQueryIcon = styled.button`
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     top: 3px;
-    left: 3px;
+    left: 4px;
     width: 24px;
     height: 24px;
   }
@@ -107,9 +107,11 @@ const ResultsSection = styled.div`
   display: flex;
   flex-flow: column wrap;
   width: 100%;
-  padding: 5px 25px;
-  margin-bottom: 20px;
-  background-color: #fff;
+  margin-top: 15px;
+  padding: 5px 15px;
+  color: #2d2d2d;
+  background-color: #e6e6e6;
+  border-top: none;
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -129,7 +131,9 @@ const ResultContentWrapper = styled.div`
   font-size: 20px;
   &:hover {
     padding-left: 5px;
-    background-color: #e6e6e6;
+    padding-right: 10px;
+    color: #e6e6e6;
+    background-color: #2d2d2d;
     border: none;
     border-radius: 5px;
   }
@@ -138,15 +142,44 @@ const ResultContentWrapper = styled.div`
     font-size: 18px;
   }
 `
-const Avatar = styled.div<{ avatarURL: string }>`
+const Avatar = styled.img`
+  margin: 0 10px 0 10px;
+  width: 24px;
+  height: 24px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    width: 20px;
+    height: 20px;
+  }
+`
+const NameText = styled.div`
   display: flex;
-  align-self: center;
-  margin-right: 5px;
-  width: 30px;
+  flex-flow: row nowrap;
+  justify-content: start;
+  width: 30%;
+  margin: 2px 10px 2px 0px;
+  line-height: 24px;
+  height: 24px;
+  font-family: "Poppins";
+  font-size: 20px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+    line-height: 20px;
+    height: 20px;
+  }
+`
+const NoMatchText = styled(NameText)`
+  width: 100%;
+  padding-left: 10px;
+  line-height: 30px;
   height: 30px;
-  background-image: ${(props) => `url(${props.avatarURL})`};
-  background-size: 100% 100%;
-  /* border-radius: 50%; */
+  font-weight: 700;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    line-height: 24px;
+    height: 24px;
+  }
 `
 const ResultContent = styled(ResultContentWrapper)`
   display: flex;
@@ -159,24 +192,36 @@ const ResultContent = styled(ResultContentWrapper)`
   gap: 20px;
   cursor: pointer;
 `
-export const FilteredWrapper = styled.div`
+const FilteredWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  line-height: 30px;
-  height: 30px;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  margin: 10px 0;
+  font-size: 20px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+  }
 `
-export const FilteredContent = styled.div`
+
+const FilteredContent = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
   margin: 2px;
-  align-self: center;
+  line-height: 24px;
+  height: 24px;
   font-family: "Poppins";
-  line-height: 20px;
-  height: 20px;
-  font-size: 18px;
+  font-size: 20px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+    line-height: 20px;
+    height: 20px;
+  }
 `
+
 export const UserAvatar = styled.img`
   width: 30px;
   height: 30px;
@@ -196,35 +241,33 @@ export const BtnDefault = styled.div`
   border-radius: 3px;
   cursor: pointer;
 `
-export const BtnWrapper = styled.div`
-  position: relative;
+const BtnWrapper = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  width: 20%;
-  height: 30px;
-  line-height: 30px;
-  font-size: 24px;
-  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 35%;
+  margin-right: 10px;
+  justify-content: space-between;
+  align-self: center;
 `
-
-export const BtnAccept = styled.div`
+const BtnAccept = styled.div`
+  display: flex;
   width: 48%;
-  text-align: center;
+  justify-content: center;
   font-family: "Poppins";
-  line-height: 30px;
-  height: 30px;
-  font-size: 20px;
   color: #ffffff;
   background-color: #34ca9d;
   border-radius: 3px;
   cursor: pointer;
 `
-export const BtnDeny = styled(BtnAccept)`
+const BtnDeny = styled(BtnAccept)`
   background-color: #ca3434;
 `
-
+const BtnVisitLink = styled(BtnAccept)`
+  width: 100%;
+  margin-right: 0px;
+  background-color: #3490ca;
+  text-decoration: none;
+`
 const searchClient = algoliasearch(
   "NW2MT84M3G",
   "f31f1435408c2dda975160ac96a5e625"
@@ -254,7 +297,6 @@ interface UserInfoType {
 
 export function Autocomplete(props: Props) {
   const { currentUser, isLogin } = useContext(AuthContext)
-  const [filteredId, setFilteredId] = useState("")
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [friendStatus, setFriendStatus] = useState("")
   const [autocompleteState, setAutocompleteState] = useState<
@@ -309,7 +351,6 @@ export function Autocomplete(props: Props) {
   const qInputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { getEnvironmentProps } = autocomplete
-
   const checkRelation = async (id: string) => {
     if (!isLogin || currentUser === null) return
     const inviterIsMedocRef = doc(
@@ -416,6 +457,7 @@ export function Autocomplete(props: Props) {
               {...autocomplete.getInputProps({
                 inputElement: null,
               })}
+              placeholder="Search user"
             />
           </QueryIconWrapper>
         </QueryForm>
@@ -452,7 +494,7 @@ export function Autocomplete(props: Props) {
                         <ResultContent
                           {...autocomplete.getItemProps({ item, source })}
                         >
-                          <Avatar avatarURL={item?.photoURL} />
+                          <Avatar src={item?.photoURL} />
                           {item.name}
                         </ResultContent>
                         {item.hometownName}
@@ -465,44 +507,41 @@ export function Autocomplete(props: Props) {
         </ResultsSection>
       )}
       {queryResult &&
-      props.invitingIds !== undefined &&
-      !props.invitingIds.includes(queryResult.id) ? (
-        <FilteredWrapper>
-          <UserAvatar src={queryResult.photoURL} />
-          <FilteredContent>{queryResult.name}</FilteredContent>
-          <FilteredContent>{queryResult.hometownName}</FilteredContent>
-          {friendStatus === "" ? (
-            <BtnDefault
-              onClick={() => {
-                addFriend(queryResult.id)
-              }}
-            >
-              Add friend
-            </BtnDefault>
-          ) : (
-            ""
-          )}
-          {friendStatus === "acceptOrDeny" ? (
-            <BtnWrapper>
-              <BtnAccept>Accept</BtnAccept>
-              <BtnDeny>Deny</BtnDeny>
-            </BtnWrapper>
-          ) : (
-            ""
-          )}
-          {friendStatus === "alreadyFriend" ? (
-            <BtnDefault>Visit friend</BtnDefault>
-          ) : (
-            ""
-          )}
-          {friendStatus === "awaitingReply" ? (
-            <FilteredContent>Awaiting reply</FilteredContent>
-          ) : (
-            ""
-          )}
-        </FilteredWrapper>
-      ) : (
-        ""
+        props.invitingIds !== undefined &&
+        !props.invitingIds.includes(queryResult.id) && (
+          <FilteredWrapper>
+            <Avatar src={queryResult.photoURL} />
+            <NameText>{queryResult.name}</NameText>
+            <NameText>{queryResult.hometownName}</NameText>
+            {friendStatus === "" && (
+              <BtnVisitLink
+                onClick={() => {
+                  addFriend(queryResult.id)
+                }}
+              >
+                Add friend
+              </BtnVisitLink>
+            )}
+            {friendStatus === "acceptOrDeny" && (
+              <BtnWrapper>
+                <BtnAccept>Accept</BtnAccept>
+                <BtnDeny>Deny</BtnDeny>
+              </BtnWrapper>
+            )}
+            {friendStatus === "alreadyFriend" && (
+              <BtnWrapper>
+                <BtnVisitLink>Visit friend</BtnVisitLink>
+              </BtnWrapper>
+            )}
+            {friendStatus === "awaitingReply" && (
+              <FilteredContent>Awaiting reply</FilteredContent>
+            )}
+          </FilteredWrapper>
+        )}
+      {!queryResult && qInputRef?.current?.value !== "" && (
+        <ResultsSection>
+          <NoMatchText>No matches found</NoMatchText>
+        </ResultsSection>
       )}
     </>
   )
