@@ -36,7 +36,7 @@ import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
 import { DefinedDocumentData, getPins, PinContent } from "./ts_fn_commonUse"
 import pins from "../assets/markers/pins.png"
-import DetailMemoryOnMap from "../Components/detailMemoryOnMap"
+import DetailMemory from "../Components/detailMemory"
 
 const Container = styled.div`
   position: relative;
@@ -282,7 +282,7 @@ function FriendsMap() {
           )}
       </Container>
       {showMemory && (
-        <DetailMemoryOnMap
+        <DetailMemory
           selectedMarker={selectedMarker}
           setShowMemory={setShowMemory}
         />

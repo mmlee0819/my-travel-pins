@@ -7,7 +7,7 @@ import {
   SetStateAction,
 } from "react"
 import styled from "styled-components"
-import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
+import L, { LatLng, LeafletEvent } from "leaflet"
 import {
   MapContainer,
   Tooltip,
@@ -25,7 +25,6 @@ import home from "../assets/markers/home.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
 import uploadIcon from "./uploadImgIcon.png"
-import StreetView, { containerStyle } from "../Utils/gmap"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import {
@@ -39,7 +38,7 @@ import defaultImage from "../assets/defaultImage.png"
 import { getPins, PinContent } from "./ts_fn_commonUse"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
-import DetailMemoryOnMap from "../Components/detailMemoryOnMap"
+import DetailMemory from "../Components/detailMemory"
 
 const Container = styled.div`
   position: relative;
@@ -384,7 +383,7 @@ export default function MyMap() {
     },
   })
   console.log({ center })
-  const [markers, setMarkers] = useState<DocumentData[] | PinContent[]>([])
+  const [markers, setMarkers] = useState<PinContent[]>([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent>()
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
@@ -718,7 +717,6 @@ export default function MyMap() {
                   data={country}
                   style={myCustomStyle}
                   onEachFeature={onEachFeature}
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
               {hasAddPin && !hasPosted && <ChangeCenter />}
@@ -772,7 +770,7 @@ export default function MyMap() {
           </Container>
         )}
       {showMemory && (
-        <DetailMemoryOnMap
+        <DetailMemory
           selectedMarker={selectedMarker}
           setShowMemory={setShowMemory}
         />
