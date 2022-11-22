@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
-import { StreetViewService } from "@react-google-maps/api"
+import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
-import moreIcon from "../assets/buttons/moreIcon.png"
-import xMark from "../assets/x-mark.png"
 import {
   MessagesType,
   addMsg,
@@ -13,12 +11,15 @@ import {
   PinContent,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
+import moreIcon from "../assets/buttons/moreIcon.png"
+import moreHoverIcon from "../assets/buttons/moreHover.png"
+import xMark from "../assets/x-mark.png"
 
 const Container = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  min-height: 100%;
+  height: 100%;
   width: 100%;
   font-family: "Poppins", "sans-serif";
   background-color: rgb(45, 45, 45, 0.8);
@@ -28,12 +29,12 @@ const ContentArea = styled.div`
   position: relative;
   padding: 20px;
   width: 60%;
-  height: 100vh;
+  height: 100%;
   margin: 0 auto;
   font-size: 4rem;
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
-  box-shadow: 0px 0px 3px 10px #232323c2;
+  /* box-shadow: 0px 0px 3px 10px #232323c2; */
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
@@ -146,15 +147,20 @@ const MsgRowNoWrapper = styled.div`
   justify-content: flex-start;
   margin: 5px 0;
 `
-const BtnMore = styled.div`
+const BtnMore = styled.div<{ showDelete: boolean }>`
   position: absolute;
   right: 40px;
   display: inline-block;
   width: 30px;
   height: 25px;
   font-size: 16px;
-  background-image: url(${moreIcon});
+  background-image: ${(props) =>
+    props.showDelete ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
   background-size: cover;
+  cursor: pointer;
+  &:hover {
+    background-image: url(${moreHoverIcon});
+  }
 `
 const BtnMsgDelete = styled.div`
   position: absolute;
@@ -170,6 +176,7 @@ const BtnMsgDelete = styled.div`
   background-color: #5594b7;
   border-radius: 5px;
   z-index: 120;
+  cursor: pointer;
 `
 
 const MsgInput = styled.input`
@@ -200,7 +207,28 @@ interface Props {
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
 }
 
-export default function DetailMemoryOnMap(props: Props) {
+function useOnClickOutside(
+  ref: React.RefObject<HTMLDivElement>,
+  setShowMemory: Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      // Do nothing if clicking ref's element or descendent elements
+      console.log(event.target)
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return
+      }
+      setShowMemory(false)
+    }
+    document.addEventListener("mousedown", listener)
+    document.addEventListener("touchstart", listener)
+    return () => {
+      document.removeEventListener("mousedown", listener)
+      document.removeEventListener("touchstart", listener)
+    }
+  }, [ref])
+}
+export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const { isLoaded, currentUser } = useContext(AuthContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
@@ -208,6 +236,9 @@ export default function DetailMemoryOnMap(props: Props) {
   console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
+
+  const ref = useRef<HTMLDivElement>(null)
+  useOnClickOutside(ref, () => setShowMemory(false))
 
   useEffect(() => {
     const keyDownListener = (e: KeyboardEvent) => {
@@ -243,8 +274,7 @@ export default function DetailMemoryOnMap(props: Props) {
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
-  console.log(selectedMarker?.location?.lat)
-  console.log(selectedMarker?.location?.lng)
+
   const onStreetLoad = () => {
     if (
       selectedMarker !== undefined &&
@@ -271,7 +301,7 @@ export default function DetailMemoryOnMap(props: Props) {
         selectedMarker &&
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
-          <ContentArea>
+          <ContentArea ref={ref}>
             <XmarkTop
               onClick={() => {
                 setShowMemory(false)
@@ -315,6 +345,7 @@ export default function DetailMemoryOnMap(props: Props) {
                           item.messenger === currentUser?.id && (
                             <>
                               <BtnMore
+                                showDelete={showDelete}
                                 onClick={() => {
                                   setShowDelete((prev) => !prev)
                                 }}
@@ -342,9 +373,36 @@ export default function DetailMemoryOnMap(props: Props) {
             </MsgColumnWrapper>
             <TextNoMargin>{selectedMarker?.location?.name}</TextNoMargin>
             {isLoaded && (
-              <StreetModeContainer id="street-mode-container">
-                <StreetViewService onLoad={onStreetLoad} />
-              </StreetModeContainer>
+              <>
+                <StreetModeContainer id="street-mode-container">
+                  <StreetViewService onLoad={onStreetLoad} />
+                </StreetModeContainer>
+                <GoogleMap
+                  mapContainerStyle={{
+                    height: "40vh",
+                    width: "100%",
+                  }}
+                  center={{
+                    lat: selectedMarker?.location.lat,
+                    lng: selectedMarker?.location.lng,
+                  }}
+                  zoom={14}
+                  options={{
+                    draggable: true,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    scaleControl: false,
+                    fullscreenControl: false,
+                  }}
+                >
+                  <Marker
+                    position={{
+                      lat: selectedMarker?.location.lat,
+                      lng: selectedMarker?.location.lng,
+                    }}
+                  />
+                </GoogleMap>
+              </>
             )}
           </ContentArea>
         )}
