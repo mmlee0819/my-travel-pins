@@ -11,7 +11,7 @@ import mmAvatar from "../assets/samplePhotos/mmAvatar.jpg"
 import pkcAvatar from "../assets/samplePhotos/pkcAvatar.jpg"
 import cyuAvatar from "../assets/samplePhotos/cyuAvatar.jpg"
 import laysAvatar from "../assets/samplePhotos/laysAvatar.jpg"
-import moreIcon from "../assets/moreIcon.png"
+import moreIcon from "../assets/buttons/moreIcon.png"
 
 const Container = styled.div`
   position: absolute;

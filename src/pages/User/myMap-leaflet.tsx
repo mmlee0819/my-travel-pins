@@ -767,14 +767,14 @@ export default function MyMap() {
                 )
               })}
             </MapContainer>
+            {showMemory && (
+              <DetailMemory
+                selectedMarker={selectedMarker}
+                setShowMemory={setShowMemory}
+              />
+            )}
           </Container>
         )}
-      {showMemory && (
-        <DetailMemory
-          selectedMarker={selectedMarker}
-          setShowMemory={setShowMemory}
-        />
-      )}
     </>
   )
 }

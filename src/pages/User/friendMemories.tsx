@@ -135,30 +135,11 @@ function FriendMemories() {
     return checkRealTimePinMessages(memory?.id, setMessages)
   }, [memory?.id])
 
-  const onStreetLoad = () => {
-    if (
-      memory !== undefined &&
-      typeof memory?.location?.lat !== undefined &&
-      typeof memory?.location?.lng !== undefined
-    ) {
-      new google.maps.StreetViewPanorama(
-        document.getElementById("street-mode-container") as HTMLElement,
-        {
-          position: new google.maps.LatLng(
-            memory?.location?.lat,
-            memory?.location?.lng
-          ),
-          fullscreenControl: false,
-          addressControl: false,
-        }
-      )
-    }
-  }
   return (
     <Container>
       <ContentArea>
         <ContentWrapper>
-          {isLoaded && memories ? (
+          {isLogin && isLoaded && memories ? (
             memories.map((item: PinContent, index: number) => {
               return (
                 <MemoryList key={`${item.id}-${item?.article?.title}`}>

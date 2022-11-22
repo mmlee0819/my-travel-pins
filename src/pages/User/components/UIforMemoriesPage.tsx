@@ -1,5 +1,4 @@
 import styled from "styled-components"
-import { Link } from "react-router-dom"
 
 export const Container = styled.div`
   position: relative;
@@ -62,37 +61,6 @@ export const MemoryList = styled.div`
   gap: 20px;
 `
 
-export const DetailContentWrapper = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  align-self: end;
-  width: 60%;
-  margin: 0;
-  padding: 10px;
-  gap: 20px;
-`
-export const DetailArticleWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  margin: 0;
-`
-export const DetailImgsWrapper = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  width: 100%;
-  gap: 20px;
-`
-export const DetailImg = styled.div<{
-  bkImage: string
-}>`
-  display: flex;
-  flex: 0 1 45%;
-  height: 200px;
-  background-image: ${(props) => `url(${props.bkImage})`};
-  background-size: 100% 100%;
-`
 export const ImgWrapper = styled.div`
   position: relative;
   display: block;
@@ -106,19 +74,4 @@ export const MemoryImg = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
-`
-export const SplitWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  margin: 0;
-  padding: 0;
-`
-export const DetailMapWrapper = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  text-align: center;
-  justify-content: center;
-  width: 100%;
-  height: 400px;
-  font-size: 14px;
 `
