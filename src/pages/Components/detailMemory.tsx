@@ -147,7 +147,7 @@ const MsgRowNoWrapper = styled.div`
   justify-content: flex-start;
   margin: 5px 0;
 `
-const BtnMore = styled.div<{ showDelete: boolean }>`
+const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
   right: 40px;
   display: inline-block;
@@ -155,22 +155,22 @@ const BtnMore = styled.div<{ showDelete: boolean }>`
   height: 25px;
   font-size: 16px;
   background-image: ${(props) =>
-    props.showDelete ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
+    props.showMore ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
   background-size: cover;
   cursor: pointer;
   &:hover {
     background-image: url(${moreHoverIcon});
   }
 `
-const BtnMsgDelete = styled.div`
+const BtnGreen = styled.div`
   position: absolute;
   top: 30px;
-  right: 40px;
-  display: inline-block;
+  right: 0px;
+  display: flex;
   text-align: center;
+  width: auto;
   padding: 5px 10px;
   line-height: 16px;
-  height: 30px;
   font-size: 16px;
   color: #fff;
   background-color: #5594b7;
@@ -178,7 +178,9 @@ const BtnMsgDelete = styled.div`
   z-index: 120;
   cursor: pointer;
 `
-
+const BtnRed = styled(BtnGreen)`
+  background-color: #ca3434;
+`
 const MsgInput = styled.input`
   display: flex;
   flex: 1 1 auto;
@@ -236,6 +238,7 @@ export default function DetailMemory(props: Props) {
   console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   const ref = useRef<HTMLDivElement>(null)
   useOnClickOutside(ref, () => setShowMemory(false))
@@ -302,11 +305,14 @@ export default function DetailMemory(props: Props) {
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
           <ContentArea ref={ref}>
-            <XmarkTop
+            <BtnMore
+              showMore={showMore}
               onClick={() => {
-                setShowMemory(false)
+                setShowMore((prev) => !prev)
               }}
-            />
+            >
+              {showMore && <BtnGreen>Edit</BtnGreen>}
+            </BtnMore>
             <ArticleTitle>{selectedMarker?.article?.title}</ArticleTitle>
             <TextNoMargin>{selectedMarker?.article?.travelDate}</TextNoMargin>
             <PhotoWrapper>
@@ -343,15 +349,14 @@ export default function DetailMemory(props: Props) {
                         </MsgContent>
                         {currentUser !== null &&
                           item.messenger === currentUser?.id && (
-                            <>
-                              <BtnMore
-                                showDelete={showDelete}
-                                onClick={() => {
-                                  setShowDelete((prev) => !prev)
-                                }}
-                              />
+                            <BtnMore
+                              showMore={showDelete}
+                              onClick={() => {
+                                setShowDelete((prev) => !prev)
+                              }}
+                            >
                               {showDelete && (
-                                <BtnMsgDelete
+                                <BtnRed
                                   onClick={() => {
                                     if (
                                       selectedMarker !== undefined &&
@@ -362,9 +367,9 @@ export default function DetailMemory(props: Props) {
                                   }}
                                 >
                                   Delete
-                                </BtnMsgDelete>
+                                </BtnRed>
                               )}
-                            </>
+                            </BtnMore>
                           )}
                       </MsgRowNoWrapper>
                     )
