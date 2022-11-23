@@ -3,6 +3,7 @@ import {
   useState,
   useContext,
   useEffect,
+  useRef,
   Dispatch,
   SetStateAction,
 } from "react"
@@ -33,9 +34,10 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage"
-import { DocumentData } from "@firebase/firestore-types"
-import defaultImage from "../assets/defaultImage.png"
 import { getPins, PinContent } from "./ts_fn_commonUse"
+import Editor from "../Components/editor"
+import defaultImage from "../assets/defaultImage.png"
+
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
@@ -399,10 +401,8 @@ export default function MyMap() {
   const [artiContent, setArtiContent] = useState<string>("")
   const [hasPosted, setHasPosted] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
-  const [showInfoWindow, setShowInfoWindow] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
-
   console.log("markers", markers)
   console.log("selectedMarker", selectedMarker)
   console.log("showMemory", showMemory)
@@ -629,12 +629,9 @@ export default function MyMap() {
                           setTravelDate(e.target.value)
                         }}
                       />
-                      <Textarea
-                        placeholder="What's on your mind?"
-                        rows={6}
-                        onChange={(e) => {
-                          setArtiContent(e.target.value)
-                        }}
+                      <Editor
+                        artiContent={artiContent}
+                        setArtiContent={setArtiContent}
                       />
                     </ArticleWrapper>
                     {hasUpload && urls ? (

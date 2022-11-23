@@ -187,11 +187,7 @@ export default function MyMemories() {
                     {item?.albumURLs ? (
                       <MemoryImg src={item?.albumURLs[0]} />
                     ) : (
-                      <>
-                        <MemoryImg src={defaultImage} />
-
-                        <Text>No photo uploaded</Text>
-                      </>
+                      <MemoryImg src={defaultImage} />
                     )}
                   </ImgWrapper>
                   <ArticleWrapper>

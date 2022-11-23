@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
+import parse from "html-react-parser"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -13,7 +14,6 @@ import {
 import { AuthContext } from "../Context/authContext"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
-import xMark from "../assets/x-mark.png"
 
 const Container = styled.div`
   position: absolute;
@@ -62,21 +62,6 @@ const TextNoMargin = styled(Text)`
   text-align: justify;
 `
 
-const XmarkTop = styled.div`
-  position: absolute;
-  top: 50px;
-  right: 20px;
-  background-image: url(${xMark});
-  background-size: 100% 100%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    top: 45px;
-    width: 30px;
-    height: 30px;
-  }
-`
 const StreetModeContainer = styled.div`
   height: 40vh;
   margin-bottom: 20px;
@@ -320,7 +305,9 @@ export default function DetailMemory(props: Props) {
                 return <PhotoImg key={photoUrl} bkImage={photoUrl} />
               })}
             </PhotoWrapper>
-            <Text>{selectedMarker?.article?.content}</Text>
+            {selectedMarker?.article?.content !== undefined && (
+              <Text>{parse(selectedMarker.article.content)}</Text>
+            )}
             <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
             <MsgColumnWrapper>
               <MsgRowNoWrapper>
