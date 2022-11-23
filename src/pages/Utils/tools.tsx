@@ -5,14 +5,10 @@ import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
 import robot from "../assets/chatbot.png"
 import currency from "../assets/whiteCurrencies.png"
-import flight from "../assets/whiteAirplane.png"
-import hsr from "../assets/whiteHSR.png"
-import train from "../assets/whiteTrain.png"
 import tripAdvisor from "../assets/tripadvisor.png"
 import weather from "../assets/whiteWeather.png"
 import CurrencyWidget, { getRatesData } from "../Widgets/currencies"
 import WeatherWidget from "../Widgets/weather"
-import FlightWidget from "../Widgets/flight"
 import { ToolContext } from "../Context/toolContext"
 
 const ToolsWrapper = styled.div`
@@ -47,15 +43,7 @@ const CurrencyIcon = styled(RobotIcon)`
   background-size: contain;
   cursor: pointer;
 `
-const FlightIcon = styled(CurrencyIcon)`
-  background-image: url(${flight});
-`
-const TrainIcon = styled(CurrencyIcon)`
-  background-image: url(${train});
-`
-const HSRIcon = styled(CurrencyIcon)`
-  background-image: url(${hsr});
-`
+
 const TAIcon = styled(CurrencyIcon)`
   background-image: url(${tripAdvisor});
 `
@@ -74,7 +62,6 @@ function ToolsRobot() {
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
   const [showWeather, setShowWeather] = useState(false)
-  const [showFlight, setShowFlight] = useState(false)
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
@@ -164,7 +151,7 @@ function ToolsRobot() {
           }}
         >
           <RobotIcon id="robotIcon" />
-          {showTools ? (
+          {showTools && (
             <>
               <Weather
                 id="weatherIcon"
@@ -201,30 +188,9 @@ function ToolsRobot() {
                   }
                 }}
               />
-              <FlightIcon
-                id="flightIcon"
-                // onClick={(e) => {
-                //   if (
-                //     (e.target as Element).id === "flightIcon" &&
-                //     !showFlight
-                //   ) {
-                //     setShowExchange(false)
-                //     setShowWeather(false)
-                //     setShowFlight((prev) => !prev)
-                //   } else if (
-                //     (e.target as Element).id === "flightIcon" &&
-                //     showFlight
-                //   ) {
-                //     setShowFlight((prev) => !prev)
-                //   }
-                // }}
-              />
-              <HSRIcon id="hsrIcon" />
-              <TrainIcon id="trainIcon" />
+
               <TAIcon id="tripAdviIcon" />
             </>
-          ) : (
-            ""
           )}
         </DragWrapper>
       </ToolsWrapper>
@@ -238,7 +204,6 @@ function ToolsRobot() {
         />
       )}
       {showWeather && <WeatherWidget showWeather={showWeather} />}
-      {showFlight && <FlightWidget showFlight={showFlight} />}
     </>
   )
 }

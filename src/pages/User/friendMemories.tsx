@@ -1,65 +1,91 @@
 import React from "react"
 import styled from "styled-components"
-import { Link } from "react-router-dom"
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect, useRef } from "react"
 import { AuthContext } from "../Context/authContext"
-import { GoogleMap, Marker } from "@react-google-maps/api"
-
 import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
-  MapWrapper,
-  ImgsWrapper,
-  ArticleWrapper,
-  BtnReadMore,
-  MemoryImg,
-} from "./myMemories"
-import {
+  Container,
   ContentArea,
+  ArticleWrapper,
+  MemoryList,
   ContentWrapper,
-  DetailContentWrapper,
-  DetailArticleWrapper,
-  DetailImg,
-  DetailImgsWrapper,
-  DetailMapWrapper,
+  ImgWrapper,
+  MemoryImg,
 } from "./components/UIforMemoriesPage"
 import { DocumentData } from "@firebase/firestore-types"
+import {
+  MessagesType,
+  addMsg,
+  checkRealTimePinMessages,
+  queryMessengerInfo,
+  PinContent,
+} from "../User/ts_fn_commonUse"
+import DetailMemory from "../Components/detailMemory"
 import defaultImage from "../assets/defaultImage.png"
 
-const Container = styled.div`
-  position: relative;
-  margin: 0 auto;
-  max-width: 1440px;
+const Text = styled.div`
+  color: ${(props) => props.theme.color.bgDark};
+  min-width: 30%;
+`
+const Title = styled(Text)`
+  font-weight: 700;
+  font-size: 24px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
+`
+
+const BtnWrapper = styled.div`
+  display: flex;
+  flex: 1 1 auto;
   width: 100%;
-  color: #2d2d2d;
-  height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+  margin-right: 10px;
+  justify-content: space-between;
+  align-self: center;
 `
-const Title = styled.div`
-  color: #000000;
-`
-const MemoryListWrapper = styled.div`
+const BtnBlue = styled.div`
   display: flex;
-  flex-flow: column wrap;
-  padding: 10px;
-  background-color: #ffffff;
-  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 48%;
+  padding: 5px;
+  font-family: "Poppins";
+  font-size: 20px;
+  color: #ffffff;
+  background-color: #3490ca;
+  border-radius: 3px;
+  cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+  }
 `
-const MemoryList = styled.div`
+
+export const BtnReadMore = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  height: 150px;
-  padding: 10px 0;
-  background-color: #ffffff;
-  gap: 20px;
+  align-self: end;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  cursor: pointer;
 `
 
 function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
-  const [memories, setMemories] = useState<DocumentData[]>([])
+  const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
-  const [memory, setMemory] = useState<DocumentData>()
+  const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
+  const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
+  const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
+  console.log("messengerInfo", messengerInfo)
+  console.log({ memoryIsShow })
+  console.log({ memory })
+
+  const msgRef = useRef<HTMLInputElement>(null)
 
   const url = window.location.href
   const splitUrlArr = url.split("/")
@@ -72,166 +98,90 @@ function FriendMemories() {
     getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
   }, [friendId])
 
+  useEffect(() => {
+    const keyDownListener = (e: KeyboardEvent) => {
+      if (
+        e.key === "Enter" &&
+        memory &&
+        typeof memory?.id === "string" &&
+        typeof currentUser?.id === "string" &&
+        msgRef.current !== undefined &&
+        msgRef.current !== null
+      ) {
+        console.log("Enter key was pressed. Run your function.")
+        addMsg(currentUser?.id, memory?.id, msgRef?.current?.value)
+        msgRef.current.value = ""
+      } else return
+    }
+
+    document.addEventListener("keydown", keyDownListener)
+    return () => {
+      document.removeEventListener("keydown", keyDownListener)
+    }
+  })
+  useEffect(() => {
+    if (messages === undefined || messages.length === 0) return
+    setMessengerInfo([])
+    console.log({ messages })
+    messages.map((item: DocumentData | MessagesType) => {
+      queryMessengerInfo(item.messenger, setMessengerInfo)
+    })
+  }, [messages])
+
+  useEffect(() => {
+    if (!memory?.id) return
+
+    checkRealTimePinMessages(memory?.id, setMessages)
+    return checkRealTimePinMessages(memory?.id, setMessages)
+  }, [memory?.id])
+
   return (
-    <>
-      <Container>
-        <ContentArea>
-          <ContentWrapper>
-            {isLoaded ? (
-              <MemoryListWrapper>
-                {memories
-                  ? memories.map((item) => {
-                      return (
-                        <DetailContentWrapper key={item.id}>
-                          <MemoryList>
-                            <MapWrapper>
-                              <GoogleMap
-                                mapContainerStyle={{
-                                  height: "100px",
-                                  width: "100%",
-                                }}
-                                center={{
-                                  lat: item.location.lat,
-                                  lng: item.location.lng,
-                                }}
-                                zoom={10}
-                                options={{
-                                  draggable: true,
-                                  mapTypeControl: false,
-                                  streetViewControl: false,
-                                  scaleControl: false,
-                                  fullscreenControl: false,
-                                }}
-                              >
-                                <Marker
-                                  position={{
-                                    lat: item.location.lat,
-                                    lng: item.location.lng,
-                                  }}
-                                />
-                              </GoogleMap>
-                              <Title>{item?.location?.name}</Title>
-                            </MapWrapper>
-                            <ImgsWrapper>
-                              {item?.albumURLs ? (
-                                item?.albumURLs?.map((photo: string) => {
-                                  return (
-                                    <MemoryImg
-                                      key={photo.slice(0, -8)}
-                                      src={photo}
-                                    />
-                                  )
-                                })
-                              ) : (
-                                <>
-                                  <MemoryImg src={defaultImage} />
-                                  <Title>No photo uploaded</Title>
-                                </>
-                              )}
-                            </ImgsWrapper>
-                            <ArticleWrapper>
-                              <Title>{item?.article?.travelDate}</Title>
-                              <Title>{item?.article?.title}</Title>
-                              <Title>{item?.article?.content}</Title>
-                              <BtnReadMore
-                                id={item?.id}
-                                onClick={() => {
-                                  if (memoryIsShow && memory?.id !== item?.id) {
-                                    setMemoryIsShow(false)
-                                    getSpecificPin(
-                                      item?.id,
-                                      setMemory,
-                                      setMemoryIsShow
-                                    )
-                                  } else if (
-                                    memoryIsShow &&
-                                    memory?.id === item?.id
-                                  ) {
-                                    setMemoryIsShow(false)
-                                  } else {
-                                    getSpecificPin(
-                                      item?.id,
-                                      setMemory,
-                                      setMemoryIsShow
-                                    )
-                                  }
-                                }}
-                              >
-                                {item?.article?.content !== ""
-                                  ? "Read more"
-                                  : "Add memory"}
-                              </BtnReadMore>
-                            </ArticleWrapper>
-                          </MemoryList>
-                          {memory && memoryIsShow && memory.id === item.id ? (
-                            <DetailContentWrapper
-                              key={`${memory.id}-${memory.location.placeId}`}
-                            >
-                              <DetailArticleWrapper>
-                                <Title>{memory?.article?.travelDate}</Title>
-                                <Title>{memory?.article?.title}</Title>
-                              </DetailArticleWrapper>
-                              <Title>{memory?.article?.content}</Title>
-                              <DetailImgsWrapper>
-                                {memory?.albumURLs &&
-                                  memory?.albumURLs?.length !== 0 &&
-                                  memory?.albumURLs.map((photoUrl: string) => {
-                                    return (
-                                      <DetailImg
-                                        key={photoUrl}
-                                        bkImage={photoUrl}
-                                      />
-                                    )
-                                  })}
-                              </DetailImgsWrapper>
-                              {memoryIsShow ? (
-                                <DetailMapWrapper>
-                                  <Title>{memory?.location?.name}</Title>
-                                  <GoogleMap
-                                    mapContainerStyle={{
-                                      height: "300px",
-                                      width: "100%",
-                                    }}
-                                    center={{
-                                      lat: memory.location.lat,
-                                      lng: memory.location.lng,
-                                    }}
-                                    zoom={14}
-                                    options={{
-                                      draggable: true,
-                                      mapTypeControl: false,
-                                      streetViewControl: false,
-                                      scaleControl: false,
-                                      fullscreenControl: false,
-                                    }}
-                                  >
-                                    <Marker
-                                      position={{
-                                        lat: memory.location.lat,
-                                        lng: memory.location.lng,
-                                      }}
-                                    />
-                                  </GoogleMap>
-                                </DetailMapWrapper>
-                              ) : (
-                                ""
-                              )}
-                            </DetailContentWrapper>
-                          ) : (
-                            ""
-                          )}
-                        </DetailContentWrapper>
-                      )
-                    })
-                  : ""}
-              </MemoryListWrapper>
-            ) : (
-              <Title>Please wait...</Title>
-            )}
-          </ContentWrapper>
-        </ContentArea>
-      </Container>
-    </>
+    <Container>
+      <ContentArea>
+        <ContentWrapper>
+          {isLogin && isLoaded && memories ? (
+            memories.map((item: PinContent, index: number) => {
+              return (
+                <MemoryList key={`${item.id}-${item?.article?.title}`}>
+                  <ImgWrapper>
+                    {item?.albumURLs ? (
+                      <MemoryImg src={item?.albumURLs[0]} />
+                    ) : (
+                      <MemoryImg src={defaultImage} />
+                    )}
+                  </ImgWrapper>
+                  <ArticleWrapper>
+                    <Title>{item?.article?.title}</Title>
+                    <Text>{item?.article?.travelDate}</Text>
+                    <Text>{item?.location?.name}</Text>
+                    <BtnWrapper>
+                      <BtnBlue
+                        id={item?.id}
+                        onClick={() => {
+                          if (typeof item.id !== "string") return
+                          setMemoryIsShow(true)
+                          setMemory(item)
+                          getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                        }}
+                      >
+                        {item?.article?.content !== ""
+                          ? "Read more"
+                          : "Add memory"}
+                      </BtnBlue>
+                    </BtnWrapper>
+                  </ArticleWrapper>
+                </MemoryList>
+              )
+            })
+          ) : (
+            <Title>Please wait...</Title>
+          )}
+        </ContentWrapper>
+      </ContentArea>
+      {memoryIsShow && memory && memory.location && (
+        <DetailMemory selectedMarker={memory} setShowMemory={setMemoryIsShow} />
+      )}
+    </Container>
   )
 }
 export default FriendMemories

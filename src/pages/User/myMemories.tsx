@@ -9,40 +9,61 @@ import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { DocumentData } from "@firebase/firestore-types"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins, getSpecificPin } from "./ts_fn_commonUse"
+import DetailMemory from "../Components/detailMemory"
+import { getPins, getSpecificPin, PinContent } from "./ts_fn_commonUse"
 import {
+  ContentWrapper,
   Container,
   ContentArea,
-  ContentWrapper,
-  DetailContentWrapper,
-  DetailArticleWrapper,
-  DetailImg,
-  DetailImgsWrapper,
-  DetailMapWrapper,
-  TabWrapper,
-  TabLink,
-  TabTitle,
+  ArticleWrapper,
+  ImgWrapper,
+  MemoryImg,
+  MemoryList,
 } from "./components/UIforMemoriesPage"
 
-const Title = styled.div`
-  color: #000000;
+const Text = styled.div`
+  color: ${(props) => props.theme.color.bgDark};
+  min-width: 30%;
+`
+const Title = styled(Text)`
+  font-weight: 700;
+  font-size: 24px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
 `
 
-export const MemoryListWrapper = styled.div`
+const BtnWrapper = styled.div`
   display: flex;
-  flex-flow: column wrap;
-  margin: 10px auto;
-  padding: 10px;
-  gap: 20px;
+  flex: 1 1 auto;
+  width: 100%;
+  margin-right: 10px;
+  justify-content: space-between;
+  align-self: center;
+`
+const BtnBlue = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 48%;
+  padding: 5px;
+  font-family: "Poppins";
+  font-size: 20px;
+  color: #ffffff;
+  background-color: #3490ca;
+  border-radius: 3px;
+  cursor: pointer;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 16px;
+  }
+`
+const BtnRed = styled(BtnBlue)`
+  background-color: #ca3434;
 `
 
-export const MemoryList = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  height: 150px;
-  padding: 10px 0;
-  gap: 20px;
-`
 const BtnDelete = styled.img`
   align-self: center;
   width: 40px;
@@ -50,35 +71,46 @@ const BtnDelete = styled.img`
   cursor: pointer;
 `
 
-export const ImgsWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  height: 120px;
-  width: 50%;
-  gap: 10px;
-  border: none;
-  overflow: overlay;
-`
-export const MemoryImg = styled.img`
-  width: 30%;
-  height: 120px;
-`
-export const ArticleWrapper = styled(MemoryListWrapper)`
-  width: 200px;
-  padding: 0 15px;
-  font-size: 14px;
-  gap: 10px;
-  border: none;
-`
-export const MapWrapper = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  text-align: center;
+const BgOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  width: 20%;
-  font-size: 14px;
+  background-color: ${(props) => props.theme.color.bgDark};
+  opacity: 0.9;
+  z-index: 50;
 `
+const ReminderArea = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  padding: 20px;
+  background-color: #fff;
+  z-index: 52;
+`
+const ReminderText = styled.div`
+  font-family: "Jomhuria";
+  margin: 20px auto 0 auto;
+  text-align: center;
+  font-size: 40px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 30px;
+  }
+`
+const DeleteTargetText = styled(Title)`
+  text-align: center;
+  margin-bottom: 40px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    margin-bottom: 30px;
+  }
+`
+
 export const BtnReadMore = styled.div`
   display: flex;
   align-self: end;
@@ -88,45 +120,40 @@ export const BtnReadMore = styled.div`
   border-radius: 5px;
   cursor: pointer;
 `
-const LeftSplit = styled.div`
-  width: 116px;
-  border-top: 1px solid #beb9b9;
-`
-const RightSplit = styled(LeftSplit)`
-  flex: 1 1 auto;
-  margin-left: 129px;
-`
+
 export default function MyMemories() {
   const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
-  const [memories, setMemories] = useState<DocumentData>([])
+  const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
-  const [memory, setMemory] = useState<DocumentData>()
+  const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
   const [qResultIds, setQResultIds] = useState<string[]>([])
-  console.log(currentUser)
-  console.log("memories", memories)
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<
+    number | undefined
+  >(undefined)
 
-  const deleteMemory = async (
-    e: React.MouseEvent<HTMLImageElement, MouseEvent>
-  ) => {
+  const deleteMemory = async (index: number) => {
+    console.log({ memory })
     try {
+      if (typeof memories[0].userId !== "string") return
       const folderName = `${memories[0].userId.slice(
         0,
         4
       )}-${memories[0].location.placeId.slice(0, 4)}`
 
-      const newMemories = memories.filter((memory: DocumentData) => {
-        return memory.id !== (e.target as Element).id
+      const newMemories = memories.filter((memory: PinContent) => {
+        return memory.id !== memories[index].id
       })
-      const chosenMemory = memories.filter((memory: DocumentData) => {
-        return memory.id === (e.target as Element).id
+      const chosenMemory = memories.filter((memory: PinContent) => {
+        return memory.id === memories[index].id
       })
       if (chosenMemory[0].albumNames) {
         chosenMemory[0].albumNames.map(async (fileName: string) => {
           await deleteObject(ref(storage, `/${folderName}/${fileName}`))
         })
       }
-      const docRef = doc(db, "pins", (e.target as Element).id)
+      if (typeof memory?.id !== "string") return
+      const docRef = doc(db, "pins", memory?.id)
       await deleteDoc(docRef)
       setMemories(newMemories)
     } catch (error) {
@@ -152,169 +179,98 @@ export default function MyMemories() {
 
   return (
     <Container>
-      <TabWrapper>
-        <TabLink to={`/${currentUser?.name}`}>My map</TabLink>
-        <TabTitle>My Memories</TabTitle>
-        <TabLink to={`/${currentUser?.name}/my-friends`}>My friends</TabLink>
-      </TabWrapper>
-
       <ContentArea>
         <ContentWrapper>
-          {isLoaded ? (
-            <MemoryListWrapper>
-              {memories &&
-                memories.map((item: DocumentData) => {
-                  return (
-                    <DetailContentWrapper key={item.id}>
-                      <MemoryList>
-                        <BtnDelete
-                          src={trashBin}
-                          id={item.id}
-                          onClick={(e) => {
-                            deleteMemory(e)
+          {isLogin && isLoaded && memories ? (
+            memories.map((item: PinContent, index: number) => {
+              return (
+                <MemoryList key={item.id}>
+                  <ImgWrapper>
+                    {item?.albumURLs ? (
+                      <MemoryImg src={item?.albumURLs[0]} />
+                    ) : (
+                      <>
+                        <MemoryImg src={defaultImage} />
+
+                        <Text>No photo uploaded</Text>
+                      </>
+                    )}
+                  </ImgWrapper>
+                  <ArticleWrapper>
+                    <Title>{item?.article?.title}</Title>
+                    <Text>{item?.article?.travelDate}</Text>
+                    <Text>{item?.location?.name}</Text>
+                    <BtnWrapper>
+                      <BtnBlue
+                        id={item?.id}
+                        onClick={() => {
+                          if (typeof item.id !== "string") return
+                          setMemoryIsShow(true)
+                          setMemory(item)
+                          getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                        }}
+                      >
+                        {item?.article?.content !== ""
+                          ? "Read more"
+                          : "Add memory"}
+                      </BtnBlue>
+                      <BtnDelete
+                        id={item.id}
+                        src={trashBin}
+                        onClick={() => {
+                          setMemory(item)
+                          setDeleteTargetIndex(index)
+                        }}
+                      />
+                    </BtnWrapper>
+                  </ArticleWrapper>
+                  {deleteTargetIndex !== undefined &&
+                    deleteTargetIndex === index && (
+                      <>
+                        <BgOverlay
+                          onClick={() => {
+                            setDeleteTargetIndex(undefined)
                           }}
                         />
-                        <MapWrapper>
-                          <GoogleMap
-                            mapContainerStyle={{
-                              height: "100px",
-                              width: "100%",
-                            }}
-                            center={{
-                              lat: item.location.lat,
-                              lng: item.location.lng,
-                            }}
-                            zoom={16}
-                            options={{
-                              draggable: true,
-                              mapTypeControl: false,
-                              streetViewControl: false,
-                              scaleControl: false,
-                              fullscreenControl: false,
-                            }}
-                          >
-                            <Marker
-                              position={{
-                                lat: item.location.lat,
-                                lng: item.location.lng,
+                        <ReminderArea>
+                          <ReminderText>
+                            Are you sure <br />
+                            you want to delete this memory?
+                          </ReminderText>
+                          <DeleteTargetText>
+                            {memories[index]?.article?.title}
+                          </DeleteTargetText>
+                          <BtnWrapper>
+                            <BtnRed
+                              onClick={() => {
+                                deleteMemory(index)
+                                setDeleteTargetIndex(undefined)
                               }}
-                            />
-                          </GoogleMap>
-                          <Title>{item?.location?.name}</Title>
-                        </MapWrapper>
-                        <ImgsWrapper>
-                          {item?.albumURLs ? (
-                            item?.albumURLs?.map((photo: string) => {
-                              return (
-                                <MemoryImg
-                                  key={photo.slice(0, -8)}
-                                  src={photo}
-                                />
-                              )
-                            })
-                          ) : (
-                            <>
-                              <MemoryImg src={defaultImage} />
-                              <Title>No photo uploaded</Title>
-                            </>
-                          )}
-                        </ImgsWrapper>
-                        <ArticleWrapper>
-                          <Title>{item?.article?.travelDate}</Title>
-                          <Title>{item?.article?.title}</Title>
-                          <Title>{item?.article?.content}</Title>
-                          <BtnReadMore
-                            id={item?.id}
-                            onClick={() => {
-                              if (memoryIsShow && memory?.id !== item?.id) {
-                                setMemoryIsShow(false)
-                                getSpecificPin(
-                                  item?.id,
-                                  setMemory,
-                                  setMemoryIsShow
-                                )
-                              } else if (
-                                memoryIsShow &&
-                                memory?.id === item?.id
-                              ) {
-                                setMemoryIsShow(false)
-                              } else {
-                                getSpecificPin(
-                                  item?.id,
-                                  setMemory,
-                                  setMemoryIsShow
-                                )
-                              }
-                            }}
-                          >
-                            {item?.article?.content !== ""
-                              ? "Read more"
-                              : "Add memory"}
-                          </BtnReadMore>
-                        </ArticleWrapper>
-                      </MemoryList>
-                      {memory && memoryIsShow && memory?.id === item.id && (
-                        <DetailContentWrapper
-                          key={`${memory?.id}-${memory?.location.placeId}`}
-                        >
-                          <DetailArticleWrapper>
-                            <Title>{memory?.article?.travelDate}</Title>
-                            <Title>{memory?.article?.title}</Title>
-                          </DetailArticleWrapper>
-                          <Title>{memory?.article?.content}</Title>
-                          <DetailImgsWrapper>
-                            {memory?.albumURLs &&
-                              memory?.albumURLs?.length !== 0 &&
-                              memory?.albumURLs.map((photoUrl: string) => {
-                                return (
-                                  <DetailImg
-                                    key={photoUrl}
-                                    bkImage={photoUrl}
-                                  />
-                                )
-                              })}
-                          </DetailImgsWrapper>
-                          {memoryIsShow && (
-                            <DetailMapWrapper>
-                              <Title>{memory?.location?.name}</Title>
-                              <GoogleMap
-                                mapContainerStyle={{
-                                  height: "300px",
-                                  width: "100%",
-                                }}
-                                center={{
-                                  lat: memory?.location.lat,
-                                  lng: memory?.location.lng,
-                                }}
-                                zoom={14}
-                                options={{
-                                  draggable: true,
-                                  mapTypeControl: false,
-                                  streetViewControl: false,
-                                  scaleControl: false,
-                                  fullscreenControl: false,
-                                }}
-                              >
-                                <Marker
-                                  position={{
-                                    lat: memory?.location.lat,
-                                    lng: memory?.location.lng,
-                                  }}
-                                />
-                              </GoogleMap>
-                            </DetailMapWrapper>
-                          )}
-                        </DetailContentWrapper>
-                      )}
-                    </DetailContentWrapper>
-                  )
-                })}
-            </MemoryListWrapper>
+                            >
+                              Confirm to delete
+                            </BtnRed>
+                            <BtnBlue
+                              onClick={() => {
+                                setDeleteTargetIndex(undefined)
+                              }}
+                            >
+                              Cancel
+                            </BtnBlue>
+                          </BtnWrapper>
+                        </ReminderArea>
+                      </>
+                    )}
+                </MemoryList>
+              )
+            })
           ) : (
             <Title>Please wait...</Title>
           )}
         </ContentWrapper>
       </ContentArea>
+      {memoryIsShow && memory && memory.location && (
+        <DetailMemory selectedMarker={memory} setShowMemory={setMemoryIsShow} />
+      )}
     </Container>
   )
 }

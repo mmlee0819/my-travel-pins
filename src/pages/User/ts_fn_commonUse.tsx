@@ -53,7 +53,7 @@ export const getPins = async (
   id: string,
   hasFetched: boolean,
   setHasFetched: Dispatch<SetStateAction<boolean>>,
-  setMemories: Dispatch<SetStateAction<DocumentData[]>>
+  setMemories: Dispatch<SetStateAction<PinContent[]>>
 ) => {
   if (currentUser !== null && !hasFetched) {
     const newMemories: DocumentData[] = []
@@ -62,9 +62,9 @@ export const getPins = async (
     console.log("q", q)
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
-      newMemories.push(doc.data())
+      newMemories.push(doc.data() as PinContent)
     })
-    setMemories(newMemories)
+    setMemories(newMemories as PinContent[])
     setHasFetched(true)
   }
 }
@@ -89,14 +89,14 @@ export const choosePinOnMap = (
 
 export const getSpecificPin = async (
   pinId: string,
-  setMemory: Dispatch<SetStateAction<DocumentData | PinContent>>,
+  setMemory: Dispatch<SetStateAction<PinContent | undefined>>,
   setMemoryIsShow: Dispatch<SetStateAction<boolean>>
 ) => {
   const docRef = doc(db, "pins", pinId)
   const docSnap = await getDoc(docRef)
   if (docSnap.exists()) {
     console.log("Document data:", docSnap.data())
-    setMemory(docSnap.data())
+    setMemory(docSnap.data() as PinContent)
     setMemoryIsShow(true)
   } else {
     // doc.data() will be undefined in this case
