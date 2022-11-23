@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import parse from "html-react-parser"
+import { db, storage } from "../Utils/firebase"
+import { doc, updateDoc } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -42,6 +44,12 @@ const ContentArea = styled.div`
     display: none; /* for Chrome, Safari, and Opera */
   }
 `
+const EditWrapper = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+  margin: 50px 0 20px 0;
+  gap: 20px;
+`
 
 const Text = styled.div`
   margin: 25px 0;
@@ -58,7 +66,24 @@ const ArticleTitle = styled(Text)`
     min-height: 30px;
   }
 `
-const Input = styled(ArticleTitle)``
+const Input = styled(Text)`
+  width: 100%;
+  margin: 0px;
+  padding-left: 10px;
+  border: 3px solid #ffffff;
+  border-radius: 5px;
+  &:focus {
+    outline: #f99c62;
+    border: 3px solid #f99c62;
+  }
+`
+const ConfirmedTitle = styled(Input)`
+  font-weight: 700;
+  border: none;
+`
+const ConfirmedText = styled(Input)`
+  border: none;
+`
 const TextNoMargin = styled(Text)`
   margin: 0;
   text-align: justify;
@@ -168,6 +193,18 @@ const BtnGreen = styled.div`
 const BtnRed = styled(BtnGreen)`
   background-color: #ca3434;
 `
+
+const ArtiWrapper = styled.div`
+  position: relative;
+`
+const BtnSave = styled(BtnGreen)`
+  top: 7.5px;
+  right: 15px;
+  &:hover {
+    padding: 5px 20px;
+  }
+`
+
 const MsgInput = styled.input`
   display: flex;
   flex: 1 1 auto;
@@ -217,6 +254,7 @@ function useOnClickOutside(
     }
   }, [ref])
 }
+
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const { isLoaded, currentUser } = useContext(AuthContext)
@@ -226,6 +264,9 @@ export default function DetailMemory(props: Props) {
   const [showDelete, setShowDelete] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [showEditor, setShowEditor] = useState(false)
+  const [showEditTitle, setShowEditTitle] = useState(true)
+  const [showEditTravelDate, setShowEditTravelDate] = useState(true)
+  const [showEditArtiContent, setShowEditArtiContent] = useState(true)
   const [artiTitle, setArtiTitle] = useState<string>(
     selectedMarker?.article?.title || ""
   )
@@ -235,31 +276,68 @@ export default function DetailMemory(props: Props) {
   const [artiContent, setArtiContent] = useState<string>(
     selectedMarker?.article?.content || ""
   )
-  console.log({ selectedMarker })
+
   const ref = useRef<HTMLDivElement>(null)
+
+  const updateTitle = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditTitle(false)
+    } catch (error) {
+      console.log("Failed to update title from specific memory page", error)
+    }
+  }
+
+  const updateTravelDate = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditTravelDate(false)
+    } catch (error) {
+      console.log(
+        "Failed to update travelDate from specific memory page",
+        error
+      )
+    }
+  }
+
+  const updateArtiContent = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditArtiContent(false)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
+
   useOnClickOutside(ref, () => setShowMemory(false))
 
-  useEffect(() => {
-    const keyDownListener = (e: KeyboardEvent) => {
-      if (
-        e.key === "Enter" &&
-        selectedMarker &&
-        typeof selectedMarker?.id === "string" &&
-        typeof currentUser?.id === "string" &&
-        msgRef.current !== undefined &&
-        msgRef.current !== null
-      ) {
-        console.log("Enter key was pressed. Run your function.")
-        addMsg(currentUser?.id, selectedMarker?.id, msgRef?.current?.value)
-        msgRef.current.value = ""
-      } else return
-    }
-
-    document.addEventListener("keydown", keyDownListener)
-    return () => {
-      document.removeEventListener("keydown", keyDownListener)
-    }
-  })
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
     setMessengerInfo([])
@@ -311,7 +389,9 @@ export default function DetailMemory(props: Props) {
                 <BtnGreen
                   onClick={() => {
                     setShowEditor(true)
-                    setShowMore(false)
+                    setShowEditTitle(true)
+                    setShowEditTravelDate(true)
+                    setShowEditArtiContent(true)
                   }}
                 >
                   Edit
@@ -320,34 +400,59 @@ export default function DetailMemory(props: Props) {
             </BtnMore>
             {showEditor && (
               <>
-                <Input
-                  as="input"
-                  value={selectedMarker?.article?.title || ""}
-                  placeholder="Title"
-                  onChange={(e) => {
-                    setArtiTitle(e.target.value)
-                  }}
-                />
-                <Input
-                  as="input"
-                  type="date"
-                  value={selectedMarker?.article?.travelDate || ""}
-                  onChange={(e) => {
-                    setTravelDate(e.target.value)
-                  }}
-                />
-                <Editor
-                  artiContent={artiContent}
-                  setArtiContent={setArtiContent}
-                />
+                <EditWrapper>
+                  {showEditTitle ? (
+                    <Input
+                      as="input"
+                      value={artiTitle}
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          updateTitle()
+                        }
+                      }}
+                    />
+                  ) : (
+                    <ConfirmedTitle as="div">{artiTitle}</ConfirmedTitle>
+                  )}
+                  {showEditTravelDate ? (
+                    <Input
+                      as="input"
+                      type="date"
+                      value={travelDate}
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          updateTravelDate()
+                        }
+                      }}
+                    />
+                  ) : (
+                    <ConfirmedText as="div">{travelDate}</ConfirmedText>
+                  )}
+                </EditWrapper>
+                {showEditArtiContent ? (
+                  <ArtiWrapper>
+                    <BtnSave onClick={updateArtiContent}>Save</BtnSave>
+                    <Editor
+                      artiContent={artiContent}
+                      setArtiContent={setArtiContent}
+                    />
+                  </ArtiWrapper>
+                ) : (
+                  <Text>{parse(artiContent)}</Text>
+                )}
               </>
             )}
             {!showEditor && (
               <>
-                <ArticleTitle>{selectedMarker?.article?.title}</ArticleTitle>
-                <TextNoMargin>
-                  {selectedMarker?.article?.travelDate}
-                </TextNoMargin>
+                <ArticleTitle>{artiTitle}</ArticleTitle>
+                <TextNoMargin>{travelDate}</TextNoMargin>
               </>
             )}
             <PhotoWrapper>
@@ -357,7 +462,7 @@ export default function DetailMemory(props: Props) {
             </PhotoWrapper>
 
             {!showEditor && selectedMarker?.article?.content !== undefined && (
-              <Text>{parse(selectedMarker.article.content)}</Text>
+              <Text>{parse(artiContent)}</Text>
             )}
 
             <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
@@ -368,7 +473,26 @@ export default function DetailMemory(props: Props) {
                   typeof currentUser?.photoURL === "string" && (
                     <UserAvatar avatarURL={currentUser?.photoURL} />
                   )}
-                <MsgInput ref={msgRef} placeholder="Leave message..." />
+                <MsgInput
+                  ref={msgRef}
+                  placeholder="Leave message..."
+                  onKeyPress={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      typeof selectedMarker?.id === "string" &&
+                      typeof currentUser?.id === "string" &&
+                      msgRef.current !== undefined &&
+                      msgRef.current !== null
+                    ) {
+                      addMsg(
+                        currentUser?.id,
+                        selectedMarker?.id,
+                        msgRef?.current?.value
+                      )
+                      msgRef.current.value = ""
+                    }
+                  }}
+                />
               </MsgRowNoWrapper>
               {messages !== undefined &&
                 messages.length !== 0 &&
