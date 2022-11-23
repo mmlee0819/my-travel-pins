@@ -8,7 +8,12 @@ import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { ref, deleteObject } from "firebase/storage"
 import DetailMemory from "../Components/detailMemory"
-import { getPins, getSpecificPin, PinContent } from "./ts_fn_commonUse"
+import {
+  getPins,
+  getSpecificPin,
+  PinContent,
+  checkRealTimePinsInfo,
+} from "./ts_fn_commonUse"
 import {
   ContentWrapper,
   Container,
@@ -129,7 +134,7 @@ export default function MyMemories() {
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<
     number | undefined
   >(undefined)
-
+  console.log({ memories })
   const deleteMemory = async (index: number) => {
     console.log({ memory })
     try {
@@ -158,6 +163,16 @@ export default function MyMemories() {
       console.log(error)
     }
   }
+  useEffect(() => {
+    if (
+      currentUser !== undefined &&
+      currentUser !== null &&
+      typeof currentUser?.id === "string"
+    ) {
+      checkRealTimePinsInfo(currentUser?.id, setMemories)
+      return checkRealTimePinsInfo(currentUser?.id, setMemories)
+    }
+  }, [currentUser?.id])
 
   useEffect(() => {
     if (
@@ -173,7 +188,7 @@ export default function MyMemories() {
         setMemories
       )
     }
-  }, [currentUser?.id])
+  }, [currentUser?.id, memories])
 
   return (
     <Container>
