@@ -12,6 +12,7 @@ import {
   PinContent,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
+import Editor from "../Components/editor"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
 
@@ -57,6 +58,7 @@ const ArticleTitle = styled(Text)`
     min-height: 30px;
   }
 `
+const Input = styled(ArticleTitle)``
 const TextNoMargin = styled(Text)`
   margin: 0;
   text-align: justify;
@@ -220,11 +222,20 @@ export default function DetailMemory(props: Props) {
   const { isLoaded, currentUser } = useContext(AuthContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
   const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
-  console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [showMore, setShowMore] = useState(false)
-
+  const [showEditor, setShowEditor] = useState(false)
+  const [artiTitle, setArtiTitle] = useState<string>(
+    selectedMarker?.article?.title || ""
+  )
+  const [travelDate, setTravelDate] = useState<string>(
+    selectedMarker?.article?.travelDate || ""
+  )
+  const [artiContent, setArtiContent] = useState<string>(
+    selectedMarker?.article?.content || ""
+  )
+  console.log({ selectedMarker })
   const ref = useRef<HTMLDivElement>(null)
   useOnClickOutside(ref, () => setShowMemory(false))
 
@@ -296,18 +307,59 @@ export default function DetailMemory(props: Props) {
                 setShowMore((prev) => !prev)
               }}
             >
-              {showMore && <BtnGreen>Edit</BtnGreen>}
+              {showMore && (
+                <BtnGreen
+                  onClick={() => {
+                    setShowEditor(true)
+                    setShowMore(false)
+                  }}
+                >
+                  Edit
+                </BtnGreen>
+              )}
             </BtnMore>
-            <ArticleTitle>{selectedMarker?.article?.title}</ArticleTitle>
-            <TextNoMargin>{selectedMarker?.article?.travelDate}</TextNoMargin>
+            {showEditor && (
+              <>
+                <Input
+                  as="input"
+                  value={selectedMarker?.article?.title || ""}
+                  placeholder="Title"
+                  onChange={(e) => {
+                    setArtiTitle(e.target.value)
+                  }}
+                />
+                <Input
+                  as="input"
+                  type="date"
+                  value={selectedMarker?.article?.travelDate || ""}
+                  onChange={(e) => {
+                    setTravelDate(e.target.value)
+                  }}
+                />
+                <Editor
+                  artiContent={artiContent}
+                  setArtiContent={setArtiContent}
+                />
+              </>
+            )}
+            {!showEditor && (
+              <>
+                <ArticleTitle>{selectedMarker?.article?.title}</ArticleTitle>
+                <TextNoMargin>
+                  {selectedMarker?.article?.travelDate}
+                </TextNoMargin>
+              </>
+            )}
             <PhotoWrapper>
               {selectedMarker?.albumURLs?.map((photoUrl: string) => {
                 return <PhotoImg key={photoUrl} bkImage={photoUrl} />
               })}
             </PhotoWrapper>
-            {selectedMarker?.article?.content !== undefined && (
+
+            {!showEditor && selectedMarker?.article?.content !== undefined && (
               <Text>{parse(selectedMarker.article.content)}</Text>
             )}
+
             <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
             <MsgColumnWrapper>
               <MsgRowNoWrapper>
