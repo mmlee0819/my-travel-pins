@@ -3,7 +3,6 @@ import {
   useState,
   useContext,
   useEffect,
-  useRef,
   Dispatch,
   SetStateAction,
 } from "react"
@@ -21,23 +20,16 @@ import {
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../Utils/customGeo"
-import homeMarker from "../assets/markers/hometownIcon.png"
 import home from "../assets/markers/home.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
-import uploadIcon from "./uploadImgIcon.png"
+import Upload from "./functions/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage"
+import { ref, deleteObject } from "firebase/storage"
 import { getPins, PinContent } from "./ts_fn_commonUse"
 import Editor from "../Components/editor"
 import defaultImage from "../assets/defaultImage.png"
-
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
@@ -180,12 +172,7 @@ const UploadPhotoWrapper = styled.div`
 const BtnWrapper = styled(UploadPhotoWrapper)`
   margin-top: 15px;
 `
-const UrlsImgWrapper = styled.div`
-  position: relative;
-  display: flex;
-  flex-flow: row nowrap;
-  padding-left: 5px;
-`
+
 const BtnUpload = styled.button`
   display: flex;
   align-self: center;
@@ -208,39 +195,6 @@ const BtnCancel = styled(BtnUpload)`
 const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-`
-const Textarea = styled.textarea`
-  padding-left: 10px;
-  margin-top: 5px;
-  border-radius: 5px;
-  &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
-  }
-`
-const UploadImgLabel = styled.label`
-  display: flex;
-  align-items: center;
-  height: 64px;
-  cursor: pointer;
-`
-const UploadImgIcon = styled.img`
-  width: 30px;
-  height: 30px;
-`
-const UploadedPhoto = styled.img`
-  margin-top: 15px;
-  width: 100px;
-  height: 100px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    width: 80px;
-    height: 80px;
-  }
-`
-
-const UploadImgInput = styled.input`
-  display: none;
 `
 
 export const PinInfoArea = styled.div`
@@ -403,9 +357,6 @@ export default function MyMap() {
   const [hasFetched, setHasFetched] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
-  console.log("markers", markers)
-  console.log("selectedMarker", selectedMarker)
-  console.log("showMemory", showMemory)
 
   useEffect(() => {
     if (typeof currentUser?.id === "string") {
@@ -469,56 +420,6 @@ export default function MyMap() {
     setHasPosted(false)
     setHasUpload(false)
     setHasFetched(false)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilesName([])
-    setPhotos([])
-    if (e.target.files !== null) {
-      for (const file of e.target.files) {
-        setFilesName((prev: string[]) => {
-          return [...prev, file.name]
-        })
-        setPhotos((prev: File[]) => {
-          return [...prev, file]
-        })
-      }
-    }
-  }
-
-  const handleUpload = () => {
-    photos.map((photo) => {
-      if (typeof currentUser?.id === "string") {
-        const folderName = `${currentUser?.id?.slice(
-          0,
-          4
-        )}-${newPin.location.placeId.slice(0, 4)}`
-
-        const imgRef = ref(storage, `/${folderName}/${photo.name}`)
-        const uploadTask = uploadBytesResumable(imgRef, photo)
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progress = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            )
-            setUploadProgress(progress)
-            setHasUpload(true)
-          },
-          (error) => {
-            console.log(error)
-          },
-          async () => {
-            const url = await getDownloadURL(
-              ref(storage, `/${folderName}/${photo.name}`)
-            )
-            setUrls((prev) => {
-              return [...prev, url]
-            })
-          }
-        )
-      }
-    })
   }
 
   const addMemory = async () => {
@@ -634,34 +535,18 @@ export default function MyMap() {
                         setArtiContent={setArtiContent}
                       />
                     </ArticleWrapper>
-                    {hasUpload && urls ? (
-                      <UrlsImgWrapper>
-                        {urls.map((url) => {
-                          console.log(url)
-                          return <UploadedPhoto key={url} src={url} />
-                        })}
-                      </UrlsImgWrapper>
-                    ) : (
-                      <UploadPhotoWrapper>
-                        <UploadImgLabel>
-                          <UploadImgIcon src={uploadIcon} />
-                          {filesName.length !== 0
-                            ? filesName.map((fileName) => {
-                                return `\n${fileName}`
-                              })
-                            : "Choose photos"}
-                          <UploadImgInput
-                            type="file"
-                            accept="image/*"
-                            multiple={true}
-                            onChange={(e) => {
-                              handleChange(e)
-                            }}
-                          />
-                        </UploadImgLabel>
-                        <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
-                      </UploadPhotoWrapper>
-                    )}
+                    <Upload
+                      currentPin={newPin}
+                      filesName={filesName}
+                      setFilesName={setFilesName}
+                      photos={photos}
+                      setPhotos={setPhotos}
+                      hasUpload={hasUpload}
+                      setHasUpload={setHasUpload}
+                      urls={urls}
+                      setUrls={setUrls}
+                      setUploadProgress={setUploadProgress}
+                    />
                     <BtnWrapper>
                       <BtnConfirm onClick={addMemory}>
                         Confirm to post
