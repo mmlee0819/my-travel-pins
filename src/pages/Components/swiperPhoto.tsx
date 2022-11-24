@@ -2,7 +2,7 @@ import React, { useState } from "react"
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react"
 import { type Swiper as SwiperRef } from "swiper"
-import { FreeMode, Navigation, Thumbs } from "swiper"
+import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
 // Import Swiper styles
 import "swiper/css/bundle"
 import "swiper/css"
@@ -79,8 +79,12 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         spaceBetween={10}
         navigation={true}
         thumbs={{ swiper: thumbsSwiper }}
-        modules={[FreeMode, Navigation, Thumbs]}
+        modules={[Autoplay, FreeMode, Navigation, Thumbs]}
         className="mySwiper2"
+        autoplay={{
+          delay: 2000,
+          disableOnInteraction: false,
+        }}
       >
         {photos.map((item: string) => {
           return (
