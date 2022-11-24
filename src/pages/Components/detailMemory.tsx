@@ -277,13 +277,17 @@ interface Props {
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-  setShowMemory: Dispatch<React.SetStateAction<boolean>>
+  setShowMemory: Dispatch<React.SetStateAction<boolean>>,
+  showEditor: boolean
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       // Do nothing if clicking ref's element or descendent elements
-      console.log(event.target)
-      if (!ref.current || ref.current.contains(event.target as Node)) {
+      if (
+        showEditor ||
+        !ref.current ||
+        ref.current.contains(event.target as Node)
+      ) {
         return
       }
       setShowMemory(false)
@@ -294,12 +298,12 @@ function useOnClickOutside(
       window.removeEventListener("mousedown", listener)
       window.removeEventListener("touchstart", listener)
     }
-  }, [ref])
+  }, [ref, showEditor])
 }
 
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
-  const { isLoaded, currentUser } = useContext(AuthContext)
+  const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
   const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
   const msgRef = useRef<HTMLInputElement>(null)
@@ -447,7 +451,7 @@ export default function DetailMemory(props: Props) {
     setUrls([])
   }
 
-  useOnClickOutside(overlayRef, () => setShowMemory(false))
+  useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
@@ -490,12 +494,14 @@ export default function DetailMemory(props: Props) {
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
           <ContentArea ref={overlayRef}>
-            <BtnMore
-              showMore={showMore}
-              onClick={() => {
-                setShowMore((prev) => !prev)
-              }}
-            />
+            {(isMyMap || isMyMemory) && (
+              <BtnMore
+                showMore={showMore}
+                onClick={() => {
+                  setShowMore((prev) => !prev)
+                }}
+              />
+            )}
             {showMore && (
               <BtnColumnWrapper>
                 <BtnRemainChange
