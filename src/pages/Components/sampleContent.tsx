@@ -12,6 +12,7 @@ import pkcAvatar from "../assets/samplePhotos/pkcAvatar.jpg"
 import cyuAvatar from "../assets/samplePhotos/cyuAvatar.jpg"
 import laysAvatar from "../assets/samplePhotos/laysAvatar.jpg"
 import moreIcon from "../assets/buttons/moreIcon.png"
+import SwiperPhotos from "./swiperPhoto"
 
 const Container = styled.div`
   position: absolute;
@@ -201,6 +202,7 @@ const BtnMsgDelete = styled.div`
   z-index: 30;
 `
 
+const samplePhotos = [gala1, gala2, gala3, gala4]
 export function TipsContent({
   setShowTips,
 }: {
@@ -277,12 +279,13 @@ export function SampleMemory({
         />
         <ArticleTitle>My First Time Skiing </ArticleTitle>
         <TextNoMargin>Mar.2019</TextNoMargin>
-        <PhotoWrapper>
+        <SwiperPhotos photos={samplePhotos} />
+        {/* <PhotoWrapper>
           <Gala3 />
           <Gala4 />
           <Gala1 />
           <Gala2 />
-        </PhotoWrapper>
+        </PhotoWrapper> */}
         <Text>
           As a member, you can...
           <br />

@@ -3,7 +3,7 @@ import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import parse from "html-react-parser"
 import { db, storage } from "../Utils/firebase"
-import { doc, updateDoc, arrayUnion } from "firebase/firestore"
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import {
@@ -19,6 +19,7 @@ import Editor from "../Components/editor"
 import Upload from "../User/functions/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
+import SwiperPhotos from "./swiperPhoto"
 
 const Container = styled.div`
   position: absolute;
@@ -329,6 +330,7 @@ export default function DetailMemory(props: Props) {
   const [urls, setUrls] = useState<string[]>([])
   const [showSavedPhoto, setShowSavedPhoto] = useState(false)
   const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
+  const [savedPhotoFilesName, setSavedPhotoFilesName] = useState<string[]>([])
   const [hasDiscard, setHasDiscard] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -345,7 +347,7 @@ export default function DetailMemory(props: Props) {
       })
       setShowEditTitle(false)
     } catch (error) {
-      console.log("Failed to update title from specific memory page", error)
+      console.log("Failed to revert contents to original", error)
     }
   }
 
@@ -397,6 +399,7 @@ export default function DetailMemory(props: Props) {
         albumNames: arrayUnion(...filesName),
       })
       setSavedPhotoUrls((prev: string[]) => [...prev, ...urls])
+      setSavedPhotoFilesName((prev: string[]) => [...prev, ...filesName])
       setHasUpload(false)
       setFilesName([])
       setPhotos([])
@@ -420,7 +423,11 @@ export default function DetailMemory(props: Props) {
           travelDate: selectedMarker?.article?.travelDate || "",
           content: selectedMarker?.article?.content || "",
         },
+        albumURLs: arrayRemove(...urls),
+        albumNames: arrayRemove(...filesName),
       })
+      setSavedPhotoUrls([])
+      setSavedPhotoFilesName([])
       setShowEditArtiContent(false)
       setHasDiscard(false)
     } catch (error) {
@@ -653,7 +660,11 @@ export default function DetailMemory(props: Props) {
                 <TextNoMargin>{travelDate}</TextNoMargin>
               </>
             )}
-            <PhotoWrapper>
+            {selectedMarker?.albumURLs &&
+              typeof selectedMarker?.albumURLs !== null && (
+                <SwiperPhotos photos={selectedMarker?.albumURLs} />
+              )}
+            {/* <PhotoWrapper>
               {selectedMarker?.albumURLs?.map((photoUrl: string) => {
                 return <PhotoImg key={photoUrl} bkImage={photoUrl} />
               })}
@@ -661,7 +672,7 @@ export default function DetailMemory(props: Props) {
                 savedPhotoUrls.map((photoUrl: string) => (
                   <PhotoImg key={photoUrl} bkImage={photoUrl} />
                 ))}
-            </PhotoWrapper>
+            </PhotoWrapper> */}
 
             {!showEditor && selectedMarker?.article?.content !== undefined && (
               <Text>{parse(artiContent)}</Text>
