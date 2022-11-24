@@ -16,9 +16,6 @@ const MainSwiper = styled(Swiper)`
   .swiper {
     height: 300px;
   }
-  /* .swiper-horizontal {
-    height: 300px;
-  } */
 
   .mySwiper2.swiper-backface-hidden {
     height: 300px;
@@ -29,7 +26,14 @@ const MainSwiper = styled(Swiper)`
     height: 100%;
     object-fit: cover;
   }
-  --swiper-navigation-color: "#fff";
+  .swiper-button-prev,
+  .swiper-button-next {
+    &:after {
+      color: #fff;
+    }
+  }
+  --swiper-theme-color: #fff;
+  --swiper-navigation-color: #fff;
   --swiper-pagination-color: "#fff";
 `
 
@@ -37,6 +41,7 @@ const ButtomSwiper = styled(Swiper)`
   .swiper {
     height: 150px;
   }
+
   .swiper-slide {
     background-size: cover;
     background-position: center;
