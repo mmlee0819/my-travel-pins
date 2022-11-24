@@ -208,10 +208,6 @@ const BtnSave = styled(BtnGreen)`
     padding: 5px 20px;
   }
 `
-// const BtnUploaded = styled(BtnSave)`
-//   top: initial;
-//   bottom: 0;
-// `
 
 const BtnWrapper = styled.div`
   position: relative;
@@ -292,11 +288,11 @@ function useOnClickOutside(
       }
       setShowMemory(false)
     }
-    document.addEventListener("mousedown", listener)
-    document.addEventListener("touchstart", listener)
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
     return () => {
-      document.removeEventListener("mousedown", listener)
-      document.removeEventListener("touchstart", listener)
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
     }
   }, [ref])
 }
@@ -329,6 +325,7 @@ export default function DetailMemory(props: Props) {
   const [urls, setUrls] = useState<string[]>([])
   const [showSavedPhoto, setShowSavedPhoto] = useState(false)
   const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
+  const [hasDiscard, setHasDiscard] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const updateTitle = async () => {
@@ -409,7 +406,26 @@ export default function DetailMemory(props: Props) {
       )
     }
   }
-
+  const updateToOrigin = async () => {
+    if (!selectedMarker?.id || !hasDiscard) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: selectedMarker?.article?.title || "",
+          travelDate: selectedMarker?.article?.travelDate || "",
+          content: selectedMarker?.article?.content || "",
+        },
+      })
+      setShowEditArtiContent(false)
+      setHasDiscard(false)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
   const cancelPhotos = async () => {
     if (urls.length !== 0 && typeof currentUser?.id === "string") {
       const folderName = `${currentUser?.id?.slice(
@@ -507,24 +523,18 @@ export default function DetailMemory(props: Props) {
                 {showEditor && (
                   <BtnRemoveChange
                     onClick={() => {
-                      if (!showEditor) {
-                        setShowEditor(true)
-                        setShowEditTitle(true)
-                        setShowEditTravelDate(true)
-                        setShowEditArtiContent(true)
-                        setShowMore(false)
-                      } else {
-                        setShowEditTitle(false)
-                        setShowEditTravelDate(false)
-                        setShowEditArtiContent(false)
-                        setArtiTitle(selectedMarker?.article?.title || "")
-                        setTravelDate(selectedMarker?.article?.travelDate || "")
-                        setArtiContent(selectedMarker?.article?.content || "")
-                        if (hasUpload) {
-                          cancelPhotos()
-                        }
-                        setShowMore(false)
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(selectedMarker?.article?.title || "")
+                      setTravelDate(selectedMarker?.article?.travelDate || "")
+                      setArtiContent(selectedMarker?.article?.content || "")
+                      if (hasUpload) {
+                        cancelPhotos()
                       }
+                      updateToOrigin()
+                      setShowMore(false)
+                      setHasDiscard(true)
                     }}
                   >
                     Discard all changes
