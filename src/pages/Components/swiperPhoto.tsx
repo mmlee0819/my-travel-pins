@@ -15,7 +15,13 @@ import styled from "styled-components"
 const MainSwiper = styled(Swiper)`
   .swiper {
     height: 300px;
-    max-height: 300px;
+  }
+  /* .swiper-horizontal {
+    height: 300px;
+  } */
+
+  .mySwiper2.swiper-backface-hidden {
+    height: 300px;
   }
   .swiper-slide img {
     display: block;
@@ -68,6 +74,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
   return (
     <>
       <MainSwiper
+        style={{ height: "300px" }}
         loop={true}
         spaceBetween={10}
         navigation={true}
@@ -84,6 +91,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         })}
       </MainSwiper>
       <ButtomSwiper
+        style={{ height: "150px" }}
         onSwiper={setThumbsSwiper}
         loop={true}
         spaceBetween={10}
