@@ -541,6 +541,7 @@ export default function DetailMemory(props: Props) {
                       updateToOrigin()
                       setShowMore(false)
                       setHasDiscard(true)
+                      setShowEditor(false)
                     }}
                   >
                     Discard all changes
@@ -604,27 +605,29 @@ export default function DetailMemory(props: Props) {
                   typeof selectedMarker.location.lng === "number" &&
                   typeof selectedMarker.location.placeId === "string" && (
                     <EditWrapper>
-                      <Upload
-                        currentPin={{
-                          id: selectedMarker.id,
-                          userId: selectedMarker.userId,
-                          location: {
-                            lat: selectedMarker.location.lat,
-                            lng: selectedMarker.location.lng,
-                            name: selectedMarker.location.name,
-                            placeId: selectedMarker.location.placeId,
-                          },
-                        }}
-                        filesName={filesName}
-                        setFilesName={setFilesName}
-                        photos={photos}
-                        setPhotos={setPhotos}
-                        hasUpload={hasUpload}
-                        setHasUpload={setHasUpload}
-                        urls={urls}
-                        setUrls={setUrls}
-                        setUploadProgress={setUploadProgress}
-                      />
+                      {showEditor && (
+                        <Upload
+                          currentPin={{
+                            id: selectedMarker.id,
+                            userId: selectedMarker.userId,
+                            location: {
+                              lat: selectedMarker.location.lat,
+                              lng: selectedMarker.location.lng,
+                              name: selectedMarker.location.name,
+                              placeId: selectedMarker.location.placeId,
+                            },
+                          }}
+                          filesName={filesName}
+                          setFilesName={setFilesName}
+                          photos={photos}
+                          setPhotos={setPhotos}
+                          hasUpload={hasUpload}
+                          setHasUpload={setHasUpload}
+                          urls={urls}
+                          setUrls={setUrls}
+                          setUploadProgress={setUploadProgress}
+                        />
+                      )}
                       {hasUpload && (
                         <BtnWrapper>
                           <BtnUploaded onClick={updatePhotos}>
@@ -635,6 +638,7 @@ export default function DetailMemory(props: Props) {
                           </BtnCancelUpload>
                         </BtnWrapper>
                       )}
+
                       {showSavedPhoto &&
                         savedPhotoUrls.map((photoUrl: string) => (
                           <PhotoImg key={photoUrl} bkImage={photoUrl} />
