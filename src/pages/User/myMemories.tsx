@@ -3,7 +3,6 @@ import styled from "styled-components"
 import { useState, useContext, useEffect } from "react"
 import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
-import trashBin from "./trashBin.png"
 import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { ref, deleteObject } from "firebase/storage"
@@ -23,6 +22,9 @@ import {
   MemoryImg,
   MemoryList,
 } from "./components/UIforMemoriesPage"
+import trashBinIcon from "../assets/buttons/trashBin.png"
+import trashBinWhite from "../assets/buttons/trashBin.png"
+import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 
 const Text = styled.div`
   color: ${(props) => props.theme.color.bgDark};
@@ -135,6 +137,7 @@ export default function MyMemories() {
     number | undefined
   >(undefined)
   console.log({ memories })
+
   const deleteMemory = async (index: number) => {
     console.log({ memory })
     try {
@@ -225,7 +228,7 @@ export default function MyMemories() {
                       </BtnBlue>
                       <BtnDelete
                         id={item.id}
-                        src={trashBin}
+                        src={trashBinBlack}
                         onClick={() => {
                           setMemory(item)
                           setDeleteTargetIndex(index)

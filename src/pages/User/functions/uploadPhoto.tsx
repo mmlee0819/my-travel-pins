@@ -1,5 +1,5 @@
 import React from "react"
-import { useState, useContext, Dispatch, SetStateAction } from "react"
+import { useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
 import { storage } from "../../Utils/firebase"
 import { AuthContext } from "../../Context/authContext"
@@ -10,6 +10,11 @@ const UploadPhotoWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+  font-size: 20px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: 18px;
+  }
 `
 const UploadImgLabel = styled.label`
   display: flex;
@@ -169,7 +174,7 @@ export default function Upload(props: UploadType) {
               }}
             />
           </UploadImgLabel>
-          <BtnUpload onClick={handleUpload}>Upload</BtnUpload>
+          <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
         </UploadPhotoWrapper>
       )}
     </>

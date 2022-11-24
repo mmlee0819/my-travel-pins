@@ -3,7 +3,8 @@ import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import parse from "html-react-parser"
 import { db, storage } from "../Utils/firebase"
-import { doc, updateDoc } from "firebase/firestore"
+import { doc, updateDoc, arrayUnion } from "firebase/firestore"
+import { ref, deleteObject } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -46,6 +47,7 @@ const ContentArea = styled.div`
   }
 `
 const EditWrapper = styled.div`
+  position: relative;
   display: flex;
   flex-flow: column wrap;
   margin: 50px 0 20px 0;
@@ -163,7 +165,8 @@ const MsgRowNoWrapper = styled.div`
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
   right: 40px;
-  display: inline-block;
+  display: flex;
+  flex-flow: column wrap;
   width: 30px;
   height: 25px;
   font-size: 16px;
@@ -204,6 +207,48 @@ const BtnSave = styled(BtnGreen)`
   &:hover {
     padding: 5px 20px;
   }
+`
+// const BtnUploaded = styled(BtnSave)`
+//   top: initial;
+//   bottom: 0;
+// `
+
+const BtnWrapper = styled.div`
+  position: relative;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 20%;
+`
+const BtnUploaded = styled(BtnGreen)`
+  position: relative;
+  top: initial;
+  right: initial;
+  width: 40%;
+  align-items: center;
+  justify-content: center;
+`
+const BtnCancelUpload = styled(BtnUploaded)`
+  background-color: #ca3434;
+`
+const BtnColumnWrapper = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-content: end;
+  width: 100%;
+  gap: 20%;
+`
+const BtnRemainChange = styled(BtnUploaded)`
+  margin: 5px 0px;
+  padding: 10px 5px;
+`
+const BtnRemoveChange = styled(BtnRemainChange)`
+  background-color: #ca3434;
 `
 
 const MsgInput = styled.input`
@@ -282,8 +327,9 @@ export default function DetailMemory(props: Props) {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
-
-  const ref = useRef<HTMLDivElement>(null)
+  const [showSavedPhoto, setShowSavedPhoto] = useState(false)
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
+  const overlayRef = useRef<HTMLDivElement>(null)
 
   const updateTitle = async () => {
     if (!selectedMarker?.id) return
@@ -341,8 +387,51 @@ export default function DetailMemory(props: Props) {
       )
     }
   }
+  const updatePhotos = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        albumURLs: arrayUnion(...urls),
+        albumNames: arrayUnion(...filesName),
+      })
+      setSavedPhotoUrls((prev: string[]) => [...prev, ...urls])
+      setHasUpload(false)
+      setFilesName([])
+      setPhotos([])
+      setUrls([])
+      setUploadProgress(0)
+      setShowSavedPhoto(true)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
 
-  useOnClickOutside(ref, () => setShowMemory(false))
+  const cancelPhotos = async () => {
+    if (urls.length !== 0 && typeof currentUser?.id === "string") {
+      const folderName = `${currentUser?.id?.slice(
+        0,
+        4
+      )}-${selectedMarker?.location?.placeId.slice(0, 4)}`
+      try {
+        filesName.map(async (file) => {
+          await deleteObject(ref(storage, `/${folderName}/${file}`))
+        })
+      } catch (error) {
+        console.log("Failed to cancel uploaded", error)
+      }
+    }
+    setHasUpload(false)
+    setFilesName([])
+    setPhotos([])
+    setUploadProgress(0)
+    setUrls([])
+  }
+
+  useOnClickOutside(overlayRef, () => setShowMemory(false))
 
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
@@ -384,26 +473,65 @@ export default function DetailMemory(props: Props) {
         selectedMarker &&
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
-          <ContentArea ref={ref}>
+          <ContentArea ref={overlayRef}>
             <BtnMore
               showMore={showMore}
               onClick={() => {
                 setShowMore((prev) => !prev)
               }}
-            >
-              {showMore && (
-                <BtnGreen
+            />
+            {showMore && (
+              <BtnColumnWrapper>
+                <BtnRemainChange
                   onClick={() => {
-                    setShowEditor(true)
-                    setShowEditTitle(true)
-                    setShowEditTravelDate(true)
-                    setShowEditArtiContent(true)
+                    if (!showEditor) {
+                      setShowEditor(true)
+                      setShowEditTitle(true)
+                      setShowEditTravelDate(true)
+                      setShowEditArtiContent(true)
+                      setHasUpload(false)
+                    } else {
+                      setShowEditor(false)
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(selectedMarker?.article?.title || "")
+                      setTravelDate(selectedMarker?.article?.travelDate || "")
+                      setArtiContent(selectedMarker?.article?.content || "")
+                    }
+                    setShowMore(false)
                   }}
                 >
-                  Edit
-                </BtnGreen>
-              )}
-            </BtnMore>
+                  {showEditor ? "Remain all changes and back" : "Edit"}
+                </BtnRemainChange>
+                {showEditor && (
+                  <BtnRemoveChange
+                    onClick={() => {
+                      if (!showEditor) {
+                        setShowEditor(true)
+                        setShowEditTitle(true)
+                        setShowEditTravelDate(true)
+                        setShowEditArtiContent(true)
+                        setShowMore(false)
+                      } else {
+                        setShowEditTitle(false)
+                        setShowEditTravelDate(false)
+                        setShowEditArtiContent(false)
+                        setArtiTitle(selectedMarker?.article?.title || "")
+                        setTravelDate(selectedMarker?.article?.travelDate || "")
+                        setArtiContent(selectedMarker?.article?.content || "")
+                        if (hasUpload) {
+                          cancelPhotos()
+                        }
+                        setShowMore(false)
+                      }
+                    }}
+                  >
+                    Discard all changes
+                  </BtnRemoveChange>
+                )}
+              </BtnColumnWrapper>
+            )}
             {showEditor && (
               <>
                 <EditWrapper>
@@ -451,7 +579,7 @@ export default function DetailMemory(props: Props) {
                     />
                   </ArtiWrapper>
                 ) : (
-                  <Text>{parse(artiContent)}</Text>
+                  <ConfirmedText>{parse(artiContent)}</ConfirmedText>
                 )}
                 {selectedMarker &&
                   typeof selectedMarker.id === "string" &&
@@ -481,6 +609,20 @@ export default function DetailMemory(props: Props) {
                         setUrls={setUrls}
                         setUploadProgress={setUploadProgress}
                       />
+                      {hasUpload && (
+                        <BtnWrapper>
+                          <BtnUploaded onClick={updatePhotos}>
+                            Save uploaded
+                          </BtnUploaded>
+                          <BtnCancelUpload onClick={cancelPhotos}>
+                            Cancel
+                          </BtnCancelUpload>
+                        </BtnWrapper>
+                      )}
+                      {showSavedPhoto &&
+                        savedPhotoUrls.map((photoUrl: string) => (
+                          <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                        ))}
                     </EditWrapper>
                   )}
               </>
@@ -495,6 +637,10 @@ export default function DetailMemory(props: Props) {
               {selectedMarker?.albumURLs?.map((photoUrl: string) => {
                 return <PhotoImg key={photoUrl} bkImage={photoUrl} />
               })}
+              {savedPhotoUrls &&
+                savedPhotoUrls.map((photoUrl: string) => (
+                  <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                ))}
             </PhotoWrapper>
 
             {!showEditor && selectedMarker?.article?.content !== undefined && (
