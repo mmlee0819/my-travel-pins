@@ -15,6 +15,7 @@ import {
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
 import Editor from "../Components/editor"
+import Upload from "../User/functions/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
 
@@ -276,6 +277,11 @@ export default function DetailMemory(props: Props) {
   const [artiContent, setArtiContent] = useState<string>(
     selectedMarker?.article?.content || ""
   )
+  const [filesName, setFilesName] = useState<string[]>([])
+  const [photos, setPhotos] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [hasUpload, setHasUpload] = useState(false)
+  const [urls, setUrls] = useState<string[]>([])
 
   const ref = useRef<HTMLDivElement>(null)
 
@@ -447,6 +453,36 @@ export default function DetailMemory(props: Props) {
                 ) : (
                   <Text>{parse(artiContent)}</Text>
                 )}
+                {selectedMarker &&
+                  typeof selectedMarker.id === "string" &&
+                  typeof selectedMarker.userId === "string" &&
+                  typeof selectedMarker.location.lat === "number" &&
+                  typeof selectedMarker.location.lng === "number" &&
+                  typeof selectedMarker.location.placeId === "string" && (
+                    <EditWrapper>
+                      <Upload
+                        currentPin={{
+                          id: selectedMarker.id,
+                          userId: selectedMarker.userId,
+                          location: {
+                            lat: selectedMarker.location.lat,
+                            lng: selectedMarker.location.lng,
+                            name: selectedMarker.location.name,
+                            placeId: selectedMarker.location.placeId,
+                          },
+                        }}
+                        filesName={filesName}
+                        setFilesName={setFilesName}
+                        photos={photos}
+                        setPhotos={setPhotos}
+                        hasUpload={hasUpload}
+                        setHasUpload={setHasUpload}
+                        urls={urls}
+                        setUrls={setUrls}
+                        setUploadProgress={setUploadProgress}
+                      />
+                    </EditWrapper>
+                  )}
               </>
             )}
             {!showEditor && (
