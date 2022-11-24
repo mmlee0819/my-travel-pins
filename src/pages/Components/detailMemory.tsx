@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
+import parse from "html-react-parser"
+import { db, storage } from "../Utils/firebase"
+import { doc, updateDoc, arrayUnion } from "firebase/firestore"
+import { ref, deleteObject } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -11,9 +15,10 @@ import {
   PinContent,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
+import Editor from "../Components/editor"
+import Upload from "../User/functions/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
-import xMark from "../assets/x-mark.png"
 
 const Container = styled.div`
   position: absolute;
@@ -41,6 +46,13 @@ const ContentArea = styled.div`
     display: none; /* for Chrome, Safari, and Opera */
   }
 `
+const EditWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-flow: column wrap;
+  margin: 50px 0 20px 0;
+  gap: 20px;
+`
 
 const Text = styled.div`
   margin: 25px 0;
@@ -57,26 +69,29 @@ const ArticleTitle = styled(Text)`
     min-height: 30px;
   }
 `
+const Input = styled(Text)`
+  width: 100%;
+  margin: 0px;
+  padding-left: 10px;
+  border: 3px solid #ffffff;
+  border-radius: 5px;
+  &:focus {
+    outline: #f99c62;
+    border: 3px solid #f99c62;
+  }
+`
+const ConfirmedTitle = styled(Input)`
+  font-weight: 700;
+  border: none;
+`
+const ConfirmedText = styled(Input)`
+  border: none;
+`
 const TextNoMargin = styled(Text)`
   margin: 0;
   text-align: justify;
 `
 
-const XmarkTop = styled.div`
-  position: absolute;
-  top: 50px;
-  right: 20px;
-  background-image: url(${xMark});
-  background-size: 100% 100%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    top: 45px;
-    width: 30px;
-    height: 30px;
-  }
-`
 const StreetModeContainer = styled.div`
   height: 40vh;
   margin-bottom: 20px;
@@ -147,36 +162,89 @@ const MsgRowNoWrapper = styled.div`
   justify-content: flex-start;
   margin: 5px 0;
 `
-const BtnMore = styled.div<{ showDelete: boolean }>`
+const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
   right: 40px;
-  display: inline-block;
+  display: flex;
+  flex-flow: column wrap;
   width: 30px;
   height: 25px;
   font-size: 16px;
   background-image: ${(props) =>
-    props.showDelete ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
+    props.showMore ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
   background-size: cover;
   cursor: pointer;
   &:hover {
     background-image: url(${moreHoverIcon});
   }
 `
-const BtnMsgDelete = styled.div`
+const BtnGreen = styled.div`
   position: absolute;
   top: 30px;
-  right: 40px;
-  display: inline-block;
+  right: 0px;
+  display: flex;
   text-align: center;
+  width: auto;
   padding: 5px 10px;
   line-height: 16px;
-  height: 30px;
   font-size: 16px;
   color: #fff;
   background-color: #5594b7;
   border-radius: 5px;
   z-index: 120;
   cursor: pointer;
+`
+const BtnRed = styled(BtnGreen)`
+  background-color: #ca3434;
+`
+
+const ArtiWrapper = styled.div`
+  position: relative;
+`
+const BtnSave = styled(BtnGreen)`
+  top: 7.5px;
+  right: 15px;
+  &:hover {
+    padding: 5px 20px;
+  }
+`
+
+const BtnWrapper = styled.div`
+  position: relative;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 20%;
+`
+const BtnUploaded = styled(BtnGreen)`
+  position: relative;
+  top: initial;
+  right: initial;
+  width: 40%;
+  align-items: center;
+  justify-content: center;
+`
+const BtnCancelUpload = styled(BtnUploaded)`
+  background-color: #ca3434;
+`
+const BtnColumnWrapper = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-content: end;
+  width: 100%;
+  gap: 20%;
+`
+const BtnRemainChange = styled(BtnUploaded)`
+  margin: 5px 0px;
+  padding: 10px 5px;
+`
+const BtnRemoveChange = styled(BtnRemainChange)`
+  background-color: #ca3434;
 `
 
 const MsgInput = styled.input`
@@ -209,58 +277,182 @@ interface Props {
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-  setShowMemory: Dispatch<React.SetStateAction<boolean>>
+  setShowMemory: Dispatch<React.SetStateAction<boolean>>,
+  showEditor: boolean
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       // Do nothing if clicking ref's element or descendent elements
-      console.log(event.target)
-      if (!ref.current || ref.current.contains(event.target as Node)) {
+      if (
+        showEditor ||
+        !ref.current ||
+        ref.current.contains(event.target as Node)
+      ) {
         return
       }
       setShowMemory(false)
     }
-    document.addEventListener("mousedown", listener)
-    document.addEventListener("touchstart", listener)
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
     return () => {
-      document.removeEventListener("mousedown", listener)
-      document.removeEventListener("touchstart", listener)
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
     }
-  }, [ref])
+  }, [ref, showEditor])
 }
+
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
-  const { isLoaded, currentUser } = useContext(AuthContext)
+  const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
   const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
-  console.log("messengerInfo", messengerInfo)
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
+  const [showEditTitle, setShowEditTitle] = useState(true)
+  const [showEditTravelDate, setShowEditTravelDate] = useState(true)
+  const [showEditArtiContent, setShowEditArtiContent] = useState(true)
+  const [artiTitle, setArtiTitle] = useState<string>(
+    selectedMarker?.article?.title || ""
+  )
+  const [travelDate, setTravelDate] = useState<string>(
+    selectedMarker?.article?.travelDate || ""
+  )
+  const [artiContent, setArtiContent] = useState<string>(
+    selectedMarker?.article?.content || ""
+  )
+  const [filesName, setFilesName] = useState<string[]>([])
+  const [photos, setPhotos] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [hasUpload, setHasUpload] = useState(false)
+  const [urls, setUrls] = useState<string[]>([])
+  const [showSavedPhoto, setShowSavedPhoto] = useState(false)
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
+  const [hasDiscard, setHasDiscard] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
 
-  const ref = useRef<HTMLDivElement>(null)
-  useOnClickOutside(ref, () => setShowMemory(false))
-
-  useEffect(() => {
-    const keyDownListener = (e: KeyboardEvent) => {
-      if (
-        e.key === "Enter" &&
-        selectedMarker &&
-        typeof selectedMarker?.id === "string" &&
-        typeof currentUser?.id === "string" &&
-        msgRef.current !== undefined &&
-        msgRef.current !== null
-      ) {
-        console.log("Enter key was pressed. Run your function.")
-        addMsg(currentUser?.id, selectedMarker?.id, msgRef?.current?.value)
-        msgRef.current.value = ""
-      } else return
+  const updateTitle = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditTitle(false)
+    } catch (error) {
+      console.log("Failed to update title from specific memory page", error)
     }
+  }
 
-    document.addEventListener("keydown", keyDownListener)
-    return () => {
-      document.removeEventListener("keydown", keyDownListener)
+  const updateTravelDate = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditTravelDate(false)
+    } catch (error) {
+      console.log(
+        "Failed to update travelDate from specific memory page",
+        error
+      )
     }
-  })
+  }
+
+  const updateArtiContent = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+      })
+      setShowEditArtiContent(false)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
+  const updatePhotos = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        albumURLs: arrayUnion(...urls),
+        albumNames: arrayUnion(...filesName),
+      })
+      setSavedPhotoUrls((prev: string[]) => [...prev, ...urls])
+      setHasUpload(false)
+      setFilesName([])
+      setPhotos([])
+      setUrls([])
+      setUploadProgress(0)
+      setShowSavedPhoto(true)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
+  const updateToOrigin = async () => {
+    if (!selectedMarker?.id || !hasDiscard) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    try {
+      await updateDoc(docRef, {
+        article: {
+          title: selectedMarker?.article?.title || "",
+          travelDate: selectedMarker?.article?.travelDate || "",
+          content: selectedMarker?.article?.content || "",
+        },
+      })
+      setShowEditArtiContent(false)
+      setHasDiscard(false)
+    } catch (error) {
+      console.log(
+        "Failed to update article content from specific memory page",
+        error
+      )
+    }
+  }
+  const cancelPhotos = async () => {
+    if (urls.length !== 0 && typeof currentUser?.id === "string") {
+      const folderName = `${currentUser?.id?.slice(
+        0,
+        4
+      )}-${selectedMarker?.location?.placeId.slice(0, 4)}`
+      try {
+        filesName.map(async (file) => {
+          await deleteObject(ref(storage, `/${folderName}/${file}`))
+        })
+      } catch (error) {
+        console.log("Failed to cancel uploaded", error)
+      }
+    }
+    setHasUpload(false)
+    setFilesName([])
+    setPhotos([])
+    setUploadProgress(0)
+    setUrls([])
+  }
+
+  useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
+
   useEffect(() => {
     if (messages === undefined || messages.length === 0) return
     setMessengerInfo([])
@@ -301,20 +493,180 @@ export default function DetailMemory(props: Props) {
         selectedMarker &&
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
-          <ContentArea ref={ref}>
-            <XmarkTop
-              onClick={() => {
-                setShowMemory(false)
-              }}
-            />
-            <ArticleTitle>{selectedMarker?.article?.title}</ArticleTitle>
-            <TextNoMargin>{selectedMarker?.article?.travelDate}</TextNoMargin>
+          <ContentArea ref={overlayRef}>
+            {(isMyMap || isMyMemory) && (
+              <BtnMore
+                showMore={showMore}
+                onClick={() => {
+                  setShowMore((prev) => !prev)
+                }}
+              />
+            )}
+            {showMore && (
+              <BtnColumnWrapper>
+                <BtnRemainChange
+                  onClick={() => {
+                    if (!showEditor) {
+                      setShowEditor(true)
+                      setShowEditTitle(true)
+                      setShowEditTravelDate(true)
+                      setShowEditArtiContent(true)
+                      setHasUpload(false)
+                    } else {
+                      setShowEditor(false)
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(selectedMarker?.article?.title || "")
+                      setTravelDate(selectedMarker?.article?.travelDate || "")
+                      setArtiContent(selectedMarker?.article?.content || "")
+                    }
+                    setShowMore(false)
+                  }}
+                >
+                  {showEditor ? "Remain all changes and back" : "Edit"}
+                </BtnRemainChange>
+                {showEditor && (
+                  <BtnRemoveChange
+                    onClick={() => {
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(selectedMarker?.article?.title || "")
+                      setTravelDate(selectedMarker?.article?.travelDate || "")
+                      setArtiContent(selectedMarker?.article?.content || "")
+                      if (hasUpload) {
+                        cancelPhotos()
+                      }
+                      updateToOrigin()
+                      setShowMore(false)
+                      setHasDiscard(true)
+                      setShowEditor(false)
+                    }}
+                  >
+                    Discard all changes
+                  </BtnRemoveChange>
+                )}
+              </BtnColumnWrapper>
+            )}
+            {showEditor && (
+              <>
+                <EditWrapper>
+                  {showEditTitle ? (
+                    <Input
+                      as="input"
+                      value={artiTitle}
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          updateTitle()
+                        }
+                      }}
+                    />
+                  ) : (
+                    <ConfirmedTitle as="div">{artiTitle}</ConfirmedTitle>
+                  )}
+                  {showEditTravelDate ? (
+                    <Input
+                      as="input"
+                      type="date"
+                      value={travelDate}
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          updateTravelDate()
+                        }
+                      }}
+                    />
+                  ) : (
+                    <ConfirmedText as="div">{travelDate}</ConfirmedText>
+                  )}
+                </EditWrapper>
+                {showEditArtiContent ? (
+                  <ArtiWrapper>
+                    <BtnSave onClick={updateArtiContent}>Save</BtnSave>
+                    <Editor
+                      artiContent={artiContent}
+                      setArtiContent={setArtiContent}
+                    />
+                  </ArtiWrapper>
+                ) : (
+                  <ConfirmedText>{parse(artiContent)}</ConfirmedText>
+                )}
+                {selectedMarker &&
+                  typeof selectedMarker.id === "string" &&
+                  typeof selectedMarker.userId === "string" &&
+                  typeof selectedMarker.location.lat === "number" &&
+                  typeof selectedMarker.location.lng === "number" &&
+                  typeof selectedMarker.location.placeId === "string" && (
+                    <EditWrapper>
+                      {showEditor && (
+                        <Upload
+                          currentPin={{
+                            id: selectedMarker.id,
+                            userId: selectedMarker.userId,
+                            location: {
+                              lat: selectedMarker.location.lat,
+                              lng: selectedMarker.location.lng,
+                              name: selectedMarker.location.name,
+                              placeId: selectedMarker.location.placeId,
+                            },
+                          }}
+                          filesName={filesName}
+                          setFilesName={setFilesName}
+                          photos={photos}
+                          setPhotos={setPhotos}
+                          hasUpload={hasUpload}
+                          setHasUpload={setHasUpload}
+                          urls={urls}
+                          setUrls={setUrls}
+                          setUploadProgress={setUploadProgress}
+                        />
+                      )}
+                      {hasUpload && (
+                        <BtnWrapper>
+                          <BtnUploaded onClick={updatePhotos}>
+                            Save uploaded
+                          </BtnUploaded>
+                          <BtnCancelUpload onClick={cancelPhotos}>
+                            Cancel
+                          </BtnCancelUpload>
+                        </BtnWrapper>
+                      )}
+
+                      {showSavedPhoto &&
+                        savedPhotoUrls.map((photoUrl: string) => (
+                          <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                        ))}
+                    </EditWrapper>
+                  )}
+              </>
+            )}
+            {!showEditor && (
+              <>
+                <ArticleTitle>{artiTitle}</ArticleTitle>
+                <TextNoMargin>{travelDate}</TextNoMargin>
+              </>
+            )}
             <PhotoWrapper>
               {selectedMarker?.albumURLs?.map((photoUrl: string) => {
                 return <PhotoImg key={photoUrl} bkImage={photoUrl} />
               })}
+              {savedPhotoUrls &&
+                savedPhotoUrls.map((photoUrl: string) => (
+                  <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                ))}
             </PhotoWrapper>
-            <Text>{selectedMarker?.article?.content}</Text>
+
+            {!showEditor && selectedMarker?.article?.content !== undefined && (
+              <Text>{parse(artiContent)}</Text>
+            )}
+
             <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
             <MsgColumnWrapper>
               <MsgRowNoWrapper>
@@ -323,7 +675,26 @@ export default function DetailMemory(props: Props) {
                   typeof currentUser?.photoURL === "string" && (
                     <UserAvatar avatarURL={currentUser?.photoURL} />
                   )}
-                <MsgInput ref={msgRef} placeholder="Leave message..." />
+                <MsgInput
+                  ref={msgRef}
+                  placeholder="Leave message..."
+                  onKeyPress={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      typeof selectedMarker?.id === "string" &&
+                      typeof currentUser?.id === "string" &&
+                      msgRef.current !== undefined &&
+                      msgRef.current !== null
+                    ) {
+                      addMsg(
+                        currentUser?.id,
+                        selectedMarker?.id,
+                        msgRef?.current?.value
+                      )
+                      msgRef.current.value = ""
+                    }
+                  }}
+                />
               </MsgRowNoWrapper>
               {messages !== undefined &&
                 messages.length !== 0 &&
@@ -343,15 +714,14 @@ export default function DetailMemory(props: Props) {
                         </MsgContent>
                         {currentUser !== null &&
                           item.messenger === currentUser?.id && (
-                            <>
-                              <BtnMore
-                                showDelete={showDelete}
-                                onClick={() => {
-                                  setShowDelete((prev) => !prev)
-                                }}
-                              />
+                            <BtnMore
+                              showMore={showDelete}
+                              onClick={() => {
+                                setShowDelete((prev) => !prev)
+                              }}
+                            >
                               {showDelete && (
-                                <BtnMsgDelete
+                                <BtnRed
                                   onClick={() => {
                                     if (
                                       selectedMarker !== undefined &&
@@ -362,9 +732,9 @@ export default function DetailMemory(props: Props) {
                                   }}
                                 >
                                   Delete
-                                </BtnMsgDelete>
+                                </BtnRed>
                               )}
-                            </>
+                            </BtnMore>
                           )}
                       </MsgRowNoWrapper>
                     )

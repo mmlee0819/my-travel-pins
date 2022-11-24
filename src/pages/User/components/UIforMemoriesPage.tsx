@@ -69,9 +69,9 @@ export const ImgWrapper = styled.div`
 export const MemoryImg = styled.img`
   display: block;
   position: absolute;
-  top: 0;
+  top: 10px;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 `

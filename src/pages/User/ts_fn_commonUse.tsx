@@ -124,6 +124,19 @@ export const addMsg = async (
   }
 }
 
+export const checkRealTimePinsInfo = (
+  id: string,
+  setMemories: Dispatch<SetStateAction<PinContent[]>>
+) => {
+  const q = query(collection(db, "pins"), where("userId", "==", id))
+  onSnapshot(q, (querySnapshot) => {
+    const newMemories: PinContent[] = []
+    querySnapshot.forEach((doc) => {
+      newMemories.push(doc.data() as PinContent)
+    })
+    setMemories(newMemories)
+  })
+}
 export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>

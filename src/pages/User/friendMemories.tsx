@@ -19,6 +19,7 @@ import {
   checkRealTimePinMessages,
   queryMessengerInfo,
   PinContent,
+  checkRealTimePinsInfo,
 } from "../User/ts_fn_commonUse"
 import DetailMemory from "../Components/detailMemory"
 import defaultImage from "../assets/defaultImage.png"
@@ -95,7 +96,20 @@ function FriendMemories() {
     friendName = decodeURI(friendName)
   }
   useEffect(() => {
-    getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
+    if (
+      currentUser !== undefined &&
+      currentUser !== null &&
+      typeof currentUser?.id === "string"
+    ) {
+      getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
+    }
+  }, [friendId, memories])
+
+  useEffect(() => {
+    if (friendId) {
+      checkRealTimePinsInfo(friendId, setMemories)
+      return checkRealTimePinsInfo(friendId, setMemories)
+    }
   }, [friendId])
 
   useEffect(() => {

@@ -3,14 +3,16 @@ import styled from "styled-components"
 import { useState, useContext, useEffect } from "react"
 import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
-import { GoogleMap, Marker } from "@react-google-maps/api"
-import trashBin from "./trashBin.png"
 import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
-import { DocumentData } from "@firebase/firestore-types"
 import { ref, deleteObject } from "firebase/storage"
 import DetailMemory from "../Components/detailMemory"
-import { getPins, getSpecificPin, PinContent } from "./ts_fn_commonUse"
+import {
+  getPins,
+  getSpecificPin,
+  PinContent,
+  checkRealTimePinsInfo,
+} from "./ts_fn_commonUse"
 import {
   ContentWrapper,
   Container,
@@ -20,6 +22,9 @@ import {
   MemoryImg,
   MemoryList,
 } from "./components/UIforMemoriesPage"
+import trashBinIcon from "../assets/buttons/trashBin.png"
+import trashBinWhite from "../assets/buttons/trashBin.png"
+import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 
 const Text = styled.div`
   color: ${(props) => props.theme.color.bgDark};
@@ -131,6 +136,7 @@ export default function MyMemories() {
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<
     number | undefined
   >(undefined)
+  console.log({ memories })
 
   const deleteMemory = async (index: number) => {
     console.log({ memory })
@@ -160,6 +166,16 @@ export default function MyMemories() {
       console.log(error)
     }
   }
+  useEffect(() => {
+    if (
+      currentUser !== undefined &&
+      currentUser !== null &&
+      typeof currentUser?.id === "string"
+    ) {
+      checkRealTimePinsInfo(currentUser?.id, setMemories)
+      return checkRealTimePinsInfo(currentUser?.id, setMemories)
+    }
+  }, [currentUser?.id])
 
   useEffect(() => {
     if (
@@ -175,7 +191,7 @@ export default function MyMemories() {
         setMemories
       )
     }
-  }, [currentUser?.id])
+  }, [currentUser?.id, memories])
 
   return (
     <Container>
@@ -189,11 +205,7 @@ export default function MyMemories() {
                     {item?.albumURLs ? (
                       <MemoryImg src={item?.albumURLs[0]} />
                     ) : (
-                      <>
-                        <MemoryImg src={defaultImage} />
-
-                        <Text>No photo uploaded</Text>
-                      </>
+                      <MemoryImg src={defaultImage} />
                     )}
                   </ImgWrapper>
                   <ArticleWrapper>
@@ -216,7 +228,7 @@ export default function MyMemories() {
                       </BtnBlue>
                       <BtnDelete
                         id={item.id}
-                        src={trashBin}
+                        src={trashBinBlack}
                         onClick={() => {
                           setMemory(item)
                           setDeleteTargetIndex(index)
