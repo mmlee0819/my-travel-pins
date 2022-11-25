@@ -21,13 +21,14 @@ import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
 import { countries } from "./Utils/customGeo"
 import { AuthContext } from "./Context/authContext"
-import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/buttons/finger.png"
 import tip from "./assets/tip.png"
 import xMark from "./assets/x-mark.png"
-// import home from "./assets/markers/home.png"
+import spinner from "./assets/dotsSpinner.svg"
+import home from "./assets/markers/home2.png"
+
 const Attribution = styled.a`
   position: absolute;
   bottom: 0;
@@ -55,8 +56,16 @@ const Container = styled.div`
   width: 100%;
   height: calc(100vh - 120px);
   background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: 5px;
 `
+
+const Spinner = styled(Container)`
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
+
 const HeaderWrapper = styled.div`
   position: relative;
   display: flex;
@@ -67,7 +76,6 @@ const HeaderWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 60px;
-  font-family: "Jomhuria";
   opacity: 1;
   gap: 20px;
 `
@@ -77,16 +85,14 @@ const Title = styled.div`
   right: 10px;
   margin: 0 auto;
   max-width: 1440px;
-  font-family: "Jomhuria";
   color: #fff;
-  font-size: 90px;
-  font-weight: 400;
-  letter-spacing: 4px;
+  font-size: ${(props) => props.theme.title.xl};
+  font-weight: 700;
   line-height: 76px;
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 76px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 
@@ -96,6 +102,7 @@ const Slogan = styled.div`
   margin: 0 auto;
   font-family: "Just Me Again Down Here";
   font-size: 28px;
+  color: #ffffffe7;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 1rem;
@@ -111,14 +118,13 @@ const TabWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 40px;
-  font-family: "Jomhuria";
-  font-size: 40px;
+  font-size: ${(props) => props.theme.title.xl};
   opacity: 1;
   gap: 20px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 28px;
-    height: 30px;
+    height: ${(props) => props.theme.title.lg};
   }
 `
 const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
@@ -140,6 +146,7 @@ const SignUpTab = styled(Tab)`
   &:hover {
     color: ${(props) => !props.isSignUp && "#5594b7"};
     background-color: #fff;
+    font-weight: 700;
   }
 `
 
@@ -149,6 +156,7 @@ const SignInTab = styled(Tab)`
   &:hover {
     color: ${(props) => !props.isSignIn && "#5594b7"};
     background-color: #fff;
+    font-weight: 700;
   }
 `
 const TipText = styled.div`
@@ -244,7 +252,7 @@ const Btn = styled.div`
   }
 `
 const DefaultIcon = L.icon({
-  iconUrl: homeMarker,
+  iconUrl: home,
   iconSize: [40, 43],
 })
 
@@ -281,7 +289,7 @@ const myCustomStyle = {
   stroke: false,
   fill: true,
   fillColor: "#fff",
-  fillOpacity: 1,
+  fillOpacity: 0.8,
   zIndex: 50,
 }
 
@@ -303,6 +311,7 @@ function AuthArea(props: AuthProps) {
     } else console.log("失敗啦")
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
+
   return (
     <Wrapper>
       {(!isLogin || currentUser === null || currentUser === undefined) &&
@@ -399,7 +408,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
       layer.setStyle({
         stroke: false,
         fill: true,
-        fillColor: "#ffd500",
+        fillColor: "#d1c06c",
         fillOpacity: 1,
       })
     }
@@ -409,7 +418,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
       stroke: false,
       fill: true,
       fillColor: "#fff",
-      fillOpacity: 1,
+      fillOpacity: 0.8,
     })
   })
 }
@@ -588,7 +597,6 @@ function Home() {
                   data={country}
                   style={myCustomStyle}
                   onEachFeature={onEachFeature}
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
               {!hasRead && !showSamplePost && (
@@ -597,17 +605,14 @@ function Home() {
               {(isSignUp || isSignIn) && <ChangeCenter />}
               {}
               <TargetArea position={position} setPosition={setPosition} />
-              {/* <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        /> */}
+
               {!isSignUp && !isSignIn && (
                 <>
                   <ChangeCenterBack />
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
                 </>
               )}
-              <Marker position={[42, 121]}>
+              <Marker position={[35, 121]}>
                 <Popup offset={[0, -10]} keepInView>
                   My Hometown <br />
                   Taiwan
@@ -628,9 +633,7 @@ function Home() {
       <Slogan>
         Save your favorite memories and share with your loved ones.
       </Slogan>
-      {/* <Attribution href="https://www.openstreetmap.org/copyright">
-        &copy; OpenStreetMap
-      </Attribution> */}
+
       {showTips && <TipsContent setShowTips={setShowTips} />}
       {showSamplePost && (
         <SampleMemory
