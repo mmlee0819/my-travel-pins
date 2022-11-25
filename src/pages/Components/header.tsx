@@ -15,7 +15,6 @@ const HeaderContainer = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 60px;
-  font-family: "Jomhuria";
   opacity: 1;
   gap: 20px;
 `
@@ -28,13 +27,12 @@ const TabWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 40px;
-  font-family: "Jomhuria";
-  font-size: 40px;
+  font-size: ${(props) => props.theme.title.xl};
   opacity: 1;
   gap: 20px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 28px;
+    font-size: ${(props) => props.theme.title.md};
     height: 30px;
   }
 `
@@ -82,16 +80,15 @@ const Title = styled.div`
   left: 80px;
   margin: 0 auto;
   max-width: 1440px;
-  font-family: "Jomhuria";
   color: #fff;
-  font-size: 40px;
+  font-size: ${(props) => props.theme.title.xl};
   font-weight: 400;
   letter-spacing: 2px;
   line-height: 76px;
   z-index: 20;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 30px;
+    font-size: ${(props) => props.theme.title.lg};
   }
 `
 
