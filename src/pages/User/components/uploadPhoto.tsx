@@ -1,10 +1,12 @@
 import React from "react"
-import { useContext, Dispatch, SetStateAction } from "react"
+import { useState, useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
 import { storage } from "../../Utils/firebase"
 import { AuthContext } from "../../Context/authContext"
-import uploadIcon from "../functions/uploadImgIcon.png"
+import uploadIcon from "./uploadImgIcon.png"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
+import imageCompression from "browser-image-compression"
+import spinner from "../../assets/dotsSpinner.svg"
 
 const UploadPhotoWrapper = styled.div`
   display: flex;
@@ -85,6 +87,8 @@ interface UploadType {
 
 export default function Upload(props: UploadType) {
   const { currentUser } = useContext(AuthContext)
+  const [hasFiles, setHasFiles] = useState(false)
+  const [hasCompressed, setHasCompressed] = useState(false)
   const {
     currentPin,
     filesName,
@@ -98,21 +102,54 @@ export default function Upload(props: UploadType) {
     setUploadProgress,
   } = props
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilesName([])
-    setPhotos([])
-    if (e.target.files !== null) {
-      for (const file of e.target.files) {
-        setFilesName((prev: string[]) => {
-          return [...prev, file.name]
-        })
-        setPhotos((prev: File[]) => {
-          return [...prev, file]
-        })
+  console.log({ photos })
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const options = {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    }
+    try {
+      if (e.target.files !== null) {
+        setHasFiles(true)
+        const files = Array.from(e.target.files)
+        files.map((file) => setFilesName((prev) => [...prev, file.name]))
+
+        const compressedFiles = await Promise.all(
+          files.map(async (imgFile: File) => {
+            const compressedFile = await imageCompression(imgFile, options)
+            console.log(
+              "compressedFile instanceof Blob",
+              compressedFile instanceof Blob
+            ) // true
+            console.log(
+              `compressedFile size ${compressedFile.size / 1024 / 1024} MB`
+            ) // smaller than maxSizeMB
+            console.log("compressedFile", compressedFile)
+            setPhotos((prev) => [...prev, compressedFile])
+          })
+        )
+        setHasCompressed(true)
+
+        // setPhotos(compressedFiles)
+        console.log({ compressedFiles })
       }
+    } catch (error) {
+      console.log("Failed to compress files", error)
     }
   }
+
+  // for (const file of e.target.files) {
+  //   setFilesName((prev: string[]) => {
+  //     return [...prev, file.name]
+  //   })
+  //   setPhotos((prev: File[]) => {
+  //     return [...prev, file]
+  //   })
+  // }
+
   const handleUpload = () => {
+    if (!hasCompressed) return
     photos.map((photo) => {
       if (typeof currentUser?.id === "string") {
         const folderName = `${currentUser?.id?.slice(
@@ -129,7 +166,6 @@ export default function Upload(props: UploadType) {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100
             )
             setUploadProgress(progress)
-            setHasUpload(true)
           },
           (error) => {
             console.log(error)
@@ -141,6 +177,9 @@ export default function Upload(props: UploadType) {
             setUrls((prev) => {
               return [...prev, url]
             })
+            setHasUpload(true)
+            setHasFiles(false)
+            setHasCompressed(false)
           }
         )
       }
@@ -174,7 +213,10 @@ export default function Upload(props: UploadType) {
               }}
             />
           </UploadImgLabel>
-          <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
+          {hasFiles && !hasCompressed && <img src={spinner} />}
+          {hasCompressed && (
+            <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
+          )}
         </UploadPhotoWrapper>
       )}
     </>

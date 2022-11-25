@@ -1,16 +1,15 @@
 import React, { useState } from "react"
-// Import Swiper React components
+import styled from "styled-components"
+
 import { Swiper, SwiperSlide } from "swiper/react"
 import { type Swiper as SwiperRef } from "swiper"
 import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
-// Import Swiper styles
+
 import "swiper/css/bundle"
 import "swiper/css"
 import "swiper/css/free-mode"
 import "swiper/css/navigation"
 import "swiper/css/thumbs"
-
-import styled from "styled-components"
 
 const MainSwiper = styled(Swiper)`
   .swiper {

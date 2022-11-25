@@ -16,7 +16,7 @@ import {
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
 import Editor from "../Components/editor"
-import Upload from "../User/functions/uploadPhoto"
+import Upload from "../User/components/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
 import SwiperPhotos from "./swiperPhoto"
@@ -40,7 +40,6 @@ const ContentArea = styled.div`
   font-size: 4rem;
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
-  /* box-shadow: 0px 0px 3px 10px #232323c2; */
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {

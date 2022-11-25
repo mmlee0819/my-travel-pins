@@ -23,7 +23,7 @@ import { countries } from "../Utils/customGeo"
 import home from "../assets/markers/home.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
-import Upload from "./functions/uploadPhoto"
+import Upload from "./components/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
@@ -34,6 +34,8 @@ import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
 
+import spinner from "../assets/dotsSpinner.svg"
+
 const Container = styled.div`
   position: relative;
   margin: 0 auto;
@@ -43,10 +45,13 @@ const Container = styled.div`
   background-color: rgb(255, 255, 255, 0.1);
   border-radius: 20px;
 `
-
-const Title = styled.div`
-  color: #000000;
+const Spinner = styled(Container)`
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
 `
+
 const Wrapper = styled.div<{ hasAddPin: boolean }>`
   position: absolute;
   margin: auto;
@@ -481,182 +486,181 @@ export default function MyMap() {
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
-    return <Title>你沒有登入</Title>
+    return <Spinner />
 
   return (
     <>
-      {isLoaded &&
-        typeof currentUser?.hometownLat === "number" &&
-        typeof currentUser?.hometownLng === "number" && (
-          <Container>
-            {!showPostArea && (
-              <BtnAddPin
-                onClick={() => {
-                  setShowPostArea(true)
-                }}
-              />
-            )}
-            {showPostArea && (
-              <Wrapper hasAddPin={hasAddPin}>
-                <StepText>To remember your trip</StepText>
-                {!hasAddPin && (
-                  <>
-                    <StepText>Step 1: Pin a place!</StepText>
-                    <StandaloneSearchBox
-                      onLoad={onLoad}
-                      onPlacesChanged={onPlacesChanged}
-                    >
-                      <Input placeholder="Where did you go?"></Input>
-                    </StandaloneSearchBox>
-                    <BtnText onClick={addPin}>
-                      Confirm to pin
-                      <BtnConfirmAddPin />
-                    </BtnText>
-                  </>
-                )}
-                {hasAddPin && !hasPosted && (
-                  <>
-                    <StepText>Step 2: Log your memory</StepText>
-                    <ArticleWrapper>
-                      <Input
-                        placeholder="Title"
-                        onChange={(e) => {
-                          setArtiTitle(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="date"
-                        onChange={(e) => {
-                          setTravelDate(e.target.value)
-                        }}
-                      />
-                      <Editor
-                        artiContent={artiContent}
-                        setArtiContent={setArtiContent}
-                      />
-                    </ArticleWrapper>
-                    <Upload
-                      currentPin={newPin}
-                      filesName={filesName}
-                      setFilesName={setFilesName}
-                      photos={photos}
-                      setPhotos={setPhotos}
-                      hasUpload={hasUpload}
-                      setHasUpload={setHasUpload}
-                      urls={urls}
-                      setUrls={setUrls}
-                      setUploadProgress={setUploadProgress}
-                    />
-                    <BtnWrapper>
-                      <BtnConfirm onClick={addMemory}>
-                        Confirm to post
-                      </BtnConfirm>
-                      <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
-                    </BtnWrapper>
-                    <CancelReminder>
-                      If you cancel to post,
-                      <br /> all content and uploaded files will not be
-                      preserved.
-                    </CancelReminder>
-                  </>
-                )}
-              </Wrapper>
-            )}
-
-            <MapContainer
-              id="my-Map"
-              center={
-                mapZoom === "lg"
-                  ? [
-                      selectedMarker?.location?.lat || 45,
-                      selectedMarker?.location?.lng || 50,
-                    ]
-                  : [
-                      selectedMarker?.location?.lat || 41,
-                      selectedMarker?.location?.lng || 121,
-                    ]
-              }
-              zoomControl={false}
-              zoom={mapZoom === "lg" ? 2 : 1}
-              scrollWheelZoom={true}
-              zoomSnap={0.25}
-              dragging={true}
-              trackResize
-              style={{
-                margin: "0 auto",
-                width: "100%",
-                height: "100%",
-                zIndex: "30",
-                backgroundColor: "rgb(255, 255, 255, 0)",
-                borderRadius: "10px",
+      {!isLoaded ||
+      typeof currentUser?.hometownLat !== "number" ||
+      typeof currentUser?.hometownLng !== "number" ? (
+        <Spinner />
+      ) : (
+        <Container>
+          {!showPostArea && (
+            <BtnAddPin
+              onClick={() => {
+                setShowPostArea(true)
               }}
-              minZoom={mapZoom === "lg" ? 2 : 1}
-            >
-              <ZoomControl position="bottomright" />
-              {countries.features.map((country) => (
-                <GeoJSON
-                  key={country.properties.name}
-                  data={country}
-                  style={myCustomStyle}
-                  onEachFeature={onEachFeature}
-                />
-              ))}
-              {hasAddPin && !hasPosted && <ChangeCenter />}
-              {!hasAddPin && !hasPosted && <ChangeCenterBack />}
-              <TargetArea center={center} setCenter={setCenter} />
-              <Marker
-                position={[currentUser?.hometownLat, currentUser?.hometownLng]}
-              >
-                <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
-                  Hometown {currentUser?.hometownName}
-                </Tooltip>
-              </Marker>
-              {markers?.map((marker: any) => {
-                return (
-                  <>
-                    <Marker
-                      key={marker.location.placeId}
-                      position={[marker.location.lat, marker.location.lng]}
-                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                      eventHandlers={{
-                        click() {
-                          setShowPostArea(false)
-                          setSelectedMarker(marker)
-                        },
+            />
+          )}
+          {showPostArea && (
+            <Wrapper hasAddPin={hasAddPin}>
+              <StepText>To remember your trip</StepText>
+              {!hasAddPin && (
+                <>
+                  <StepText>Step 1: Pin a place!</StepText>
+                  <StandaloneSearchBox
+                    onLoad={onLoad}
+                    onPlacesChanged={onPlacesChanged}
+                  >
+                    <Input placeholder="Where did you go?"></Input>
+                  </StandaloneSearchBox>
+                  <BtnText onClick={addPin}>
+                    Confirm to pin
+                    <BtnConfirmAddPin />
+                  </BtnText>
+                </>
+              )}
+              {hasAddPin && !hasPosted && (
+                <>
+                  <StepText>Step 2: Log your memory</StepText>
+                  <ArticleWrapper>
+                    <Input
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
                       }}
-                    >
-                      <Popup
-                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView
-                      >
-                        <PinInfoArea
-                          onClick={() => {
-                            setShowMemory(true)
-                          }}
-                        >
-                          <PinInfoImg
-                            src={
-                              marker.albumURLs
-                                ? marker?.albumURLs[0]
-                                : defaultImage
-                            }
-                          />
-                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                        </PinInfoArea>
-                      </Popup>
-                    </Marker>
-                  </>
-                )
-              })}
-            </MapContainer>
-            {showMemory && (
-              <DetailMemory
-                selectedMarker={selectedMarker}
-                setShowMemory={setShowMemory}
+                    />
+                    <Input
+                      type="date"
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                    />
+                    <Editor
+                      artiContent={artiContent}
+                      setArtiContent={setArtiContent}
+                    />
+                  </ArticleWrapper>
+                  <Upload
+                    currentPin={newPin}
+                    filesName={filesName}
+                    setFilesName={setFilesName}
+                    photos={photos}
+                    setPhotos={setPhotos}
+                    hasUpload={hasUpload}
+                    setHasUpload={setHasUpload}
+                    urls={urls}
+                    setUrls={setUrls}
+                    setUploadProgress={setUploadProgress}
+                  />
+                  <BtnWrapper>
+                    <BtnConfirm onClick={addMemory}>Confirm to post</BtnConfirm>
+                    <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
+                  </BtnWrapper>
+                  <CancelReminder>
+                    If you cancel to post,
+                    <br /> all content and uploaded files will not be preserved.
+                  </CancelReminder>
+                </>
+              )}
+            </Wrapper>
+          )}
+
+          <MapContainer
+            id="my-Map"
+            center={
+              mapZoom === "lg"
+                ? [
+                    selectedMarker?.location?.lat || 45,
+                    selectedMarker?.location?.lng || 50,
+                  ]
+                : [
+                    selectedMarker?.location?.lat || 41,
+                    selectedMarker?.location?.lng || 121,
+                  ]
+            }
+            zoomControl={false}
+            zoom={mapZoom === "lg" ? 2 : 1}
+            scrollWheelZoom={true}
+            zoomSnap={0.25}
+            dragging={true}
+            trackResize
+            style={{
+              margin: "0 auto",
+              width: "100%",
+              height: "100%",
+              zIndex: "30",
+              backgroundColor: "rgb(255, 255, 255, 0)",
+              borderRadius: "10px",
+            }}
+            minZoom={mapZoom === "lg" ? 2 : 1}
+          >
+            <ZoomControl position="bottomright" />
+            {countries.features.map((country) => (
+              <GeoJSON
+                key={country.properties.name}
+                data={country}
+                style={myCustomStyle}
+                onEachFeature={onEachFeature}
               />
-            )}
-          </Container>
-        )}
+            ))}
+            {hasAddPin && !hasPosted && <ChangeCenter />}
+            {!hasAddPin && !hasPosted && <ChangeCenterBack />}
+            <TargetArea center={center} setCenter={setCenter} />
+            <Marker
+              position={[currentUser?.hometownLat, currentUser?.hometownLng]}
+            >
+              <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
+                Hometown {currentUser?.hometownName}
+              </Tooltip>
+            </Marker>
+            {markers?.map((marker: any) => {
+              return (
+                <>
+                  <Marker
+                    key={marker.location.placeId}
+                    position={[marker.location.lat, marker.location.lng]}
+                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    eventHandlers={{
+                      click() {
+                        setShowPostArea(false)
+                        setSelectedMarker(marker)
+                      },
+                    }}
+                  >
+                    <Popup
+                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      keepInView
+                    >
+                      <PinInfoArea
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
+                      >
+                        <PinInfoImg
+                          src={
+                            marker.albumURLs
+                              ? marker?.albumURLs[0]
+                              : defaultImage
+                          }
+                        />
+                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                      </PinInfoArea>
+                    </Popup>
+                  </Marker>
+                </>
+              )
+            })}
+          </MapContainer>
+          {showMemory && (
+            <DetailMemory
+              selectedMarker={selectedMarker}
+              setShowMemory={setShowMemory}
+            />
+          )}
+        </Container>
+      )}
     </>
   )
 }
