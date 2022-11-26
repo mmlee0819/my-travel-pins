@@ -24,10 +24,11 @@ import { AuthContext } from "./Context/authContext"
 import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/buttons/finger.png"
+import shadowFinger from "./assets/buttons/shadowFinger.png"
 import tip from "./assets/tip.png"
 import xMark from "./assets/x-mark.png"
 import spinner from "./assets/dotsSpinner.svg"
-import home from "./assets/markers/home2.png"
+import home from "./assets/markers/home1.png"
 
 const Attribution = styled.a`
   position: absolute;
@@ -35,17 +36,25 @@ const Attribution = styled.a`
   right: 0;
   display: flex;
   margin: 0;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  padding-right: 15px;
+  font-family: "Poppins", "sans-serif";
   font-size: 12px;
   line-height: 1.5;
-  color: #5594b7;
-  background: rgb(255, 255, 255, 0.6);
+  color: #fff;
+  background: none;
   border: none;
   text-decoration: none;
+  z-index: 60;
+  cursor: pointer;
   &:visited,
   &:hover,
   &:active {
     text-decoration: underline;
+  }
+`
+const StyleMapContainer = styled(MapContainer)`
+  .leaflet-control-attribution a {
+    display: none;
   }
 `
 
@@ -76,24 +85,24 @@ const HeaderWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 60px;
+  font-size: ${(props) => props.theme.title.lg};
   opacity: 1;
   gap: 20px;
-`
-const Title = styled.div`
-  position: absolute;
-  top: 0;
-  right: 10px;
-  margin: 0 auto;
-  max-width: 1440px;
-  color: #fff;
-  font-size: ${(props) => props.theme.title.xl};
-  font-weight: 700;
-  line-height: 76px;
-  z-index: 20;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
   }
+`
+const Title = styled.div`
+  display: flex;
+  width: 50%;
+  padding-right: 20px;
+  flex: 1 1 auto;
+  line-height: 40px;
+  align-self: end;
+  justify-content: end;
+  color: ${(props) => props.theme.color.bgDark};
+  font-weight: 700;
+  z-index: 20;
 `
 
 const Slogan = styled.div`
@@ -103,8 +112,7 @@ const Slogan = styled.div`
   font-family: "Just Me Again Down Here";
   font-size: 28px;
   color: #ffffffe7;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: 1rem;
   }
 `
@@ -118,45 +126,52 @@ const TabWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 40px;
-  font-size: ${(props) => props.theme.title.xl};
   opacity: 1;
   gap: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 28px;
-    height: ${(props) => props.theme.title.lg};
-  }
 `
 const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   display: flex;
   padding: 0 15px;
+  font-weight: 700;
+  color: ${(props) => props.theme.color.bgDark};
   border: 1px solid #fff;
   border: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  &:hover {
+    box-shadow: 3px 3px 1px #0000004c;
+  }
+  @media screen and (min-width: 600px), (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const SignUpTab = styled(Tab)`
-  color: ${(props) => (props.isSignUp ? "#034961" : "#fff")};
-  background-color: ${(props) => (props.isSignUp ? "#fff" : "none")};
+  color: ${(props) => props.isSignUp && props.theme.color.bgLight};
+  background-color: ${(props) =>
+    props.isSignUp ? props.theme.color.lightMain : "none"};
+
   &:hover {
-    color: ${(props) => !props.isSignUp && "#5594b7"};
-    background-color: #fff;
-    font-weight: 700;
+    color: ${(props) =>
+      !props.isSignUp ? props.theme.color.deepMain : props.theme.color.bgLight};
+    background-color: ${(props) =>
+      !props.isSignUp && props.theme.color.bgLight};
+    transition: ${(props) =>
+      !props.isSignUp ? "background-color 0.3s" : "none"};
   }
 `
 
 const SignInTab = styled(Tab)`
-  color: ${(props) => (props.isSignIn ? "#034961" : "#fff")};
-  background-color: ${(props) => (props.isSignIn ? "#fff" : "none")};
+  color: ${(props) => props.isSignIn && props.theme.color.bgLight};
+  background-color: ${(props) =>
+    props.isSignIn ? props.theme.color.lightMain : "none"};
   &:hover {
-    color: ${(props) => !props.isSignIn && "#5594b7"};
-    background-color: #fff;
-    font-weight: 700;
+    color: ${(props) =>
+      !props.isSignIn ? props.theme.color.deepMain : props.theme.color.bgLight};
+    background-color: ${(props) =>
+      !props.isSignIn && props.theme.color.bgLight};
+    transition: ${(props) =>
+      !props.isSignIn ? "background-color 0.3s" : "none"};
   }
 `
 const TipText = styled.div`
@@ -210,15 +225,14 @@ const Wrapper = styled.div`
   flex-flow: column wrap;
   justify-content: flex-start;
   font-family: "Poppins";
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   background-color: rgb(255, 255, 255, 0.6);
   border-radius: 10px;
   box-shadow: 0 8px 6px #0000004c;
   gap: 15px;
   z-index: 100;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 18px;
+  @media screen and(max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 
@@ -241,19 +255,14 @@ const Btn = styled.div`
   width: 50%;
   min-height: 30px;
   line-height: 30px;
-  font-size: 16px;
   color: #fff;
-  background-color: #034961;
+  background-color: ${(props) => props.theme.color.lightMain};
   border-radius: 5px;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 12px;
-  }
 `
 const DefaultIcon = L.icon({
   iconUrl: home,
-  iconSize: [40, 43],
+  iconSize: [30, 30],
 })
 
 L.Marker.prototype.options.icon = DefaultIcon
@@ -408,7 +417,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
       layer.setStyle({
         stroke: false,
         fill: true,
-        fillColor: "#d1c06c",
+        fillColor: "#7ccbab",
         fillOpacity: 1,
       })
     }
@@ -440,6 +449,11 @@ const fingerIcon = L.icon({
   iconAnchor: [30, 0],
   iconUrl: finger,
 })
+const fingerShadow = L.icon({
+  iconSize: [60, 60],
+  iconAnchor: [33, -3],
+  iconUrl: shadowFinger,
+})
 
 function FingerMarker({ data }: { data: RoutePositionType }) {
   const { lat, lng } = data
@@ -452,11 +466,18 @@ function FingerMarker({ data }: { data: RoutePositionType }) {
   }, [lat, lng, fingerPos])
 
   return (
-    <LeafletTrackingMarker
-      icon={fingerIcon}
-      position={[lat, lng]}
-      duration={mapZoom === "md" ? 500 : 2500}
-    />
+    <>
+      <LeafletTrackingMarker
+        icon={fingerIcon}
+        position={[lat, lng]}
+        duration={mapZoom === "md" ? 500 : 2500}
+      />
+      <LeafletTrackingMarker
+        icon={fingerShadow}
+        position={[lat + 1, lng + 1]}
+        duration={mapZoom === "md" ? 500 : 2500}
+      />
+    </>
   )
 }
 function ChangeCenter() {
@@ -536,7 +557,6 @@ function Home() {
   return (
     <>
       <HeaderWrapper>
-        <Title>My Travel Pins</Title>
         <TabWrapper>
           <SignUpTab
             isSignUp={isSignUp}
@@ -567,11 +587,13 @@ function Home() {
             Tips
           </TipText>
         </TabWrapper>
+        <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
+        <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
-            <MapContainer
+            <StyleMapContainer
               id="homeMap"
               center={[39.9437334482122, 65.35942441225613]}
               zoomControl={false}
@@ -612,13 +634,13 @@ function Home() {
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
                 </>
               )}
-              <Marker position={[35, 121]}>
+              <Marker position={[30, 121]}>
                 <Popup offset={[0, -10]} keepInView>
                   My Hometown <br />
                   Taiwan
                 </Popup>
               </Marker>
-            </MapContainer>
+            </StyleMapContainer>
           </>
         )}
         {(isSignUp || isSignIn) && (
