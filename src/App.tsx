@@ -5,6 +5,7 @@ import { AuthContextProvider } from "./pages/Context/authContext"
 import { ToolContextProvider } from "./pages/Context/toolContext"
 import ToolsRobot from "./pages/Utils/tools"
 import Header from "./pages/Components/header"
+import bg from "../src/pages/assets/bg.jpg"
 
 const GlobalStyle = createGlobalStyle`
   *{
@@ -26,7 +27,9 @@ const GlobalStyle = createGlobalStyle`
     min-height: 100vh;
     padding: 10px 60px 20px 60px;
     color:#fff;
-    background: linear-gradient(#0f3a49,#5594b7,#0f3a49);
+    background-image: url(${bg});
+    background-size: 100% 100%;
+        /* background: linear-gradient(#0f3a49,#5594b7,#0f3a49); */
   }
 `
 const theme = {
@@ -37,11 +40,11 @@ const theme = {
     lg: "1200px",
     xl: "1440px",
   },
-  title: { xs: "12px", sm: "14px", md: "18px", lg: "20px", xl: "24px" },
+  title: { sm: "14px", md: "18px", lg: "24px" },
   subTitle: { sm: "14px", md: "1rem", lg: "29px", xl: "29px" },
   color: {
     deepMain: "#034961",
-    lightMain: "#5594b7",
+    lightMain: "#7ccbab",
     bgDark: "#2d2d2d",
     bgLight: "#ffffff",
   },
