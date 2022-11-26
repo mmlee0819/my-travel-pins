@@ -26,7 +26,6 @@ import { TipsContent, SampleMemory } from "./Components/sampleContent"
 import finger from "./assets/buttons/finger.png"
 import shadowFinger from "./assets/buttons/shadowFinger.png"
 import tip from "./assets/tip.png"
-import xMark from "./assets/x-mark.png"
 import spinner from "./assets/dotsSpinner.svg"
 import home from "./assets/markers/home1.png"
 
@@ -195,24 +194,9 @@ const TipTab = styled.div`
   background-image: url(${tip});
   background-size: contain;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     width: 25px;
     height: 25px;
-  }
-`
-const Xmark = styled.div`
-  position: absolute;
-  right: 50px;
-  bottom: 20px;
-  background-image: url(${xMark});
-  background-size: 100% 100%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    right: 30px;
   }
 `
 const Wrapper = styled.div`
@@ -277,6 +261,7 @@ interface AuthProps {
   isSignIn: boolean
   setIsSignUp: Dispatch<SetStateAction<boolean>>
   setIsSignIn: Dispatch<SetStateAction<boolean>>
+  overlayRef: React.RefObject<HTMLDivElement>
 }
 
 interface CountryType {
@@ -302,9 +287,37 @@ const myCustomStyle = {
   zIndex: 50,
 }
 
+function useOnClickOutside(
+  ref: React.RefObject<HTMLDivElement>,
+  isSignUp: boolean,
+  isSignIn: boolean,
+  setIsSignUp: Dispatch<React.SetStateAction<boolean>>,
+  setIsSignIn: Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      // Do nothing if clicking ref's element or descendent elements
+
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return
+      }
+      if (isSignUp && !isSignIn) {
+        setIsSignUp(false)
+      }
+      if (isSignIn && !isSignUp) setIsSignIn(false)
+    }
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
+    return () => {
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
+    }
+  }, [ref])
+}
+
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
-  const { isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
+  const { overlayRef, isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
@@ -321,8 +334,16 @@ function AuthArea(props: AuthProps) {
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
 
+  useOnClickOutside(
+    overlayRef,
+    isSignUp,
+    isSignIn,
+    () => setIsSignUp(false),
+    () => setIsSignIn(false)
+  )
+
   return (
-    <Wrapper>
+    <Wrapper ref={overlayRef}>
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignUp && (
           <>
@@ -371,11 +392,6 @@ function AuthArea(props: AuthProps) {
             >
               Create an account
             </Btn>
-            <Xmark
-              onClick={() => {
-                setIsSignUp(false)
-              }}
-            />
           </>
         )}
       {(!isLogin || currentUser === null || currentUser === undefined) &&
@@ -401,11 +417,6 @@ function AuthArea(props: AuthProps) {
             >
               Sign in
             </Btn>
-            <Xmark
-              onClick={() => {
-                setIsSignIn(false)
-              }}
-            />
           </>
         )}
     </Wrapper>
@@ -504,7 +515,7 @@ function ChangeCenterBack() {
 let cursor = 0
 function Home() {
   const { currentUser, isLogin, mapZoom } = useContext(AuthContext)
-
+  const overlayRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
@@ -628,7 +639,7 @@ function Home() {
               {}
               <TargetArea position={position} setPosition={setPosition} />
 
-              {!isSignUp && !isSignIn && (
+              {!isSignUp && !isSignIn && overlayRef.current === null && (
                 <>
                   <ChangeCenterBack />
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
@@ -649,6 +660,7 @@ function Home() {
             isSignIn={isSignIn}
             setIsSignUp={setIsSignUp}
             setIsSignIn={setIsSignIn}
+            overlayRef={overlayRef}
           />
         )}
       </Container>
