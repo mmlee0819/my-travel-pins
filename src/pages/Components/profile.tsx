@@ -16,7 +16,7 @@ import { AuthContext } from "../Context/authContext"
 import { Container } from "../User/components/styles"
 import logoutIcon from "../assets/buttons/logoutIcon.png"
 import editPencil from "../assets/buttons/edit.png"
-
+import spinner from "../assets/dotsSpinner.svg"
 const ProfileArea = styled.div`
   position: absolute;
   top: 50%;
@@ -94,15 +94,56 @@ const UserAvatar = styled.div<{ photoURL: string }>`
   border: 2px solid #fff;
   cursor: pointer;
 `
+const Spinner = styled.div`
+  display: flex;
+  align-self: center;
+  width: 150px;
+  height: 150px;
+  margin: 30px auto 60px auto;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
+
+function useOnClickOutside(
+  ref: React.RefObject<HTMLDivElement>,
+  setIsProfile: Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      // Do nothing if clicking ref's element or descendent elements
+      if (!ref.current || ref.current.contains(event.target as Node)) return
+      setIsProfile(false)
+    }
+
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
+    return () => {
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
+    }
+  }, [ref])
+}
 
 export default function Profile() {
-  const { isLogin, currentUser, logOut, avatarURL, setAvatarURL } =
-    useContext(AuthContext)
+  const {
+    isLogin,
+    currentUser,
+    logOut,
+    avatarURL,
+    setAvatarURL,
+    setIsProfile,
+  } = useContext(AuthContext)
 
   const [uploadProgress, setUploadProgress] = useState(0)
   // const [avatarURL, setAvatarURL] = useState(currentUser?.photoURL || "")
   const [hasFile, setHasFile] = useState(false)
   const [hasCompressed, setHasCompressed] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+
+  useOnClickOutside(overlayRef, () => setIsProfile(false))
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const options = {
       maxSizeMB: 0.5,
@@ -114,10 +155,8 @@ export default function Profile() {
         setHasFile(true)
         const docRef = doc(db, "users", currentUser.id)
         const file = e.target.files[0]
-        console.log({ file })
         const compressedFile = await imageCompression(file, options)
         setHasCompressed(true)
-        console.log({ compressedFile })
         const folderName = `${currentUser?.id?.slice(0, 4)}-avatar`
         const imgRef = ref(storage, `/${folderName}/${compressedFile.name}`)
         const uploadTask = uploadBytesResumable(imgRef, compressedFile)
@@ -130,17 +169,16 @@ export default function Profile() {
             setUploadProgress(progress)
           },
           (error) => {
-            console.log(error)
+            console.log("Failed to upload file to Storage", error)
           },
           async () => {
             const url = await getDownloadURL(
               ref(storage, `/${folderName}/${compressedFile.name}`)
             )
-            console.log({ url })
+
             await updateDoc(docRef, {
               photoURL: url,
             })
-            console.log("應已更新avatar url")
             setHasFile(false)
             setHasCompressed(false)
             setAvatarURL(url)
@@ -154,14 +192,15 @@ export default function Profile() {
 
   if (!isLogin || currentUser === undefined || currentUser === null) return null
   return (
-    <ProfileArea>
+    <ProfileArea ref={overlayRef}>
       {typeof currentUser.name === "string" && (
         <Text>
           {currentUser?.name}
           <BtnEdit />
         </Text>
       )}
-      {typeof avatarURL === "string" && (
+      {hasFile && <Spinner />}
+      {!hasFile && typeof avatarURL === "string" && (
         <UploadLabel>
           <UserAvatar photoURL={avatarURL} />
           <UploadInput
