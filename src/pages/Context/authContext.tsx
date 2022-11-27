@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  ReactNode,
-  Dispatch,
-} from "react"
+import React, { createContext, useState, useEffect, ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 import { useJsApiLoader, LoadScriptProps } from "@react-google-maps/api"
 import {
@@ -53,6 +47,10 @@ interface AuthContextType {
     id: string
   }
   setCurrentFriendInfo: (currentFriendInfo: CurrentFriendInfoType) => void
+  isProfile: boolean
+  setIsProfile: (isProfile: boolean) => void
+  avatarURL: string
+  setAvatarURL: (avatarURL: string) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -97,6 +95,10 @@ export const AuthContext = createContext<AuthContextType>({
     id: "",
   },
   setCurrentFriendInfo: (currentFriendInfo: CurrentFriendInfoType) => Response,
+  isProfile: false,
+  setIsProfile: (isProfile: boolean) => Response,
+  avatarURL: "",
+  setAvatarURL: (avatarURL: string) => Response,
 })
 
 interface Props {
@@ -125,7 +127,9 @@ export interface DocumentData {
 const libraries: LoadScriptProps["libraries"] = ["places"]
 
 export function AuthContextProvider({ children }: Props) {
+  const [isLoading, setIsLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(false)
+  const [isProfile, setIsProfile] = useState(false)
   const [isMyMap, setIsMyMap] = useState(false)
   const [isMyMemory, setIsMyMemory] = useState(false)
   const [isMyFriend, setIsMyFriend] = useState(false)
@@ -138,6 +142,7 @@ export function AuthContextProvider({ children }: Props) {
   const [currentUser, setCurrentUser] = useState<
     UserInfoType | DocumentData | undefined
   >()
+  const [avatarURL, setAvatarURL] = useState<string>("")
   const [mapZoom, setMapZoom] = useState<string>("lg")
   console.log("mapZoom", mapZoom)
   const navigate = useNavigate()
@@ -193,12 +198,19 @@ export function AuthContextProvider({ children }: Props) {
           const docRef = doc(db, "users", user.uid)
           const docSnap = await getDoc(docRef)
           const userInfo: DocumentData | undefined = docSnap.data()
-          setCurrentUser(userInfo)
-          setIsLogin(true)
-          setIsMyMap(true)
-          navigate(`/${userInfo?.name}`)
+          if (
+            userInfo !== undefined &&
+            typeof userInfo?.photoURL === "string"
+          ) {
+            setCurrentUser(userInfo)
+            setAvatarURL(userInfo?.photoURL)
+            setIsLogin(true)
+            setIsMyMap(true)
+            navigate(`/${userInfo?.name}`)
+          }
         } else {
           setIsLogin(false)
+          navigate("/")
         }
       } catch (error) {
         console.log(error)
@@ -247,6 +259,7 @@ export function AuthContextProvider({ children }: Props) {
         }
         await setDoc(doc(db, "users", user.uid), userInfo)
         setCurrentUser(userInfo)
+        setAvatarURL(userInfo?.photoURL)
         setIsLogin(true)
         setIsMyFriend(false)
         setIsMyMap(true)
@@ -272,6 +285,7 @@ export function AuthContextProvider({ children }: Props) {
       if (docSnap) {
         const userInfo = docSnap.data()
         setCurrentUser(userInfo)
+        setAvatarURL(userInfo?.photoURL)
         setIsLogin(true)
         setIsLogin(true)
         setIsMyFriend(false)
@@ -321,6 +335,10 @@ export function AuthContextProvider({ children }: Props) {
         setIsFriendMemory,
         currentFriendInfo,
         setCurrentFriendInfo,
+        isProfile,
+        setIsProfile,
+        avatarURL,
+        setAvatarURL,
       }}
     >
       {children}
