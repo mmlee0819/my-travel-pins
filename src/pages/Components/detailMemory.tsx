@@ -38,7 +38,6 @@ const ContentArea = styled.div`
   width: 60%;
   height: 100%;
   margin: 0 auto;
-  font-size: 4rem;
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
   overflow-y: scroll;
@@ -51,7 +50,7 @@ const EditWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: column wrap;
-  margin: 50px 0 20px 0;
+  margin: 30px 0 20px 0;
   gap: 20px;
 `
 
@@ -75,6 +74,8 @@ const ArticleTitle = styled(Text)`
   }
 `
 const Input = styled(Text)`
+  display: flex;
+  flex-flow: row nowrap;
   width: 100%;
   margin: 0px;
   padding-left: 10px;
@@ -170,12 +171,12 @@ const BtnEdit = styled.div`
 `
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
-  right: 40px;
+  top: 25px;
+  right: 30px;
+  width: 25px;
+  height: 25px;
   display: flex;
   flex-flow: column wrap;
-  width: 30px;
-  height: 25px;
-  font-size: 16px;
   background-image: ${(props) =>
     props.showMore ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
   background-size: cover;
@@ -510,6 +511,11 @@ export default function DetailMemory(props: Props) {
               <BtnEdit
                 onClick={() => {
                   setShowEditor(true)
+                  setShowEditor(true)
+                  setShowEditTitle(true)
+                  setShowEditTravelDate(true)
+                  setShowEditArtiContent(true)
+                  setHasUpload(false)
                 }}
               />
             )}
@@ -525,25 +531,17 @@ export default function DetailMemory(props: Props) {
               <BtnColumnWrapper>
                 <BtnRemainChange
                   onClick={() => {
-                    if (!showEditor) {
-                      setShowEditor(true)
-                      setShowEditTitle(true)
-                      setShowEditTravelDate(true)
-                      setShowEditArtiContent(true)
-                      setHasUpload(false)
-                    } else {
-                      setShowEditor(false)
-                      setShowEditTitle(false)
-                      setShowEditTravelDate(false)
-                      setShowEditArtiContent(false)
-                      setArtiTitle(selectedMarker?.article?.title || "")
-                      setTravelDate(selectedMarker?.article?.travelDate || "")
-                      setArtiContent(selectedMarker?.article?.content || "")
-                    }
+                    setShowEditor(false)
+                    setShowEditTitle(false)
+                    setShowEditTravelDate(false)
+                    setShowEditArtiContent(false)
+                    setArtiTitle(selectedMarker?.article?.title || "")
+                    setTravelDate(selectedMarker?.article?.travelDate || "")
+                    setArtiContent(selectedMarker?.article?.content || "")
                     setShowMore(false)
                   }}
                 >
-                  {showEditor ? "Remain all changes and back" : "Edit"}
+                  Remain all changes and back
                 </BtnRemainChange>
                 {showEditor && (
                   <BtnRemoveChange
