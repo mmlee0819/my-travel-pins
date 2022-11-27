@@ -17,7 +17,7 @@ export const ContentArea = styled.div`
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  padding: 15px;
+  padding: 50px 50px;
   gap: 25px;
   border: none;
 `
@@ -75,4 +75,46 @@ export const MemoryImg = styled.img`
   height: 100%;
   border-radius: 5px;
   object-fit: cover;
+`
+
+export const IconInList = styled.img`
+  align-self: center;
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+`
+
+export const PhotoText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  width: 150px;
+  height: 150px;
+  color: ${(props) => props.theme.color.bgDark};
+  border-radius: 5px;
+`
+
+export const Text = styled.div`
+  vertical-align: text-bottom;
+  height: 30px;
+  margin: 5px 0;
+  color: ${(props) => props.theme.color.bgDark};
+  min-width: 30%;
+`
+export const Title = styled(Text)`
+  flex: 1 1 auto;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: ${(props) => props.theme.title.lg};
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
 `

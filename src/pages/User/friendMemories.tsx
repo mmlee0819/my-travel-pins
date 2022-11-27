@@ -1,16 +1,19 @@
 import React from "react"
-import styled from "styled-components"
 import { useState, useContext, useEffect, useRef } from "react"
 import { AuthContext } from "../Context/authContext"
 import { getPins, getSpecificPin } from "./ts_fn_commonUse"
 import {
+  ContentWrapper,
   Container,
   ContentArea,
   ArticleWrapper,
-  MemoryList,
-  ContentWrapper,
   ImgWrapper,
   MemoryImg,
+  MemoryList,
+  Text,
+  Title,
+  PhotoText,
+  IconInList,
 } from "./components/UIforMemoriesPage"
 import { DocumentData } from "@firebase/firestore-types"
 import {
@@ -22,57 +25,8 @@ import {
   checkRealTimePinsInfo,
 } from "../User/ts_fn_commonUse"
 import DetailMemory from "../Components/detailMemory"
-import defaultImage from "../assets/defaultImage.png"
-
-const Text = styled.div`
-  color: ${(props) => props.theme.color.bgDark};
-  min-width: 30%;
-`
-const Title = styled(Text)`
-  font-weight: 700;
-  font-size: 24px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 18px;
-  }
-`
-
-const BtnWrapper = styled.div`
-  display: flex;
-  flex: 1 1 auto;
-  width: 100%;
-  margin-right: 10px;
-  justify-content: space-between;
-  align-self: center;
-`
-const BtnBlue = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 48%;
-  padding: 5px;
-  font-family: "Poppins";
-  font-size: 20px;
-  color: #ffffff;
-  background-color: #3490ca;
-  border-radius: 3px;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
-  }
-`
-
-export const BtnReadMore = styled.div`
-  display: flex;
-  align-self: end;
-  text-align: center;
-  padding: 5px;
-  border: 1px solid #000000;
-  border-radius: 5px;
-  cursor: pointer;
-`
+import calendar from "../assets/calendar.png"
+import location from "../assets/location.png"
 
 function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
@@ -157,32 +111,43 @@ function FriendMemories() {
             memories.map((item: PinContent, index: number) => {
               return (
                 <MemoryList key={`${item.id}-${item?.article?.title}`}>
-                  <ImgWrapper>
+                  <ImgWrapper
+                    id={item?.id}
+                    onClick={() => {
+                      if (typeof item.id !== "string") return
+                      setMemoryIsShow(true)
+                      setMemory(item)
+                      getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                    }}
+                  >
                     {item?.albumURLs ? (
                       <MemoryImg src={item?.albumURLs[0]} />
                     ) : (
-                      <MemoryImg src={defaultImage} />
+                      <PhotoText>No photo uploaded</PhotoText>
                     )}
                   </ImgWrapper>
                   <ArticleWrapper>
-                    <Title>{item?.article?.title}</Title>
-                    <Text>{item?.article?.travelDate}</Text>
-                    <Text>{item?.location?.name}</Text>
-                    <BtnWrapper>
-                      <BtnBlue
-                        id={item?.id}
-                        onClick={() => {
-                          if (typeof item.id !== "string") return
-                          setMemoryIsShow(true)
-                          setMemory(item)
-                          getSpecificPin(item?.id, setMemory, setMemoryIsShow)
-                        }}
-                      >
-                        {item?.article?.content !== ""
-                          ? "Read more"
-                          : "Add memory"}
-                      </BtnBlue>
-                    </BtnWrapper>
+                    <Title
+                      id={item?.id}
+                      onClick={() => {
+                        if (typeof item.id !== "string") return
+                        setMemoryIsShow(true)
+                        setMemory(item)
+                        getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                      }}
+                    >
+                      {item?.article?.title === undefined
+                        ? "No title"
+                        : item?.article?.title}
+                    </Title>
+                    <Text>
+                      <IconInList src={calendar} />
+                      {item?.article?.travelDate}
+                    </Text>
+                    <Text>
+                      <IconInList src={location} />
+                      {item?.location?.name}
+                    </Text>
                   </ArticleWrapper>
                 </MemoryList>
               )

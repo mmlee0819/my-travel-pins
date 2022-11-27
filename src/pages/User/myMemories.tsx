@@ -20,46 +20,15 @@ import {
   ImgWrapper,
   MemoryImg,
   MemoryList,
+  Text,
+  Title,
+  PhotoText,
+  IconInList,
 } from "./components/UIforMemoriesPage"
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
 
-const Text = styled.div`
-  vertical-align: text-bottom;
-  height: 30px;
-  margin: 5px 0;
-  color: ${(props) => props.theme.color.bgDark};
-  min-width: 30%;
-`
-const Title = styled(Text)`
-  flex: 1 1 auto;
-  margin-bottom: 20px;
-  font-weight: 700;
-  font-size: ${(props) => props.theme.title.lg};
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-`
-
-const PhotoText = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  text-align: center;
-  width: 150px;
-  height: 150px;
-  color: ${(props) => props.theme.color.bgDark};
-
-  border-radius: 5px;
-`
 const BtnWrapper = styled.div`
   display: flex;
   flex: 1 1 auto;
@@ -96,12 +65,6 @@ const BtnDelete = styled.img`
   cursor: pointer;
 `
 
-const IconInList = styled.img`
-  align-self: center;
-  margin-right: 10px;
-  width: 20px;
-  height: 20px;
-`
 const BgOverlay = styled.div`
   position: absolute;
   top: 3px;
@@ -249,7 +212,6 @@ export default function MyMemories() {
                         ? "No title"
                         : item?.article?.title}
                     </Title>
-
                     <Text>
                       <IconInList src={calendar} />
                       {item?.article?.travelDate}
