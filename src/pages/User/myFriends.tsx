@@ -1,6 +1,5 @@
 import React from "react"
 import styled from "styled-components"
-import { Link } from "react-router-dom"
 import { useState, useEffect, useContext } from "react"
 import { AuthContext } from "../Context/authContext"
 import { Autocomplete } from "../Utils/autoComplete"
@@ -23,7 +22,7 @@ export const Container = styled.div`
   margin: 0 auto;
   max-width: 1440px;
   width: 100%;
-  color: #2d2d2d;
+  color: ${(props) => props.theme.color.bgDark};
   height: calc(100vh - 120px);
   background-color: rgb(255, 255, 255, 0.1);
   border-radius: 20px;
@@ -32,6 +31,7 @@ export const Container = styled.div`
 export const ContentArea = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  justify-content: space-around;
   height: 100%;
   margin: 0 auto;
   padding: 15px;
@@ -44,12 +44,10 @@ const InviWrapper = styled.div`
   display: flex;
   flex-flow: column nowrap;
   padding: 5px 8px;
-  width: 50%;
+  width: 45%;
   height: 100%;
-  background-color: #ffffff;
   border: none;
-  box-shadow: (8px 3px #beb9b9);
-  opacity: 0.8;
+  border-radius: 5px;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
@@ -69,18 +67,30 @@ const FilteredWrapper = styled.div`
   flex-flow: row nowrap;
   width: 100%;
   margin: 10px 0;
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  padding: 10px 0;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+`
+const FilteredFriendWrapper = styled(FilteredWrapper)`
+  cursor: pointer;
+  &:hover {
+    color: #e6e6e6;
+    background-color: ${(props) => props.theme.color.bgDark};
+    border: none;
+    border-radius: 5px;
   }
 `
 const ContentTitle = styled.div`
+  display: flex;
+  align-items: center;
   padding: 10px 10px 0 10px;
-  font-size: 40px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 30px;
+  font-size: ${(props) => props.theme.title.lg};
+  font-weight: 700;
+  gap: 10px;
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 
@@ -91,26 +101,24 @@ const BtnWrapper = styled.div`
   margin-right: 10px;
   justify-content: space-between;
   align-self: center;
+  font-size: ${(props) => props.theme.title.md};
 `
 const BtnAccept = styled.div`
   display: flex;
   width: 48%;
   justify-content: center;
-  font-family: "Poppins";
   color: #ffffff;
-  background-color: #34ca9d;
-  border-radius: 3px;
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
   cursor: pointer;
+  &:hover {
+    box-shadow: 3px 3px #8c8c8c;
+  }
 `
 const BtnDeny = styled(BtnAccept)`
-  background-color: #ca3434;
+  background-color: ${(props) => props.theme.btnColor.bgRed};
 `
-const BtnVisitLink = styled(BtnAccept)`
-  width: 100%;
-  margin-right: 0px;
-  background-color: #3490ca;
-  text-decoration: none;
-`
+
 const FilteredContent = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -118,11 +126,9 @@ const FilteredContent = styled.div`
   margin: 2px;
   line-height: 24px;
   height: 24px;
-  font-family: "Poppins";
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
     line-height: 20px;
     height: 20px;
   }
@@ -134,13 +140,11 @@ const NameText = styled.div`
   justify-content: start;
   width: 30%;
   margin: 2px 10px 2px 0px;
-  line-height: 24px;
-  height: 24px;
-  font-family: "Poppins";
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  line-height: 30px;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
     line-height: 20px;
     height: 20px;
   }
@@ -151,21 +155,30 @@ const StatusText = styled(NameText)`
 `
 const Avatar = styled.img`
   margin: 0 10px 0 10px;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 `
+
+const SplitRight = styled.div`
+  display: flex;
+  flex: 1 1 auto;
+  height: 2px;
+  border-bottom: 2px solid #454545;
+`
+
 const usersRef = collection(db, "users")
 const today = `${new Date().getFullYear()}-${
   new Date().getMonth() + 1
 }-${new Date().getDate()}`
 
 export default function MyFriends() {
-  const { currentUser, isLogin, setCurrentFriendInfo } = useContext(AuthContext)
+  const { currentUser, isLogin, setCurrentFriendInfo, navigate } =
+    useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
     DocumentData | DefinedDocumentData
@@ -365,7 +378,9 @@ export default function MyFriends() {
             setQResultIds={setQResultIds}
             invitingIds={invitingIds}
           />
-          <ContentTitle>You are inviting ...</ContentTitle>
+          <ContentTitle style={{ marginTop: "30px" }}>
+            You are inviting <SplitRight />
+          </ContentTitle>
           <ContentWrapper>
             {invitingList.length !== 0 &&
               invitingList.map((inviting: DocumentData) => {
@@ -379,7 +394,10 @@ export default function MyFriends() {
                 )
               })}
           </ContentWrapper>
-          <ContentTitle>They want to be your friend ...</ContentTitle>
+          <ContentTitle style={{ marginTop: "30px" }}>
+            They want to be your friend
+            <SplitRight />
+          </ContentTitle>
           <ContentWrapper>
             {beInvitedList.length !== 0 &&
               beInvitedList.map((invited: DocumentData) => {
@@ -416,31 +434,30 @@ export default function MyFriends() {
           </ContentWrapper>
         </InviWrapper>
         <FriendsWrapper>
-          <ContentTitle>Here are your friends!</ContentTitle>
+          <ContentTitle>
+            Here are your friends! <SplitRight />
+          </ContentTitle>
           <ContentWrapper>
             {friends.length !== 0 ? (
               friends.map((friend: DocumentData) => {
                 return (
-                  <FilteredWrapper key={friend.id}>
+                  <FilteredFriendWrapper
+                    key={friend.id}
+                    id={friend.id}
+                    onClick={() => {
+                      setCurrentFriendInfo({
+                        name: friend.name,
+                        id: friend.id,
+                      })
+                      navigate(
+                        `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
+                      )
+                    }}
+                  >
                     <Avatar src={friend.photoURL} />
                     <NameText>{friend.name}</NameText>
                     <NameText>{friend.hometownName}</NameText>
-                    <BtnWrapper>
-                      <BtnVisitLink
-                        to={`/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`}
-                        as={Link}
-                        id={friend.id}
-                        onClick={() => {
-                          setCurrentFriendInfo({
-                            name: friend.name,
-                            id: friend.id,
-                          })
-                        }}
-                      >
-                        Visit friend
-                      </BtnVisitLink>
-                    </BtnWrapper>
-                  </FilteredWrapper>
+                  </FilteredFriendWrapper>
                 )
               })
             ) : (
