@@ -21,7 +21,7 @@ import {
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 import { AuthContext } from "../Context/authContext"
-import xMark from "../assets/x-mark.png"
+import xMark from "../assets/buttons/x-mark.png"
 
 const Xmark = styled.div`
   position: absolute;

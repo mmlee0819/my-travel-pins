@@ -24,10 +24,13 @@ const StyleQuill = styled(ReactQuill)`
   .ql-toolbar.ql-snow {
     border-radius: 5px;
     height: 40px;
-    font-size: 40px;
   }
   .ql-container.ql-snow {
+    height: calc(100% - 40px);
     border: none;
+  }
+  .ql-editor.ql-blank {
+    height: 100%;
   }
   .ql-formats {
     height: 40px;

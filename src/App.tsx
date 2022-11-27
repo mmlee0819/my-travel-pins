@@ -45,8 +45,13 @@ const theme = {
   color: {
     deepMain: "#034961",
     lightMain: "#7ccbab",
-    bgDark: "#2d2d2d",
+    bgDark: "#454545",
     bgLight: "#ffffff",
+  },
+  btnColor: {
+    bgGreen: "#a5b7af",
+    bgRed: "#ca3434",
+    bgBlue: "#5397bd",
   },
   border: { commonRadius: "5px" },
 }

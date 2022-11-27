@@ -22,6 +22,8 @@ const UploadImgLabel = styled.label`
   display: flex;
   align-items: center;
   height: 64px;
+  color: ${(props) => props.theme.color.bgDark};
+  gap: 15px;
   cursor: pointer;
 `
 const UrlsImgWrapper = styled.div`
@@ -51,15 +53,16 @@ const UploadImgInput = styled.input`
 
 const BtnUpload = styled.button`
   display: flex;
-  align-self: center;
+  align-self: end;
   align-items: center;
   padding: 10px;
   height: 30px;
   color: #ffffff;
-  background-color: #5594b7;
+  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  border-radius: 5px;
   border: none;
   opacity: 1;
-  border-radius: 10px;
+
   cursor: pointer;
 `
 
@@ -139,15 +142,6 @@ export default function Upload(props: UploadType) {
     }
   }
 
-  // for (const file of e.target.files) {
-  //   setFilesName((prev: string[]) => {
-  //     return [...prev, file.name]
-  //   })
-  //   setPhotos((prev: File[]) => {
-  //     return [...prev, file]
-  //   })
-  // }
-
   const handleUpload = () => {
     if (!hasCompressed) return
     photos.map((photo) => {
@@ -214,10 +208,10 @@ export default function Upload(props: UploadType) {
             />
           </UploadImgLabel>
           {hasFiles && !hasCompressed && <img src={spinner} />}
-          {hasCompressed && (
-            <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
-          )}
         </UploadPhotoWrapper>
+      )}
+      {hasCompressed && (
+        <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
       )}
     </>
   )
