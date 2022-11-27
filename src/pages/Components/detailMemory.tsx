@@ -20,6 +20,7 @@ import Upload from "../User/components/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
 import SwiperPhotos from "./swiperPhoto"
+import editPencil from "../assets/buttons/blackEdit.png"
 
 const Container = styled.div`
   position: absolute;
@@ -33,7 +34,7 @@ const Container = styled.div`
 `
 const ContentArea = styled.div`
   position: relative;
-  padding: 20px;
+  padding: 30px 6%;
   width: 60%;
   height: 100%;
   margin: 0 auto;
@@ -55,16 +56,20 @@ const EditWrapper = styled.div`
 `
 
 const Text = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  text-justify: justify;
   margin: 25px 0;
-  font-family: "Poppins", "sans-serif";
-  font-size: 25px;
+  font-size: ${(props) => props.theme.title.md};
   @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: 18px;
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const ArticleTitle = styled(Text)`
   min-height: 40px;
+  margin: 15px 0 15px 0;
   font-weight: 700;
+  font-size: ${(props) => props.theme.title.lg};
   @media screen and (max-width: 799px), (max-height: 600px) {
     min-height: 30px;
   }
@@ -89,6 +94,7 @@ const ConfirmedText = styled(Input)`
 `
 const TextNoMargin = styled(Text)`
   margin: 0;
+  margin-block-end: 0;
   text-align: justify;
 `
 
@@ -96,19 +102,7 @@ const StreetModeContainer = styled.div`
   height: 40vh;
   margin-bottom: 20px;
 `
-const PhotoWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  min-width: 300px;
-  margin-bottom: 20px;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
-`
+
 const Photo = styled.div`
   width: 100%;
   height: 200px;
@@ -123,11 +117,12 @@ const MsgNumText = styled.div`
   display: flex;
   justify-content: end;
   width: 100%;
-  padding-right: 20px;
-  font-size: 25px;
+  margin-top: 30px;
+  /* padding-right: 20px; */
+  font-size: ${(props) => props.theme.title.md};
   border-bottom: 2px solid #d4d4d4;
   @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: 18px;
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const MsgContent = styled.div`
@@ -147,7 +142,8 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   height: 30px;
   background-image: ${(props) => `url(${props.avatarURL})`};
   background-size: 100% 100%;
-  /* border-radius: 50%; */
+  border: 2px solid #fff;
+  border-radius: 50%;
 `
 const MsgColumnWrapper = styled.div`
   display: flex;
@@ -161,6 +157,16 @@ const MsgRowNoWrapper = styled.div`
   flex-flow: row wrap;
   justify-content: flex-start;
   margin: 5px 0;
+`
+const BtnEdit = styled.div`
+  position: absolute;
+  top: 45px;
+  right: 30px;
+  width: 25px;
+  height: 25px;
+  background-image: url(${editPencil});
+  background-size: 100% 100%;
+  cursor: pointer;
 `
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
@@ -251,7 +257,7 @@ const MsgInput = styled.input`
   display: flex;
   flex: 1 1 auto;
   align-self: center;
-  margin: 10px 20px 10px 0;
+  margin: 10px 0;
   padding-left: 10px;
   height: 30px;
   line-height: 30px;
@@ -500,7 +506,14 @@ export default function DetailMemory(props: Props) {
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
           <ContentArea ref={overlayRef}>
-            {(isMyMap || isMyMemory) && (
+            {(isMyMap || isMyMemory) && !showEditor && (
+              <BtnEdit
+                onClick={() => {
+                  setShowEditor(true)
+                }}
+              />
+            )}
+            {(isMyMap || isMyMemory) && showEditor && (
               <BtnMore
                 showMore={showMore}
                 onClick={() => {
@@ -659,23 +672,13 @@ export default function DetailMemory(props: Props) {
                 <TextNoMargin>{travelDate}</TextNoMargin>
               </>
             )}
+            {!showEditor && selectedMarker?.article?.content !== undefined && (
+              <TextNoMargin>{parse(artiContent)}</TextNoMargin>
+            )}
             {selectedMarker?.albumURLs &&
               typeof selectedMarker?.albumURLs !== null && (
                 <SwiperPhotos photos={selectedMarker?.albumURLs} />
               )}
-            {/* <PhotoWrapper>
-              {selectedMarker?.albumURLs?.map((photoUrl: string) => {
-                return <PhotoImg key={photoUrl} bkImage={photoUrl} />
-              })}
-              {savedPhotoUrls &&
-                savedPhotoUrls.map((photoUrl: string) => (
-                  <PhotoImg key={photoUrl} bkImage={photoUrl} />
-                ))}
-            </PhotoWrapper> */}
-
-            {!showEditor && selectedMarker?.article?.content !== undefined && (
-              <Text>{parse(artiContent)}</Text>
-            )}
 
             <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
             <MsgColumnWrapper>
