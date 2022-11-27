@@ -18,17 +18,16 @@ export const ContentArea = styled.div`
   height: 100%;
   margin: 0 auto;
   padding: 15px;
-  gap: 20px;
+  gap: 25px;
   border: none;
 `
 export const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
+  flex: 1 1 auto;
   min-width: 40%;
-  margin: 10px 0;
   font-family: "Poppins";
   font-size: 20px;
-  gap: 20px;
   border: none;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -43,9 +42,7 @@ export const ContentWrapper = styled.div`
   width: 100%;
   height: 100%;
   padding: 15px;
-  background-color: #ffffff;
-  opacity: 0.8;
-  gap: 20px;
+  gap: 30px;
   border: none;
   overflow-y: scroll;
   scrollbar-width: none;
@@ -56,22 +53,26 @@ export const ContentWrapper = styled.div`
 export const MemoryList = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  height: 450px;
-  padding: 10px 0;
+  height: 150px;
   gap: 20px;
 `
 
 export const ImgWrapper = styled.div`
   position: relative;
   display: block;
-  width: 40%;
+  width: 150px;
+  height: 150px;
+  border-radius: 5px;
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  cursor: pointer;
 `
 export const MemoryImg = styled.img`
   display: block;
   position: absolute;
-  top: 10px;
+  top: 0px;
   left: 0;
   width: 100%;
   height: 100%;
+  border-radius: 5px;
   object-fit: cover;
 `

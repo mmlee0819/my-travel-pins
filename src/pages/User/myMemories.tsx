@@ -3,7 +3,6 @@ import styled from "styled-components"
 import { useState, useContext, useEffect } from "react"
 import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
-import defaultImage from "../assets/defaultImage.png"
 import { AuthContext } from "../Context/authContext"
 import { ref, deleteObject } from "firebase/storage"
 import DetailMemory from "../Components/detailMemory"
@@ -22,23 +21,45 @@ import {
   MemoryImg,
   MemoryList,
 } from "./components/UIforMemoriesPage"
-import trashBinIcon from "../assets/buttons/trashBin.png"
-import trashBinWhite from "../assets/buttons/trashBin.png"
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
+import calendar from "../assets/calendar.png"
+import location from "../assets/location.png"
 
 const Text = styled.div`
+  vertical-align: text-bottom;
+  height: 30px;
+  margin: 5px 0;
   color: ${(props) => props.theme.color.bgDark};
   min-width: 30%;
 `
 const Title = styled(Text)`
+  flex: 1 1 auto;
+  margin-bottom: 20px;
   font-weight: 700;
-  font-size: 24px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 18px;
+  font-size: ${(props) => props.theme.title.lg};
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 
+const PhotoText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  width: 150px;
+  height: 150px;
+  color: ${(props) => props.theme.color.bgDark};
+
+  border-radius: 5px;
+`
 const BtnWrapper = styled.div`
   display: flex;
   flex: 1 1 auto;
@@ -55,34 +76,40 @@ const BtnBlue = styled.div`
   width: 48%;
   padding: 5px;
   font-family: "Poppins";
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: #3490ca;
-  border-radius: 3px;
+  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  border-radius: 5px;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const BtnRed = styled(BtnBlue)`
-  background-color: #ca3434;
+  background-color: ${(props) => props.theme.btnColor.bgRed};
 `
 
 const BtnDelete = styled.img`
   align-self: center;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
 `
 
+const IconInList = styled.img`
+  align-self: center;
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+`
 const BgOverlay = styled.div`
   position: absolute;
-  top: 0;
+  top: 3px;
   left: 0;
   width: 100%;
   height: 100%;
   background-color: ${(props) => props.theme.color.bgDark};
+  border-radius: 5px;
   opacity: 0.9;
   z-index: 50;
 `
@@ -94,17 +121,18 @@ const ReminderArea = styled.div`
   width: 50%;
   height: 50%;
   padding: 20px;
+  color: ${(props) => props.theme.color.bgDark};
   background-color: #fff;
+  border-radius: 5px;
   z-index: 52;
 `
 const ReminderText = styled.div`
-  font-family: "Jomhuria";
   margin: 20px auto 0 auto;
   text-align: center;
-  font-size: 40px;
+  font-size: ${(props) => props.theme.title.lg};
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 30px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 const DeleteTargetText = styled(Title)`
@@ -114,16 +142,6 @@ const DeleteTargetText = styled(Title)`
     (max-height: 600px) {
     margin-bottom: 30px;
   }
-`
-
-export const BtnReadMore = styled.div`
-  display: flex;
-  align-self: end;
-  text-align: center;
-  padding: 5px;
-  border: 1px solid #000000;
-  border-radius: 5px;
-  cursor: pointer;
 `
 
 export default function MyMemories() {
@@ -136,6 +154,7 @@ export default function MyMemories() {
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<
     number | undefined
   >(undefined)
+
   console.log({ memories })
 
   const deleteMemory = async (index: number) => {
@@ -201,41 +220,54 @@ export default function MyMemories() {
             memories.map((item: PinContent, index: number) => {
               return (
                 <MemoryList key={item.id}>
-                  <ImgWrapper>
+                  <ImgWrapper
+                    id={item?.id}
+                    onClick={() => {
+                      if (typeof item.id !== "string") return
+                      setMemoryIsShow(true)
+                      setMemory(item)
+                      getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                    }}
+                  >
                     {item?.albumURLs ? (
                       <MemoryImg src={item?.albumURLs[0]} />
                     ) : (
-                      <MemoryImg src={defaultImage} />
+                      <PhotoText>No photo uploaded</PhotoText>
                     )}
                   </ImgWrapper>
                   <ArticleWrapper>
-                    <Title>{item?.article?.title}</Title>
-                    <Text>{item?.article?.travelDate}</Text>
-                    <Text>{item?.location?.name}</Text>
-                    <BtnWrapper>
-                      <BtnBlue
-                        id={item?.id}
-                        onClick={() => {
-                          if (typeof item.id !== "string") return
-                          setMemoryIsShow(true)
-                          setMemory(item)
-                          getSpecificPin(item?.id, setMemory, setMemoryIsShow)
-                        }}
-                      >
-                        {item?.article?.content !== ""
-                          ? "Read more"
-                          : "Add memory"}
-                      </BtnBlue>
-                      <BtnDelete
-                        id={item.id}
-                        src={trashBinBlack}
-                        onClick={() => {
-                          setMemory(item)
-                          setDeleteTargetIndex(index)
-                        }}
-                      />
-                    </BtnWrapper>
+                    <Title
+                      id={item?.id}
+                      onClick={() => {
+                        if (typeof item.id !== "string") return
+                        setMemoryIsShow(true)
+                        setMemory(item)
+                        getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                      }}
+                    >
+                      {item?.article?.title === undefined
+                        ? "No title"
+                        : item?.article?.title}
+                    </Title>
+
+                    <Text>
+                      <IconInList src={calendar} />
+                      {item?.article?.travelDate}
+                    </Text>
+
+                    <Text>
+                      <IconInList src={location} />
+                      {item?.location?.name}
+                    </Text>
                   </ArticleWrapper>
+                  <BtnDelete
+                    id={item.id}
+                    src={trashBinBlack}
+                    onClick={() => {
+                      setMemory(item)
+                      setDeleteTargetIndex(index)
+                    }}
+                  />
                   {deleteTargetIndex !== undefined &&
                     deleteTargetIndex === index && (
                       <>
@@ -250,7 +282,7 @@ export default function MyMemories() {
                             you want to delete this memory?
                           </ReminderText>
                           <DeleteTargetText>
-                            {memories[index]?.article?.title}
+                            {memories[index]?.article?.title || "No title"}
                           </DeleteTargetText>
                           <BtnWrapper>
                             <BtnRed
