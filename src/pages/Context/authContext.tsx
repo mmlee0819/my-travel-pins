@@ -205,6 +205,7 @@ export function AuthContextProvider({ children }: Props) {
             setCurrentUser(userInfo)
             setAvatarURL(userInfo?.photoURL)
             setIsLogin(true)
+            setIsProfile(false)
             setIsMyMap(true)
             navigate(`/${userInfo?.name}`)
           }
@@ -264,6 +265,7 @@ export function AuthContextProvider({ children }: Props) {
         setIsMyFriend(false)
         setIsMyMap(true)
         console.log("註冊完成，已登入")
+        setIsProfile(false)
         navigate(`/${userInfo?.name}`)
       }
     } catch (error: unknown) {
@@ -290,6 +292,7 @@ export function AuthContextProvider({ children }: Props) {
         setIsLogin(true)
         setIsMyFriend(false)
         setIsMyMap(true)
+        setIsProfile(false)
         console.log("已登入")
         navigate(`/${userInfo?.name}`)
       }

@@ -79,9 +79,10 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   background-image: ${(props) => `url(${props.avatarURL})`};
   background-size: 100% 100%;
   border-radius: 50%;
+  border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: 0px -3px 1px #0000004c;
+    box-shadow: -3px -1px 1px #0000004c;
   }
 `
 

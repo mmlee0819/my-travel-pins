@@ -8,14 +8,7 @@ import React, {
 } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
-import {
-  MapContainer,
-  useMap,
-  Marker,
-  Popup,
-  GeoJSON,
-  useMapEvents,
-} from "react-leaflet"
+import { useMap, Marker, Popup, GeoJSON, useMapEvents } from "react-leaflet"
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
@@ -23,56 +16,15 @@ import { countries } from "./Utils/customGeo"
 import { AuthContext } from "./Context/authContext"
 import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
+import {
+  Attribution,
+  StyleMapContainer,
+  Container,
+} from "../pages/User/components/styles"
 import finger from "./assets/buttons/finger.png"
 import shadowFinger from "./assets/buttons/shadowFinger.png"
 import tip from "./assets/tip.png"
-import spinner from "./assets/dotsSpinner.svg"
 import home from "./assets/markers/home1.png"
-
-const Attribution = styled.a`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  display: flex;
-  margin: 0;
-  padding-right: 15px;
-  font-family: "Poppins", "sans-serif";
-  font-size: 12px;
-  line-height: 1.5;
-  color: #fff;
-  background: none;
-  border: none;
-  text-decoration: none;
-  z-index: 60;
-  cursor: pointer;
-  &:visited,
-  &:hover,
-  &:active {
-    text-decoration: underline;
-  }
-`
-const StyleMapContainer = styled(MapContainer)`
-  .leaflet-control-attribution a {
-    display: none;
-  }
-`
-
-const Container = styled.div`
-  position: relative;
-  margin: 0 auto;
-  max-width: 1440px;
-  width: 100%;
-  height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 5px;
-`
-
-const Spinner = styled(Container)`
-  background-image: url(${spinner});
-  background-size: 100% 100%;
-  background-color: rgb(255, 255, 255, 0);
-  border: none;
-`
 
 const HeaderWrapper = styled.div`
   position: relative;
@@ -232,7 +184,7 @@ const Input = styled.input`
 
 const Btn = styled.div`
   display: flex;
-  margin-top: 10px auto 30px auto;
+  margin: 30px auto;
   justify-content: center;
   align-self: center;
   text-align: center;
@@ -301,9 +253,8 @@ function useOnClickOutside(
       if (!ref.current || ref.current.contains(event.target as Node)) {
         return
       }
-      if (isSignUp && !isSignIn) {
-        setIsSignUp(false)
-      }
+      if (isSignUp && !isSignIn) setIsSignUp(false)
+
       if (isSignIn && !isSignUp) setIsSignIn(false)
     }
     window.addEventListener("mousedown", listener)
@@ -520,7 +471,6 @@ function Home() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
   console.log({ position })
-  // const [mapZoom, setMapZoom] = useState<number>(0)
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
   const [hasRead, setHasRead] = useState(false)
