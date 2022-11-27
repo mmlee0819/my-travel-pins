@@ -46,12 +46,14 @@ const Text = styled.div`
   border: none;
   gap: 5px;
   cursor: pointer;
-  &:hover {
-    border-bottom: 3px solid #fff;
-  }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     padding: 2px 10px;
+  }
+`
+const BtnText = styled(Text)`
+  &:hover {
+    border-bottom: 2px solid #fff;
   }
 `
 const BtnLogout = styled.div`
@@ -212,14 +214,14 @@ export default function Profile() {
           />
         </UploadLabel>
       )}
-      <Text
+      <BtnText
         onClick={() => {
           logOut()
         }}
       >
         <BtnLogout />
         Sign out
-      </Text>
+      </BtnText>
     </ProfileArea>
   )
 }
