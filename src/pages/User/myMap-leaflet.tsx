@@ -297,7 +297,7 @@ const myCustomStyle = {
   weight: 0.5,
   fill: true,
   fillColor: "#fff",
-  fillOpacity: 1,
+  fillOpacity: 0.8,
   zIndex: 50,
 }
 
@@ -323,7 +323,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     if (event.target.feature.properties.name === country.properties.name) {
       layer.setStyle({
         fill: true,
-        fillColor: "#ffd500",
+        fillColor: "#7ccbab",
         fillOpacity: 1,
       })
     }
@@ -332,7 +332,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     layer.setStyle({
       fill: true,
       fillColor: "#fff",
-      fillOpacity: 1,
+      fillOpacity: 0.8,
     })
   })
 }
@@ -359,7 +359,7 @@ function ChangeCenterBack() {
 const DefaultIcon = L.icon({
   iconUrl: home,
   iconSize: [40, 43],
-  iconAnchor: [40, 443],
+  iconAnchor: [40, 43],
 })
 
 const lgNewPinIcon = L.icon({
@@ -409,6 +409,8 @@ export default function MyMap() {
     mapZoom,
     setIsMyMap,
     setIsMyMemory,
+    setIsFriendHome,
+    setIsFriendMemory,
   } = useContext(AuthContext)
   console.log("currentUser", currentUser)
   const [center, setCenter] = useState<LatLng | null>(null)
@@ -423,7 +425,7 @@ export default function MyMap() {
       placeId: "",
     },
   })
-  // console.log({ center })
+
   const [markers, setMarkers] = useState<PinContent[]>([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent>()
   const [searchBox, setSearchBox] = useState<
@@ -452,6 +454,8 @@ export default function MyMap() {
   useOnClickOutside(overlayRef, hasAddPin, () => setShowAlert(true))
 
   useEffect(() => {
+    setIsFriendHome(false)
+    setIsFriendMemory(false)
     if (typeof currentUser?.id === "string") {
       getPins(
         currentUser,

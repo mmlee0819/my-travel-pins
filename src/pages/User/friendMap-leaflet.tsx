@@ -1,5 +1,5 @@
 import React from "react"
-import { Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import {
   useState,
   useContext,
@@ -12,16 +12,14 @@ import L, { LatLng, LeafletEvent } from "leaflet"
 import {
   MapContainer,
   Tooltip,
-  useMap,
   Marker,
   Popup,
   GeoJSON,
   ZoomControl,
-  useMapEvents,
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../Utils/customGeo"
-import homeMarker from "../assets/markers/hometownIcon.png"
+import homeMarker from "../assets/markers/home1.png"
 import { AuthContext } from "../Context/authContext"
 import { db } from "../Utils/firebase"
 import {
@@ -34,7 +32,7 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import defaultImage from "../assets/defaultImage.png"
-import { DefinedDocumentData, getPins, PinContent } from "./ts_fn_commonUse"
+import { DefinedDocumentData, PinContent } from "./ts_fn_commonUse"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
 
@@ -61,11 +59,6 @@ export const PinInfoTitle = styled.div`
   font-size: 12px;
   font-weight: 700;
 `
-
-interface CenterType {
-  center: LatLng | null
-  setCenter: Dispatch<SetStateAction<LatLng | null>>
-}
 
 interface CountryType {
   type: "Feature"
@@ -98,7 +91,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     if (event.target.feature.properties.name === country.properties.name) {
       layer.setStyle({
         fill: true,
-        fillColor: "#ffd500",
+        fillColor: "#7ccbab",
         fillOpacity: 1,
       })
     }
@@ -107,7 +100,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     layer.setStyle({
       fill: true,
       fillColor: "#fff",
-      fillOpacity: 1,
+      fillOpacity: 0.8,
     })
   })
 }
@@ -115,7 +108,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
 const DefaultIcon = L.icon({
   iconUrl: homeMarker,
   iconSize: [40, 43],
-  iconAnchor: [40, 443],
+  iconAnchor: [40, 43],
 })
 
 const lgNewPinIcon = L.icon({
@@ -147,15 +140,9 @@ function FriendsMap() {
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
-
+  const { friendName, friendId } = useParams()
+  console.log({ friendName, friendId })
   console.log("markers", markers)
-  const url = window.location.href
-  const splitUrlArr = url.split("/")
-  const friendId = splitUrlArr.slice(-1)[0]
-  let friendName = splitUrlArr.slice(-2, -1)[0]
-  if (friendName[0] === "%") {
-    friendName = decodeURI(friendName)
-  }
 
   useEffect(() => {
     const getFriendInfo = async () => {
@@ -180,7 +167,6 @@ function FriendsMap() {
     const getAllPinsOfFriend = async () => {
       const q = query(collection(db, "pins"), where("userId", "==", friendId))
       const querySnapshot = await getDocs(q)
-      // const newMarkers: DocumentData[] | PinContent[] = []
       const newMarkers: any[] = []
       querySnapshot.forEach((doc: any) => {
         newMarkers.push(doc.data())
@@ -202,15 +188,15 @@ function FriendsMap() {
                 mapZoom === "lg"
                   ? [
                       selectedMarker?.location?.lat || 45,
-                      selectedMarker?.location?.lng || 50,
+                      selectedMarker?.location?.lng || 10,
                     ]
                   : [
                       selectedMarker?.location?.lat || 41,
-                      selectedMarker?.location?.lng || 121,
+                      selectedMarker?.location?.lng || 5,
                     ]
               }
               zoomControl={false}
-              zoom={mapZoom === "lg" ? 2 : 1}
+              zoom={mapZoom === "lg" ? 1.75 : 1.5}
               scrollWheelZoom={true}
               zoomSnap={0.25}
               dragging={true}
@@ -222,8 +208,9 @@ function FriendsMap() {
                 zIndex: "30",
                 backgroundColor: "rgb(255, 255, 255, 0)",
                 borderRadius: "10px",
+                border: "none",
               }}
-              minZoom={mapZoom === "lg" ? 2 : 1}
+              minZoom={mapZoom === "lg" ? 0.7 : 0.5}
             >
               <ZoomControl position="bottomright" />
               {countries.features.map((country) => (
