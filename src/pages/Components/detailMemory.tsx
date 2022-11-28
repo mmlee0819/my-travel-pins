@@ -215,16 +215,16 @@ const BtnEdit = styled.div`
     background-image: url(${blackEditPencil});
   }
 `
+
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
-  top: 20px;
+  top: 0px;
   right: 30px;
   width: 25px;
   height: 25px;
   display: flex;
   flex-flow: column wrap;
-  background-image: ${(props) =>
-    props.showMore ? `url(${moreHoverIcon})` : `url(${moreIcon})`};
+  background-image: url(${moreIcon});
   background-size: cover;
   cursor: pointer;
   &:hover {
@@ -242,13 +242,15 @@ const BtnGreen = styled.div`
   line-height: 16px;
   font-size: 16px;
   color: #fff;
-  background-color: #5594b7;
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
   z-index: 120;
   cursor: pointer;
 `
-const BtnRed = styled(BtnGreen)`
-  background-color: #ca3434;
+const BtnDelete = styled(BtnGreen)<{ showDelete: boolean }>`
+  top: 25px;
+  display: ${(props) => (props.showDelete ? "flex" : "none")};
+  background-color: ${(props) => props.theme.btnColor.bgGray};
 `
 
 const ArtiWrapper = styled.div`
@@ -384,8 +386,9 @@ export default function DetailMemory(props: Props) {
   const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
   const [savedPhotoFilesName, setSavedPhotoFilesName] = useState<string[]>([])
   const [hasDiscard, setHasDiscard] = useState(false)
+  const [selectedMsgId, setSelectedMsgId] = useState("")
   const overlayRef = useRef<HTMLDivElement>(null)
-
+  console.log({ showDelete })
   const updateTitle = async () => {
     if (!selectedMarker?.id) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -683,26 +686,44 @@ export default function DetailMemory(props: Props) {
                               {currentUser !== null &&
                                 item.messenger === currentUser?.id && (
                                   <BtnMore
+                                    id={`${item.messenger}-${item.msgTimestamp}`}
                                     showMore={showDelete}
-                                    onClick={() => {
-                                      setShowDelete((prev) => !prev)
+                                    onClick={(
+                                      e: React.MouseEvent<HTMLDivElement>
+                                    ) => {
+                                      if (
+                                        (e.target as HTMLDivElement).id !==
+                                        selectedMsgId
+                                      ) {
+                                        setSelectedMsgId(
+                                          (e.target as HTMLDivElement).id
+                                        )
+                                        setShowDelete(true)
+                                      } else {
+                                        setShowDelete((prev) => !prev)
+                                      }
                                     }}
                                   >
-                                    {showDelete && (
-                                      <BtnRed
-                                        onClick={() => {
-                                          if (
-                                            selectedMarker !== undefined &&
-                                            typeof selectedMarker?.id ===
-                                              "string"
-                                          ) {
-                                            deleteMsg(selectedMarker?.id, item)
-                                          }
-                                        }}
-                                      >
-                                        Delete
-                                      </BtnRed>
-                                    )}
+                                    <BtnDelete
+                                      id={`${item.messenger}-${item.msgTimestamp}`}
+                                      showDelete={
+                                        showDelete &&
+                                        `${item.messenger}-${item.msgTimestamp}` ===
+                                          selectedMsgId
+                                          ? true
+                                          : false
+                                      }
+                                      onClick={() => {
+                                        if (
+                                          selectedMarker !== undefined &&
+                                          typeof selectedMarker?.id === "string"
+                                        ) {
+                                          deleteMsg(selectedMarker?.id, item)
+                                        }
+                                      }}
+                                    >
+                                      Delete
+                                    </BtnDelete>
                                   </BtnMore>
                                 )}
                             </MsgRowNoWrapper>
