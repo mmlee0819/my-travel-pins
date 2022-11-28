@@ -13,11 +13,11 @@ import "swiper/css/thumbs"
 
 const MainSwiper = styled(Swiper)`
   .swiper {
-    height: 300px;
+    height: 50%;
   }
 
   .mySwiper2.swiper-backface-hidden {
-    height: 300px;
+    height: 50%;
   }
   .swiper-slide img {
     display: block;
@@ -38,7 +38,7 @@ const MainSwiper = styled(Swiper)`
 
 const ButtomSwiper = styled(Swiper)`
   .swiper {
-    height: 150px;
+    height: 25%;
   }
 
   .swiper-slide {
@@ -78,7 +78,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
   return (
     <>
       <MainSwiper
-        style={{ height: "300px" }}
+        style={{ height: "70%" }}
         loop={true}
         spaceBetween={10}
         navigation={true}
@@ -99,7 +99,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         })}
       </MainSwiper>
       <ButtomSwiper
-        style={{ height: "150px" }}
+        style={{ height: "25%" }}
         onSwiper={setThumbsSwiper}
         loop={true}
         spaceBetween={10}

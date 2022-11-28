@@ -1,7 +1,7 @@
 import React, { useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
-import { StreetViewService } from "@react-google-maps/api"
-import xMark from "../assets/x-mark.png"
+import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
+import xMark from "../assets/buttons/x-mark.png"
 import gala1 from "../assets/samplePhotos/gala1.jpg"
 import gala2 from "../assets/samplePhotos/gala2.jpg"
 import gala3 from "../assets/samplePhotos/gala3.jpg"
@@ -13,65 +13,95 @@ import cyuAvatar from "../assets/samplePhotos/cyuAvatar.jpg"
 import laysAvatar from "../assets/samplePhotos/laysAvatar.jpg"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import SwiperPhotos from "./swiperPhoto"
+import calendar from "../assets/calendar.png"
+import location from "../assets/location.png"
 
 const Container = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  min-height: 100%;
+  height: 100%;
   width: 100%;
   background-color: rgb(45, 45, 45, 0.8);
+  border-radius: 5px;
   z-index: 120;
 `
 const ContentArea = styled.div`
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex: row nowrap;
   padding: 20px;
-  width: 60%;
-  height: 100vh;
+  width: 80%;
+  height: 80%;
   margin: 0 auto;
-  font-size: 4rem;
+  font-size: ${(props) => props.theme.title.lg};
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
-  box-shadow: 0px 0px 3px 10px #232323c2;
+`
+const LeftWrapper = styled.div`
+  position: relative;
+  align-self: center;
+
+  width: 50%;
+  height: 90%;
+`
+const RightWrapper = styled.div`
+  position: relative;
+  align-self: center;
+  width: 45%;
+  height: 90%;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
 `
+const MiddleSplit = styled.div`
+  margin: 0 20px 0 10px;
+  border-left: 2px dashed #454545;
+  height: 100%;
+`
+const IconInList = styled.img`
+  align-self: center;
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+`
 const SubTitle = styled.div`
   min-height: 60px;
   @media screen and (min-width: 1100px) {
-    font-size: 4rem;
+    font-size: ${(props) => props.theme.title.lg};
   }
   @media screen and (max-width: 1100px) and (min-width: 800px) {
-    font-size: 3rem;
+    font-size: ${(props) => props.theme.title.md};
   }
   @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: 2.5rem;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 const Text = styled.div`
-  font-family: "Poppins", "sans-serif";
-  font-size: 25px;
+  font-size: ${(props) => props.theme.title.md};
   margin: 25px 0;
   @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: 18px;
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const ArticleTitle = styled(Text)`
+  margin: 0;
   font-weight: 700;
 `
 const Reminder = styled(Text)`
-  color: #034961;
+  color: ${(props) => props.theme.color.deepMain};
 `
 const TextNoMargin = styled(Text)`
-  margin: 0;
+  display: flex;
+  margin: 10px 0;
   text-align: justify;
 `
 const LinkText = styled(TextNoMargin)`
   display: inline-block;
-  margin-left: 15px;
+  margin: 0 0 0 15px;
   color: #5594b7;
   cursor: pointer;
   &:hover {
@@ -88,64 +118,33 @@ const XmarkTop = styled.div`
   right: 20px;
   background-image: url(${xMark});
   background-size: 100% 100%;
-  width: 60px;
-  height: 60px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   @media screen and (max-width: 799px), (max-height: 600px) {
     top: 30px;
-    width: 40px;
-    height: 40px;
+    width: 25px;
+    height: 25px;
   }
 `
 const StreetModeContainer = styled.div`
   height: 40vh;
 `
-const PhotoWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  min-width: 300px;
-  margin-bottom: 20px;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
-`
-const Photo = styled.div`
-  width: 100%;
-  height: 200px;
-  margin-bottom: 15px;
-  background-size: 100% 100%;
-`
-const Gala1 = styled(Photo)`
-  background-image: url(${gala1});
-`
-const Gala2 = styled(Photo)`
-  background-image: url(${gala2});
-`
-const Gala3 = styled(Photo)`
-  background-image: url(${gala3});
-`
-const Gala4 = styled(Photo)`
-  background-image: url(${gala4});
-`
+
 const MsgNumText = styled.div`
   display: flex;
   justify-content: end;
   width: 100%;
-  padding-right: 20px;
   border-bottom: 2px solid #d4d4d4;
 `
 const MsgContent = styled.div`
   display: flex;
   flex: 1 1 auto;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   padding-left: 8px;
   background-color: #f6f6f6;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
 `
 const Placeholder = styled(MsgContent)`
   align-self: center;
@@ -178,26 +177,26 @@ const MsgRowNoWrapper = styled.div`
 `
 const BtnMore = styled.div`
   position: absolute;
-  right: 40px;
+  right: 10px;
   display: inline-block;
   width: 30px;
   height: 25px;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   background-image: url(${moreIcon});
   background-size: cover;
 `
 const BtnMsgDelete = styled.div`
   position: absolute;
   top: 30px;
-  right: 40px;
+  right: 0px;
   display: inline-block;
   text-align: center;
   padding: 5px 10px;
   line-height: 16px;
   height: 30px;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   color: #fff;
-  background-color: #5594b7;
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
   z-index: 30;
 `
@@ -258,8 +257,9 @@ export function SampleMemory({
           heading: 90,
           pitch: 10,
         },
-        fullscreenControl: false,
+        fullscreenControl: true,
         addressControl: false,
+        scrollwheel: false,
       }
     )
   }
@@ -277,101 +277,139 @@ export function SampleMemory({
             setHasRead(true)
           }}
         />
-        <ArticleTitle>My First Time Skiing </ArticleTitle>
-        <TextNoMargin>Mar.2019</TextNoMargin>
-        <SwiperPhotos photos={samplePhotos} />
-        {/* <PhotoWrapper>
-          <Gala3 />
-          <Gala4 />
-          <Gala1 />
-          <Gala2 />
-        </PhotoWrapper> */}
-        <Text>
-          As a member, you can...
-          <br />
-          - upload photos, post an article to save your travel memories here!
-          <br />
-          - leave messages with your friends!
-          <br />
-          <Reminder>
-            Note: Only your friends have access to your memories.
-          </Reminder>
-          <br />
-          <MsgNumText>4則留言</MsgNumText>
-          <MsgColumnWrapper>
-            <MsgRowNoWrapper>
-              <UserAvatar photoURL={mmAvatar} />
-              <Placeholder>Leave message...</Placeholder>
-            </MsgRowNoWrapper>
-            <MsgRowNoWrapper>
-              <UserAvatar photoURL={mmAvatar} />
-              <MsgContent>
-                Mika
-                <br />
-                許願：2024冬天去滑雪！
-              </MsgContent>
-              <BtnMore />
-              <BtnMsgDelete>Delete</BtnMsgDelete>
-            </MsgRowNoWrapper>
-            {users.map((user) => (
-              <MsgRowNoWrapper key={user.name}>
-                <UserAvatar photoURL={user.avatar} />
-                <MsgContent>
-                  {user.name}
-                  <br />
-                  {user.msg}
-                </MsgContent>
-              </MsgRowNoWrapper>
-            ))}
-          </MsgColumnWrapper>
-          Also, visitors can see other details about the place you went from
-          Google streetView service!
-          <br />
-          Maybe they will go there too in the future!
-        </Text>
+        <LeftWrapper>
+          <SwiperPhotos photos={samplePhotos} />
+        </LeftWrapper>
+        <MiddleSplit />
+        <RightWrapper>
+          <ArticleTitle>My First Time Skiing </ArticleTitle>
+          <TextNoMargin>
+            <IconInList src={calendar} />
+            2019-03-06
+          </TextNoMargin>
 
-        <TextNoMargin> GALA湯沢スキー場</TextNoMargin>
-        {isLoaded && (
-          <StreetModeContainer id="street-mode-container">
-            <StreetViewService onLoad={onStreetLoad} />
-          </StreetModeContainer>
-        )}
-        <br />
-        <TextNoMargin>
-          Not a member yet?
-          <LinkText
-            onClick={() => {
-              setShowSamplePost(false)
-              setHasRead(true)
-              setIsSignUp(true)
-            }}
-          >
-            Sign up
-          </LinkText>
-        </TextNoMargin>
-        <TextNoMargin>
-          Already have an account?
-          <LinkText
-            onClick={() => {
-              setShowSamplePost(false)
-              setHasRead(true)
-              setIsSignIn(true)
-            }}
-          >
-            Sign in
-          </LinkText>
-        </TextNoMargin>
-        <TextNoMargin>
-          Not decided yet?
-          <LinkText
-            onClick={() => {
-              setShowSamplePost(false)
-              setHasRead(true)
-            }}
-          >
-            Back to Home
-          </LinkText>
-        </TextNoMargin>
+          <Text>
+            As a member, you can
+            <br />
+            - upload photos, post an article to save your travel memories here!
+            <br />
+            - leave messages with your friends!
+            <br />
+            <Reminder>
+              Note: <br />
+              Only your friends have access to your memories.
+            </Reminder>
+            <br />
+            <MsgNumText>4則留言</MsgNumText>
+            <br />
+            <MsgColumnWrapper>
+              <MsgRowNoWrapper>
+                <UserAvatar photoURL={mmAvatar} />
+                <Placeholder>Leave message...</Placeholder>
+              </MsgRowNoWrapper>
+              <MsgRowNoWrapper>
+                <UserAvatar photoURL={mmAvatar} />
+                <MsgContent>
+                  Mika
+                  <br />
+                  許願：2024冬天去滑雪！
+                </MsgContent>
+                <BtnMore />
+                <BtnMsgDelete>Delete</BtnMsgDelete>
+              </MsgRowNoWrapper>
+              {users.map((user) => (
+                <MsgRowNoWrapper key={user.name}>
+                  <UserAvatar photoURL={user.avatar} />
+                  <MsgContent>
+                    {user.name}
+                    <br />
+                    {user.msg}
+                  </MsgContent>
+                </MsgRowNoWrapper>
+              ))}
+            </MsgColumnWrapper>
+            <br />
+            Also, visitors can see other details about the place you went from
+            Google streetView service!
+            <br />
+            Maybe they will go there too in the future!
+          </Text>
+
+          <TextNoMargin>
+            <IconInList src={location} />
+            GALA湯沢スキー場
+          </TextNoMargin>
+          {isLoaded && (
+            <>
+              <StreetModeContainer id="street-mode-container">
+                <StreetViewService onLoad={onStreetLoad} />
+              </StreetModeContainer>
+              <GoogleMap
+                mapContainerStyle={{
+                  height: "40vh",
+                  width: "100%",
+                  marginTop: "20px",
+                }}
+                center={{
+                  lat: 36.9505502,
+                  lng: 138.7990597,
+                }}
+                zoom={14}
+                options={{
+                  draggable: true,
+                  mapTypeControl: false,
+                  streetViewControl: false,
+                  scaleControl: false,
+                  fullscreenControl: false,
+                  scrollwheel: false,
+                }}
+              >
+                <Marker
+                  position={{
+                    lat: 36.9505502,
+                    lng: 138.7990597,
+                  }}
+                />
+              </GoogleMap>
+            </>
+          )}
+          <br />
+          <TextNoMargin>
+            Not a member yet?
+            <LinkText
+              onClick={() => {
+                setShowSamplePost(false)
+                setHasRead(true)
+                setIsSignUp(true)
+              }}
+            >
+              Sign up
+            </LinkText>
+          </TextNoMargin>
+          <TextNoMargin>
+            Already have an account?
+            <LinkText
+              onClick={() => {
+                setShowSamplePost(false)
+                setHasRead(true)
+                setIsSignIn(true)
+              }}
+            >
+              Sign in
+            </LinkText>
+          </TextNoMargin>
+          <TextNoMargin>
+            Not decided yet?
+            <LinkText
+              onClick={() => {
+                setShowSamplePost(false)
+                setHasRead(true)
+              }}
+            >
+              Back to Home
+            </LinkText>
+          </TextNoMargin>
+        </RightWrapper>
       </ContentArea>
     </Container>
   )
