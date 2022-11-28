@@ -82,8 +82,8 @@ const IconInList = styled.img`
 const EditWrapper = styled.div`
   position: relative;
   display: flex;
-  flex-flow: column wrap;
-  margin: 30px 0 20px 0;
+  flex-flow: column nowrap;
+  margin: 20px 0 20px 0;
   gap: 20px;
 `
 
@@ -217,7 +217,7 @@ const BtnEdit = styled.div`
 `
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
-  top: 25px;
+  top: 20px;
   right: 30px;
   width: 25px;
   height: 25px;
@@ -613,107 +613,6 @@ export default function DetailMemory(props: Props) {
                 )}
               </BtnColumnWrapper>
             )}
-            {showEditor && (
-              <>
-                <EditWrapper>
-                  {showEditTitle ? (
-                    <Input
-                      as="input"
-                      value={artiTitle}
-                      placeholder="Title"
-                      onChange={(e) => {
-                        setArtiTitle(e.target.value)
-                      }}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          updateTitle()
-                        }
-                      }}
-                    />
-                  ) : (
-                    <ConfirmedTitle as="div">{artiTitle}</ConfirmedTitle>
-                  )}
-                  {showEditTravelDate ? (
-                    <Input
-                      as="input"
-                      type="date"
-                      value={travelDate}
-                      onChange={(e) => {
-                        setTravelDate(e.target.value)
-                      }}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          updateTravelDate()
-                        }
-                      }}
-                    />
-                  ) : (
-                    <ConfirmedText as="div">
-                      <IconInList src={calendar} />
-                      {travelDate}
-                    </ConfirmedText>
-                  )}
-                </EditWrapper>
-                {showEditArtiContent ? (
-                  <ArtiWrapper>
-                    <BtnSave onClick={updateArtiContent}>Save</BtnSave>
-                    <Editor
-                      artiContent={artiContent}
-                      setArtiContent={setArtiContent}
-                    />
-                  </ArtiWrapper>
-                ) : (
-                  <ConfirmedText>{parse(artiContent)}</ConfirmedText>
-                )}
-                {selectedMarker &&
-                  typeof selectedMarker.id === "string" &&
-                  typeof selectedMarker.userId === "string" &&
-                  typeof selectedMarker.location.lat === "number" &&
-                  typeof selectedMarker.location.lng === "number" &&
-                  typeof selectedMarker.location.placeId === "string" && (
-                    <EditWrapper>
-                      {showEditor && (
-                        <Upload
-                          currentPin={{
-                            id: selectedMarker.id,
-                            userId: selectedMarker.userId,
-                            location: {
-                              lat: selectedMarker.location.lat,
-                              lng: selectedMarker.location.lng,
-                              name: selectedMarker.location.name,
-                              placeId: selectedMarker.location.placeId,
-                            },
-                          }}
-                          filesName={filesName}
-                          setFilesName={setFilesName}
-                          photos={photos}
-                          setPhotos={setPhotos}
-                          hasUpload={hasUpload}
-                          setHasUpload={setHasUpload}
-                          urls={urls}
-                          setUrls={setUrls}
-                          setUploadProgress={setUploadProgress}
-                        />
-                      )}
-                      {hasUpload && (
-                        <BtnWrapper>
-                          <BtnUploaded onClick={updatePhotos}>
-                            Save uploaded
-                          </BtnUploaded>
-                          <BtnCancelUpload onClick={cancelPhotos}>
-                            Cancel
-                          </BtnCancelUpload>
-                        </BtnWrapper>
-                      )}
-
-                      {showSavedPhoto &&
-                        savedPhotoUrls.map((photoUrl: string) => (
-                          <PhotoImg key={photoUrl} bkImage={photoUrl} />
-                        ))}
-                    </EditWrapper>
-                  )}
-              </>
-            )}
             <LeftWrapper>
               {selectedMarker?.albumURLs &&
                 typeof selectedMarker?.albumURLs !== null && (
@@ -731,92 +630,93 @@ export default function DetailMemory(props: Props) {
                   </TextNoMargin>
                 </>
               )}
-              {!showEditor &&
-                selectedMarker?.article?.content !== undefined && (
+              {!showEditor && selectedMarker?.article?.content !== undefined && (
+                <>
                   <ArticleContentArea>{parse(artiContent)}</ArticleContentArea>
-                )}
-
-              <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
-              <MsgColumnWrapper>
-                <MsgRowNoWrapper>
-                  {currentUser !== null &&
-                    currentUser !== undefined &&
-                    typeof currentUser?.photoURL === "string" && (
-                      <UserAvatar avatarURL={currentUser?.photoURL} />
-                    )}
-                  <MsgInput
-                    ref={msgRef}
-                    placeholder="Leave message..."
-                    onKeyPress={(e) => {
-                      if (
-                        e.key === "Enter" &&
-                        typeof selectedMarker?.id === "string" &&
-                        typeof currentUser?.id === "string" &&
-                        msgRef.current !== undefined &&
-                        msgRef.current !== null
-                      ) {
-                        addMsg(
-                          currentUser?.id,
-                          selectedMarker?.id,
-                          msgRef?.current?.value
-                        )
-                        msgRef.current.value = ""
-                      }
-                    }}
-                  />
-                </MsgRowNoWrapper>
-                {messages !== undefined &&
-                  messages.length !== 0 &&
-                  messengerInfo !== undefined &&
-                  messengerInfo.length === messages.length &&
-                  messages.map(
-                    (item: DocumentData | MessagesType, index: number) => {
-                      return (
-                        <MsgRowNoWrapper
-                          key={`${item.messenger}-${item.msgTimestamp}`}
-                        >
-                          <UserAvatar
-                            avatarURL={messengerInfo[index].photoURL}
-                          />
-                          <MsgContent>
-                            {messengerInfo[index].name}
-                            <br />
-                            {item.msgContent}
-                          </MsgContent>
-                          {currentUser !== null &&
-                            item.messenger === currentUser?.id && (
-                              <BtnMore
-                                showMore={showDelete}
-                                onClick={() => {
-                                  setShowDelete((prev) => !prev)
-                                }}
-                              >
-                                {showDelete && (
-                                  <BtnRed
+                  <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
+                  <MsgColumnWrapper>
+                    <MsgRowNoWrapper>
+                      {currentUser !== null &&
+                        currentUser !== undefined &&
+                        typeof currentUser?.photoURL === "string" && (
+                          <UserAvatar avatarURL={currentUser?.photoURL} />
+                        )}
+                      <MsgInput
+                        ref={msgRef}
+                        placeholder="Leave message..."
+                        onKeyPress={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            typeof selectedMarker?.id === "string" &&
+                            typeof currentUser?.id === "string" &&
+                            msgRef.current !== undefined &&
+                            msgRef.current !== null
+                          ) {
+                            addMsg(
+                              currentUser?.id,
+                              selectedMarker?.id,
+                              msgRef?.current?.value
+                            )
+                            msgRef.current.value = ""
+                          }
+                        }}
+                      />
+                    </MsgRowNoWrapper>
+                    {messages !== undefined &&
+                      messages.length !== 0 &&
+                      messengerInfo !== undefined &&
+                      messengerInfo.length === messages.length &&
+                      messages.map(
+                        (item: DocumentData | MessagesType, index: number) => {
+                          return (
+                            <MsgRowNoWrapper
+                              key={`${item.messenger}-${item.msgTimestamp}`}
+                            >
+                              <UserAvatar
+                                avatarURL={messengerInfo[index].photoURL}
+                              />
+                              <MsgContent>
+                                {messengerInfo[index].name}
+                                <br />
+                                {item.msgContent}
+                              </MsgContent>
+                              {currentUser !== null &&
+                                item.messenger === currentUser?.id && (
+                                  <BtnMore
+                                    showMore={showDelete}
                                     onClick={() => {
-                                      if (
-                                        selectedMarker !== undefined &&
-                                        typeof selectedMarker?.id === "string"
-                                      ) {
-                                        deleteMsg(selectedMarker?.id, item)
-                                      }
+                                      setShowDelete((prev) => !prev)
                                     }}
                                   >
-                                    Delete
-                                  </BtnRed>
+                                    {showDelete && (
+                                      <BtnRed
+                                        onClick={() => {
+                                          if (
+                                            selectedMarker !== undefined &&
+                                            typeof selectedMarker?.id ===
+                                              "string"
+                                          ) {
+                                            deleteMsg(selectedMarker?.id, item)
+                                          }
+                                        }}
+                                      >
+                                        Delete
+                                      </BtnRed>
+                                    )}
+                                  </BtnMore>
                                 )}
-                              </BtnMore>
-                            )}
-                        </MsgRowNoWrapper>
-                      )
-                    }
-                  )}
-              </MsgColumnWrapper>
-              <LocationText>
-                <IconInList src={location} />
-                {selectedMarker?.location?.name}
-              </LocationText>
-              {isLoaded && (
+                            </MsgRowNoWrapper>
+                          )
+                        }
+                      )}
+                  </MsgColumnWrapper>
+                  <LocationText>
+                    <IconInList src={location} />
+                    {selectedMarker?.location?.name}
+                  </LocationText>{" "}
+                </>
+              )}
+              {isLoaded && !showEditor && (
                 <>
                   <StreetModeContainer id="street-mode-container">
                     <StreetViewService onLoad={onStreetLoad} />
@@ -848,6 +748,107 @@ export default function DetailMemory(props: Props) {
                       }}
                     />
                   </GoogleMap>
+                </>
+              )}
+              {showEditor && (
+                <>
+                  <EditWrapper>
+                    {showEditTitle ? (
+                      <Input
+                        as="input"
+                        value={artiTitle}
+                        placeholder="Title"
+                        onChange={(e) => {
+                          setArtiTitle(e.target.value)
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            updateTitle()
+                          }
+                        }}
+                      />
+                    ) : (
+                      <ConfirmedTitle as="div">{artiTitle}</ConfirmedTitle>
+                    )}
+                    {showEditTravelDate ? (
+                      <Input
+                        as="input"
+                        type="date"
+                        value={travelDate}
+                        onChange={(e) => {
+                          setTravelDate(e.target.value)
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            updateTravelDate()
+                          }
+                        }}
+                      />
+                    ) : (
+                      <ConfirmedText as="div">
+                        <IconInList src={calendar} />
+                        {travelDate}
+                      </ConfirmedText>
+                    )}
+                  </EditWrapper>
+                  {showEditArtiContent ? (
+                    <ArtiWrapper>
+                      <BtnSave onClick={updateArtiContent}>Save</BtnSave>
+                      <Editor
+                        artiContent={artiContent}
+                        setArtiContent={setArtiContent}
+                      />
+                    </ArtiWrapper>
+                  ) : (
+                    <ConfirmedText>{parse(artiContent)}</ConfirmedText>
+                  )}
+                  {selectedMarker &&
+                    typeof selectedMarker.id === "string" &&
+                    typeof selectedMarker.userId === "string" &&
+                    typeof selectedMarker.location.lat === "number" &&
+                    typeof selectedMarker.location.lng === "number" &&
+                    typeof selectedMarker.location.placeId === "string" && (
+                      <EditWrapper>
+                        {showEditor && (
+                          <Upload
+                            currentPin={{
+                              id: selectedMarker.id,
+                              userId: selectedMarker.userId,
+                              location: {
+                                lat: selectedMarker.location.lat,
+                                lng: selectedMarker.location.lng,
+                                name: selectedMarker.location.name,
+                                placeId: selectedMarker.location.placeId,
+                              },
+                            }}
+                            filesName={filesName}
+                            setFilesName={setFilesName}
+                            photos={photos}
+                            setPhotos={setPhotos}
+                            hasUpload={hasUpload}
+                            setHasUpload={setHasUpload}
+                            urls={urls}
+                            setUrls={setUrls}
+                            setUploadProgress={setUploadProgress}
+                          />
+                        )}
+                        {hasUpload && (
+                          <BtnWrapper>
+                            <BtnUploaded onClick={updatePhotos}>
+                              Save uploaded
+                            </BtnUploaded>
+                            <BtnCancelUpload onClick={cancelPhotos}>
+                              Cancel
+                            </BtnCancelUpload>
+                          </BtnWrapper>
+                        )}
+
+                        {showSavedPhoto &&
+                          savedPhotoUrls.map((photoUrl: string) => (
+                            <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                          ))}
+                      </EditWrapper>
+                    )}
                 </>
               )}
             </RightWrapper>
