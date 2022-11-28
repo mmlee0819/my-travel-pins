@@ -37,7 +37,6 @@ const StreetModePinContentContainer = styled.div`
   flex-flow: column wrap;
   padding: 10px;
   width: 50vw;
-  font-family: "Poppins";
   background-color: #ffffff;
   z-index: 101;
 `
