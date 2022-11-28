@@ -20,7 +20,10 @@ import Upload from "../User/components/uploadPhoto"
 import moreIcon from "../assets/buttons/moreIcon.png"
 import moreHoverIcon from "../assets/buttons/moreHover.png"
 import SwiperPhotos from "./swiperPhoto"
-import editPencil from "../assets/buttons/blackEdit.png"
+import whiteEditPencil from "../assets/buttons/edit.png"
+import blackEditPencil from "../assets/buttons/blackEdit.png"
+import calendar from "../assets/calendar.png"
+import location from "../assets/location.png"
 
 const Container = styled.div`
   position: absolute;
@@ -30,21 +33,51 @@ const Container = styled.div`
   width: 100%;
   font-family: "Poppins", "sans-serif";
   background-color: rgb(45, 45, 45, 0.8);
+  border-radius: 5px;
   z-index: 120;
 `
 const ContentArea = styled.div`
-  position: relative;
-  padding: 30px 6%;
-  width: 60%;
-  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex: row nowrap;
+  padding: 20px;
+  width: 80%;
+  height: 80%;
   margin: 0 auto;
+  font-size: ${(props) => props.theme.title.lg};
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
+`
+const LeftWrapper = styled.div`
+  position: relative;
+  align-self: center;
+  width: 50%;
+  height: 90%;
+`
+const RightWrapper = styled.div`
+  position: relative;
+  align-self: center;
+  width: 45%;
+  height: 90%;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
+`
+const MiddleSplit = styled.div`
+  margin: 0 20px 0 10px;
+  border-left: 2px dashed #454545;
+  height: 100%;
+`
+const IconInList = styled.img`
+  align-self: center;
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
 `
 const EditWrapper = styled.div`
   position: relative;
@@ -58,7 +91,7 @@ const Text = styled.div`
   display: flex;
   flex-flow: column nowrap;
   text-justify: justify;
-  margin: 25px 0;
+  margin: 20px 0;
   font-size: ${(props) => props.theme.title.md};
   @media screen and (max-width: 799px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
@@ -66,7 +99,7 @@ const Text = styled.div`
 `
 const ArticleTitle = styled(Text)`
   min-height: 40px;
-  margin: 15px 0 15px 0;
+  margin: 0;
   font-weight: 700;
   font-size: ${(props) => props.theme.title.lg};
   @media screen and (max-width: 799px), (max-height: 600px) {
@@ -94,9 +127,20 @@ const ConfirmedText = styled(Input)`
   border: none;
 `
 const TextNoMargin = styled(Text)`
-  margin: 0;
+  display: flex;
+  flex-flow: row nowrap;
   margin-block-end: 0;
   text-align: justify;
+`
+const LocationText = styled(TextNoMargin)`
+  margin: 30px 0 0 0;
+`
+const ArticleContentArea = styled(Text)`
+  p {
+    margin: 0;
+    margin-block-end: 10px;
+    text-align: justify;
+  }
 `
 
 const StreetModeContainer = styled.div`
@@ -150,7 +194,6 @@ const MsgColumnWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   width: 100%;
-  min-height: 100px;
 `
 const MsgRowNoWrapper = styled.div`
   position: relative;
@@ -161,13 +204,16 @@ const MsgRowNoWrapper = styled.div`
 `
 const BtnEdit = styled.div`
   position: absolute;
-  top: 45px;
+  top: 20px;
   right: 30px;
   width: 25px;
   height: 25px;
-  background-image: url(${editPencil});
+  background-image: url(${whiteEditPencil});
   background-size: 100% 100%;
   cursor: pointer;
+  &:hover {
+    background-image: url(${blackEditPencil});
+  }
 `
 const BtnMore = styled.div<{ showMore: boolean }>`
   position: absolute;
@@ -493,8 +539,9 @@ export default function DetailMemory(props: Props) {
             selectedMarker?.location?.lat,
             selectedMarker?.location?.lng
           ),
-          fullscreenControl: false,
+          fullscreenControl: true,
           addressControl: false,
+          scrollwheel: false,
         }
       )
     }
@@ -601,7 +648,10 @@ export default function DetailMemory(props: Props) {
                       }}
                     />
                   ) : (
-                    <ConfirmedText as="div">{travelDate}</ConfirmedText>
+                    <ConfirmedText as="div">
+                      <IconInList src={calendar} />
+                      {travelDate}
+                    </ConfirmedText>
                   )}
                 </EditWrapper>
                 {showEditArtiContent ? (
@@ -664,127 +714,143 @@ export default function DetailMemory(props: Props) {
                   )}
               </>
             )}
-            {!showEditor && (
-              <>
-                <ArticleTitle>{artiTitle}</ArticleTitle>
-                <TextNoMargin>{travelDate}</TextNoMargin>
-              </>
-            )}
-            {!showEditor && selectedMarker?.article?.content !== undefined && (
-              <TextNoMargin>{parse(artiContent)}</TextNoMargin>
-            )}
-            {selectedMarker?.albumURLs &&
-              typeof selectedMarker?.albumURLs !== null && (
-                <SwiperPhotos photos={selectedMarker?.albumURLs} />
-              )}
-
-            <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
-            <MsgColumnWrapper>
-              <MsgRowNoWrapper>
-                {currentUser !== null &&
-                  currentUser !== undefined &&
-                  typeof currentUser?.photoURL === "string" && (
-                    <UserAvatar avatarURL={currentUser?.photoURL} />
-                  )}
-                <MsgInput
-                  ref={msgRef}
-                  placeholder="Leave message..."
-                  onKeyPress={(e) => {
-                    if (
-                      e.key === "Enter" &&
-                      typeof selectedMarker?.id === "string" &&
-                      typeof currentUser?.id === "string" &&
-                      msgRef.current !== undefined &&
-                      msgRef.current !== null
-                    ) {
-                      addMsg(
-                        currentUser?.id,
-                        selectedMarker?.id,
-                        msgRef?.current?.value
-                      )
-                      msgRef.current.value = ""
-                    }
-                  }}
-                />
-              </MsgRowNoWrapper>
-              {messages !== undefined &&
-                messages.length !== 0 &&
-                messengerInfo !== undefined &&
-                messengerInfo.length === messages.length &&
-                messages.map(
-                  (item: DocumentData | MessagesType, index: number) => {
-                    return (
-                      <MsgRowNoWrapper
-                        key={`${item.messenger}-${item.msgTimestamp}`}
-                      >
-                        <UserAvatar avatarURL={messengerInfo[index].photoURL} />
-                        <MsgContent>
-                          {messengerInfo[index].name}
-                          <br />
-                          {item.msgContent}
-                        </MsgContent>
-                        {currentUser !== null &&
-                          item.messenger === currentUser?.id && (
-                            <BtnMore
-                              showMore={showDelete}
-                              onClick={() => {
-                                setShowDelete((prev) => !prev)
-                              }}
-                            >
-                              {showDelete && (
-                                <BtnRed
-                                  onClick={() => {
-                                    if (
-                                      selectedMarker !== undefined &&
-                                      typeof selectedMarker?.id === "string"
-                                    ) {
-                                      deleteMsg(selectedMarker?.id, item)
-                                    }
-                                  }}
-                                >
-                                  Delete
-                                </BtnRed>
-                              )}
-                            </BtnMore>
-                          )}
-                      </MsgRowNoWrapper>
-                    )
-                  }
+            <LeftWrapper>
+              {selectedMarker?.albumURLs &&
+                typeof selectedMarker?.albumURLs !== null && (
+                  <SwiperPhotos photos={selectedMarker?.albumURLs} />
                 )}
-            </MsgColumnWrapper>
-            <TextNoMargin>{selectedMarker?.location?.name}</TextNoMargin>
-            {isLoaded && (
-              <>
-                <StreetModeContainer id="street-mode-container">
-                  <StreetViewService onLoad={onStreetLoad} />
-                </StreetModeContainer>
-                <GoogleMap
-                  mapContainerStyle={{
-                    height: "40vh",
-                    width: "100%",
-                  }}
-                  center={{
-                    lat: selectedMarker?.location.lat,
-                    lng: selectedMarker?.location.lng,
-                  }}
-                  zoom={14}
-                  options={{
-                    draggable: true,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    scaleControl: false,
-                    fullscreenControl: false,
-                  }}
-                >
-                  <Marker
-                    position={{
+            </LeftWrapper>
+            <MiddleSplit />
+            <RightWrapper>
+              {!showEditor && (
+                <>
+                  <ArticleTitle>{artiTitle}</ArticleTitle>
+                  <TextNoMargin>
+                    <IconInList src={calendar} />
+                    {travelDate}
+                  </TextNoMargin>
+                </>
+              )}
+              {!showEditor &&
+                selectedMarker?.article?.content !== undefined && (
+                  <ArticleContentArea>{parse(artiContent)}</ArticleContentArea>
+                )}
+
+              <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
+              <MsgColumnWrapper>
+                <MsgRowNoWrapper>
+                  {currentUser !== null &&
+                    currentUser !== undefined &&
+                    typeof currentUser?.photoURL === "string" && (
+                      <UserAvatar avatarURL={currentUser?.photoURL} />
+                    )}
+                  <MsgInput
+                    ref={msgRef}
+                    placeholder="Leave message..."
+                    onKeyPress={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        typeof selectedMarker?.id === "string" &&
+                        typeof currentUser?.id === "string" &&
+                        msgRef.current !== undefined &&
+                        msgRef.current !== null
+                      ) {
+                        addMsg(
+                          currentUser?.id,
+                          selectedMarker?.id,
+                          msgRef?.current?.value
+                        )
+                        msgRef.current.value = ""
+                      }
+                    }}
+                  />
+                </MsgRowNoWrapper>
+                {messages !== undefined &&
+                  messages.length !== 0 &&
+                  messengerInfo !== undefined &&
+                  messengerInfo.length === messages.length &&
+                  messages.map(
+                    (item: DocumentData | MessagesType, index: number) => {
+                      return (
+                        <MsgRowNoWrapper
+                          key={`${item.messenger}-${item.msgTimestamp}`}
+                        >
+                          <UserAvatar
+                            avatarURL={messengerInfo[index].photoURL}
+                          />
+                          <MsgContent>
+                            {messengerInfo[index].name}
+                            <br />
+                            {item.msgContent}
+                          </MsgContent>
+                          {currentUser !== null &&
+                            item.messenger === currentUser?.id && (
+                              <BtnMore
+                                showMore={showDelete}
+                                onClick={() => {
+                                  setShowDelete((prev) => !prev)
+                                }}
+                              >
+                                {showDelete && (
+                                  <BtnRed
+                                    onClick={() => {
+                                      if (
+                                        selectedMarker !== undefined &&
+                                        typeof selectedMarker?.id === "string"
+                                      ) {
+                                        deleteMsg(selectedMarker?.id, item)
+                                      }
+                                    }}
+                                  >
+                                    Delete
+                                  </BtnRed>
+                                )}
+                              </BtnMore>
+                            )}
+                        </MsgRowNoWrapper>
+                      )
+                    }
+                  )}
+              </MsgColumnWrapper>
+              <LocationText>
+                <IconInList src={location} />
+                {selectedMarker?.location?.name}
+              </LocationText>
+              {isLoaded && (
+                <>
+                  <StreetModeContainer id="street-mode-container">
+                    <StreetViewService onLoad={onStreetLoad} />
+                  </StreetModeContainer>
+                  <GoogleMap
+                    mapContainerStyle={{
+                      height: "40vh",
+                      width: "100%",
+                      marginTop: "20px",
+                    }}
+                    center={{
                       lat: selectedMarker?.location.lat,
                       lng: selectedMarker?.location.lng,
                     }}
-                  />
-                </GoogleMap>
-              </>
-            )}
+                    zoom={14}
+                    options={{
+                      draggable: true,
+                      mapTypeControl: false,
+                      streetViewControl: false,
+                      scaleControl: false,
+                      fullscreenControl: true,
+                      scrollwheel: false,
+                    }}
+                  >
+                    <Marker
+                      position={{
+                        lat: selectedMarker?.location.lat,
+                        lng: selectedMarker?.location.lng,
+                      }}
+                    />
+                  </GoogleMap>
+                </>
+              )}
+            </RightWrapper>
           </ContentArea>
         )}
     </Container>
