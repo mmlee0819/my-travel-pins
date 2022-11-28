@@ -35,8 +35,8 @@ const Xmark = styled.div`
   cursor: pointer;
 
   @media screen and (max-width: 799px), (max-height: 600px) {
-    width: 30px;
-    height: 30px;
+    width: 15px;
+    height: 15px;
   }
 `
 
@@ -494,7 +494,7 @@ function WeatherWidget(props: Props) {
                 }}
               />
               <ForecastRowWrapper>
-                <Line options={options} data={data} />
+                {maxTemps && maxTemps && <Line options={options} data={data} />}
                 {forecastStatus.map((item) => {
                   return (
                     <>

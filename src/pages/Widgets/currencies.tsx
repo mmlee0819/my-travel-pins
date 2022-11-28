@@ -263,7 +263,8 @@ function CurrencyWidget(props: Props) {
   } = useContext(ToolContext)
 
   const [amount, setAmount] = useState("")
-
+  console.log(selectedTo.id)
+  console.log(selectedFrom.id)
   useEffect(() => {
     if (!currenciesData || selectedFrom.id === "" || selectedTo.id === "")
       return
@@ -335,7 +336,7 @@ function CurrencyWidget(props: Props) {
                         return (
                           <>
                             <CurrencyRow
-                              key={item.id}
+                              key={`from-${item.id}`}
                               id={item.id}
                               onClick={(e) => {
                                 const filteredCurrency = currenciesArr.filter(
@@ -376,7 +377,7 @@ function CurrencyWidget(props: Props) {
                       currenciesArr.map((item) => {
                         return (
                           <CurrencyRow
-                            key={item.id}
+                            key={`to-${item.id}`}
                             id={item.id}
                             onClick={(e) => {
                               const filteredCurrency = currenciesArr.filter(
