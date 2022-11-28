@@ -25,12 +25,12 @@ import xMark from "../assets/buttons/x-mark.png"
 
 const Xmark = styled.div`
   position: absolute;
-  top: 10px;
-  right: 30px;
+  top: 18px;
+  right: 20px;
   background-image: url(${xMark});
   background-size: 100% 100%;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   z-index: 188;
   cursor: pointer;
 
@@ -39,28 +39,18 @@ const Xmark = styled.div`
     height: 30px;
   }
 `
+
 const GridArea = styled.div`
   position: absolute;
   display: flex;
   top: 90px;
   left: 60px;
   height: calc(100% - 150px);
-  min-width: 40vw;
+  min-width: 30vw;
   min-height: 30vh;
   border-radius: 5px;
   border: none;
   z-index: 150;
-`
-const GridItemWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  width: 100%;
-  min-height: 50vh;
-  font-size: ${(props) => props.theme.title.md};
-  color: #ffffff;
-  background-color: #ffffff;
-  box-shadow: 3px 5px 3px #2d2d2d;
-  background: #2d2d2d;
 `
 
 const Input = styled.input`
@@ -69,9 +59,9 @@ const Input = styled.input`
   left: 0;
   padding-left: 8px;
   width: 100%;
-  line-height: 40px;
-  height: 40px;
-  font-size: 15px;
+  line-height: 50px;
+  height: 50px;
+  font-size: ${(props) => props.theme.title.md};
   color: #2d2d2d;
   background-color: #ffffff;
   border-radius: 5px;
@@ -152,10 +142,14 @@ const ForecastColumnArea = styled(ColumnWrapper)`
   min-height: 50%;
 `
 const WeatherContentArea = styled.div`
-  position: relative;
-  min-width: 50vw;
   padding: 5px;
   background-color: #ffffff;
+  border-radius: 5px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `
 const TitleWrapper = styled(RowNoWrapper)`
   justify-content: end;
@@ -176,12 +170,23 @@ const PopText = styled(ForecastWeatherText)`
 `
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
+const GridContainer = styled(ResponsiveGridLayout)`
+  .react-grid-item {
+    box-shadow: 2px 2px #454545;
+    border: 2px solid #034961;
+  }
+  .react-grid-item > .react-resizable-handle::after {
+    border-right: 2px solid #034961;
+    border-bottom: 2px solid #034961;
+  }
+`
+
 const layouts = {
-  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 3, maxH: 2 }],
-  md: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
-  sm: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 3, maxH: 2 }],
+  lg: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
+  md: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  sm: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
 }
 
 interface Props {
@@ -277,13 +282,13 @@ function WeatherWidget(props: Props) {
       title: {
         display: true,
         text: `${location.name} 8-day forecast`,
-        size: "25px",
+        font: { size: 18, weight: "bold" },
       },
     },
     scales: {
       y: {
-        min: minTemps[0] - 5,
-        max: maxTemps[0] + 5,
+        min: minTemps[0] - 10,
+        max: maxTemps[0] + 10,
         stepSize: 10,
       },
     },
@@ -461,22 +466,23 @@ function WeatherWidget(props: Props) {
             onLoad={onLoad}
             onPlacesChanged={onPlacesChanged}
           >
-            <Input placeholder="Search a place for current weather and 8-day forecast" />
+            <Input placeholder="Search a place for weather forecast" />
           </StandaloneSearchBox>
         </>
       )}
-      <ResponsiveGridLayout
-        layouts={layouts}
-        key="tools"
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
-        width={150}
-        rowHeight={300}
-        z-index={180}
-      >
-        <GridItemWrapper key="weather-query">
+      {location.name !== "" && (
+        <GridContainer
+          layouts={layouts}
+          key="tools"
+          breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
+          cols={{ xl: 4, lg: 3, md: 3, sm: 2, xs: 1 }}
+          width={150}
+          rowHeight={400}
+          z-index={180}
+        >
+          {/* <GridItemWrapper key="weather-query"> */}
           {location.name !== "" && showForecast && (
-            <WeatherContentArea>
+            <WeatherContentArea key="weather-query">
               <Xmark
                 onClick={() => {
                   setShowForecast(false)
@@ -529,8 +535,9 @@ function WeatherWidget(props: Props) {
               </ForecastRowWrapper>
             </WeatherContentArea>
           )}
-        </GridItemWrapper>
-      </ResponsiveGridLayout>
+          {/* </GridItemWrapper> */}
+        </GridContainer>
+      )}
     </GridArea>
   )
 }
