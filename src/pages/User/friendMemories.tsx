@@ -137,7 +137,7 @@ function FriendMemories() {
                       }}
                     >
                       {item?.article?.title === undefined
-                        ? "No title"
+                        ? "Untitled"
                         : item?.article?.title}
                     </Title>
                     <Text>

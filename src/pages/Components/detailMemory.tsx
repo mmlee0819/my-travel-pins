@@ -36,7 +36,7 @@ const Container = styled.div`
   border-radius: 5px;
   z-index: 120;
 `
-const ContentArea = styled.div`
+const ContentArea = styled.div<{ showEditor: boolean }>`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -50,7 +50,7 @@ const ContentArea = styled.div`
   font-size: ${(props) => props.theme.title.lg};
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
-  gap: 2%;
+  ${(props) => props.showEditor && "gap: 2%;"}
 `
 const LeftWrapper = styled.div`
   position: relative;
@@ -561,7 +561,7 @@ export default function DetailMemory(props: Props) {
         selectedMarker &&
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
-          <ContentArea ref={overlayRef}>
+          <ContentArea ref={overlayRef} showEditor={showEditor}>
             {(isMyMap || isMyMemory) && !showEditor && (
               <BtnEdit
                 onClick={() => {

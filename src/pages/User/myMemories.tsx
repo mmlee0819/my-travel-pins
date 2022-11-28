@@ -208,8 +208,9 @@ export default function MyMemories() {
                         getSpecificPin(item?.id, setMemory, setMemoryIsShow)
                       }}
                     >
-                      {item?.article?.title === undefined
-                        ? "No title"
+                      {item?.article?.title === undefined ||
+                      item?.article?.title === ""
+                        ? "Untitled"
                         : item?.article?.title}
                     </Title>
                     <Text>

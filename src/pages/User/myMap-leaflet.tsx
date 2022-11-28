@@ -35,13 +35,24 @@ import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { getPins, PinContent } from "./ts_fn_commonUse"
 import Editor from "../Components/editor"
-import defaultImage from "../assets/defaultImage.png"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
 import spinner from "../assets/dotsSpinner.svg"
 import xmark from "../assets/buttons/x-mark.png"
 
+const PhotoText = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+  width: 150px;
+  height: 120px;
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
+`
 const Spinner = styled(Container)`
   background-image: url(${spinner});
   background-size: 100% 100%;
@@ -209,7 +220,7 @@ const BtnBlue = styled.div`
   font-size: 20px;
   color: #ffffff;
   background-color: ${(props) => props.theme.btnColor.bgBlue};
-  border-radius: 3px;
+  border-radius: 5px;
   cursor: pointer;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -768,13 +779,12 @@ export default function MyMap() {
                             setShowMemory(true)
                           }}
                         >
-                          <PinInfoImg
-                            src={
-                              marker.albumURLs
-                                ? marker?.albumURLs[0]
-                                : defaultImage
-                            }
-                          />
+                          {marker.albumURLs ? (
+                            <PinInfoImg src={marker?.albumURLs[0]} />
+                          ) : (
+                            <PhotoText>No photo uploaded</PhotoText>
+                          )}
+
                           <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                         </PinInfoArea>
                       </Popup>

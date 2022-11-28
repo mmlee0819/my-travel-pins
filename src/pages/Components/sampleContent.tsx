@@ -42,7 +42,6 @@ const ContentArea = styled.div`
 const LeftWrapper = styled.div`
   position: relative;
   align-self: center;
-
   width: 50%;
   height: 90%;
 `
@@ -102,6 +101,7 @@ const TextNoMargin = styled(Text)`
 const LinkText = styled(TextNoMargin)`
   display: inline-block;
   margin: 0 0 0 15px;
+  font-weight: 700;
   color: #5594b7;
   cursor: pointer;
   &:hover {
