@@ -58,7 +58,7 @@ const BtnUpload = styled.button`
   padding: 10px;
   height: 30px;
   color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
   border: none;
   opacity: 1;

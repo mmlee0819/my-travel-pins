@@ -50,6 +50,7 @@ const ContentArea = styled.div`
   font-size: ${(props) => props.theme.title.lg};
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
+  gap: 2%;
 `
 const LeftWrapper = styled.div`
   position: relative;
@@ -57,16 +58,19 @@ const LeftWrapper = styled.div`
   width: 50%;
   height: 90%;
 `
-const RightWrapper = styled.div`
+const RightWrapper = styled.div<{ showEditor: boolean }>`
   position: relative;
   align-self: center;
   width: 45%;
   height: 90%;
+  ${(props) =>
+    !props.showEditor &&
+    `
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
+    display: none; 
+  }`}
 `
 const MiddleSplit = styled.div`
   margin: 0 20px 0 10px;
@@ -83,8 +87,15 @@ const EditWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: column nowrap;
-  margin: 20px 0 20px 0;
+  flex: 1 1 auto;
+  margin: 20px 0 0 0;
+  height: calc(90% - 30px);
   gap: 20px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `
 
 const Text = styled.div`
@@ -110,6 +121,8 @@ const Input = styled(Text)`
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
+  min-height: 30px;
+  height: 30px;
   margin: 0px;
   padding-left: 10px;
   border: 3px solid #ffffff;
@@ -173,7 +186,7 @@ const MsgNumText = styled.div`
 const MsgContent = styled.div`
   display: flex;
   flex: 1 1 auto;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   padding-left: 8px;
   background-color: #f6f6f6;
   border: none;
@@ -204,8 +217,8 @@ const MsgRowNoWrapper = styled.div`
 `
 const BtnEdit = styled.div`
   position: absolute;
-  top: 20px;
-  right: 30px;
+  top: 10px;
+  right: 20px;
   width: 25px;
   height: 25px;
   background-image: url(${whiteEditPencil});
@@ -231,6 +244,7 @@ const BtnMore = styled.div<{ showMore: boolean }>`
     background-image: url(${moreHoverIcon});
   }
 `
+
 const BtnGreen = styled.div`
   position: absolute;
   top: 30px;
@@ -240,7 +254,7 @@ const BtnGreen = styled.div`
   width: auto;
   padding: 5px 10px;
   line-height: 16px;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   color: #fff;
   background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
@@ -256,22 +270,7 @@ const BtnDelete = styled(BtnGreen)<{ showDelete: boolean }>`
 const ArtiWrapper = styled.div`
   position: relative;
 `
-const BtnSave = styled(BtnGreen)`
-  top: 7.5px;
-  right: 15px;
-  &:hover {
-    padding: 5px 20px;
-  }
-`
 
-const BtnWrapper = styled.div`
-  position: relative;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  gap: 20%;
-`
 const BtnUploaded = styled(BtnGreen)`
   position: relative;
   top: initial;
@@ -280,26 +279,30 @@ const BtnUploaded = styled(BtnGreen)`
   align-items: center;
   justify-content: center;
 `
-const BtnCancelUpload = styled(BtnUploaded)`
-  background-color: #ca3434;
-`
-const BtnColumnWrapper = styled.div`
-  position: absolute;
-  top: 50px;
-  right: 20px;
+
+const BtnPhotoWrapper = styled.div`
   display: flex;
-  flex-flow: column wrap;
-  justify-content: center;
+  flex-flow: row nowrap;
+  justify-content: end;
   align-content: end;
+  height: 30px;
+  line-height: 30px;
   width: 100%;
-  gap: 20%;
+  gap: 20px;
 `
-const BtnRemainChange = styled(BtnUploaded)`
-  margin: 5px 0px;
-  padding: 10px 5px;
+const BtnSaveBackWrapper = styled(BtnPhotoWrapper)``
+
+const BtnDone = styled(BtnUploaded)`
+  min-width: 50px;
+  width: 30%;
+  height: 30px;
+  margin: 0;
+  padding: 0;
 `
-const BtnRemoveChange = styled(BtnRemainChange)`
-  background-color: #ca3434;
+const BtnCancel = styled(BtnDone)`
+  color: ${(props) => props.theme.color.deepMain};
+  background-color: rgb(255, 255, 255, 0);
+  border: 1px solid ${(props) => props.theme.btnColor.bgGray};
 `
 
 const MsgInput = styled.input`
@@ -310,7 +313,7 @@ const MsgInput = styled.input`
   padding-left: 10px;
   height: 30px;
   line-height: 30px;
-  font-size: 16px;
+  font-size: ${(props) => props.theme.title.md};
   color: #8d8d8d;
   background-color: #cbcbcb;
   border: none;
@@ -321,7 +324,7 @@ const MsgInput = styled.input`
     background-color: #e3e3e3;
   }
   ::placeholder {
-    font-size: 16px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 
@@ -385,6 +388,7 @@ export default function DetailMemory(props: Props) {
   const [showSavedPhoto, setShowSavedPhoto] = useState(false)
   const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
   const [savedPhotoFilesName, setSavedPhotoFilesName] = useState<string[]>([])
+  const [showUploadMore, setShowUploadMore] = useState(false)
   const [hasDiscard, setHasDiscard] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState("")
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -461,6 +465,7 @@ export default function DetailMemory(props: Props) {
       setUrls([])
       setUploadProgress(0)
       setShowSavedPhoto(true)
+      setShowUploadMore(true)
     } catch (error) {
       console.log(
         "Failed to update article content from specific memory page",
@@ -569,53 +574,7 @@ export default function DetailMemory(props: Props) {
                 }}
               />
             )}
-            {(isMyMap || isMyMemory) && showEditor && (
-              <BtnMore
-                showMore={showMore}
-                onClick={() => {
-                  setShowMore((prev) => !prev)
-                }}
-              />
-            )}
-            {showMore && (
-              <BtnColumnWrapper>
-                <BtnRemainChange
-                  onClick={() => {
-                    setShowEditor(false)
-                    setShowEditTitle(false)
-                    setShowEditTravelDate(false)
-                    setShowEditArtiContent(false)
-                    setArtiTitle(selectedMarker?.article?.title || "")
-                    setTravelDate(selectedMarker?.article?.travelDate || "")
-                    setArtiContent(selectedMarker?.article?.content || "")
-                    setShowMore(false)
-                  }}
-                >
-                  Remain all changes and back
-                </BtnRemainChange>
-                {showEditor && (
-                  <BtnRemoveChange
-                    onClick={() => {
-                      setShowEditTitle(false)
-                      setShowEditTravelDate(false)
-                      setShowEditArtiContent(false)
-                      setArtiTitle(selectedMarker?.article?.title || "")
-                      setTravelDate(selectedMarker?.article?.travelDate || "")
-                      setArtiContent(selectedMarker?.article?.content || "")
-                      if (hasUpload) {
-                        cancelPhotos()
-                      }
-                      updateToOrigin()
-                      setShowMore(false)
-                      setHasDiscard(true)
-                      setShowEditor(false)
-                    }}
-                  >
-                    Discard all changes
-                  </BtnRemoveChange>
-                )}
-              </BtnColumnWrapper>
-            )}
+
             <LeftWrapper>
               {selectedMarker?.albumURLs &&
                 typeof selectedMarker?.albumURLs !== null && (
@@ -623,7 +582,7 @@ export default function DetailMemory(props: Props) {
                 )}
             </LeftWrapper>
             <MiddleSplit />
-            <RightWrapper>
+            <RightWrapper showEditor={showEditor}>
               {!showEditor && (
                 <>
                   <ArticleTitle>{artiTitle}</ArticleTitle>
@@ -771,6 +730,46 @@ export default function DetailMemory(props: Props) {
                   </GoogleMap>
                 </>
               )}
+              {(isMyMap || isMyMemory) && showEditor && (
+                <BtnSaveBackWrapper>
+                  <BtnCancel
+                    onClick={() => {
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(selectedMarker?.article?.title || "")
+                      setTravelDate(selectedMarker?.article?.travelDate || "")
+                      setArtiContent(selectedMarker?.article?.content || "")
+                      if (hasUpload) {
+                        cancelPhotos()
+                      }
+                      updateToOrigin()
+                      setShowMore(false)
+                      setHasDiscard(true)
+                      setShowEditor(false)
+                    }}
+                  >
+                    Back
+                  </BtnCancel>
+                  <BtnDone
+                    onClick={() => {
+                      if (hasUpload) {
+                        updatePhotos()
+                      }
+                      updateArtiContent()
+                      setShowEditor(false)
+                      setShowEditTitle(false)
+                      setShowEditTravelDate(false)
+                      setShowEditArtiContent(false)
+                      setArtiTitle(artiTitle)
+                      setTravelDate(travelDate)
+                      setArtiContent(artiContent)
+                    }}
+                  >
+                    Done
+                  </BtnDone>
+                </BtnSaveBackWrapper>
+              )}
               {showEditor && (
                 <>
                   <EditWrapper>
@@ -811,65 +810,58 @@ export default function DetailMemory(props: Props) {
                         {travelDate}
                       </ConfirmedText>
                     )}
-                  </EditWrapper>
-                  {showEditArtiContent ? (
-                    <ArtiWrapper>
-                      <BtnSave onClick={updateArtiContent}>Save</BtnSave>
-                      <Editor
-                        artiContent={artiContent}
-                        setArtiContent={setArtiContent}
-                      />
-                    </ArtiWrapper>
-                  ) : (
-                    <ConfirmedText>{parse(artiContent)}</ConfirmedText>
-                  )}
-                  {selectedMarker &&
-                    typeof selectedMarker.id === "string" &&
-                    typeof selectedMarker.userId === "string" &&
-                    typeof selectedMarker.location.lat === "number" &&
-                    typeof selectedMarker.location.lng === "number" &&
-                    typeof selectedMarker.location.placeId === "string" && (
-                      <EditWrapper>
-                        {showEditor && (
-                          <Upload
-                            currentPin={{
-                              id: selectedMarker.id,
-                              userId: selectedMarker.userId,
-                              location: {
-                                lat: selectedMarker.location.lat,
-                                lng: selectedMarker.location.lng,
-                                name: selectedMarker.location.name,
-                                placeId: selectedMarker.location.placeId,
-                              },
-                            }}
-                            filesName={filesName}
-                            setFilesName={setFilesName}
-                            photos={photos}
-                            setPhotos={setPhotos}
-                            hasUpload={hasUpload}
-                            setHasUpload={setHasUpload}
-                            urls={urls}
-                            setUrls={setUrls}
-                            setUploadProgress={setUploadProgress}
-                          />
-                        )}
-                        {hasUpload && (
-                          <BtnWrapper>
-                            <BtnUploaded onClick={updatePhotos}>
-                              Save uploaded
-                            </BtnUploaded>
-                            <BtnCancelUpload onClick={cancelPhotos}>
-                              Cancel
-                            </BtnCancelUpload>
-                          </BtnWrapper>
-                        )}
-
-                        {showSavedPhoto &&
-                          savedPhotoUrls.map((photoUrl: string) => (
-                            <PhotoImg key={photoUrl} bkImage={photoUrl} />
-                          ))}
-                      </EditWrapper>
+                    {showEditArtiContent ? (
+                      <ArtiWrapper>
+                        <Editor
+                          artiContent={artiContent}
+                          setArtiContent={setArtiContent}
+                        />
+                      </ArtiWrapper>
+                    ) : (
+                      <ConfirmedText>{parse(artiContent)}</ConfirmedText>
                     )}
+
+                    {selectedMarker &&
+                      typeof selectedMarker.id === "string" &&
+                      typeof selectedMarker.userId === "string" &&
+                      typeof selectedMarker.location.lat === "number" &&
+                      typeof selectedMarker.location.lng === "number" &&
+                      typeof selectedMarker.location.placeId === "string" &&
+                      (showEditor || showUploadMore) && (
+                        <Upload
+                          currentPin={{
+                            id: selectedMarker.id,
+                            userId: selectedMarker.userId,
+                            location: {
+                              lat: selectedMarker.location.lat,
+                              lng: selectedMarker.location.lng,
+                              name: selectedMarker.location.name,
+                              placeId: selectedMarker.location.placeId,
+                            },
+                          }}
+                          filesName={filesName}
+                          setFilesName={setFilesName}
+                          photos={photos}
+                          setPhotos={setPhotos}
+                          hasUpload={hasUpload}
+                          setHasUpload={setHasUpload}
+                          urls={urls}
+                          setUrls={setUrls}
+                          setUploadProgress={setUploadProgress}
+                        />
+                      )}
+                    {hasUpload && (
+                      <BtnPhotoWrapper style={{ justifyContent: "center" }}>
+                        <BtnCancel onClick={cancelPhotos}>Reselect</BtnCancel>
+                        <BtnDone onClick={updatePhotos}>Save</BtnDone>
+                      </BtnPhotoWrapper>
+                    )}
+
+                    {showSavedPhoto &&
+                      savedPhotoUrls.map((photoUrl: string) => (
+                        <PhotoImg key={photoUrl} bkImage={photoUrl} />
+                      ))}
+                  </EditWrapper>
                 </>
               )}
             </RightWrapper>
