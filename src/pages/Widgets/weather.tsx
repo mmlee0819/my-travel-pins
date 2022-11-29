@@ -22,6 +22,7 @@ import {
 import { Line } from "react-chartjs-2"
 import { AuthContext } from "../Context/authContext"
 import xMark from "../assets/buttons/x-mark.png"
+import spinner from "../assets/dotsSpinner.svg"
 
 const Xmark = styled.div`
   position: absolute;
@@ -67,7 +68,7 @@ const Input = styled.input`
   border-radius: 5px;
   border: 2px solid #034961;
   opacity: 1;
-  z-index: 199;
+  z-index: 198;
   &:focus {
     outline: #5397bd;
     border: 3px solid #5397bd;
@@ -168,11 +169,21 @@ const HumidityText = styled(ForecastWeatherText)`
 const PopText = styled(ForecastWeatherText)`
   color: #2b2a2a;
 `
+
+const Spinner = styled.div`
+  width: 100%;
+  height: 30px;
+  margin: 0 auto;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const GridContainer = styled(ResponsiveGridLayout)`
   .react-grid-item {
-    box-shadow: 2px 2px #454545;
+    box-shadow: 0 8px 6px #0000004c;
     border: 2px solid #034961;
   }
   .react-grid-item > .react-resizable-handle::after {
@@ -494,7 +505,11 @@ function WeatherWidget(props: Props) {
                 }}
               />
               <ForecastRowWrapper>
-                {maxTemps && maxTemps && <Line options={options} data={data} />}
+                {maxTemps.length > 0 && minTemps.length > 0 ? (
+                  <Line options={options} data={data} />
+                ) : (
+                  <Spinner />
+                )}
                 {forecastStatus.map((item) => {
                   return (
                     <>

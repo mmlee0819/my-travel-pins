@@ -31,10 +31,22 @@ import {
   where,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import defaultImage from "../assets/defaultImage.png"
 import { DefinedDocumentData, PinContent } from "./ts_fn_commonUse"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
+
+const PhotoText = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+  width: 150px;
+  height: 120px;
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
+`
 
 const Container = styled.div`
   position: relative;
@@ -251,13 +263,11 @@ function FriendsMap() {
                             setShowMemory(true)
                           }}
                         >
-                          <PinInfoImg
-                            src={
-                              marker.albumURLs
-                                ? marker?.albumURLs[0]
-                                : defaultImage
-                            }
-                          />
+                          {marker.albumURLs ? (
+                            <PinInfoImg src={marker?.albumURLs[0]} />
+                          ) : (
+                            <PhotoText>No photo uploaded</PhotoText>
+                          )}
                           <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                         </PinInfoArea>
                       </Popup>

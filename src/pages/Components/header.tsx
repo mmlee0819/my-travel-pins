@@ -1,8 +1,7 @@
-import React, { useState, useContext, useEffect } from "react"
+import React, { useState, useContext } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
-import defaultAvatar from "../assets/defaultProfile.png"
 import { AuthContext } from "../Context/authContext"
 import logoutIcon from "../assets/buttons/logoutIcon.png"
 
@@ -82,7 +81,7 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: -3px -1px 1px #0000004c;
+    box-shadow: 3px 1px 1px #0000004c;
   }
 `
 

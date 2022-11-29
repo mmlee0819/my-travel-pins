@@ -28,6 +28,17 @@ import {
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
+import spinner from "../assets/dotsSpinner.svg"
+
+const Spinner = styled.div`
+  width: 100%;
+  height: 30px;
+  margin: 0 auto;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
 
 const BtnWrapper = styled.div`
   display: flex;
@@ -245,7 +256,7 @@ export default function MyMemories() {
                             you want to delete this memory?
                           </ReminderText>
                           <DeleteTargetText>
-                            {memories[index]?.article?.title || "No title"}
+                            {memories[index]?.article?.title || "Untitled"}
                           </DeleteTargetText>
                           <BtnWrapper>
                             <BtnRed
@@ -271,7 +282,9 @@ export default function MyMemories() {
               )
             })
           ) : (
-            <Title>Please wait...</Title>
+            <Title>
+              <Spinner />
+            </Title>
           )}
         </ContentWrapper>
       </ContentArea>

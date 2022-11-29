@@ -128,7 +128,7 @@ const ResultContentWrapper = styled.div`
     padding-left: 5px;
     padding-right: 10px;
     color: #e6e6e6;
-    background-color: ${(props) => props.theme.color.bgDark};
+    background-color: ${(props) => props.theme.color.deepMain};
     border: none;
     border-radius: 5px;
   }
@@ -207,7 +207,7 @@ const FilteredFriendWrapper = styled(FilteredWrapper)<{ friendStatus: string }>`
     cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
     color: ${(props) => props.friendStatus === "alreadyFriend" && "#fff"};
     background-color: ${(props) =>
-      props.friendStatus === "alreadyFriend" && props.theme.color.bgDark};
+      props.friendStatus === "alreadyFriend" && props.theme.color.deepMain};
   }
 `
 
@@ -240,7 +240,7 @@ export const BtnDefault = styled.div`
   height: 30px;
   font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
   cursor: pointer;
 `
@@ -258,18 +258,17 @@ const BtnAccept = styled.div`
   justify-content: center;
   font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
   cursor: pointer;
 `
 const BtnDeny = styled(BtnAccept)`
-  background-color: ${(props) => props.theme.btnColor.bgRed};
+  background-color: ${(props) => props.theme.btnColor.bgGray};
 `
 const BtnVisitLink = styled(BtnAccept)`
-  width: 35%;
+  min-width: 35%;
   margin-right: 10px;
   font-size: ${(props) => props.theme.title.md};
-  background-color: ${(props) => props.theme.btnColor.bgBlue};
   text-decoration: none;
 `
 
@@ -557,6 +556,9 @@ export function Autocomplete(props: Props) {
             {/* {friendStatus === "alreadyFriend" && <BtnDeny>Unfriend</BtnDeny>} */}
             {friendStatus === "awaitingReply" && (
               <FilteredContent>Awaiting reply</FilteredContent>
+            )}
+            {friendStatus === "alreadyFriend" && (
+              <FilteredContent>friends</FilteredContent>
             )}
           </FilteredFriendWrapper>
         )}

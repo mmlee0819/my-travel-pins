@@ -1,17 +1,10 @@
 import React from "react"
-import {
-  useState,
-  useRef,
-  useContext,
-  useEffect,
-  Dispatch,
-  SetStateAction,
-} from "react"
+import { useState, useRef, useContext, useEffect, Dispatch } from "react"
 import styled from "styled-components"
 import { db, storage } from "../Utils/firebase"
 import imageCompression from "browser-image-compression"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
-import { doc, setDoc, updateDoc } from "firebase/firestore"
+import { doc, updateDoc } from "firebase/firestore"
 import { AuthContext } from "../Context/authContext"
 import { Container } from "../User/components/styles"
 import logoutIcon from "../assets/buttons/logoutIcon.png"

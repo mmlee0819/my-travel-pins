@@ -50,8 +50,9 @@ const theme = {
   },
   btnColor: {
     bgGreen: "#a5b7af",
-    bgRed: "#ca3434",
+    bgRed: "#c56363",
     bgBlue: "#5397bd",
+    bgGray: "#b4b1b1",
   },
   border: { commonRadius: "5px" },
 }

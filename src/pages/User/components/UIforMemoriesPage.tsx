@@ -64,6 +64,8 @@ export const ImgWrapper = styled.div`
   height: 150px;
   border-radius: 5px;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
+  object-fit: cover;
+  border: 2px solid #fff;
   cursor: pointer;
 `
 export const MemoryImg = styled.img`
@@ -74,7 +76,6 @@ export const MemoryImg = styled.img`
   width: 100%;
   height: 100%;
   border-radius: 5px;
-  object-fit: cover;
 `
 
 export const IconInList = styled.img`

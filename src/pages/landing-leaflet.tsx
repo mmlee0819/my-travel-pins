@@ -21,8 +21,7 @@ import {
   StyleMapContainer,
   Container,
 } from "../pages/User/components/styles"
-import finger from "./assets/buttons/finger.png"
-import shadowFinger from "./assets/buttons/shadowFinger.png"
+import finger from "./assets/buttons/blackFinger.png"
 import tip from "./assets/tip.png"
 import home from "./assets/markers/home1.png"
 
@@ -411,11 +410,6 @@ const fingerIcon = L.icon({
   iconAnchor: [30, 0],
   iconUrl: finger,
 })
-const fingerShadow = L.icon({
-  iconSize: [60, 60],
-  iconAnchor: [33, -3],
-  iconUrl: shadowFinger,
-})
 
 function FingerMarker({ data }: { data: RoutePositionType }) {
   const { lat, lng } = data
@@ -432,11 +426,6 @@ function FingerMarker({ data }: { data: RoutePositionType }) {
       <LeafletTrackingMarker
         icon={fingerIcon}
         position={[lat, lng]}
-        duration={mapZoom === "md" ? 500 : 2500}
-      />
-      <LeafletTrackingMarker
-        icon={fingerShadow}
-        position={[lat + 1, lng + 1]}
         duration={mapZoom === "md" ? 500 : 2500}
       />
     </>
@@ -523,6 +512,7 @@ function Home() {
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
+              setShowSamplePost(false)
               setIsSignIn(false)
               setIsSignUp(true)
             }}
@@ -533,24 +523,33 @@ function Home() {
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
+              setShowSamplePost(false)
               setIsSignUp(false)
               setIsSignIn(true)
             }}
           >
             Sign In
           </SignInTab>
-          <TipText
+          {/* <TipText
             onClick={() => {
               setShowTips((prev) => !prev)
             }}
           >
             <TipTab />
             Tips
-          </TipText>
+          </TipText> */}
         </TabWrapper>
         <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
+        {showSamplePost && (
+          <SampleMemory
+            setShowSamplePost={setShowSamplePost}
+            setHasRead={setHasRead}
+            setIsSignUp={setIsSignUp}
+            setIsSignIn={setIsSignIn}
+          />
+        )}
         <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
@@ -619,14 +618,6 @@ function Home() {
       </Slogan>
 
       {showTips && <TipsContent setShowTips={setShowTips} />}
-      {showSamplePost && (
-        <SampleMemory
-          setShowSamplePost={setShowSamplePost}
-          setHasRead={setHasRead}
-          setIsSignUp={setIsSignUp}
-          setIsSignIn={setIsSignIn}
-        />
-      )}
     </>
   )
 }

@@ -77,7 +77,7 @@ const FilteredFriendWrapper = styled(FilteredWrapper)`
   cursor: pointer;
   &:hover {
     color: #e6e6e6;
-    background-color: ${(props) => props.theme.color.bgDark};
+    background-color: ${(props) => props.theme.color.deepMain};
     border: none;
     border-radius: 5px;
   }
@@ -108,7 +108,7 @@ const BtnAccept = styled.div`
   width: 48%;
   justify-content: center;
   color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
   cursor: pointer;
   &:hover {
@@ -116,7 +116,7 @@ const BtnAccept = styled.div`
   }
 `
 const BtnDeny = styled(BtnAccept)`
-  background-color: ${(props) => props.theme.btnColor.bgRed};
+  background-color: ${(props) => props.theme.btnColor.bgGray};
 `
 
 const FilteredContent = styled.div`
