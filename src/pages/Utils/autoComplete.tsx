@@ -33,8 +33,7 @@ const InputWrapper = styled.div`
   padding: 0;
   align-items: center;
   gap: 8px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     line-height: 30px;
     height: 30px;
   }
@@ -60,8 +59,7 @@ const QueryFriendInput = styled.input`
   ::placeholder {
     font-size: 16px;
   }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     padding-left: 32px;
     line-height: 30px;
     height: 30px;
@@ -74,8 +72,7 @@ const QueryIconWrapper = styled.div`
   line-height: 40px;
   height: 40px;
   border-radius: 5px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     line-height: 30px;
     height: 30px;
   }
@@ -91,8 +88,7 @@ const BtnQueryIcon = styled.button`
   border-radius: 5px;
   background-image: url(${queryFriendImg});
   background-size: contain;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     top: 3px;
     left: 4px;
     width: 24px;
@@ -110,11 +106,11 @@ const ResultsSection = styled.div`
   margin-top: 15px;
   padding: 5px 15px;
   color: #2d2d2d;
-  background-color: #e6e6e6;
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
   border-top: none;
   z-index: 20;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     top: 55px;
   }
 `
@@ -127,29 +123,34 @@ const ResultContentWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding-right: 5px;
-  font-family: "Poppins";
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.lg};
   &:hover {
     padding-left: 5px;
     padding-right: 10px;
     color: #e6e6e6;
-    background-color: #2d2d2d;
+    background-color: ${(props) => props.theme.color.deepMain};
     border: none;
     border-radius: 5px;
   }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 18px;
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 const Avatar = styled.img`
   margin: 0 10px 0 10px;
-  width: 24px;
-  height: 24px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+
+  @media screen and (max-width: 600px), (max-height: 600px) {
     width: 20px;
     height: 20px;
+  }
+`
+const ResultAvatar = styled(Avatar)<{ friendStatus: string }>`
+  &:hover {
+    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
   }
 `
 const NameText = styled.div`
@@ -160,11 +161,9 @@ const NameText = styled.div`
   margin: 2px 10px 2px 0px;
   line-height: 24px;
   height: 24px;
-  font-family: "Poppins";
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
     line-height: 20px;
     height: 20px;
   }
@@ -175,8 +174,7 @@ const NoMatchText = styled(NameText)`
   line-height: 30px;
   height: 30px;
   font-weight: 700;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     line-height: 24px;
     height: 24px;
   }
@@ -184,11 +182,9 @@ const NoMatchText = styled(NameText)`
 const ResultContent = styled(ResultContentWrapper)`
   display: flex;
   align-items: center;
-
   padding: 10px 0;
-  font-family: "Poppins";
   line-height: 16px;
-  font-size: 14px;
+  font-size: ${(props) => props.theme.title.lg};
   gap: 20px;
   cursor: pointer;
 `
@@ -198,10 +194,20 @@ const FilteredWrapper = styled.div`
   flex-flow: row nowrap;
   width: 100%;
   margin: 10px 0;
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+`
+const FilteredFriendWrapper = styled(FilteredWrapper)<{ friendStatus: string }>`
+  padding: 10px 0;
+  &:hover {
+    border: none;
+    border-radius: 5px;
+    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
+    color: ${(props) => props.friendStatus === "alreadyFriend" && "#fff"};
+    background-color: ${(props) =>
+      props.friendStatus === "alreadyFriend" && props.theme.color.deepMain};
   }
 `
 
@@ -210,15 +216,13 @@ const FilteredContent = styled.div`
   flex-flow: row nowrap;
   justify-content: space-between;
   margin: 2px;
-  line-height: 24px;
-  height: 24px;
-  font-family: "Poppins";
-  font-size: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
-    line-height: 20px;
-    height: 20px;
+  line-height: 30px;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+    line-height: 24px;
+    height: 24px;
   }
 `
 
@@ -232,13 +236,12 @@ export const BtnDefault = styled.div`
   right: 5px;
   padding: 1px 5px;
   align-self: center;
-  font-family: "Poppins";
   line-height: 30px;
   height: 30px;
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: #3490ca;
-  border-radius: 3px;
+  background-color: ${(props) => props.theme.color.deepMain};
+  border-radius: 5px;
   cursor: pointer;
 `
 const BtnWrapper = styled.div`
@@ -253,21 +256,22 @@ const BtnAccept = styled.div`
   display: flex;
   width: 48%;
   justify-content: center;
-  font-family: "Poppins";
+  font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: #34ca9d;
-  border-radius: 3px;
+  background-color: ${(props) => props.theme.color.deepMain};
+  border-radius: 5px;
   cursor: pointer;
 `
 const BtnDeny = styled(BtnAccept)`
-  background-color: #ca3434;
+  background-color: ${(props) => props.theme.btnColor.bgGray};
 `
 const BtnVisitLink = styled(BtnAccept)`
-  width: 100%;
-  margin-right: 0px;
-  background-color: #3490ca;
+  min-width: 35%;
+  margin-right: 10px;
+  font-size: ${(props) => props.theme.title.md};
   text-decoration: none;
 `
+
 const searchClient = algoliasearch(
   "NW2MT84M3G",
   "f31f1435408c2dda975160ac96a5e625"
@@ -296,7 +300,8 @@ interface UserInfoType {
 }
 
 export function Autocomplete(props: Props) {
-  const { currentUser, isLogin } = useContext(AuthContext)
+  const { currentUser, isLogin, navigate, setCurrentFriendInfo } =
+    useContext(AuthContext)
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [friendStatus, setFriendStatus] = useState("")
   const [autocompleteState, setAutocompleteState] = useState<
@@ -457,7 +462,7 @@ export function Autocomplete(props: Props) {
               {...autocomplete.getInputProps({
                 inputElement: null,
               })}
-              placeholder="Search user"
+              placeholder="Search a user"
             />
           </QueryIconWrapper>
         </QueryForm>
@@ -506,19 +511,34 @@ export function Autocomplete(props: Props) {
           })}
         </ResultsSection>
       )}
-      {!autocompleteState.isOpen && qInputRef?.current?.value !== "" && (
-        <ResultsSection>
-          <NoMatchText>No matches found</NoMatchText>
-        </ResultsSection>
-      )}
+      {!autocompleteState.isOpen &&
+        qInputRef?.current?.value !== "" &&
+        !queryResult && (
+          <ResultsSection>
+            <NoMatchText>No matches found</NoMatchText>
+          </ResultsSection>
+        )}
       {queryResult &&
         props.invitingIds !== undefined &&
         !props.invitingIds.includes(queryResult.id) && (
-          <FilteredWrapper>
+          <FilteredFriendWrapper
+            friendStatus={friendStatus}
+            onClick={() => {
+              if (friendStatus === "alreadyFriend") {
+                setCurrentFriendInfo({
+                  name: queryResult.name,
+                  id: queryResult.id,
+                })
+                navigate(
+                  `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
+                )
+              }
+            }}
+          >
             <Avatar src={queryResult.photoURL} />
             <NameText>{queryResult.name}</NameText>
             <NameText>{queryResult.hometownName}</NameText>
-            {friendStatus === "" && (
+            {friendStatus === "" && queryResult.id !== currentUser?.id && (
               <BtnVisitLink
                 onClick={() => {
                   addFriend(queryResult.id)
@@ -533,15 +553,14 @@ export function Autocomplete(props: Props) {
                 <BtnDeny>Deny</BtnDeny>
               </BtnWrapper>
             )}
-            {friendStatus === "alreadyFriend" && (
-              <BtnWrapper>
-                <BtnVisitLink>Visit friend</BtnVisitLink>
-              </BtnWrapper>
-            )}
+            {/* {friendStatus === "alreadyFriend" && <BtnDeny>Unfriend</BtnDeny>} */}
             {friendStatus === "awaitingReply" && (
               <FilteredContent>Awaiting reply</FilteredContent>
             )}
-          </FilteredWrapper>
+            {friendStatus === "alreadyFriend" && (
+              <FilteredContent>friends</FilteredContent>
+            )}
+          </FilteredFriendWrapper>
         )}
     </>
   )

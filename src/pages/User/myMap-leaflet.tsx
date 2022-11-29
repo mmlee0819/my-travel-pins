@@ -1,6 +1,7 @@
 import React from "react"
 import {
   useState,
+  useRef,
   useContext,
   useEffect,
   Dispatch,
@@ -9,7 +10,6 @@ import {
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent } from "leaflet"
 import {
-  MapContainer,
   Tooltip,
   useMap,
   Marker,
@@ -20,101 +20,154 @@ import {
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../Utils/customGeo"
-import home from "../assets/markers/home.png"
+import {
+  Attribution,
+  StyleMapContainer,
+  Container,
+  Wrapper,
+} from "./components/styles"
+import home from "../assets/markers/home1.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
-import Upload from "./functions/uploadPhoto"
+import Upload from "./components/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { getPins, PinContent } from "./ts_fn_commonUse"
 import Editor from "../Components/editor"
-import defaultImage from "../assets/defaultImage.png"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
 import DetailMemory from "../Components/detailMemory"
+import spinner from "../assets/dotsSpinner.svg"
+import xmark from "../assets/buttons/x-mark.png"
 
-const Container = styled.div`
-  position: relative;
-  margin: 0 auto;
-  max-width: 1440px;
-  width: 100%;
-  height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+const PhotoText = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+  width: 150px;
+  height: 120px;
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
 `
-
-const Title = styled.div`
-  color: #000000;
+const Spinner = styled(Container)`
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
 `
-const Wrapper = styled.div<{ hasAddPin: boolean }>`
+const Xmark = styled.div`
   position: absolute;
-  margin: auto;
-  width: 50%;
-  height: ${(props) => (props.hasAddPin ? "100%" : "200px")};
-  padding: 20px 10px;
-  top: 0;
-  right: 0;
+  top: 30px;
+  right: 30px;
+  background-image: url(${xmark});
+  background-size: 100% 100%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`
+const PostPinWrapper = styled(Wrapper)<{ hasAddPin: boolean }>`
+  top: 3px;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-start;
-  font-family: "Poppins";
-  font-size: 20px;
-  background-color: #2d2d2d;
-  opacity: 1;
-  border-radius: 10px;
-  box-shadow: 0 8px 6px #0000004c;
-  z-index: 60;
+  width: 50%;
+  height: ${(props) => (props.hasAddPin ? "100%" : "60%")};
+  padding: 20px 20px;
+  font-size: ${(props) => props.theme.title.md};
+  z-index: 48;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
+  @media screen and(max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 
 const Input = styled.input`
   width: 100%;
-  height: 30px;
+  height: 40px;
   padding-left: 10px;
   margin-top: 5px;
   margin-bottom: 10px;
-  font-size: 18px;
-  color: #2d2d2d;
+  font-size: ${(props) => props.theme.title.lg};
+  color: ${(props) => props.theme.color.bgDark};
   background-color: #ffffff;
   border: 3px solid #ffffff;
   border-radius: 5px;
   opacity: 1;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: #7ccbab;
+    border: 3px solid #7ccbab;
+  }
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+`
+const DateInput = styled.input.attrs({
+  type: "date",
+})`
+  width: 100%;
+  height: 40px;
+  padding-left: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: ${(props) => props.theme.title.lg};
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: #ffffff;
+  border: 3px solid #ffffff;
+  border-radius: 5px;
+  opacity: 1;
+  &:focus {
+    outline: #7ccbab;
+    border: 3px solid #7ccbab;
+  }
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+  &::-webkit-datetime-edit-text {
+    -webkit-appearance: none;
+  }
+  &::-webkit-datetime-edit-month-field {
+    -webkit-appearance: none;
+  }
+  &::-webkit-datetime-edit-day-field {
+    -webkit-appearance: none;
+  }
+  &::-webkit-datetime-edit-year-field {
+    -webkit-appearance: none;
   }
 `
 const StepText = styled.div`
   display: flex;
   padding: 0px 10px;
-  font-family: "Jomhuria";
-  font-size: 40px;
-  color: #fff;
+  font-size: ${(props) => props.theme.title.lg};
+  font-weight: 700;
+  color: ${(props) => props.theme.color.bgDark};
   border: none;
   gap: 5px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 30px;
+    font-size: ${(props) => props.theme.title.md};
     padding: 2px 10px;
   }
 `
 const BtnText = styled.div`
   display: flex;
-  align-items: end;
-  justify-content: end;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 40px;
-  font-family: "Poppins";
-  color: #f99c62;
+  margin: 30px auto;
+  font-size: ${(props) => props.theme.title.lg};
+  font-weight: 400;
+  color: ${(props) => props.theme.color.bgLight};
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  border-radius: 5px;
   border: none;
   gap: 5px;
   cursor: pointer;
@@ -125,15 +178,17 @@ const BtnText = styled.div`
     (max-height: 600px) {
     padding: 2px 10px;
     height: 30px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
+
 const BtnAddPin = styled.div`
   position: absolute;
   top: 20px;
-  right: 40px;
+  left: 20px;
   display: flex;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   background-image: url(${addPinIcon});
   background-size: 100% 100%;
   z-index: 60;
@@ -144,54 +199,38 @@ const BtnAddPin = styled.div`
     height: 40px;
   }
 `
-const BtnConfirmAddPin = styled.div`
+
+const BtnWrapper = styled.div`
   display: flex;
-  width: 40px;
-  height: 40px;
-  background-image: url(${addPinIcon});
-  background-size: 100% 100%;
+  flex: 1 1 auto;
+  width: 100%;
+  margin: 30px auto;
+
+  justify-content: space-between;
+  align-self: center;
+`
+const BtnBlue = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 48%;
+  padding: 5px;
+  font-family: "Poppins";
+  font-size: 20px;
+  color: #ffffff;
+  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  border-radius: 5px;
   cursor: pointer;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    width: 30px;
-    height: 30px;
+    font-size: 16px;
   }
 `
-
-const CancelReminder = styled(BtnText)`
-  margin-top: 30px;
-  color: #fff;
-  text-align: end;
+const BtnRed = styled(BtnBlue)`
+  background-color: ${(props) => props.theme.btnColor.bgRed};
 `
 
-const UploadPhotoWrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-`
-const BtnWrapper = styled(UploadPhotoWrapper)`
-  margin-top: 15px;
-`
-
-const BtnUpload = styled.button`
-  display: flex;
-  align-self: center;
-  align-items: center;
-  padding: 10px;
-  height: 30px;
-  color: #ffffff;
-  background-color: #5594b7;
-  border: none;
-  opacity: 1;
-  border-radius: 10px;
-  cursor: pointer;
-`
-const BtnConfirm = styled(BtnUpload)`
-  background-color: #f99c62;
-`
-const BtnCancel = styled(BtnUpload)`
-  background-color: #034961;
-`
 const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -211,6 +250,36 @@ export const PinInfoTitle = styled.div`
   font-weight: 700;
 `
 
+const BgOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: ${(props) => props.theme.color.bgDark};
+  opacity: 0.9;
+  z-index: 50;
+`
+const ReminderArea = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  padding: 20px;
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: #fff;
+  border-radius: 5px;
+  z-index: 52;
+`
+const ReminderText = styled.div`
+  margin: 20px auto 0 auto;
+  text-align: center;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+`
 interface CenterType {
   center: LatLng | null
   setCenter: Dispatch<SetStateAction<LatLng | null>>
@@ -239,7 +308,7 @@ const myCustomStyle = {
   weight: 0.5,
   fill: true,
   fillColor: "#fff",
-  fillOpacity: 1,
+  fillOpacity: 0.8,
   zIndex: 50,
 }
 
@@ -265,7 +334,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     if (event.target.feature.properties.name === country.properties.name) {
       layer.setStyle({
         fill: true,
-        fillColor: "#ffd500",
+        fillColor: "#7ccbab",
         fillOpacity: 1,
       })
     }
@@ -274,7 +343,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
     layer.setStyle({
       fill: true,
       fillColor: "#fff",
-      fillOpacity: 1,
+      fillOpacity: 0.8,
     })
   })
 }
@@ -282,7 +351,7 @@ function ChangeCenter() {
   const { mapZoom } = useContext(AuthContext)
   const miniMap = useMap()
   if (mapZoom === "lg") {
-    miniMap.flyTo([45, 179], 2)
+    miniMap.flyTo([45, -185], 1.25)
   } else {
     miniMap.flyTo([42, 167], 1)
   }
@@ -292,16 +361,16 @@ function ChangeCenterBack() {
   const { mapZoom } = useContext(AuthContext)
   const originMap = useMap()
   if (mapZoom === "lg") {
-    originMap.flyTo([45, 50], 2)
+    originMap.flyTo([45, 10], 1.75)
   } else {
-    originMap.flyTo([41, 121], 1)
+    originMap.flyTo([41, 5], 1.5)
   }
   return null
 }
 const DefaultIcon = L.icon({
   iconUrl: home,
   iconSize: [40, 43],
-  iconAnchor: [40, 443],
+  iconAnchor: [40, 43],
 })
 
 const lgNewPinIcon = L.icon({
@@ -315,6 +384,33 @@ const mdNewPinIcon = L.icon({
   iconUrl: pins,
 })
 
+function useOnClickOutside(
+  ref: React.RefObject<HTMLDivElement>,
+  hasAddPin: boolean,
+  setShowAlert: Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      // Do nothing if clicking ref's element or descendent elements
+      if (
+        !ref.current ||
+        ref.current.contains(event.target as Node) ||
+        !hasAddPin
+      )
+        return
+
+      setShowAlert(true)
+    }
+
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
+    return () => {
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
+    }
+  }, [ref, hasAddPin])
+}
+
 export default function MyMap() {
   const {
     isLoaded,
@@ -324,6 +420,8 @@ export default function MyMap() {
     mapZoom,
     setIsMyMap,
     setIsMyMemory,
+    setIsFriendHome,
+    setIsFriendMemory,
   } = useContext(AuthContext)
   console.log("currentUser", currentUser)
   const [center, setCenter] = useState<LatLng | null>(null)
@@ -338,7 +436,7 @@ export default function MyMap() {
       placeId: "",
     },
   })
-  console.log({ center })
+
   const [markers, setMarkers] = useState<PinContent[]>([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent>()
   const [searchBox, setSearchBox] = useState<
@@ -357,8 +455,18 @@ export default function MyMap() {
   const [hasFetched, setHasFetched] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+
+  console.log({ showAlert })
+  console.log({ hasAddPin })
+  console.log({ showPostArea })
+
+  useOnClickOutside(overlayRef, hasAddPin, () => setShowAlert(true))
 
   useEffect(() => {
+    setIsFriendHome(false)
+    setIsFriendMemory(false)
     if (typeof currentUser?.id === "string") {
       getPins(
         currentUser,
@@ -472,6 +580,7 @@ export default function MyMap() {
         console.log(error)
       }
     }
+    setShowAlert(false)
     setHasPosted(true)
     setHasAddPin(false)
     setFilesName([])
@@ -481,13 +590,52 @@ export default function MyMap() {
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
-    return <Title>你沒有登入</Title>
+    return <Spinner />
 
   return (
     <>
-      {isLoaded &&
-        typeof currentUser?.hometownLat === "number" &&
-        typeof currentUser?.hometownLng === "number" && (
+      {!isLoaded ||
+      typeof currentUser?.hometownLat !== "number" ||
+      typeof currentUser?.hometownLng !== "number" ? (
+        <Spinner />
+      ) : (
+        <>
+          {showAlert && (
+            <>
+              <BgOverlay />
+              <ReminderArea>
+                {hasAddPin && (
+                  <ReminderText>
+                    Are you sure <br />
+                    you want to discard all changes <br />
+                    and edit later?
+                  </ReminderText>
+                )}
+                <BtnWrapper>
+                  <BtnRed
+                    onClick={() => {
+                      if (hasAddPin) {
+                        cancelPost()
+                        setShowPostArea(false)
+                      } else {
+                        setShowAlert(false)
+                        setShowPostArea(false)
+                      }
+                    }}
+                  >
+                    Yes
+                  </BtnRed>
+                  <BtnBlue
+                    onClick={() => {
+                      setShowAlert(false)
+                    }}
+                  >
+                    No, back to edit
+                  </BtnBlue>
+                </BtnWrapper>
+              </ReminderArea>
+            </>
+          )}
           <Container>
             {!showPostArea && (
               <BtnAddPin
@@ -497,26 +645,32 @@ export default function MyMap() {
               />
             )}
             {showPostArea && (
-              <Wrapper hasAddPin={hasAddPin}>
+              <PostPinWrapper hasAddPin={hasAddPin} ref={overlayRef}>
+                <Xmark
+                  onClick={() => {
+                    if (!hasAddPin) {
+                      setShowPostArea(false)
+                    } else {
+                      setShowAlert(true)
+                    }
+                  }}
+                />
                 <StepText>To remember your trip</StepText>
                 {!hasAddPin && (
                   <>
-                    <StepText>Step 1: Pin a place!</StepText>
+                    <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
                     <StandaloneSearchBox
                       onLoad={onLoad}
                       onPlacesChanged={onPlacesChanged}
                     >
                       <Input placeholder="Where did you go?"></Input>
                     </StandaloneSearchBox>
-                    <BtnText onClick={addPin}>
-                      Confirm to pin
-                      <BtnConfirmAddPin />
-                    </BtnText>
+                    <BtnText onClick={addPin}>Confirm to pin</BtnText>
                   </>
                 )}
                 {hasAddPin && !hasPosted && (
                   <>
-                    <StepText>Step 2: Log your memory</StepText>
+                    <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
                     <ArticleWrapper>
                       <Input
                         placeholder="Title"
@@ -524,7 +678,7 @@ export default function MyMap() {
                           setArtiTitle(e.target.value)
                         }}
                       />
-                      <Input
+                      <DateInput
                         type="date"
                         onChange={(e) => {
                           setTravelDate(e.target.value)
@@ -547,37 +701,27 @@ export default function MyMap() {
                       setUrls={setUrls}
                       setUploadProgress={setUploadProgress}
                     />
-                    <BtnWrapper>
-                      <BtnConfirm onClick={addMemory}>
-                        Confirm to post
-                      </BtnConfirm>
-                      <BtnCancel onClick={cancelPost}>Cancel</BtnCancel>
-                    </BtnWrapper>
-                    <CancelReminder>
-                      If you cancel to post,
-                      <br /> all content and uploaded files will not be
-                      preserved.
-                    </CancelReminder>
+                    <BtnText onClick={addMemory}>Confirm to post</BtnText>
                   </>
                 )}
-              </Wrapper>
+              </PostPinWrapper>
             )}
 
-            <MapContainer
+            <StyleMapContainer
               id="my-Map"
               center={
                 mapZoom === "lg"
                   ? [
                       selectedMarker?.location?.lat || 45,
-                      selectedMarker?.location?.lng || 50,
+                      selectedMarker?.location?.lng || 10,
                     ]
                   : [
                       selectedMarker?.location?.lat || 41,
-                      selectedMarker?.location?.lng || 121,
+                      selectedMarker?.location?.lng || 5,
                     ]
               }
               zoomControl={false}
-              zoom={mapZoom === "lg" ? 2 : 1}
+              zoom={mapZoom === "lg" ? 1.75 : 1.5}
               scrollWheelZoom={true}
               zoomSnap={0.25}
               dragging={true}
@@ -589,8 +733,9 @@ export default function MyMap() {
                 zIndex: "30",
                 backgroundColor: "rgb(255, 255, 255, 0)",
                 borderRadius: "10px",
+                border: "none",
               }}
-              minZoom={mapZoom === "lg" ? 2 : 1}
+              minZoom={mapZoom === "lg" ? 0.7 : 0.5}
             >
               <ZoomControl position="bottomright" />
               {countries.features.map((country) => (
@@ -601,8 +746,8 @@ export default function MyMap() {
                   onEachFeature={onEachFeature}
                 />
               ))}
-              {hasAddPin && !hasPosted && <ChangeCenter />}
-              {!hasAddPin && !hasPosted && <ChangeCenterBack />}
+              {showPostArea && <ChangeCenter />}
+              {!showPostArea && <ChangeCenterBack />}
               <TargetArea center={center} setCenter={setCenter} />
               <Marker
                 position={[currentUser?.hometownLat, currentUser?.hometownLng]}
@@ -634,13 +779,12 @@ export default function MyMap() {
                             setShowMemory(true)
                           }}
                         >
-                          <PinInfoImg
-                            src={
-                              marker.albumURLs
-                                ? marker?.albumURLs[0]
-                                : defaultImage
-                            }
-                          />
+                          {marker.albumURLs ? (
+                            <PinInfoImg src={marker?.albumURLs[0]} />
+                          ) : (
+                            <PhotoText>No photo uploaded</PhotoText>
+                          )}
+
                           <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                         </PinInfoArea>
                       </Popup>
@@ -648,15 +792,19 @@ export default function MyMap() {
                   </>
                 )
               })}
-            </MapContainer>
+            </StyleMapContainer>
             {showMemory && (
               <DetailMemory
                 selectedMarker={selectedMarker}
                 setShowMemory={setShowMemory}
               />
             )}
+            <Attribution href="https://leafletjs.com/">
+              source: Leaflet
+            </Attribution>
           </Container>
-        )}
+        </>
+      )}
     </>
   )
 }

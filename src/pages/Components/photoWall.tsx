@@ -13,11 +13,11 @@ import peru from "../assets/photoWall/peru.png"
 import peruLeft from "../assets/photoWall/peru2.png"
 import egypt from "../assets/photoWall/egypt.png"
 import au from "../assets/photoWall/au.png"
-import newZe from "../assets/photoWall/newZe.png"
+import newZe from "../assets/photoWall/newZe.jpg"
 
-const polylineColor = { color: "#2d2d2d", weight: 0.5 }
-const rectangleColor = { color: "#2d2d2d", weight: 3 }
-const samplePinColor = { color: "#ffd500", weight: 6 }
+const polylineColor = { color: "#3c3c3c", weight: 0.8 }
+const rectangleColor = { color: "#fff", weight: 3 }
+const samplePinColor = { color: "#fff", weight: 6 }
 function MongoImg() {
   return (
     <>

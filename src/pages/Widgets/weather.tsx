@@ -21,46 +21,37 @@ import {
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 import { AuthContext } from "../Context/authContext"
-import xMark from "../assets/x-mark.png"
+import xMark from "../assets/buttons/x-mark.png"
+import spinner from "../assets/dotsSpinner.svg"
 
 const Xmark = styled.div`
   position: absolute;
-  top: 10px;
-  right: 30px;
+  top: 18px;
+  right: 20px;
   background-image: url(${xMark});
   background-size: 100% 100%;
-  width: 40px;
-  height: 40px;
+  width: 15px;
+  height: 15px;
   z-index: 188;
   cursor: pointer;
 
   @media screen and (max-width: 799px), (max-height: 600px) {
-    width: 30px;
-    height: 30px;
+    width: 15px;
+    height: 15px;
   }
 `
+
 const GridArea = styled.div`
-  font-family: "Poppins";
   position: absolute;
   display: flex;
-  top: 0px;
-  left: 20px;
-  height: 350px;
+  top: 90px;
+  left: 60px;
+  height: calc(100% - 150px);
   min-width: 30vw;
   min-height: 30vh;
-
+  border-radius: 5px;
+  border: none;
   z-index: 150;
-`
-const GridItemWrapper = styled.div`
-  display: flex;
-  flex-flow: column wrap;
-  width: 100%;
-  min-height: 50vh;
-  font-size: 16px;
-  color: #ffffff;
-  background-color: #ffffff;
-  box-shadow: 3px 5px 3px #2d2d2d;
-  background: #2d2d2d;
 `
 
 const Input = styled.input`
@@ -69,20 +60,21 @@ const Input = styled.input`
   left: 0;
   padding-left: 8px;
   width: 100%;
-  line-height: 40px;
-  height: 40px;
-  font-size: 15px;
+  line-height: 50px;
+  height: 50px;
+  font-size: ${(props) => props.theme.title.md};
   color: #2d2d2d;
   background-color: #ffffff;
-  border: 1px solid #000000;
+  border-radius: 5px;
+  border: 2px solid #034961;
   opacity: 1;
-  z-index: 199;
+  z-index: 198;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: #5397bd;
+    border: 3px solid #5397bd;
   }
   ::placeholder {
-    font-size: 16px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 
@@ -100,14 +92,14 @@ const CurrentWeatherImg = styled.img`
 const CurrentWeatherTitle = styled.div`
   text-align: center;
   color: #2b2a2a;
-  font-size: 18px;
+  font-size: ${(props) => props.theme.title.md};
   font-weight: 500;
 `
 const CurrentWeatherText = styled.div`
   padding-right: 5px;
   text-align: start;
   color: #ffffff;
-  font-size: 18px;
+  font-size: ${(props) => props.theme.title.md};
   font-weight: 700;
 `
 const ForecastWeatherImg = styled.img`
@@ -119,7 +111,7 @@ const ForecastWeatherText = styled.div`
   padding-right: 5px;
   text-align: start;
   color: #2b2a2a;
-  font-size: 12px;
+  font-size: ${(props) => props.theme.title.sm};
   font-weight: 700;
 `
 const RowNoWrapper = styled.div`
@@ -134,11 +126,11 @@ const RowWrapper = styled.div`
   gap: 5px;
 `
 const ForecastRowWrapper = styled(RowWrapper)`
-  font-size: 24px;
+  font-size: ${(props) => props.theme.title.lg};
   gap: 0;
   justify-content: space-around;
   @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: 18px;
+    font-size: ${(props) => props.theme.title.md};
   }
 `
 const ColumnWrapper = styled.div`
@@ -151,14 +143,18 @@ const ForecastColumnArea = styled(ColumnWrapper)`
   min-height: 50%;
 `
 const WeatherContentArea = styled.div`
-  position: relative;
-  min-width: 50vw;
   padding: 5px;
   background-color: #ffffff;
+  border-radius: 5px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `
 const TitleWrapper = styled(RowNoWrapper)`
   justify-content: end;
-  font-size: 12px;
+  font-size: ${(props) => props.theme.title.sm};
   font-weight: 500;
 `
 const MaxTempText = styled(ForecastWeatherText)`
@@ -173,14 +169,35 @@ const HumidityText = styled(ForecastWeatherText)`
 const PopText = styled(ForecastWeatherText)`
   color: #2b2a2a;
 `
+
+const Spinner = styled.div`
+  width: 100%;
+  height: 30px;
+  margin: 0 auto;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
+const GridContainer = styled(ResponsiveGridLayout)`
+  .react-grid-item {
+    box-shadow: 0 8px 6px #0000004c;
+    border: 2px solid #034961;
+  }
+  .react-grid-item > .react-resizable-handle::after {
+    border-right: 2px solid #034961;
+    border-bottom: 2px solid #034961;
+  }
+`
+
 const layouts = {
-  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 3, maxH: 2 }],
-  md: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
-  sm: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 3, maxH: 2 }],
+  lg: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
+  md: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  sm: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
 }
 
 interface Props {
@@ -276,13 +293,13 @@ function WeatherWidget(props: Props) {
       title: {
         display: true,
         text: `${location.name} 8-day forecast`,
-        size: "25px",
+        font: { size: 18, weight: "bold" },
       },
     },
     scales: {
       y: {
-        min: minTemps[0] - 5,
-        max: maxTemps[0] + 5,
+        min: minTemps[0] - 10,
+        max: maxTemps[0] + 10,
         stepSize: 10,
       },
     },
@@ -390,154 +407,152 @@ function WeatherWidget(props: Props) {
 
   return (
     <GridArea>
-      <ResponsiveGridLayout
-        layouts={layouts}
-        key="tools"
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 3, md: 4, sm: 3, xs: 2, xxs: 1 }}
-        width={150}
-        rowHeight={300}
-        z-index={180}
-      >
-        <GridItemWrapper key="weather-query">
-          {isLoaded ? (
-            <>
-              <GoogleMap
-                mapTypeId="1742ed94a3f0f03"
-                mapContainerStyle={{
-                  minHeight: "calc(100% - 20px)",
-                  width: "100%",
-                  marginTop: "40px",
-                  top: "-5px",
-                }}
-                center={{
-                  lat: location?.lat || 45,
-                  lng: location?.lng || 130,
-                }}
-                zoom={location?.name === "" ? 1 : 6}
-                options={{
-                  draggable: true,
-                  mapTypeControl: false,
-                  streetViewControl: false,
-                  scaleControl: false,
-                  fullscreenControl: false,
-                  zoomControl: false,
-                  mapId: "1742ed94a3f0f03",
-                  minZoom: 0.8,
-                }}
-              >
-                {location.name !== "" &&
-                typeof location?.lat === "number" &&
-                typeof location?.lng === "number" &&
-                currWeatherStatus.icon !== "" ? (
-                  <>
-                    <InfoWindow
-                      onLoad={onInfoWinLoad}
-                      position={{
-                        lat: location?.lat,
-                        lng: location?.lng,
-                      }}
-                      options={{
-                        pixelOffset: new window.google.maps.Size(0, 0),
-                      }}
-                      // onCloseClick={() => {}}
-                    >
-                      <CurrentWeatherInfoArea>
-                        <CurrentWeatherTitle>
-                          Current weather
-                        </CurrentWeatherTitle>
-                        <RowNoWrapper>
-                          <CurrentWeatherImg
-                            src={`http://openweathermap.org/img/wn/${currWeatherStatus.icon}@2x.png`}
-                          />
-                          <ColumnWrapper>
-                            <CurrentWeatherText>
-                              {currWeatherStatus?.temp}°C
-                            </CurrentWeatherText>
-                            <CurrentWeatherText>
-                              {currWeatherStatus?.description}
-                            </CurrentWeatherText>
-                          </ColumnWrapper>
-                        </RowNoWrapper>
-                        <CurrentWeatherTitle>
-                          {location?.name}
-                        </CurrentWeatherTitle>
-                      </CurrentWeatherInfoArea>
-                    </InfoWindow>
-                  </>
-                ) : (
-                  ""
-                )}
-              </GoogleMap>
-              <StandaloneSearchBox
-                onLoad={onLoad}
-                onPlacesChanged={onPlacesChanged}
-              >
-                <Input placeholder="Search a place" />
-              </StandaloneSearchBox>
-              {location.name !== "" && showForecast ? (
-                <WeatherContentArea>
-                  <Xmark
-                    onClick={() => {
-                      setShowForecast(false)
-                      setLocation({
-                        lat: 0,
-                        lng: 0,
-                        name: "",
-                      })
+      {isLoaded && (
+        <>
+          <GoogleMap
+            mapTypeId="c85f6cd031fe4756"
+            mapContainerStyle={{
+              top: "0px",
+              height: "100%",
+              width: "100%",
+              borderRadius: "5px",
+              border: "2px solid #034961",
+            }}
+            center={{
+              lat: location?.lat || 45,
+              lng: location?.lng || 60,
+            }}
+            zoom={location?.name === "" ? 1.8 : 6}
+            options={{
+              draggable: true,
+              mapTypeControl: false,
+              streetViewControl: false,
+              scaleControl: false,
+              fullscreenControl: false,
+              zoomControl: false,
+              mapId: "c85f6cd031fe4756",
+              minZoom: 0.8,
+            }}
+          >
+            {location.name !== "" &&
+              typeof location?.lat === "number" &&
+              typeof location?.lng === "number" &&
+              currWeatherStatus.icon !== "" && (
+                <>
+                  <InfoWindow
+                    onLoad={onInfoWinLoad}
+                    position={{
+                      lat: location?.lat,
+                      lng: location?.lng,
                     }}
-                  />
-                  <ForecastRowWrapper>
-                    <Line options={options} data={data} />
-                    {forecastStatus.map((item) => {
-                      return (
-                        <>
-                          <ForecastColumnArea>
-                            <RowNoWrapper
-                              key={`${item.date}-icon-forecast-${item.icon}`}
-                            >
-                              <ForecastWeatherImg
-                                src={`http://openweathermap.org/img/wn/${item.icon}@2x.png`}
-                              />
-                            </RowNoWrapper>
-                            <RowNoWrapper
-                              key={`${item.date}-maxTemp-${item.maxTemp}`}
-                            >
-                              <MaxTempText>{item.maxTemp}°C</MaxTempText>
-                            </RowNoWrapper>
-                            <RowNoWrapper
-                              key={`${item.date}-minTemp-${item.minTemp}`}
-                            >
-                              <MinTempText>{item.minTemp}°C</MinTempText>
-                            </RowNoWrapper>
-                            <RowNoWrapper
-                              key={`${item.date}-humidity-${item.humidity}`}
-                            >
-                              <HumidityText>{item.humidity}%</HumidityText>
-                            </RowNoWrapper>
-                            <RowNoWrapper key={`${item.date}-pop-${item.pop}`}>
-                              <PopText>{item.pop}%</PopText>
-                            </RowNoWrapper>
-                          </ForecastColumnArea>
-                        </>
-                      )
-                    })}
-                    <TitleWrapper>
-                      <HumidityText>Humidity</HumidityText>
-                      <PopText>Probability of Precipitation,POP</PopText>
-                    </TitleWrapper>
-                  </ForecastRowWrapper>
-                </WeatherContentArea>
-              ) : (
-                ""
+                    options={{
+                      pixelOffset: new window.google.maps.Size(0, 0),
+                    }}
+                    // onCloseClick={() => {}}
+                  >
+                    <CurrentWeatherInfoArea>
+                      <CurrentWeatherTitle>Current weather</CurrentWeatherTitle>
+                      <RowNoWrapper>
+                        <CurrentWeatherImg
+                          src={`http://openweathermap.org/img/wn/${currWeatherStatus.icon}@2x.png`}
+                        />
+                        <ColumnWrapper>
+                          <CurrentWeatherText>
+                            {currWeatherStatus?.temp}°C
+                          </CurrentWeatherText>
+                          <CurrentWeatherText>
+                            {currWeatherStatus?.description}
+                          </CurrentWeatherText>
+                        </ColumnWrapper>
+                      </RowNoWrapper>
+                      <CurrentWeatherTitle>
+                        {location?.name}
+                      </CurrentWeatherTitle>
+                    </CurrentWeatherInfoArea>
+                  </InfoWindow>
+                </>
               )}
-            </>
-          ) : (
-            ""
+          </GoogleMap>
+          <StandaloneSearchBox
+            onLoad={onLoad}
+            onPlacesChanged={onPlacesChanged}
+          >
+            <Input placeholder="Search a place for weather forecast" />
+          </StandaloneSearchBox>
+        </>
+      )}
+      {location.name !== "" && (
+        <GridContainer
+          layouts={layouts}
+          key="tools"
+          breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
+          cols={{ xl: 4, lg: 3, md: 3, sm: 2, xs: 1 }}
+          width={150}
+          rowHeight={400}
+          z-index={180}
+        >
+          {/* <GridItemWrapper key="weather-query"> */}
+          {location.name !== "" && showForecast && (
+            <WeatherContentArea key="weather-query">
+              <Xmark
+                onClick={() => {
+                  setShowForecast(false)
+                  setLocation({
+                    lat: 0,
+                    lng: 0,
+                    name: "",
+                  })
+                }}
+              />
+              <ForecastRowWrapper>
+                {maxTemps.length > 0 && minTemps.length > 0 ? (
+                  <Line options={options} data={data} />
+                ) : (
+                  <Spinner />
+                )}
+                {forecastStatus.map((item) => {
+                  return (
+                    <>
+                      <ForecastColumnArea>
+                        <RowNoWrapper
+                          key={`${item.date}-icon-forecast-${item.icon}`}
+                        >
+                          <ForecastWeatherImg
+                            src={`http://openweathermap.org/img/wn/${item.icon}@2x.png`}
+                          />
+                        </RowNoWrapper>
+                        <RowNoWrapper
+                          key={`${item.date}-maxTemp-${item.maxTemp}`}
+                        >
+                          <MaxTempText>{item.maxTemp}°C</MaxTempText>
+                        </RowNoWrapper>
+                        <RowNoWrapper
+                          key={`${item.date}-minTemp-${item.minTemp}`}
+                        >
+                          <MinTempText>{item.minTemp}°C</MinTempText>
+                        </RowNoWrapper>
+                        <RowNoWrapper
+                          key={`${item.date}-humidity-${item.humidity}`}
+                        >
+                          <HumidityText>{item.humidity}%</HumidityText>
+                        </RowNoWrapper>
+                        <RowNoWrapper key={`${item.date}-pop-${item.pop}`}>
+                          <PopText>{item.pop}%</PopText>
+                        </RowNoWrapper>
+                      </ForecastColumnArea>
+                    </>
+                  )
+                })}
+                <TitleWrapper>
+                  <HumidityText>Humidity</HumidityText>
+                  <PopText>Probability of Precipitation,POP</PopText>
+                </TitleWrapper>
+              </ForecastRowWrapper>
+            </WeatherContentArea>
           )}
-          {/* <GridItemContent src={mapUrl}></GridItemContent> */}
-        </GridItemWrapper>
-      </ResponsiveGridLayout>
+          {/* </GridItemWrapper> */}
+        </GridContainer>
+      )}
     </GridArea>
   )
 }

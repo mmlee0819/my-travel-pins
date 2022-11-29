@@ -1,24 +1,23 @@
 import React, { useState } from "react"
-// Import Swiper React components
+import styled from "styled-components"
+
 import { Swiper, SwiperSlide } from "swiper/react"
 import { type Swiper as SwiperRef } from "swiper"
 import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
-// Import Swiper styles
+
 import "swiper/css/bundle"
 import "swiper/css"
 import "swiper/css/free-mode"
 import "swiper/css/navigation"
 import "swiper/css/thumbs"
 
-import styled from "styled-components"
-
 const MainSwiper = styled(Swiper)`
   .swiper {
-    height: 300px;
+    height: 50%;
   }
 
   .mySwiper2.swiper-backface-hidden {
-    height: 300px;
+    height: 50%;
   }
   .swiper-slide img {
     display: block;
@@ -39,7 +38,7 @@ const MainSwiper = styled(Swiper)`
 
 const ButtomSwiper = styled(Swiper)`
   .swiper {
-    height: 150px;
+    height: 25%;
   }
 
   .swiper-slide {
@@ -79,7 +78,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
   return (
     <>
       <MainSwiper
-        style={{ height: "300px" }}
+        style={{ height: "70%" }}
         loop={true}
         spaceBetween={10}
         navigation={true}
@@ -100,7 +99,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         })}
       </MainSwiper>
       <ButtomSwiper
-        style={{ height: "150px" }}
+        style={{ height: "25%" }}
         onSwiper={setThumbsSwiper}
         loop={true}
         spaceBetween={10}

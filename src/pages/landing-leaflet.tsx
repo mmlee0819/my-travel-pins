@@ -8,55 +8,23 @@ import React, {
 } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
-import {
-  MapContainer,
-  useMap,
-  Marker,
-  Popup,
-  GeoJSON,
-  useMapEvents,
-} from "react-leaflet"
+import { useMap, Marker, Popup, GeoJSON, useMapEvents } from "react-leaflet"
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
 import { countries } from "./Utils/customGeo"
 import { AuthContext } from "./Context/authContext"
-import homeMarker from "./assets/markers/hometownIcon.png"
 import PhotoWall from "./Components/photoWall"
 import { TipsContent, SampleMemory } from "./Components/sampleContent"
-import finger from "./assets/buttons/finger.png"
+import {
+  Attribution,
+  StyleMapContainer,
+  Container,
+} from "../pages/User/components/styles"
+import finger from "./assets/buttons/blackFinger.png"
 import tip from "./assets/tip.png"
-import xMark from "./assets/x-mark.png"
-// import home from "./assets/markers/home.png"
-const Attribution = styled.a`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  display: flex;
-  margin: 0;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #5594b7;
-  background: rgb(255, 255, 255, 0.6);
-  border: none;
-  text-decoration: none;
-  &:visited,
-  &:hover,
-  &:active {
-    text-decoration: underline;
-  }
-`
+import home from "./assets/markers/home1.png"
 
-const Container = styled.div`
-  position: relative;
-  margin: 0 auto;
-  max-width: 1440px;
-  width: 100%;
-  height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
-`
 const HeaderWrapper = styled.div`
   position: relative;
   display: flex;
@@ -67,27 +35,24 @@ const HeaderWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 60px;
-  font-family: "Jomhuria";
+  font-size: ${(props) => props.theme.title.lg};
   opacity: 1;
   gap: 20px;
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
 `
 const Title = styled.div`
-  position: absolute;
-  top: 0;
-  right: 10px;
-  margin: 0 auto;
-  max-width: 1440px;
-  font-family: "Jomhuria";
-  color: #fff;
-  font-size: 90px;
-  font-weight: 400;
-  letter-spacing: 4px;
-  line-height: 76px;
+  display: flex;
+  width: 50%;
+  padding-right: 20px;
+  flex: 1 1 auto;
+  line-height: 40px;
+  align-self: end;
+  justify-content: end;
+  color: ${(props) => props.theme.color.bgDark};
+  font-weight: 700;
   z-index: 20;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 76px;
-  }
 `
 
 const Slogan = styled.div`
@@ -96,8 +61,8 @@ const Slogan = styled.div`
   margin: 0 auto;
   font-family: "Just Me Again Down Here";
   font-size: 28px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  color: #ffffffe7;
+  @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: 1rem;
   }
 `
@@ -111,44 +76,52 @@ const TabWrapper = styled.div`
   max-width: 1440px;
   width: 100%;
   height: 40px;
-  font-family: "Jomhuria";
-  font-size: 40px;
   opacity: 1;
   gap: 20px;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 28px;
-    height: 30px;
-  }
 `
 const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   display: flex;
   padding: 0 15px;
+  font-weight: 700;
+  color: ${(props) => props.theme.color.bgDark};
   border: 1px solid #fff;
   border: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  &:hover {
+    box-shadow: 3px 3px 1px #0000004c;
+  }
+  @media screen and (min-width: 600px), (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const SignUpTab = styled(Tab)`
-  color: ${(props) => (props.isSignUp ? "#034961" : "#fff")};
-  background-color: ${(props) => (props.isSignUp ? "#fff" : "none")};
+  color: ${(props) => props.isSignUp && props.theme.color.bgLight};
+  background-color: ${(props) =>
+    props.isSignUp ? props.theme.color.lightMain : "none"};
+
   &:hover {
-    color: ${(props) => !props.isSignUp && "#5594b7"};
-    background-color: #fff;
+    color: ${(props) =>
+      !props.isSignUp ? props.theme.color.deepMain : props.theme.color.bgLight};
+    background-color: ${(props) =>
+      !props.isSignUp && props.theme.color.bgLight};
+    transition: ${(props) =>
+      !props.isSignUp ? "background-color 0.3s" : "none"};
   }
 `
 
 const SignInTab = styled(Tab)`
-  color: ${(props) => (props.isSignIn ? "#034961" : "#fff")};
-  background-color: ${(props) => (props.isSignIn ? "#fff" : "none")};
+  color: ${(props) => props.isSignIn && props.theme.color.bgLight};
+  background-color: ${(props) =>
+    props.isSignIn ? props.theme.color.lightMain : "none"};
   &:hover {
-    color: ${(props) => !props.isSignIn && "#5594b7"};
-    background-color: #fff;
+    color: ${(props) =>
+      !props.isSignIn ? props.theme.color.deepMain : props.theme.color.bgLight};
+    background-color: ${(props) =>
+      !props.isSignIn && props.theme.color.bgLight};
+    transition: ${(props) =>
+      !props.isSignIn ? "background-color 0.3s" : "none"};
   }
 `
 const TipText = styled.div`
@@ -172,24 +145,9 @@ const TipTab = styled.div`
   background-image: url(${tip});
   background-size: contain;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 600px), (max-height: 600px) {
     width: 25px;
     height: 25px;
-  }
-`
-const Xmark = styled.div`
-  position: absolute;
-  right: 50px;
-  bottom: 20px;
-  background-image: url(${xMark});
-  background-size: 100% 100%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    right: 30px;
   }
 `
 const Wrapper = styled.div`
@@ -202,15 +160,14 @@ const Wrapper = styled.div`
   flex-flow: column wrap;
   justify-content: flex-start;
   font-family: "Poppins";
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   background-color: rgb(255, 255, 255, 0.6);
   border-radius: 10px;
   box-shadow: 0 8px 6px #0000004c;
   gap: 15px;
   z-index: 100;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 18px;
+  @media screen and(max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 
@@ -226,26 +183,21 @@ const Input = styled.input`
 
 const Btn = styled.div`
   display: flex;
-  margin-top: 10px auto 30px auto;
+  margin: 30px auto;
   justify-content: center;
   align-self: center;
   text-align: center;
   width: 50%;
   min-height: 30px;
   line-height: 30px;
-  font-size: 16px;
   color: #fff;
-  background-color: #034961;
+  background-color: ${(props) => props.theme.color.lightMain};
   border-radius: 5px;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 12px;
-  }
 `
 const DefaultIcon = L.icon({
-  iconUrl: homeMarker,
-  iconSize: [40, 43],
+  iconUrl: home,
+  iconSize: [30, 30],
 })
 
 L.Marker.prototype.options.icon = DefaultIcon
@@ -260,6 +212,7 @@ interface AuthProps {
   isSignIn: boolean
   setIsSignUp: Dispatch<SetStateAction<boolean>>
   setIsSignIn: Dispatch<SetStateAction<boolean>>
+  overlayRef: React.RefObject<HTMLDivElement>
 }
 
 interface CountryType {
@@ -281,13 +234,40 @@ const myCustomStyle = {
   stroke: false,
   fill: true,
   fillColor: "#fff",
-  fillOpacity: 1,
+  fillOpacity: 0.8,
   zIndex: 50,
+}
+
+function useOnClickOutside(
+  ref: React.RefObject<HTMLDivElement>,
+  isSignUp: boolean,
+  isSignIn: boolean,
+  setIsSignUp: Dispatch<React.SetStateAction<boolean>>,
+  setIsSignIn: Dispatch<React.SetStateAction<boolean>>
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      // Do nothing if clicking ref's element or descendent elements
+
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return
+      }
+      if (isSignUp && !isSignIn) setIsSignUp(false)
+
+      if (isSignIn && !isSignUp) setIsSignIn(false)
+    }
+    window.addEventListener("mousedown", listener)
+    window.addEventListener("touchstart", listener)
+    return () => {
+      window.removeEventListener("mousedown", listener)
+      window.removeEventListener("touchstart", listener)
+    }
+  }, [ref])
 }
 
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
-  const { isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
+  const { overlayRef, isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
@@ -303,8 +283,17 @@ function AuthArea(props: AuthProps) {
     } else console.log("失敗啦")
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
+
+  useOnClickOutside(
+    overlayRef,
+    isSignUp,
+    isSignIn,
+    () => setIsSignUp(false),
+    () => setIsSignIn(false)
+  )
+
   return (
-    <Wrapper>
+    <Wrapper ref={overlayRef}>
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignUp && (
           <>
@@ -353,11 +342,6 @@ function AuthArea(props: AuthProps) {
             >
               Create an account
             </Btn>
-            <Xmark
-              onClick={() => {
-                setIsSignUp(false)
-              }}
-            />
           </>
         )}
       {(!isLogin || currentUser === null || currentUser === undefined) &&
@@ -383,11 +367,6 @@ function AuthArea(props: AuthProps) {
             >
               Sign in
             </Btn>
-            <Xmark
-              onClick={() => {
-                setIsSignIn(false)
-              }}
-            />
           </>
         )}
     </Wrapper>
@@ -399,7 +378,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
       layer.setStyle({
         stroke: false,
         fill: true,
-        fillColor: "#ffd500",
+        fillColor: "#7ccbab",
         fillOpacity: 1,
       })
     }
@@ -409,7 +388,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
       stroke: false,
       fill: true,
       fillColor: "#fff",
-      fillOpacity: 1,
+      fillOpacity: 0.8,
     })
   })
 }
@@ -443,11 +422,13 @@ function FingerMarker({ data }: { data: RoutePositionType }) {
   }, [lat, lng, fingerPos])
 
   return (
-    <LeafletTrackingMarker
-      icon={fingerIcon}
-      position={[lat, lng]}
-      duration={mapZoom === "md" ? 500 : 2500}
-    />
+    <>
+      <LeafletTrackingMarker
+        icon={fingerIcon}
+        position={[lat, lng]}
+        duration={mapZoom === "md" ? 500 : 2500}
+      />
+    </>
   )
 }
 function ChangeCenter() {
@@ -474,12 +455,11 @@ function ChangeCenterBack() {
 let cursor = 0
 function Home() {
   const { currentUser, isLogin, mapZoom } = useContext(AuthContext)
-
+  const overlayRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
   console.log({ position })
-  // const [mapZoom, setMapZoom] = useState<number>(0)
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
   const [hasRead, setHasRead] = useState(false)
@@ -527,12 +507,12 @@ function Home() {
   return (
     <>
       <HeaderWrapper>
-        <Title>My Travel Pins</Title>
         <TabWrapper>
           <SignUpTab
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
+              setShowSamplePost(false)
               setIsSignIn(false)
               setIsSignUp(true)
             }}
@@ -543,26 +523,37 @@ function Home() {
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
+              setShowSamplePost(false)
               setIsSignUp(false)
               setIsSignIn(true)
             }}
           >
             Sign In
           </SignInTab>
-          <TipText
+          {/* <TipText
             onClick={() => {
               setShowTips((prev) => !prev)
             }}
           >
             <TipTab />
             Tips
-          </TipText>
+          </TipText> */}
         </TabWrapper>
+        <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
+        {showSamplePost && (
+          <SampleMemory
+            setShowSamplePost={setShowSamplePost}
+            setHasRead={setHasRead}
+            setIsSignUp={setIsSignUp}
+            setIsSignIn={setIsSignIn}
+          />
+        )}
+        <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
-            <MapContainer
+            <StyleMapContainer
               id="homeMap"
               center={[39.9437334482122, 65.35942441225613]}
               zoomControl={false}
@@ -588,7 +579,6 @@ function Home() {
                   data={country}
                   style={myCustomStyle}
                   onEachFeature={onEachFeature}
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
               {!hasRead && !showSamplePost && (
@@ -597,23 +587,20 @@ function Home() {
               {(isSignUp || isSignIn) && <ChangeCenter />}
               {}
               <TargetArea position={position} setPosition={setPosition} />
-              {/* <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        /> */}
-              {!isSignUp && !isSignIn && (
+
+              {!isSignUp && !isSignIn && overlayRef.current === null && (
                 <>
                   <ChangeCenterBack />
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
                 </>
               )}
-              <Marker position={[42, 121]}>
+              <Marker position={[30, 121]}>
                 <Popup offset={[0, -10]} keepInView>
                   My Hometown <br />
                   Taiwan
                 </Popup>
               </Marker>
-            </MapContainer>
+            </StyleMapContainer>
           </>
         )}
         {(isSignUp || isSignIn) && (
@@ -622,24 +609,15 @@ function Home() {
             isSignIn={isSignIn}
             setIsSignUp={setIsSignUp}
             setIsSignIn={setIsSignIn}
+            overlayRef={overlayRef}
           />
         )}
       </Container>
       <Slogan>
         Save your favorite memories and share with your loved ones.
       </Slogan>
-      {/* <Attribution href="https://www.openstreetmap.org/copyright">
-        &copy; OpenStreetMap
-      </Attribution> */}
+
       {showTips && <TipsContent setShowTips={setShowTips} />}
-      {showSamplePost && (
-        <SampleMemory
-          setShowSamplePost={setShowSamplePost}
-          setHasRead={setHasRead}
-          setIsSignUp={setIsSignUp}
-          setIsSignIn={setIsSignIn}
-        />
-      )}
     </>
   )
 }

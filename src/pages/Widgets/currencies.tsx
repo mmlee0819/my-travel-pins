@@ -40,38 +40,46 @@ import india from "../assets/flags/india.png"
 import calculator from "../assets/calculator.png"
 
 const GridArea = styled.div`
-  font-family: "Poppins";
   position: absolute;
   display: flex;
   top: 80px;
-  min-width: 520px;
+  left: 60px;
+  min-width: 450px;
   min-height: 300px;
   z-index: 150;
 `
 const GridItemWrapper = styled.div`
   display: flex;
-  flex-flow: column wrap;
-  font-size: 18px;
-  color: #ffffff;
-  background: #2d2d2d;
+  flex-flow: row wrap;
+  min-width: 450px;
+  padding: 20px;
+  font-size: ${(props) => props.theme.title.md};
+  color: #2d2d2d;
+  background: #ffffff;
+  border-radius: 5px;
 `
 
 const GridItemContent = styled.div`
-  padding: 8px;
+  padding: 0;
+  height: 30px;
+`
+const Title = styled(GridItemContent)`
+  font-weight: 700;
+  margin-right: 20px;
 `
 const BtnClick = styled.div`
   display: inline-block;
   align-items: center;
-  margin-top: 20px;
-  margin-left: 8px;
+  margin: 20px 0 20px 8px;
   width: fit-content;
   padding: 5px;
   padding-right: 15px;
   height: 30px;
   line-height: 20px;
   text-align: center;
+  color: #fff;
   background-color: #034961;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
 `
 const ExchangesWrapper = styled.div`
@@ -96,34 +104,44 @@ const CurrenciesWrapper = styled.div`
 const CurrencyRow = styled(ExchangesRows)`
   padding: 5px 0;
   width: 200px;
-  color: #000000;
+  color: #2d2d2d;
   background-color: #ffffff;
-  border: none;
   gap: 2%;
+  &:hover {
+    color: #ffffff;
+    background-color: #034961;
+  }
 `
 
 const ExchangesTitle = styled.div`
-  font-size: 18px;
-  padding: 8px;
-  margin-top: 20px;
+  font-size: ${(props) => props.theme.title.md};
+  font-weight: 500;
+  margin: 10px 0;
 `
 const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
 `
+const ResultTitle = styled(AmountTitle)<{ changeMoment: number }>`
+  ${(props) => props.changeMoment && "color: #f99c62; font-weight:700;"}
+`
 const Credits = styled.a`
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: end;
+  margin: 20px 0 20px 8px;
   padding: 8px;
-  margin-top: 10px;
   font-size: 16px;
+  color: #b4b1b1;
   text-decoration: underline;
   &:visited {
-    color: #ffffff;
+    color: #b4b1b1;
     text-decoration: none;
   }
   &:hover {
-    color: #ffffff;
+    color: #454545;
   }
   &:active {
-    color: #ffffff;
+    color: #b4b1b1;
   }
 `
 const FlagImg = styled.img`
@@ -139,16 +157,21 @@ const WhiteInputArea = styled.div`
   height: 30px;
   background-color: #ffffff;
   border-radius: 5px;
+  border: 2px solid #034961;
   cursor: pointer;
 `
-const WhiteInputTitle = styled(WhiteInputArea)``
+const WhiteInputTitle = styled(WhiteInputArea)`
+  border: none;
+`
 const AmountInput = styled.input`
+  padding: 8px;
   font-size: 18px;
   line-height: 20px;
   width: 140px;
   height: 30px;
   background-color: #ffffff;
   border-radius: 5px;
+  border: 2px solid #034961;
 `
 
 const currenciesArr = [
@@ -233,12 +256,23 @@ const calculateRates = (
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
+const GridContainer = styled(ResponsiveGridLayout)`
+  .react-grid-item {
+    box-shadow: 0 8px 6px #0000004c;
+    border: 2px solid #034961;
+  }
+  .react-grid-item > .react-resizable-handle::after {
+    border-right: 2px solid #034961;
+    border-bottom: 2px solid #034961;
+  }
+`
+
 const layouts = {
-  lg: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 2, maxH: 1 }],
-  md: [{ i: "exRate-2", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  sm: [{ i: "exRate-3", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-4", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
-  xxs: [{ i: "exRate-5", x: 0, y: 0, w: 2, h: 1, maxW: 1, maxH: 1 }],
+  xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 2, maxW: 4, maxH: 2 }],
+  lg: [{ i: "exRate-2", x: 0, y: 0, w: 1, h: 2, maxW: 3, maxH: 2 }],
+  md: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  sm: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
 }
 
 interface Props {
@@ -263,7 +297,8 @@ function CurrencyWidget(props: Props) {
   } = useContext(ToolContext)
 
   const [amount, setAmount] = useState("")
-
+  console.log(selectedTo.id)
+  console.log(selectedFrom.id)
   useEffect(() => {
     if (!currenciesData || selectedFrom.id === "" || selectedTo.id === "")
       return
@@ -289,17 +324,17 @@ function CurrencyWidget(props: Props) {
 
   return (
     <GridArea>
-      <ResponsiveGridLayout
+      <GridContainer
         layouts={layouts}
         key="tools"
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 2.5, md: 4, sm: 3, xs: 2, xxs: 1 }}
-        width={1000}
+        breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
+        cols={{ xl: 4, lg: 3, md: 3, sm: 2, xs: 1 }}
+        width={450}
         rowHeight={500}
-        z-index={199}
+        z-index={180}
       >
         <GridItemWrapper key="exchange-rate">
-          <GridItemContent>Currency Converter</GridItemContent>
+          <Title>Currency Converter</Title>
           <GridItemContent>{`Last updated: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
           <ExchangesWrapper>
             <ExchangesWrapper>
@@ -335,7 +370,7 @@ function CurrencyWidget(props: Props) {
                         return (
                           <>
                             <CurrencyRow
-                              key={item.id}
+                              key={`from-${item.id}`}
                               id={item.id}
                               onClick={(e) => {
                                 const filteredCurrency = currenciesArr.filter(
@@ -376,7 +411,7 @@ function CurrencyWidget(props: Props) {
                       currenciesArr.map((item) => {
                         return (
                           <CurrencyRow
-                            key={item.id}
+                            key={`to-${item.id}`}
                             id={item.id}
                             onClick={(e) => {
                               const filteredCurrency = currenciesArr.filter(
@@ -397,12 +432,12 @@ function CurrencyWidget(props: Props) {
               </ExchangesWrapper>
             </ExchangesRows>
 
-            <AmountTitle>
+            <ResultTitle changeMoment={currentRate}>
               {currentRate ? `Exchange rate: ${currentRate}` : "Exchange rate"}
-            </AmountTitle>
-            <AmountTitle>
+            </ResultTitle>
+            <ResultTitle changeMoment={convertResult}>
               {convertResult ? `Result: ${convertResult}` : "Result"}
-            </AmountTitle>
+            </ResultTitle>
           </ExchangesWrapper>
           <BtnClick
             onClick={() => {
@@ -422,7 +457,7 @@ function CurrencyWidget(props: Props) {
             Credits: ©RTER.info
           </Credits>
         </GridItemWrapper>
-      </ResponsiveGridLayout>
+      </GridContainer>
     </GridArea>
   )
 }
