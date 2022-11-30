@@ -46,6 +46,8 @@ export interface MessagesType {
   msgContent: string
   msgTimestamp: number
   msgReadableTime: string
+  name: string
+  photoURL: string
 }
 
 export const getPins = async (
@@ -109,6 +111,7 @@ export const addMsg = async (
   id: string,
   refValue: string
 ) => {
+  if (refValue.trim() === "") return
   try {
     const pinRef = doc(db, "pins", id)
     await updateDoc(pinRef, {
@@ -141,33 +144,25 @@ export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>
 ) => {
-  onSnapshot(doc(db, "pins", id), (doc: DocumentData) => {
-    setMessages(doc.data().messages)
-  })
-}
-
-export const queryMessengerInfo = async (
-  id: string,
-  setMessengerInfo: Dispatch<SetStateAction<DocumentData[]>>
-) => {
-  try {
-    const docRef = doc(db, "users", id)
-    const docSnap = await getDoc(docRef)
-    if (docSnap.exists()) {
-      setMessengerInfo((prev) => {
-        return [
-          ...prev,
-          { name: docSnap.data().name, photoURL: docSnap.data().photoURL },
-        ]
-      })
-      console.log("Document data:", docSnap.data())
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!")
+  onSnapshot(doc(db, "pins", id), (messageData: DocumentData) => {
+    const fetchMessengers = async () => {
+      const newMessages: MessagesType[] = messageData.data().messages
+      await Promise.all(
+        newMessages.map(
+          async (item: DocumentData | MessagesType, index: number) => {
+            const docRef = doc(db, "users", item.messenger)
+            const docSnap = await getDoc(docRef)
+            if (docSnap.exists()) {
+              newMessages[index].name = docSnap.data().name
+              newMessages[index].photoURL = docSnap.data().photoURL
+            }
+          }
+        )
+      )
+      setMessages(newMessages)
     }
-  } catch (error) {
-    console.log(error)
-  }
+    fetchMessengers()
+  })
 }
 
 export const deleteMsg = async (id: string, item: DocumentData) => {

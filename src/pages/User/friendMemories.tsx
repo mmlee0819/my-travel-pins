@@ -20,7 +20,6 @@ import {
   MessagesType,
   addMsg,
   checkRealTimePinMessages,
-  queryMessengerInfo,
   PinContent,
   checkRealTimePinsInfo,
 } from "../User/ts_fn_commonUse"
@@ -35,10 +34,6 @@ function FriendMemories() {
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
-  const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
-  console.log("messengerInfo", messengerInfo)
-  console.log({ memoryIsShow })
-  console.log({ memory })
 
   const msgRef = useRef<HTMLInputElement>(null)
 
@@ -87,18 +82,9 @@ function FriendMemories() {
       document.removeEventListener("keydown", keyDownListener)
     }
   })
-  useEffect(() => {
-    if (messages === undefined || messages.length === 0) return
-    setMessengerInfo([])
-    console.log({ messages })
-    messages.map((item: DocumentData | MessagesType) => {
-      queryMessengerInfo(item.messenger, setMessengerInfo)
-    })
-  }, [messages])
 
   useEffect(() => {
     if (!memory?.id) return
-
     checkRealTimePinMessages(memory?.id, setMessages)
     return checkRealTimePinMessages(memory?.id, setMessages)
   }, [memory?.id])
