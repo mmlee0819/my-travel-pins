@@ -778,6 +778,9 @@ export default function DetailMemory(props: Props) {
                       <Input
                         as="input"
                         type="date"
+                        pattern="\d{4}-\d{2}-\d{2}"
+                        min="1900-01-01"
+                        max="9999-12-31"
                         value={travelDate}
                         onChange={(e) => {
                           setTravelDate(e.target.value)

@@ -108,40 +108,7 @@ const Input = styled.input`
     font-size: ${(props) => props.theme.title.md};
   }
 `
-const DateInput = styled.input.attrs({
-  type: "date",
-})`
-  width: 100%;
-  height: 40px;
-  padding-left: 10px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  font-size: ${(props) => props.theme.title.lg};
-  color: ${(props) => props.theme.color.bgDark};
-  background-color: #ffffff;
-  border: 3px solid #ffffff;
-  border-radius: 5px;
-  opacity: 1;
-  &:focus {
-    outline: #7ccbab;
-    border: 3px solid #7ccbab;
-  }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-  &::-webkit-datetime-edit-text {
-    -webkit-appearance: none;
-  }
-  &::-webkit-datetime-edit-month-field {
-    -webkit-appearance: none;
-  }
-  &::-webkit-datetime-edit-day-field {
-    -webkit-appearance: none;
-  }
-  &::-webkit-datetime-edit-year-field {
-    -webkit-appearance: none;
-  }
-`
+
 const StepText = styled.div`
   display: flex;
   padding: 0px 10px;
@@ -411,6 +378,16 @@ function useOnClickOutside(
   }, [ref, hasAddPin])
 }
 
+const getCurrentDate = () => {
+  const dateObj = new Date()
+  const month = ("0" + (dateObj.getMonth() + 1)).slice(-2)
+  const day = ("0" + dateObj.getDate()).slice(-2)
+  const year = dateObj.getFullYear()
+  const today = `${year}-${month}-${day}`
+
+  return today
+}
+
 export default function MyMap() {
   const {
     isLoaded,
@@ -678,11 +655,15 @@ export default function MyMap() {
                           setArtiTitle(e.target.value)
                         }}
                       />
-                      <DateInput
+                      <Input
                         type="date"
+                        pattern="\d{4}-\d{2}-\d{2}"
+                        min="1900-01-01"
+                        max="9999-12-31"
                         onChange={(e) => {
                           setTravelDate(e.target.value)
                         }}
+                        value={travelDate || getCurrentDate()}
                       />
                       <Editor
                         artiContent={artiContent}
