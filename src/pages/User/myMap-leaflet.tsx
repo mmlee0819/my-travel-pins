@@ -356,22 +356,33 @@ const mdNewPinIcon = L.icon({
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
   locationRef: React.RefObject<HTMLInputElement>,
-  setShowAlert: Dispatch<React.SetStateAction<boolean>>,
-  setShowPostArea: Dispatch<React.SetStateAction<boolean>>
+  artiTitle: string,
+  artiContent: string,
+  setShowAlert: Dispatch<React.SetStateAction<boolean>>
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
-        locationRef?.current?.value === "" ||
+        (event?.target as HTMLDivElement)?.classList.contains(
+          "leaflet-marker-icon"
+        ) ||
         (event?.target as HTMLDivElement)?.className === "pac-item" ||
         (event?.target as Node)?.parentElement?.className === "pac-item" ||
         (event?.target as Node)?.parentElement?.className === "pac-container"
       )
         return
 
-      setShowAlert(true)
+      if (
+        (locationRef.current !== undefined &&
+          locationRef.current !== null &&
+          locationRef?.current?.value !== "") ||
+        artiTitle !== "" ||
+        artiContent !== ""
+      ) {
+        setShowAlert(true)
+      }
     }
 
     window.addEventListener("mousedown", listener)
@@ -456,11 +467,8 @@ export default function MyMap() {
   console.log({ showPostArea })
   console.log({ selectedMarker })
 
-  useOnClickOutside(
-    overlayRef,
-    locationRef,
-    () => setShowAlert(true),
-    () => setShowPostArea(false)
+  useOnClickOutside(overlayRef, locationRef, artiTitle, artiContent, () =>
+    setShowAlert(true)
   )
 
   useEffect(() => {
@@ -666,9 +674,11 @@ export default function MyMap() {
                 <Xmark
                   onClick={() => {
                     if (
-                      locationRef.current !== undefined &&
-                      locationRef.current !== null &&
-                      locationRef?.current?.value !== ""
+                      (locationRef.current !== undefined &&
+                        locationRef.current !== null &&
+                        locationRef?.current?.value !== "") ||
+                      artiTitle !== "" ||
+                      artiContent !== ""
                     ) {
                       setShowAlert(true)
                     } else {
@@ -676,9 +686,8 @@ export default function MyMap() {
                     }
                   }}
                 />
-                <StepText>To remember your trip</StepText>
-                <>
-                  <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
+                <StepText>Log your memory</StepText>
+                <ArticleWrapper>
                   <StandaloneSearchBox
                     onLoad={onLoad}
                     onPlacesChanged={onPlacesChanged}
@@ -688,56 +697,47 @@ export default function MyMap() {
                       placeholder="Where did you go?"
                     ></Input>
                   </StandaloneSearchBox>
-                </>
-
-                {/* {hasAddPin && !hasPosted && ( */}
-                <>
-                  <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
-                  <ArticleWrapper>
-                    <Input
-                      placeholder="Title"
-                      value={artiTitle}
-                      onChange={(e) => {
-                        setArtiTitle(e.target.value)
-                      }}
-                    />
-                    <Input
-                      type="date"
-                      pattern="\d{4}-\d{2}-\d{2}"
-                      min="1900-01-01"
-                      max="9999-12-31"
-                      onChange={(e) => {
-                        setTravelDate(e.target.value)
-                      }}
-                      value={travelDate}
-                    />
-                    <Editor
-                      artiContent={artiContent}
-                      setArtiContent={setArtiContent}
-                    />
-                  </ArticleWrapper>
-                  <Upload
-                    currentPin={newPin}
-                    filesName={filesName}
-                    setFilesName={setFilesName}
-                    photos={photos}
-                    setPhotos={setPhotos}
-                    hasUpload={hasUpload}
-                    setHasUpload={setHasUpload}
-                    urls={urls}
-                    setUrls={setUrls}
-                    setUploadProgress={setUploadProgress}
-                  />
-                  <BtnText
-                    onClick={() => {
-                      // addPin()
-                      addMemory()
+                  <Input
+                    placeholder="Title"
+                    value={artiTitle}
+                    onChange={(e) => {
+                      setArtiTitle(e.target.value)
                     }}
-                  >
-                    Confirm to post
-                  </BtnText>
-                </>
-                {/* )} */}
+                  />
+                  <Input
+                    type="date"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                    min="1900-01-01"
+                    max="9999-12-31"
+                    onChange={(e) => {
+                      setTravelDate(e.target.value)
+                    }}
+                    value={travelDate}
+                  />
+                  <Editor
+                    artiContent={artiContent}
+                    setArtiContent={setArtiContent}
+                  />
+                </ArticleWrapper>
+                <Upload
+                  currentPin={newPin}
+                  filesName={filesName}
+                  setFilesName={setFilesName}
+                  photos={photos}
+                  setPhotos={setPhotos}
+                  hasUpload={hasUpload}
+                  setHasUpload={setHasUpload}
+                  urls={urls}
+                  setUrls={setUrls}
+                  setUploadProgress={setUploadProgress}
+                />
+                <BtnText
+                  onClick={() => {
+                    addMemory()
+                  }}
+                >
+                  Confirm to post
+                </BtnText>
               </PostPinWrapper>
             )}
 
@@ -800,7 +800,6 @@ export default function MyMap() {
                       icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
                       eventHandlers={{
                         click() {
-                          setShowPostArea(false)
                           setSelectedMarker(marker)
                         },
                       }}
