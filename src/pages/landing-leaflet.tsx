@@ -230,6 +230,7 @@ interface RoutePositionType {
   lat: number
   lng: number
 }
+
 const myCustomStyle = {
   stroke: false,
   fill: true,
@@ -248,8 +249,12 @@ function useOnClickOutside(
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       // Do nothing if clicking ref's element or descendent elements
-
-      if (!ref.current || ref.current.contains(event.target as Node)) {
+      if (
+        !ref.current ||
+        ref.current.contains(event.target as Node) ||
+        (event?.target as Node)?.parentElement?.className === "pac-item" ||
+        (event?.target as Node)?.parentElement?.className === "pac-container"
+      ) {
         return
       }
       if (isSignUp && !isSignIn) setIsSignUp(false)
@@ -275,6 +280,7 @@ function AuthArea(props: AuthProps) {
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
   const [result, setResult] = useState<google.maps.places.PlaceResult[]>()
+
   const onPlacesChanged = () => {
     if (hometownBox instanceof google.maps.places.SearchBox) {
       console.log(hometownBox.getPlaces())
@@ -459,7 +465,7 @@ function Home() {
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
-  console.log({ position })
+  // console.log({ position })
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
   const [hasRead, setHasRead] = useState(false)
