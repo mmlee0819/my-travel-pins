@@ -109,6 +109,7 @@ export const addMsg = async (
   id: string,
   refValue: string
 ) => {
+  if (refValue.trim() === "") return
   try {
     const pinRef = doc(db, "pins", id)
     await updateDoc(pinRef, {
