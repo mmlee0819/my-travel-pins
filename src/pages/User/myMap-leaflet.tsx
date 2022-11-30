@@ -355,13 +355,21 @@ const mdNewPinIcon = L.icon({
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-
-  setShowAlert: Dispatch<React.SetStateAction<boolean>>
+  locationRef: React.RefObject<HTMLInputElement>,
+  setShowAlert: Dispatch<React.SetStateAction<boolean>>,
+  setShowPostArea: Dispatch<React.SetStateAction<boolean>>
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      // Do nothing if clicking ref's element or descendent elements
-      if (!ref.current || ref.current.contains(event.target as Node)) return
+      if (
+        !ref.current ||
+        ref.current.contains(event.target as Node) ||
+        locationRef?.current?.value === "" ||
+        (event?.target as HTMLDivElement)?.className === "pac-item" ||
+        (event?.target as Node)?.parentElement?.className === "pac-item" ||
+        (event?.target as Node)?.parentElement?.className === "pac-container"
+      )
+        return
 
       setShowAlert(true)
     }
@@ -390,7 +398,6 @@ export default function MyMap() {
     isLoaded,
     isLogin,
     currentUser,
-    navigate,
     mapZoom,
     setIsMyMap,
     setIsMyMemory,
@@ -449,7 +456,12 @@ export default function MyMap() {
   console.log({ showPostArea })
   console.log({ selectedMarker })
 
-  useOnClickOutside(overlayRef, () => setShowAlert(true))
+  useOnClickOutside(
+    overlayRef,
+    locationRef,
+    () => setShowAlert(true),
+    () => setShowPostArea(false)
+  )
 
   useEffect(() => {
     setIsMyMap(true)
@@ -653,8 +665,15 @@ export default function MyMap() {
               <PostPinWrapper ref={overlayRef}>
                 <Xmark
                   onClick={() => {
-                    setShowAlert(true)
-                    setShowPostArea(false)
+                    if (
+                      locationRef.current !== undefined &&
+                      locationRef.current !== null &&
+                      locationRef?.current?.value !== ""
+                    ) {
+                      setShowAlert(true)
+                    } else {
+                      setShowPostArea(false)
+                    }
                   }}
                 />
                 <StepText>To remember your trip</StepText>
