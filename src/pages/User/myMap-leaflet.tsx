@@ -74,7 +74,8 @@ const PostPinWrapper = styled(Wrapper)<{ hasAddPin: boolean }>`
   display: flex;
   flex-flow: column nowrap;
   width: 50%;
-  height: ${(props) => (props.hasAddPin ? "100%" : "60%")};
+  height: 100%;
+  /* height: ${(props) => (props.hasAddPin ? "100%" : "60%")}; */
   padding: 20px 20px;
   font-size: ${(props) => props.theme.title.md};
   z-index: 48;
@@ -334,6 +335,7 @@ function ChangeCenterBack() {
   }
   return null
 }
+
 const DefaultIcon = L.icon({
   iconUrl: home,
   iconSize: [40, 43],
@@ -397,6 +399,7 @@ export default function MyMap() {
     mapZoom,
     setIsMyMap,
     setIsMyMemory,
+    setIsMyFriend,
     setIsFriendHome,
     setIsFriendMemory,
   } = useContext(AuthContext)
@@ -426,7 +429,7 @@ export default function MyMap() {
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
   const [artiTitle, setArtiTitle] = useState<string>("")
-  const [travelDate, setTravelDate] = useState<string>("")
+  const [travelDate, setTravelDate] = useState<string>(getCurrentDate)
   const [artiContent, setArtiContent] = useState<string>("")
   const [hasPosted, setHasPosted] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
@@ -435,13 +438,28 @@ export default function MyMap() {
   const [showAlert, setShowAlert] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
 
+  const [refReady, setRefReady] = useState(false)
+  const popupRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (!selectedMarker) return
+    console.log("popupRef.current", popupRef.current)
+    if (refReady && popupRef !== undefined) {
+      popupRef.current.openPopup()
+    }
+  }, [selectedMarker?.location.placeId])
+
   console.log({ showAlert })
   console.log({ hasAddPin })
   console.log({ showPostArea })
+  console.log({ selectedMarker })
 
   useOnClickOutside(overlayRef, hasAddPin, () => setShowAlert(true))
 
   useEffect(() => {
+    setIsMyMap(true)
+    setIsMyMemory(false)
+    setIsMyFriend(false)
     setIsFriendHome(false)
     setIsFriendMemory(false)
     if (typeof currentUser?.id === "string") {
@@ -485,59 +503,81 @@ export default function MyMap() {
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
-  const addPin = async () => {
-    if (!newPin) return
-    await setDoc(doc(db, "pins", newPin?.id), newPin)
-    setMarkers((prev) => {
-      return [
-        ...prev,
-        {
-          location: {
-            placeId: newPin.location.placeId,
-            lat: newPin.location.lat,
-            lng: newPin.location.lng,
-            name: newPin.location.name,
-          },
-        },
-      ]
-    })
-    setHasAddPin(true)
-    setHasPosted(false)
-    setHasUpload(false)
-    setHasFetched(false)
-  }
-
   const addMemory = async () => {
-    if (filesName.length !== 0 && !hasUpload) {
-      alert(
-        "It seems that you have some photos, please click upload button first!"
-      )
-      return
-    }
-    const docRef = doc(db, "pins", newPin.id)
-    const artiInfo = {
-      article: {
-        title: artiTitle,
-        travelDate: travelDate,
-        content: artiContent,
-      },
-      postTime: new Date(),
-      albumURLs: urls,
-      albumNames: filesName,
-    }
+    if (!newPin) return
     try {
+      await setDoc(doc(db, "pins", newPin?.id), newPin)
+      if (filesName.length !== 0 && !hasUpload) {
+        alert(
+          "It seems that you have some photos, please click upload button first!"
+        )
+        return
+      }
+      const docRef = doc(db, "pins", newPin.id)
+      const artiInfo = {
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+        postTimestamp: Date.now(),
+        postReadableTime: new Date(),
+        albumURLs: urls,
+        albumNames: filesName,
+      }
+
       await updateDoc(docRef, artiInfo)
+      setMarkers((prev) => {
+        return [
+          ...prev,
+          {
+            article: {
+              title: artiTitle,
+              travelDate: travelDate,
+              content: artiContent,
+            },
+            postTimestamp: Date.now(),
+            postReadableTime: new Date(),
+            albumURLs: urls,
+            albumNames: filesName,
+            location: {
+              placeId: newPin.location.placeId,
+              lat: newPin.location.lat,
+              lng: newPin.location.lng,
+              name: newPin.location.name,
+            },
+          },
+        ]
+      })
+      setSelectedMarker({
+        article: {
+          title: artiTitle,
+          travelDate: travelDate,
+          content: artiContent,
+        },
+        postTimestamp: Date.now(),
+        postReadableTime: new Date(),
+        albumURLs: urls,
+        albumNames: filesName,
+        location: {
+          placeId: newPin.location.placeId,
+          lat: newPin.location.lat,
+          lng: newPin.location.lng,
+          name: newPin.location.name,
+        },
+      })
+      setRefReady(true)
       setHasPosted(true)
       setHasAddPin(false)
       setFilesName([])
       setPhotos([])
       setUploadProgress(0)
       setUrls([])
-      if (currentUser) {
-        setIsMyMap(false)
-        setIsMyMemory(true)
-        navigate(`/${currentUser.name}/my-memories`)
-      }
+      // if (currentUser) {
+      //   setIsMyMap(false)
+      //   setIsMyMemory(true)
+      //   navigate(`/${currentUser.name}/my-memories`)
+      // }
     } catch (error) {
       console.log(error)
     }
@@ -642,49 +682,56 @@ export default function MyMap() {
                     >
                       <Input placeholder="Where did you go?"></Input>
                     </StandaloneSearchBox>
-                    <BtnText onClick={addPin}>Confirm to pin</BtnText>
+                    {/* <BtnText onClick={addPin}>Confirm to pin</BtnText> */}
                   </>
                 )}
-                {hasAddPin && !hasPosted && (
-                  <>
-                    <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
-                    <ArticleWrapper>
-                      <Input
-                        placeholder="Title"
-                        onChange={(e) => {
-                          setArtiTitle(e.target.value)
-                        }}
-                      />
-                      <Input
-                        type="date"
-                        pattern="\d{4}-\d{2}-\d{2}"
-                        min="1900-01-01"
-                        max="9999-12-31"
-                        onChange={(e) => {
-                          setTravelDate(e.target.value)
-                        }}
-                        value={travelDate || getCurrentDate()}
-                      />
-                      <Editor
-                        artiContent={artiContent}
-                        setArtiContent={setArtiContent}
-                      />
-                    </ArticleWrapper>
-                    <Upload
-                      currentPin={newPin}
-                      filesName={filesName}
-                      setFilesName={setFilesName}
-                      photos={photos}
-                      setPhotos={setPhotos}
-                      hasUpload={hasUpload}
-                      setHasUpload={setHasUpload}
-                      urls={urls}
-                      setUrls={setUrls}
-                      setUploadProgress={setUploadProgress}
+                {/* {hasAddPin && !hasPosted && ( */}
+                <>
+                  <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
+                  <ArticleWrapper>
+                    <Input
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
+                      }}
                     />
-                    <BtnText onClick={addMemory}>Confirm to post</BtnText>
-                  </>
-                )}
+                    <Input
+                      type="date"
+                      pattern="\d{4}-\d{2}-\d{2}"
+                      min="1900-01-01"
+                      max="9999-12-31"
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                      value={travelDate}
+                    />
+                    <Editor
+                      artiContent={artiContent}
+                      setArtiContent={setArtiContent}
+                    />
+                  </ArticleWrapper>
+                  <Upload
+                    currentPin={newPin}
+                    filesName={filesName}
+                    setFilesName={setFilesName}
+                    photos={photos}
+                    setPhotos={setPhotos}
+                    hasUpload={hasUpload}
+                    setHasUpload={setHasUpload}
+                    urls={urls}
+                    setUrls={setUrls}
+                    setUploadProgress={setUploadProgress}
+                  />
+                  <BtnText
+                    onClick={() => {
+                      // addPin()
+                      addMemory()
+                    }}
+                  >
+                    Confirm to post
+                  </BtnText>
+                </>
+                {/* )} */}
               </PostPinWrapper>
             )}
 
@@ -741,6 +788,7 @@ export default function MyMap() {
                 return (
                   <>
                     <Marker
+                      ref={popupRef}
                       key={marker.location.placeId}
                       position={[marker.location.lat, marker.location.lng]}
                       icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
@@ -753,9 +801,10 @@ export default function MyMap() {
                     >
                       <Popup
                         offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView
+                        keepInView={true}
                       >
                         <PinInfoArea
+                          id={marker.location.placeId}
                           onClick={() => {
                             setShowMemory(true)
                           }}
