@@ -69,13 +69,13 @@ const Xmark = styled.div`
   height: 20px;
   cursor: pointer;
 `
-const PostPinWrapper = styled(Wrapper)<{ hasAddPin: boolean }>`
+const PostPinWrapper = styled(Wrapper)`
   top: 3px;
   display: flex;
   flex-flow: column nowrap;
   width: 50%;
   height: 100%;
-  /* height: ${(props) => (props.hasAddPin ? "100%" : "60%")}; */
+
   padding: 20px 20px;
   font-size: ${(props) => props.theme.title.md};
   z-index: 48;
@@ -355,18 +355,13 @@ const mdNewPinIcon = L.icon({
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-  hasAddPin: boolean,
+
   setShowAlert: Dispatch<React.SetStateAction<boolean>>
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       // Do nothing if clicking ref's element or descendent elements
-      if (
-        !ref.current ||
-        ref.current.contains(event.target as Node) ||
-        !hasAddPin
-      )
-        return
+      if (!ref.current || ref.current.contains(event.target as Node)) return
 
       setShowAlert(true)
     }
@@ -377,7 +372,7 @@ function useOnClickOutside(
       window.removeEventListener("mousedown", listener)
       window.removeEventListener("touchstart", listener)
     }
-  }, [ref, hasAddPin])
+  }, [ref])
 }
 
 const getCurrentDate = () => {
@@ -422,7 +417,7 @@ export default function MyMap() {
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  const [hasAddPin, setHasAddPin] = useState(false)
+  console.log({ searchBox })
   const [filesName, setFilesName] = useState<string[]>([])
   const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -437,7 +432,7 @@ export default function MyMap() {
   const [showPostArea, setShowPostArea] = useState(false)
   const [showAlert, setShowAlert] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
-
+  const locationRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
 
@@ -450,11 +445,11 @@ export default function MyMap() {
   }, [selectedMarker?.location.placeId])
 
   console.log({ showAlert })
-  console.log({ hasAddPin })
+
   console.log({ showPostArea })
   console.log({ selectedMarker })
 
-  useOnClickOutside(overlayRef, hasAddPin, () => setShowAlert(true))
+  useOnClickOutside(overlayRef, () => setShowAlert(true))
 
   useEffect(() => {
     setIsMyMap(true)
@@ -566,18 +561,18 @@ export default function MyMap() {
           name: newPin.location.name,
         },
       })
+      if (locationRef.current !== undefined && locationRef.current !== null) {
+        locationRef.current.value = ""
+      }
       setRefReady(true)
       setHasPosted(true)
-      setHasAddPin(false)
       setFilesName([])
       setPhotos([])
       setUploadProgress(0)
       setUrls([])
-      // if (currentUser) {
-      //   setIsMyMap(false)
-      //   setIsMyMemory(true)
-      //   navigate(`/${currentUser.name}/my-memories`)
-      // }
+      setArtiTitle("")
+      setTravelDate(getCurrentDate)
+      setArtiContent("")
     } catch (error) {
       console.log(error)
     }
@@ -599,7 +594,6 @@ export default function MyMap() {
     }
     setShowAlert(false)
     setHasPosted(true)
-    setHasAddPin(false)
     setFilesName([])
     setPhotos([])
     setUploadProgress(0)
@@ -621,23 +615,17 @@ export default function MyMap() {
             <>
               <BgOverlay />
               <ReminderArea>
-                {hasAddPin && (
-                  <ReminderText>
-                    Are you sure <br />
-                    you want to discard all changes <br />
-                    and edit later?
-                  </ReminderText>
-                )}
+                <ReminderText>
+                  Are you sure <br />
+                  you want to discard all changes <br />
+                  and edit later?
+                </ReminderText>
+
                 <BtnWrapper>
                   <BtnRed
                     onClick={() => {
-                      if (hasAddPin) {
-                        cancelPost()
-                        setShowPostArea(false)
-                      } else {
-                        setShowAlert(false)
-                        setShowPostArea(false)
-                      }
+                      cancelPost()
+                      setShowPostArea(false)
                     }}
                   >
                     Yes
@@ -662,35 +650,34 @@ export default function MyMap() {
               />
             )}
             {showPostArea && (
-              <PostPinWrapper hasAddPin={hasAddPin} ref={overlayRef}>
+              <PostPinWrapper ref={overlayRef}>
                 <Xmark
                   onClick={() => {
-                    if (!hasAddPin) {
-                      setShowPostArea(false)
-                    } else {
-                      setShowAlert(true)
-                    }
+                    setShowAlert(true)
+                    setShowPostArea(false)
                   }}
                 />
                 <StepText>To remember your trip</StepText>
-                {!hasAddPin && (
-                  <>
-                    <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
-                    <StandaloneSearchBox
-                      onLoad={onLoad}
-                      onPlacesChanged={onPlacesChanged}
-                    >
-                      <Input placeholder="Where did you go?"></Input>
-                    </StandaloneSearchBox>
-                    {/* <BtnText onClick={addPin}>Confirm to pin</BtnText> */}
-                  </>
-                )}
+                <>
+                  <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
+                  <StandaloneSearchBox
+                    onLoad={onLoad}
+                    onPlacesChanged={onPlacesChanged}
+                  >
+                    <Input
+                      ref={locationRef}
+                      placeholder="Where did you go?"
+                    ></Input>
+                  </StandaloneSearchBox>
+                </>
+
                 {/* {hasAddPin && !hasPosted && ( */}
                 <>
                   <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
                   <ArticleWrapper>
                     <Input
                       placeholder="Title"
+                      value={artiTitle}
                       onChange={(e) => {
                         setArtiTitle(e.target.value)
                       }}
