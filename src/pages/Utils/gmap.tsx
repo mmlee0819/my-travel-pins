@@ -7,7 +7,7 @@ import {
   MessagesType,
   addMsg,
   checkRealTimePinMessages,
-  queryMessengerInfo,
+  // queryMessengerInfo,
   deleteMsg,
 } from "../User/ts_fn_commonUse"
 import { AuthContext } from "../Context/authContext"
@@ -235,14 +235,6 @@ const PinMsgs = (props: PropsFromStreetView) => {
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
-
-  useEffect(() => {
-    if (messages === undefined || messages.length === 0) return
-    setMessengerInfo([])
-    messages.map((item: DocumentData) => {
-      queryMessengerInfo(item.messenger, setMessengerInfo)
-    })
-  }, [messages])
 
   return (
     <>

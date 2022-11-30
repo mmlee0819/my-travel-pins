@@ -10,7 +10,6 @@ import {
   MessagesType,
   addMsg,
   checkRealTimePinMessages,
-  queryMessengerInfo,
   deleteMsg,
   PinContent,
 } from "../User/ts_fn_commonUse"
@@ -363,7 +362,6 @@ export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
-  const [messengerInfo, setMessengerInfo] = useState<DocumentData[]>([])
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -392,7 +390,7 @@ export default function DetailMemory(props: Props) {
   const [hasDiscard, setHasDiscard] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState("")
   const overlayRef = useRef<HTMLDivElement>(null)
-  console.log({ showDelete })
+
   const updateTitle = async () => {
     if (!selectedMarker?.id) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -521,14 +519,6 @@ export default function DetailMemory(props: Props) {
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
-    if (messages === undefined || messages.length === 0) return
-    setMessengerInfo([])
-    messages.map((item: DocumentData | MessagesType) => {
-      queryMessengerInfo(item.messenger, setMessengerInfo)
-    })
-  }, [messages])
-
-  useEffect(() => {
     if (!selectedMarker?.id || messages === undefined) return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
@@ -626,69 +616,63 @@ export default function DetailMemory(props: Props) {
                     </MsgRowNoWrapper>
                     {messages !== undefined &&
                       messages.length !== 0 &&
-                      messengerInfo !== undefined &&
-                      messengerInfo.length === messages.length &&
-                      messages.map(
-                        (item: DocumentData | MessagesType, index: number) => {
-                          return (
-                            <MsgRowNoWrapper
-                              key={`${item.messenger}-${item.msgTimestamp}`}
-                            >
-                              <UserAvatar
-                                avatarURL={messengerInfo[index].photoURL}
-                              />
-                              <MsgContent>
-                                {messengerInfo[index].name}
-                                <br />
-                                {item.msgContent}
-                              </MsgContent>
-                              {currentUser !== null &&
-                                item.messenger === currentUser?.id && (
-                                  <BtnMore
+                      messages.map((item: DocumentData | MessagesType) => {
+                        return (
+                          <MsgRowNoWrapper
+                            key={`${item.messenger}-${item.msgTimestamp}`}
+                          >
+                            <UserAvatar avatarURL={item.photoURL} />
+                            <MsgContent>
+                              {item.name}
+                              <br />
+                              {item.msgContent}
+                            </MsgContent>
+                            {currentUser !== null &&
+                              item.messenger === currentUser?.id && (
+                                <BtnMore
+                                  id={`${item.messenger}-${item.msgTimestamp}`}
+                                  showMore={showDelete}
+                                  onClick={(
+                                    e: React.MouseEvent<HTMLDivElement>
+                                  ) => {
+                                    if (
+                                      (e.target as HTMLDivElement).id !==
+                                      selectedMsgId
+                                    ) {
+                                      setSelectedMsgId(
+                                        (e.target as HTMLDivElement).id
+                                      )
+                                      setShowDelete(true)
+                                    } else {
+                                      setShowDelete((prev) => !prev)
+                                    }
+                                  }}
+                                >
+                                  <BtnDelete
                                     id={`${item.messenger}-${item.msgTimestamp}`}
-                                    showMore={showDelete}
-                                    onClick={(
-                                      e: React.MouseEvent<HTMLDivElement>
-                                    ) => {
-                                      if (
-                                        (e.target as HTMLDivElement).id !==
+                                    showDelete={
+                                      showDelete &&
+                                      `${item.messenger}-${item.msgTimestamp}` ===
                                         selectedMsgId
+                                        ? true
+                                        : false
+                                    }
+                                    onClick={() => {
+                                      if (
+                                        selectedMarker !== undefined &&
+                                        typeof selectedMarker?.id === "string"
                                       ) {
-                                        setSelectedMsgId(
-                                          (e.target as HTMLDivElement).id
-                                        )
-                                        setShowDelete(true)
-                                      } else {
-                                        setShowDelete((prev) => !prev)
+                                        deleteMsg(selectedMarker?.id, item)
                                       }
                                     }}
                                   >
-                                    <BtnDelete
-                                      id={`${item.messenger}-${item.msgTimestamp}`}
-                                      showDelete={
-                                        showDelete &&
-                                        `${item.messenger}-${item.msgTimestamp}` ===
-                                          selectedMsgId
-                                          ? true
-                                          : false
-                                      }
-                                      onClick={() => {
-                                        if (
-                                          selectedMarker !== undefined &&
-                                          typeof selectedMarker?.id === "string"
-                                        ) {
-                                          deleteMsg(selectedMarker?.id, item)
-                                        }
-                                      }}
-                                    >
-                                      Delete
-                                    </BtnDelete>
-                                  </BtnMore>
-                                )}
-                            </MsgRowNoWrapper>
-                          )
-                        }
-                      )}
+                                    Delete
+                                  </BtnDelete>
+                                </BtnMore>
+                              )}
+                          </MsgRowNoWrapper>
+                        )
+                      })}
                   </MsgColumnWrapper>
                   <LocationText>
                     <IconInList src={location} />
