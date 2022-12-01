@@ -33,7 +33,7 @@ import Upload from "./components/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins, PinContent } from "./ts_fn_commonUse"
+import { getPins, PinContent } from "./functions/pins"
 import Editor from "../Components/editor"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
@@ -46,7 +46,7 @@ const PhotoText = styled.div`
   justify-content: space-evenly;
   align-items: center;
   text-align: center;
-  margin-bottom: 10px;
+  margin: 5px 0;
   width: 150px;
   height: 120px;
   color: ${(props) => props.theme.color.bgDark};
@@ -68,6 +68,7 @@ const Xmark = styled.div`
   width: 20px;
   height: 20px;
   cursor: pointer;
+  z-index: 50;
 `
 const PostPinWrapper = styled(Wrapper)`
   top: 3px;
@@ -75,15 +76,9 @@ const PostPinWrapper = styled(Wrapper)`
   flex-flow: column nowrap;
   width: 50%;
   height: 100%;
-
   padding: 20px 20px;
   font-size: ${(props) => props.theme.title.md};
   z-index: 48;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
@@ -92,6 +87,7 @@ const PostPinWrapper = styled(Wrapper)`
 const Input = styled.input`
   width: 100%;
   height: 40px;
+  min-height: 40px;
   padding-left: 10px;
   margin-top: 5px;
   margin-bottom: 10px;
@@ -117,12 +113,17 @@ const StepText = styled.div`
   font-weight: 700;
   color: ${(props) => props.theme.color.bgDark};
   border: none;
-  gap: 5px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
     padding: 2px 10px;
   }
+`
+const StepTitle = styled(StepText)`
+  font-weight: 500;
+`
+const LocationText = styled(StepText)`
+  margin-top: 20px;
 `
 const BtnText = styled.div`
   display: flex;
@@ -199,16 +200,40 @@ const BtnRed = styled(BtnBlue)`
   background-color: ${(props) => props.theme.btnColor.bgRed};
 `
 
-const ArticleWrapper = styled.div`
+const ArticleWrapper = styled.div<{ hasAddPin: boolean }>`
+  position: relative;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
+  width: 100%;
+  height: 100%;
+  gap: 5px;
+  ${(props) =>
+    props.hasAddPin
+      ? `
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; 
+  }`
+      : "overflow:hidden;"}
 `
-
+const BlockArtiWrapper = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background-color: #454545;
+  opacity: 0.6;
+  border-radius: 5px;
+  z-index: 10;
+`
 export const PinInfoArea = styled.div`
   background-color: #ffffff;
   cursor: pointer;
 `
 export const PinInfoImg = styled.img`
+  margin: 5px 0;
   width: 150px;
   height: 120px;
 `
@@ -362,6 +387,7 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
+      console.log(event.target)
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
@@ -435,16 +461,14 @@ export default function MyMap() {
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  console.log({ searchBox })
   const [filesName, setFilesName] = useState<string[]>([])
-  const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [hasAddPin, setHasAddPin] = useState(false)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
   const [artiTitle, setArtiTitle] = useState<string>("")
   const [travelDate, setTravelDate] = useState<string>(getCurrentDate)
   const [artiContent, setArtiContent] = useState<string>("")
-  const [hasPosted, setHasPosted] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
@@ -456,15 +480,11 @@ export default function MyMap() {
 
   useEffect(() => {
     if (!selectedMarker) return
-    console.log("popupRef.current", popupRef.current)
     if (refReady && popupRef !== undefined) {
       popupRef.current.openPopup()
     }
   }, [selectedMarker?.location.placeId])
 
-  console.log({ showAlert })
-
-  console.log({ showPostArea })
   console.log({ selectedMarker })
 
   useOnClickOutside(overlayRef, locationRef, artiTitle, artiContent, () =>
@@ -490,7 +510,6 @@ export default function MyMap() {
 
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
-      console.log(searchBox.getPlaces())
       const searchResult = searchBox.getPlaces()
       if (searchResult !== undefined && currentUser) {
         const newLat = searchResult[0]?.geometry?.location?.lat()
@@ -512,6 +531,7 @@ export default function MyMap() {
             },
           }
           setNewPin(newPinInfo)
+          setHasAddPin(true)
         }
       }
     } else console.log("失敗啦")
@@ -565,6 +585,8 @@ export default function MyMap() {
         ]
       })
       setSelectedMarker({
+        id: newPin.id,
+        userId: newPin.userId,
         article: {
           title: artiTitle,
           travelDate: travelDate,
@@ -585,14 +607,13 @@ export default function MyMap() {
         locationRef.current.value = ""
       }
       setRefReady(true)
-      setHasPosted(true)
       setFilesName([])
-      setPhotos([])
       setUploadProgress(0)
       setUrls([])
       setArtiTitle("")
       setTravelDate(getCurrentDate)
       setArtiContent("")
+      setHasAddPin(false)
     } catch (error) {
       console.log(error)
     }
@@ -603,7 +624,7 @@ export default function MyMap() {
       const folderName = `${currentUser?.id?.slice(
         0,
         4
-      )}-${newPin.location.placeId.slice(0, 4)}`
+      )}-${newPin.location.placeId.slice(0, 6)}`
       try {
         filesName.map(async (file) => {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
@@ -612,12 +633,21 @@ export default function MyMap() {
         console.log(error)
       }
     }
+    setHasAddPin(false)
     setShowAlert(false)
-    setHasPosted(true)
-    setFilesName([])
-    setPhotos([])
     setUploadProgress(0)
+    setFilesName([])
     setUrls([])
+    setNewPin({
+      id: "",
+      userId: "",
+      location: {
+        lat: 0,
+        lng: 0,
+        name: "",
+        placeId: "",
+      },
+    })
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
@@ -645,7 +675,8 @@ export default function MyMap() {
                   <BtnRed
                     onClick={() => {
                       cancelPost()
-                      setShowPostArea(false)
+                      setShowAlert(false)
+                      // setShowPostArea(false)
                     }}
                   >
                     Yes
@@ -677,8 +708,10 @@ export default function MyMap() {
                       (locationRef.current !== undefined &&
                         locationRef.current !== null &&
                         locationRef?.current?.value !== "") ||
+                      newPin.location.name !== "" ||
                       artiTitle !== "" ||
-                      artiContent !== ""
+                      artiContent !== "" ||
+                      urls.length !== 0
                     ) {
                       setShowAlert(true)
                     } else {
@@ -686,23 +719,38 @@ export default function MyMap() {
                     }
                   }}
                 />
-                <StepText>Log your memory</StepText>
-                <ArticleWrapper>
-                  <StandaloneSearchBox
-                    onLoad={onLoad}
-                    onPlacesChanged={onPlacesChanged}
-                  >
-                    <Input
-                      ref={locationRef}
-                      placeholder="Where did you go?"
-                    ></Input>
-                  </StandaloneSearchBox>
+                {!hasAddPin ? (
+                  <>
+                    <StepTitle>To remember your trip</StepTitle>
+                    <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
+
+                    <StandaloneSearchBox
+                      onLoad={onLoad}
+                      onPlacesChanged={onPlacesChanged}
+                    >
+                      <Input
+                        ref={locationRef}
+                        placeholder="Where did you go?"
+                        required
+                      ></Input>
+                    </StandaloneSearchBox>
+                    <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
+                  </>
+                ) : (
+                  <>
+                    <StepText>Log your memory</StepText>
+                    <LocationText>{newPin?.location?.name}</LocationText>
+                  </>
+                )}
+                {!hasAddPin && <BlockArtiWrapper />}
+                <ArticleWrapper hasAddPin={hasAddPin}>
                   <Input
                     placeholder="Title"
                     value={artiTitle}
                     onChange={(e) => {
                       setArtiTitle(e.target.value)
                     }}
+                    required
                   />
                   <Input
                     type="date"
@@ -718,26 +766,23 @@ export default function MyMap() {
                     artiContent={artiContent}
                     setArtiContent={setArtiContent}
                   />
+                  <Upload
+                    currentPin={newPin}
+                    setFilesName={setFilesName}
+                    hasUpload={hasUpload}
+                    setHasUpload={setHasUpload}
+                    urls={urls}
+                    setUrls={setUrls}
+                    setUploadProgress={setUploadProgress}
+                  />
+                  <BtnText
+                    onClick={() => {
+                      addMemory()
+                    }}
+                  >
+                    Confirm to post
+                  </BtnText>
                 </ArticleWrapper>
-                <Upload
-                  currentPin={newPin}
-                  filesName={filesName}
-                  setFilesName={setFilesName}
-                  photos={photos}
-                  setPhotos={setPhotos}
-                  hasUpload={hasUpload}
-                  setHasUpload={setHasUpload}
-                  urls={urls}
-                  setUrls={setUrls}
-                  setUploadProgress={setUploadProgress}
-                />
-                <BtnText
-                  onClick={() => {
-                    addMemory()
-                  }}
-                >
-                  Confirm to post
-                </BtnText>
               </PostPinWrapper>
             )}
 
@@ -814,12 +859,14 @@ export default function MyMap() {
                             setShowMemory(true)
                           }}
                         >
-                          {marker.albumURLs ? (
+                          <PinInfoTitle>
+                            {marker?.article?.travelDate}
+                          </PinInfoTitle>
+                          {marker.albumURLs && marker.albumURLs.length > 0 ? (
                             <PinInfoImg src={marker?.albumURLs[0]} />
                           ) : (
                             <PhotoText>No photo uploaded</PhotoText>
                           )}
-
                           <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                         </PinInfoArea>
                       </Popup>

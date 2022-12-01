@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react"
-import { db } from "../Utils/firebase"
+import { db } from "../../Utils/firebase"
 import {
   doc,
   getDoc,
@@ -13,7 +13,7 @@ import {
   arrayRemove,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { UserInfoType } from "../Context/authContext"
+import { UserInfoType } from "../../Context/authContext"
 
 export interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]
@@ -61,7 +61,6 @@ export const getPins = async (
     const newMemories: DocumentData[] = []
     const pinsRef = collection(db, "pins")
     const q = query(pinsRef, where("userId", "==", id))
-    console.log("q", q)
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
@@ -97,7 +96,6 @@ export const getSpecificPin = async (
   const docRef = doc(db, "pins", pinId)
   const docSnap = await getDoc(docRef)
   if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data())
     setMemory(docSnap.data() as PinContent)
     setMemoryIsShow(true)
   } else {
@@ -140,13 +138,31 @@ export const checkRealTimePinsInfo = (
     setMemories(newMemories)
   })
 }
+export const checkRealTimePhotos = (
+  id: string,
+  setAlbumUrls: Dispatch<SetStateAction<string[]>>
+) => {
+  onSnapshot(doc(db, "pins", id), (snapshotData: DocumentData) => {
+    console.log(snapshotData.data())
+    if (snapshotData.data() && snapshotData.data().albumURLs) {
+      const newPhotos: string[] = snapshotData.data().albumURLs
+      setAlbumUrls(newPhotos)
+    }
+  })
+}
 export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>
 ) => {
   onSnapshot(doc(db, "pins", id), (messageData: DocumentData) => {
     const fetchMessengers = async () => {
+      if (
+        messageData.data() === undefined ||
+        messageData.data().messages === undefined
+      )
+        return
       const newMessages: MessagesType[] = messageData.data().messages
+      if (!newMessages || newMessages.length === 0) return
       await Promise.all(
         newMessages.map(
           async (item: DocumentData | MessagesType, index: number) => {

@@ -11,7 +11,7 @@ import "swiper/css/free-mode"
 import "swiper/css/navigation"
 import "swiper/css/thumbs"
 
-const MainSwiper = styled(Swiper)`
+const MainSwiper = styled(Swiper)<{ photos: string[] }>`
   .swiper {
     height: 50%;
   }
@@ -29,6 +29,7 @@ const MainSwiper = styled(Swiper)`
   .swiper-button-next {
     &:after {
       color: #fff;
+      ${(props) => props.photos.length <= 1 && "display:none"};
     }
   }
   --swiper-theme-color: #fff;
@@ -83,12 +84,17 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         spaceBetween={10}
         navigation={true}
         thumbs={{ swiper: thumbsSwiper }}
-        modules={[Autoplay, FreeMode, Navigation, Thumbs]}
+        modules={
+          photos.length > 1
+            ? [Autoplay, FreeMode, Navigation, Thumbs]
+            : [FreeMode, Thumbs]
+        }
         className="mySwiper2"
         autoplay={{
           delay: 2000,
           disableOnInteraction: false,
         }}
+        photos={photos}
       >
         {photos.map((item: string) => {
           return (
@@ -98,10 +104,11 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
           )
         })}
       </MainSwiper>
+
       <ButtomSwiper
         style={{ height: "25%" }}
         onSwiper={setThumbsSwiper}
-        loop={true}
+        loop={photos.length > 3 ? true : false}
         spaceBetween={10}
         slidesPerView={4}
         freeMode={true}

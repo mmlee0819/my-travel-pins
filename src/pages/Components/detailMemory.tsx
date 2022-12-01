@@ -12,7 +12,8 @@ import {
   checkRealTimePinMessages,
   deleteMsg,
   PinContent,
-} from "../User/ts_fn_commonUse"
+  checkRealTimePhotos,
+} from "../User/functions/pins"
 import { AuthContext } from "../Context/authContext"
 import Editor from "../Components/editor"
 import Upload from "../User/components/uploadPhoto"
@@ -131,13 +132,7 @@ const Input = styled(Text)`
     border: 3px solid #f99c62;
   }
 `
-const ConfirmedTitle = styled(Input)`
-  font-weight: 700;
-  border: none;
-`
-const ConfirmedText = styled(Input)`
-  border: none;
-`
+
 const TextNoMargin = styled(Text)`
   display: flex;
   flex-flow: row nowrap;
@@ -165,9 +160,6 @@ const Photo = styled.div`
   height: 200px;
   margin-bottom: 15px;
   background-size: 100% 100%;
-`
-const PhotoImg = styled(Photo)<{ bkImage: string }>`
-  background-image: ${(props) => `url(${props.bkImage})`};
 `
 
 const MsgNumText = styled.div`
@@ -220,11 +212,11 @@ const BtnEdit = styled.div`
   right: 20px;
   width: 25px;
   height: 25px;
-  background-image: url(${whiteEditPencil});
+  background-image: url(${blackEditPencil});
   background-size: 100% 100%;
   cursor: pointer;
   &:hover {
-    background-image: url(${blackEditPencil});
+    background-image: url(${whiteEditPencil});
   }
 `
 
@@ -327,6 +319,18 @@ const MsgInput = styled.input`
   }
 `
 
+const PhotoText = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  margin: 5px 0;
+  width: 100%;
+  height: 100%;
+  color: ${(props) => props.theme.color.bgDark};
+  border-radius: 5px;
+`
+
 interface Props {
   selectedMarker: PinContent | undefined
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
@@ -366,9 +370,6 @@ export default function DetailMemory(props: Props) {
   const [showDelete, setShowDelete] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [showEditor, setShowEditor] = useState(false)
-  const [showEditTitle, setShowEditTitle] = useState(true)
-  const [showEditTravelDate, setShowEditTravelDate] = useState(true)
-  const [showEditArtiContent, setShowEditArtiContent] = useState(true)
   const [artiTitle, setArtiTitle] = useState<string>(
     selectedMarker?.article?.title || ""
   )
@@ -379,13 +380,10 @@ export default function DetailMemory(props: Props) {
     selectedMarker?.article?.content || ""
   )
   const [filesName, setFilesName] = useState<string[]>([])
-  const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
-  const [showSavedPhoto, setShowSavedPhoto] = useState(false)
-  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([])
-  const [savedPhotoFilesName, setSavedPhotoFilesName] = useState<string[]>([])
+  const [albumUrls, setAlbumUrls] = useState<string[]>([])
   const [showUploadMore, setShowUploadMore] = useState(false)
   const [hasDiscard, setHasDiscard] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState("")
@@ -402,7 +400,6 @@ export default function DetailMemory(props: Props) {
           content: artiContent,
         },
       })
-      setShowEditTitle(false)
     } catch (error) {
       console.log("Failed to revert contents to original", error)
     }
@@ -419,7 +416,6 @@ export default function DetailMemory(props: Props) {
           content: artiContent,
         },
       })
-      setShowEditTravelDate(false)
     } catch (error) {
       console.log(
         "Failed to update travelDate from specific memory page",
@@ -439,7 +435,6 @@ export default function DetailMemory(props: Props) {
           content: artiContent,
         },
       })
-      setShowEditArtiContent(false)
     } catch (error) {
       console.log(
         "Failed to update article content from specific memory page",
@@ -455,14 +450,10 @@ export default function DetailMemory(props: Props) {
         albumURLs: arrayUnion(...urls),
         albumNames: arrayUnion(...filesName),
       })
-      setSavedPhotoUrls((prev: string[]) => [...prev, ...urls])
-      setSavedPhotoFilesName((prev: string[]) => [...prev, ...filesName])
       setHasUpload(false)
       setFilesName([])
-      setPhotos([])
       setUrls([])
       setUploadProgress(0)
-      setShowSavedPhoto(true)
       setShowUploadMore(true)
     } catch (error) {
       console.log(
@@ -484,9 +475,6 @@ export default function DetailMemory(props: Props) {
         albumURLs: arrayRemove(...urls),
         albumNames: arrayRemove(...filesName),
       })
-      setSavedPhotoUrls([])
-      setSavedPhotoFilesName([])
-      setShowEditArtiContent(false)
       setHasDiscard(false)
     } catch (error) {
       console.log(
@@ -500,7 +488,7 @@ export default function DetailMemory(props: Props) {
       const folderName = `${currentUser?.id?.slice(
         0,
         4
-      )}-${selectedMarker?.location?.placeId.slice(0, 4)}`
+      )}-${selectedMarker?.location?.placeId.slice(0, 6)}`
       try {
         filesName.map(async (file) => {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
@@ -511,7 +499,6 @@ export default function DetailMemory(props: Props) {
     }
     setHasUpload(false)
     setFilesName([])
-    setPhotos([])
     setUploadProgress(0)
     setUrls([])
   }
@@ -522,6 +509,12 @@ export default function DetailMemory(props: Props) {
     if (!selectedMarker?.id || messages === undefined) return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
+  }, [selectedMarker?.id])
+
+  useEffect(() => {
+    if (!selectedMarker?.id) return
+    checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
+    return checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
   }, [selectedMarker?.id])
 
   const onStreetLoad = () => {
@@ -556,20 +549,17 @@ export default function DetailMemory(props: Props) {
               <BtnEdit
                 onClick={() => {
                   setShowEditor(true)
-                  setShowEditor(true)
-                  setShowEditTitle(true)
-                  setShowEditTravelDate(true)
-                  setShowEditArtiContent(true)
                   setHasUpload(false)
                 }}
               />
             )}
 
             <LeftWrapper>
-              {selectedMarker?.albumURLs &&
-                typeof selectedMarker?.albumURLs !== null && (
-                  <SwiperPhotos photos={selectedMarker?.albumURLs} />
-                )}
+              {albumUrls.length > 0 ? (
+                <SwiperPhotos photos={albumUrls} />
+              ) : (
+                <PhotoText>No photo uploaded</PhotoText>
+              )}
             </LeftWrapper>
             <MiddleSplit />
             <RightWrapper showEditor={showEditor}>
@@ -718,9 +708,6 @@ export default function DetailMemory(props: Props) {
                 <BtnSaveBackWrapper>
                   <BtnCancel
                     onClick={() => {
-                      setShowEditTitle(false)
-                      setShowEditTravelDate(false)
-                      setShowEditArtiContent(false)
                       setArtiTitle(selectedMarker?.article?.title || "")
                       setTravelDate(selectedMarker?.article?.travelDate || "")
                       setArtiContent(selectedMarker?.article?.content || "")
@@ -740,11 +727,10 @@ export default function DetailMemory(props: Props) {
                       if (hasUpload) {
                         updatePhotos()
                       }
+                      updateTitle()
+                      updateTravelDate()
                       updateArtiContent()
                       setShowEditor(false)
-                      setShowEditTitle(false)
-                      setShowEditTravelDate(false)
-                      setShowEditArtiContent(false)
                       setArtiTitle(artiTitle)
                       setTravelDate(travelDate)
                       setArtiContent(artiContent)
@@ -757,57 +743,31 @@ export default function DetailMemory(props: Props) {
               {showEditor && (
                 <>
                   <EditWrapper>
-                    {showEditTitle ? (
-                      <Input
-                        as="input"
-                        value={artiTitle}
-                        placeholder="Title"
-                        onChange={(e) => {
-                          setArtiTitle(e.target.value)
-                        }}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            updateTitle()
-                          }
-                        }}
+                    <Input
+                      as="input"
+                      value={artiTitle}
+                      placeholder="Title"
+                      onChange={(e) => {
+                        setArtiTitle(e.target.value)
+                      }}
+                    />
+                    <Input
+                      as="input"
+                      type="date"
+                      pattern="\d{4}-\d{2}-\d{2}"
+                      min="1900-01-01"
+                      max="9999-12-31"
+                      value={travelDate}
+                      onChange={(e) => {
+                        setTravelDate(e.target.value)
+                      }}
+                    />
+                    <ArtiWrapper>
+                      <Editor
+                        artiContent={artiContent}
+                        setArtiContent={setArtiContent}
                       />
-                    ) : (
-                      <ConfirmedTitle as="div">{artiTitle}</ConfirmedTitle>
-                    )}
-                    {showEditTravelDate ? (
-                      <Input
-                        as="input"
-                        type="date"
-                        pattern="\d{4}-\d{2}-\d{2}"
-                        min="1900-01-01"
-                        max="9999-12-31"
-                        value={travelDate}
-                        onChange={(e) => {
-                          setTravelDate(e.target.value)
-                        }}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            updateTravelDate()
-                          }
-                        }}
-                      />
-                    ) : (
-                      <ConfirmedText as="div">
-                        <IconInList src={calendar} />
-                        {travelDate}
-                      </ConfirmedText>
-                    )}
-                    {showEditArtiContent ? (
-                      <ArtiWrapper>
-                        <Editor
-                          artiContent={artiContent}
-                          setArtiContent={setArtiContent}
-                        />
-                      </ArtiWrapper>
-                    ) : (
-                      <ConfirmedText>{parse(artiContent)}</ConfirmedText>
-                    )}
-
+                    </ArtiWrapper>
                     {selectedMarker &&
                       typeof selectedMarker.id === "string" &&
                       typeof selectedMarker.userId === "string" &&
@@ -826,10 +786,7 @@ export default function DetailMemory(props: Props) {
                               placeId: selectedMarker.location.placeId,
                             },
                           }}
-                          filesName={filesName}
                           setFilesName={setFilesName}
-                          photos={photos}
-                          setPhotos={setPhotos}
                           hasUpload={hasUpload}
                           setHasUpload={setHasUpload}
                           urls={urls}
@@ -837,17 +794,6 @@ export default function DetailMemory(props: Props) {
                           setUploadProgress={setUploadProgress}
                         />
                       )}
-                    {hasUpload && (
-                      <BtnPhotoWrapper style={{ justifyContent: "center" }}>
-                        <BtnCancel onClick={cancelPhotos}>Reselect</BtnCancel>
-                        <BtnDone onClick={updatePhotos}>Save</BtnDone>
-                      </BtnPhotoWrapper>
-                    )}
-
-                    {showSavedPhoto &&
-                      savedPhotoUrls.map((photoUrl: string) => (
-                        <PhotoImg key={photoUrl} bkImage={photoUrl} />
-                      ))}
                   </EditWrapper>
                 </>
               )}

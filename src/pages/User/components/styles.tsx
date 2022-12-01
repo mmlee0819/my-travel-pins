@@ -33,6 +33,9 @@ export const StyleMapContainer = styled(MapContainer)`
     margin-bottom: 15px;
     opacity: 0.8;
   }
+  .leaflet-popup-content {
+    margin: 10px 20px;
+  }
 `
 
 export const Container = styled.div`
@@ -41,7 +44,7 @@ export const Container = styled.div`
   max-width: 1440px;
   width: 100%;
   height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
+  background-color: rgb(255, 255, 255, 0.4);
   border-radius: 5px;
 `
 
