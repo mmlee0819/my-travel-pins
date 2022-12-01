@@ -68,6 +68,7 @@ const Xmark = styled.div`
   width: 20px;
   height: 20px;
   cursor: pointer;
+  z-index: 50;
 `
 const PostPinWrapper = styled(Wrapper)`
   top: 3px;
@@ -75,15 +76,9 @@ const PostPinWrapper = styled(Wrapper)`
   flex-flow: column nowrap;
   width: 50%;
   height: 100%;
-
   padding: 20px 20px;
   font-size: ${(props) => props.theme.title.md};
   z-index: 48;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
@@ -92,6 +87,7 @@ const PostPinWrapper = styled(Wrapper)`
 const Input = styled.input`
   width: 100%;
   height: 40px;
+  min-height: 40px;
   padding-left: 10px;
   margin-top: 5px;
   margin-bottom: 10px;
@@ -117,12 +113,17 @@ const StepText = styled.div`
   font-weight: 700;
   color: ${(props) => props.theme.color.bgDark};
   border: none;
-  gap: 5px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
     padding: 2px 10px;
   }
+`
+const StepTitle = styled(StepText)`
+  font-weight: 500;
+`
+const LocationText = styled(StepText)`
+  margin-top: 20px;
 `
 const BtnText = styled.div`
   display: flex;
@@ -199,11 +200,32 @@ const BtnRed = styled(BtnBlue)`
   background-color: ${(props) => props.theme.btnColor.bgRed};
 `
 
-const ArticleWrapper = styled.div`
+const ArticleWrapper = styled.div<{ hasAddPin: boolean }>`
+  position: relative;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
+  width: 100%;
+  height: 100%;
+  gap: 5px;
+  ${(props) =>
+    props.hasAddPin
+      ? `
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; 
+  }`
+      : "overflow:hidden;"}
 `
-
+const BlockArtiWrapper = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #454545;
+  opacity: 0.6;
+  border-radius: 5px;
+  z-index: 10;
+`
 export const PinInfoArea = styled.div`
   background-color: #ffffff;
   cursor: pointer;
@@ -362,6 +384,7 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
+      console.log(event.target)
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
@@ -437,12 +460,12 @@ export default function MyMap() {
   >()
   const [filesName, setFilesName] = useState<string[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [hasAddPin, setHasAddPin] = useState(false)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
   const [artiTitle, setArtiTitle] = useState<string>("")
   const [travelDate, setTravelDate] = useState<string>(getCurrentDate)
   const [artiContent, setArtiContent] = useState<string>("")
-  const [hasPosted, setHasPosted] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
@@ -489,7 +512,6 @@ export default function MyMap() {
 
   const onPlacesChanged = () => {
     if (searchBox instanceof google.maps.places.SearchBox) {
-      console.log(searchBox.getPlaces())
       const searchResult = searchBox.getPlaces()
       if (searchResult !== undefined && currentUser) {
         const newLat = searchResult[0]?.geometry?.location?.lat()
@@ -511,6 +533,7 @@ export default function MyMap() {
             },
           }
           setNewPin(newPinInfo)
+          setHasAddPin(true)
         }
       }
     } else console.log("失敗啦")
@@ -584,13 +607,13 @@ export default function MyMap() {
         locationRef.current.value = ""
       }
       setRefReady(true)
-      setHasPosted(true)
       setFilesName([])
       setUploadProgress(0)
       setUrls([])
       setArtiTitle("")
       setTravelDate(getCurrentDate)
       setArtiContent("")
+      setHasAddPin(false)
     } catch (error) {
       console.log(error)
     }
@@ -610,12 +633,21 @@ export default function MyMap() {
         console.log(error)
       }
     }
+    setHasAddPin(false)
     setShowAlert(false)
-    setHasPosted(true)
-    setFilesName([])
-
     setUploadProgress(0)
+    setFilesName([])
     setUrls([])
+    setNewPin({
+      id: "",
+      userId: "",
+      location: {
+        lat: 0,
+        lng: 0,
+        name: "",
+        placeId: "",
+      },
+    })
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
@@ -643,7 +675,8 @@ export default function MyMap() {
                   <BtnRed
                     onClick={() => {
                       cancelPost()
-                      setShowPostArea(false)
+                      setShowAlert(false)
+                      // setShowPostArea(false)
                     }}
                   >
                     Yes
@@ -675,8 +708,10 @@ export default function MyMap() {
                       (locationRef.current !== undefined &&
                         locationRef.current !== null &&
                         locationRef?.current?.value !== "") ||
+                      newPin.location.name !== "" ||
                       artiTitle !== "" ||
-                      artiContent !== ""
+                      artiContent !== "" ||
+                      urls.length !== 0
                     ) {
                       setShowAlert(true)
                     } else {
@@ -684,18 +719,31 @@ export default function MyMap() {
                     }
                   }}
                 />
-                <StepText>Log your memory</StepText>
-                <ArticleWrapper>
-                  <StandaloneSearchBox
-                    onLoad={onLoad}
-                    onPlacesChanged={onPlacesChanged}
-                  >
-                    <Input
-                      ref={locationRef}
-                      placeholder="Where did you go?"
-                      required
-                    ></Input>
-                  </StandaloneSearchBox>
+                {!hasAddPin ? (
+                  <>
+                    <StepTitle>To remember your trip</StepTitle>
+                    <StepText>Step 1&ensp;:&ensp; Pin a place!</StepText>
+
+                    <StandaloneSearchBox
+                      onLoad={onLoad}
+                      onPlacesChanged={onPlacesChanged}
+                    >
+                      <Input
+                        ref={locationRef}
+                        placeholder="Where did you go?"
+                        required
+                      ></Input>
+                    </StandaloneSearchBox>
+                    <StepText>Step 2&ensp;:&ensp; Log your memory</StepText>
+                  </>
+                ) : (
+                  <>
+                    <StepText>Log your memory</StepText>
+                    <LocationText>{newPin?.location?.name}</LocationText>
+                  </>
+                )}
+                <ArticleWrapper hasAddPin={hasAddPin}>
+                  {!hasAddPin && <BlockArtiWrapper />}
                   <Input
                     placeholder="Title"
                     value={artiTitle}
@@ -718,8 +766,6 @@ export default function MyMap() {
                     artiContent={artiContent}
                     setArtiContent={setArtiContent}
                   />
-                </ArticleWrapper>
-                {showPostArea && (
                   <Upload
                     currentPin={newPin}
                     setFilesName={setFilesName}
@@ -729,14 +775,14 @@ export default function MyMap() {
                     setUrls={setUrls}
                     setUploadProgress={setUploadProgress}
                   />
-                )}
-                <BtnText
-                  onClick={() => {
-                    addMemory()
-                  }}
-                >
-                  Confirm to post
-                </BtnText>
+                  <BtnText
+                    onClick={() => {
+                      addMemory()
+                    }}
+                  >
+                    Confirm to post
+                  </BtnText>
+                </ArticleWrapper>
               </PostPinWrapper>
             )}
 

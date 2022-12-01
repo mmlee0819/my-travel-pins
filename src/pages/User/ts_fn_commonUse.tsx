@@ -38,7 +38,7 @@ export interface PinContent {
     travelDate?: string
   }
   postTimestamp?: number
-  postReadableTime?: string
+  postReadableTime?: Date | string
 }
 
 export interface MessagesType {
