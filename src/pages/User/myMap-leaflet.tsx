@@ -435,9 +435,7 @@ export default function MyMap() {
   const [searchBox, setSearchBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
-  console.log({ searchBox })
   const [filesName, setFilesName] = useState<string[]>([])
-  const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
@@ -454,6 +452,7 @@ export default function MyMap() {
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
 
+  console.log({ filesName })
   useEffect(() => {
     if (!selectedMarker) return
     console.log("popupRef.current", popupRef.current)
@@ -587,7 +586,6 @@ export default function MyMap() {
       setRefReady(true)
       setHasPosted(true)
       setFilesName([])
-      setPhotos([])
       setUploadProgress(0)
       setUrls([])
       setArtiTitle("")
@@ -615,7 +613,7 @@ export default function MyMap() {
     setShowAlert(false)
     setHasPosted(true)
     setFilesName([])
-    setPhotos([])
+
     setUploadProgress(0)
     setUrls([])
   }
@@ -695,6 +693,7 @@ export default function MyMap() {
                     <Input
                       ref={locationRef}
                       placeholder="Where did you go?"
+                      required
                     ></Input>
                   </StandaloneSearchBox>
                   <Input
@@ -703,6 +702,7 @@ export default function MyMap() {
                     onChange={(e) => {
                       setArtiTitle(e.target.value)
                     }}
+                    required
                   />
                   <Input
                     type="date"
@@ -719,18 +719,17 @@ export default function MyMap() {
                     setArtiContent={setArtiContent}
                   />
                 </ArticleWrapper>
-                <Upload
-                  currentPin={newPin}
-                  filesName={filesName}
-                  setFilesName={setFilesName}
-                  photos={photos}
-                  setPhotos={setPhotos}
-                  hasUpload={hasUpload}
-                  setHasUpload={setHasUpload}
-                  urls={urls}
-                  setUrls={setUrls}
-                  setUploadProgress={setUploadProgress}
-                />
+                {showPostArea && (
+                  <Upload
+                    currentPin={newPin}
+                    setFilesName={setFilesName}
+                    hasUpload={hasUpload}
+                    setHasUpload={setHasUpload}
+                    urls={urls}
+                    setUrls={setUrls}
+                    setUploadProgress={setUploadProgress}
+                  />
+                )}
                 <BtnText
                   onClick={() => {
                     addMemory()

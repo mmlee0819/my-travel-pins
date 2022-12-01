@@ -8,11 +8,21 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import imageCompression from "browser-image-compression"
 import spinner from "../../assets/dotsSpinner.svg"
 
+const Spinner = styled.div`
+  width: 100%;
+  height: 64px;
+  margin: 0 auto;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
 const UploadPhotoWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   font-size: 20px;
+  height: 40px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: 18px;
@@ -29,8 +39,9 @@ const UploadImgLabel = styled.label`
 const UrlsImgWrapper = styled.div`
   position: relative;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row wrap;
   padding-left: 5px;
+  gap: 10px;
 `
 const UploadImgIcon = styled.img`
   width: 30px;
@@ -51,21 +62,6 @@ const UploadImgInput = styled.input`
   display: none;
 `
 
-const BtnUpload = styled.button`
-  display: flex;
-  align-self: end;
-  align-items: center;
-  padding: 10px;
-  height: 30px;
-  color: #ffffff;
-  background-color: ${(props) => props.theme.color.deepMain};
-  border-radius: 5px;
-  border: none;
-  opacity: 1;
-
-  cursor: pointer;
-`
-
 interface UploadType {
   currentPin: {
     id: string
@@ -77,10 +73,7 @@ interface UploadType {
       placeId: string
     }
   }
-  filesName: string[]
   setFilesName: Dispatch<SetStateAction<string[]>>
-  photos: File[]
-  setPhotos: Dispatch<SetStateAction<File[]>>
   hasUpload: boolean
   setHasUpload: Dispatch<SetStateAction<boolean>>
   urls: string[]
@@ -91,13 +84,10 @@ interface UploadType {
 export default function Upload(props: UploadType) {
   const { currentUser } = useContext(AuthContext)
   const [hasFiles, setHasFiles] = useState(false)
-  const [hasCompressed, setHasCompressed] = useState(false)
+
   const {
     currentPin,
-    filesName,
     setFilesName,
-    photos,
-    setPhotos,
     hasUpload,
     setHasUpload,
     urls,
@@ -105,7 +95,8 @@ export default function Upload(props: UploadType) {
     setUploadProgress,
   } = props
 
-  console.log({ photos })
+  console.log({ urls })
+
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const options = {
       maxSizeMB: 0.5,
@@ -117,40 +108,26 @@ export default function Upload(props: UploadType) {
         setHasFiles(true)
         const files = Array.from(e.target.files)
         files.map((file) => setFilesName((prev) => [...prev, file.name]))
-
-        const compressedFiles = await Promise.all(
+        const newFiles = await Promise.all(
           files.map(async (imgFile: File) => {
             const compressedFile = await imageCompression(imgFile, options)
-            console.log(
-              "compressedFile instanceof Blob",
-              compressedFile instanceof Blob
-            ) // true
-            console.log(
-              `compressedFile size ${compressedFile.size / 1024 / 1024} MB`
-            ) // smaller than maxSizeMB
-            console.log("compressedFile", compressedFile)
-            setPhotos((prev) => [...prev, compressedFile])
+            return compressedFile
           })
         )
-        setHasCompressed(true)
-
-        // setPhotos(compressedFiles)
-        console.log({ compressedFiles })
+        handleUpload(newFiles)
       }
     } catch (error) {
       console.log("Failed to compress files", error)
     }
   }
 
-  const handleUpload = () => {
-    if (!hasCompressed) return
+  const handleUpload = (photos: File[]) => {
     photos.map((photo) => {
       if (typeof currentUser?.id === "string") {
         const folderName = `${currentUser?.id?.slice(
           0,
           4
         )}-${currentPin.location.placeId.slice(0, 4)}`
-
         const imgRef = ref(storage, `/${folderName}/${photo.name}`)
         const uploadTask = uploadBytesResumable(imgRef, photo)
         uploadTask.on(
@@ -168,12 +145,12 @@ export default function Upload(props: UploadType) {
             const url = await getDownloadURL(
               ref(storage, `/${folderName}/${photo.name}`)
             )
+
             setUrls((prev) => {
               return [...prev, url]
             })
             setHasUpload(true)
             setHasFiles(false)
-            setHasCompressed(false)
           }
         )
       }
@@ -182,22 +159,18 @@ export default function Upload(props: UploadType) {
 
   return (
     <>
-      {hasUpload && urls ? (
+      {hasUpload && urls && (
         <UrlsImgWrapper>
           {urls.map((url) => {
-            console.log(url)
             return <UploadedPhoto key={url} src={url} />
           })}
         </UrlsImgWrapper>
-      ) : (
-        <UploadPhotoWrapper>
+      )}
+      <UploadPhotoWrapper>
+        {!hasFiles ? (
           <UploadImgLabel>
             <UploadImgIcon src={uploadIcon} />
-            {filesName.length !== 0
-              ? filesName.map((fileName) => {
-                  return `\n${fileName}`
-                })
-              : "Choose photos"}
+            Choose photos
             <UploadImgInput
               type="file"
               accept="image/*"
@@ -207,12 +180,10 @@ export default function Upload(props: UploadType) {
               }}
             />
           </UploadImgLabel>
-          {hasFiles && !hasCompressed && <img src={spinner} />}
-        </UploadPhotoWrapper>
-      )}
-      {hasCompressed && (
-        <BtnUpload onClick={handleUpload}>Upload Preview</BtnUpload>
-      )}
+        ) : (
+          <Spinner />
+        )}
+      </UploadPhotoWrapper>
     </>
   )
 }

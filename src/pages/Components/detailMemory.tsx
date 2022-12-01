@@ -379,7 +379,6 @@ export default function DetailMemory(props: Props) {
     selectedMarker?.article?.content || ""
   )
   const [filesName, setFilesName] = useState<string[]>([])
-  const [photos, setPhotos] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [hasUpload, setHasUpload] = useState(false)
   const [urls, setUrls] = useState<string[]>([])
@@ -459,7 +458,6 @@ export default function DetailMemory(props: Props) {
       setSavedPhotoFilesName((prev: string[]) => [...prev, ...filesName])
       setHasUpload(false)
       setFilesName([])
-      setPhotos([])
       setUrls([])
       setUploadProgress(0)
       setShowSavedPhoto(true)
@@ -511,7 +509,6 @@ export default function DetailMemory(props: Props) {
     }
     setHasUpload(false)
     setFilesName([])
-    setPhotos([])
     setUploadProgress(0)
     setUrls([])
   }
@@ -826,10 +823,7 @@ export default function DetailMemory(props: Props) {
                               placeId: selectedMarker.location.placeId,
                             },
                           }}
-                          filesName={filesName}
                           setFilesName={setFilesName}
-                          photos={photos}
-                          setPhotos={setPhotos}
                           hasUpload={hasUpload}
                           setHasUpload={setHasUpload}
                           urls={urls}
