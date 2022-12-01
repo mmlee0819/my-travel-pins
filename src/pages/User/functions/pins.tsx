@@ -144,7 +144,7 @@ export const checkRealTimePhotos = (
 ) => {
   onSnapshot(doc(db, "pins", id), (snapshotData: DocumentData) => {
     console.log(snapshotData.data())
-    if (snapshotData.data().albumURLs) {
+    if (snapshotData.data() && snapshotData.data().albumURLs) {
       const newPhotos: string[] = snapshotData.data().albumURLs
       setAlbumUrls(newPhotos)
     }
@@ -156,6 +156,11 @@ export const checkRealTimePinMessages = (
 ) => {
   onSnapshot(doc(db, "pins", id), (messageData: DocumentData) => {
     const fetchMessengers = async () => {
+      if (
+        messageData.data() === undefined ||
+        messageData.data().messages === undefined
+      )
+        return
       const newMessages: MessagesType[] = messageData.data().messages
       if (!newMessages || newMessages.length === 0) return
       await Promise.all(
