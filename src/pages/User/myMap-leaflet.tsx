@@ -46,7 +46,7 @@ const PhotoText = styled.div`
   justify-content: space-evenly;
   align-items: center;
   text-align: center;
-  margin-bottom: 10px;
+  margin: 5px 0;
   width: 150px;
   height: 120px;
   color: ${(props) => props.theme.color.bgDark};
@@ -219,8 +219,10 @@ const ArticleWrapper = styled.div<{ hasAddPin: boolean }>`
 `
 const BlockArtiWrapper = styled.div`
   position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 60%;
   background-color: #454545;
   opacity: 0.6;
   border-radius: 5px;
@@ -231,6 +233,7 @@ export const PinInfoArea = styled.div`
   cursor: pointer;
 `
 export const PinInfoImg = styled.img`
+  margin: 5px 0;
   width: 150px;
   height: 120px;
 `
@@ -475,10 +478,8 @@ export default function MyMap() {
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
 
-  console.log({ filesName })
   useEffect(() => {
     if (!selectedMarker) return
-    console.log("popupRef.current", popupRef.current)
     if (refReady && popupRef !== undefined) {
       popupRef.current.openPopup()
     }
@@ -741,8 +742,8 @@ export default function MyMap() {
                     <LocationText>{newPin?.location?.name}</LocationText>
                   </>
                 )}
+                {!hasAddPin && <BlockArtiWrapper />}
                 <ArticleWrapper hasAddPin={hasAddPin}>
-                  {!hasAddPin && <BlockArtiWrapper />}
                   <Input
                     placeholder="Title"
                     value={artiTitle}
@@ -858,12 +859,14 @@ export default function MyMap() {
                             setShowMemory(true)
                           }}
                         >
-                          {marker.albumURLs ? (
+                          <PinInfoTitle>
+                            {marker?.article?.travelDate}
+                          </PinInfoTitle>
+                          {marker.albumURLs && marker.albumURLs.length > 0 ? (
                             <PinInfoImg src={marker?.albumURLs[0]} />
                           ) : (
                             <PhotoText>No photo uploaded</PhotoText>
                           )}
-
                           <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                         </PinInfoArea>
                       </Popup>

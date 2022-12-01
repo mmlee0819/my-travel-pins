@@ -161,9 +161,6 @@ const Photo = styled.div`
   margin-bottom: 15px;
   background-size: 100% 100%;
 `
-const PhotoImg = styled(Photo)<{ bkImage: string }>`
-  background-image: ${(props) => `url(${props.bkImage})`};
-`
 
 const MsgNumText = styled.div`
   display: flex;
@@ -215,11 +212,11 @@ const BtnEdit = styled.div`
   right: 20px;
   width: 25px;
   height: 25px;
-  background-image: url(${whiteEditPencil});
+  background-image: url(${blackEditPencil});
   background-size: 100% 100%;
   cursor: pointer;
   &:hover {
-    background-image: url(${blackEditPencil});
+    background-image: url(${whiteEditPencil});
   }
 `
 
@@ -320,6 +317,18 @@ const MsgInput = styled.input`
   ::placeholder {
     font-size: ${(props) => props.theme.title.md};
   }
+`
+
+const PhotoText = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  margin: 5px 0;
+  width: 100%;
+  height: 100%;
+  color: ${(props) => props.theme.color.bgDark};
+  border-radius: 5px;
 `
 
 interface Props {
@@ -546,7 +555,11 @@ export default function DetailMemory(props: Props) {
             )}
 
             <LeftWrapper>
-              <SwiperPhotos photos={albumUrls} />
+              {albumUrls.length > 0 ? (
+                <SwiperPhotos photos={albumUrls} />
+              ) : (
+                <PhotoText>No photo uploaded</PhotoText>
+              )}
             </LeftWrapper>
             <MiddleSplit />
             <RightWrapper showEditor={showEditor}>
