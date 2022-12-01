@@ -484,9 +484,6 @@ export default function MyMap() {
     }
   }, [selectedMarker?.location.placeId])
 
-  console.log({ showAlert })
-
-  console.log({ showPostArea })
   console.log({ selectedMarker })
 
   useOnClickOutside(overlayRef, locationRef, artiTitle, artiContent, () =>
@@ -587,6 +584,8 @@ export default function MyMap() {
         ]
       })
       setSelectedMarker({
+        id: newPin.id,
+        userId: newPin.userId,
         article: {
           title: artiTitle,
           travelDate: travelDate,
