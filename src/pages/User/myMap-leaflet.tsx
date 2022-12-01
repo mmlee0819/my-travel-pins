@@ -33,7 +33,7 @@ import Upload from "./components/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins, PinContent } from "./ts_fn_commonUse"
+import { getPins, PinContent } from "./functions/pins"
 import Editor from "../Components/editor"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
@@ -624,7 +624,7 @@ export default function MyMap() {
       const folderName = `${currentUser?.id?.slice(
         0,
         4
-      )}-${newPin.location.placeId.slice(0, 4)}`
+      )}-${newPin.location.placeId.slice(0, 6)}`
       try {
         filesName.map(async (file) => {
           await deleteObject(ref(storage, `/${folderName}/${file}`))

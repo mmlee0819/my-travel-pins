@@ -11,7 +11,7 @@ import {
   getSpecificPin,
   PinContent,
   checkRealTimePinsInfo,
-} from "./ts_fn_commonUse"
+} from "./functions/pins"
 import {
   ContentWrapper,
   Container,
@@ -138,7 +138,7 @@ export default function MyMemories() {
       const folderName = `${memories[0].userId.slice(
         0,
         4
-      )}-${memories[0].location.placeId.slice(0, 4)}`
+      )}-${memories[0].location.placeId.slice(0, 6)}`
 
       const newMemories = memories.filter((memory: PinContent) => {
         return memory.id !== memories[index].id

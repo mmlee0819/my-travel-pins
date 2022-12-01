@@ -127,7 +127,7 @@ export default function Upload(props: UploadType) {
         const folderName = `${currentUser?.id?.slice(
           0,
           4
-        )}-${currentPin.location.placeId.slice(0, 4)}`
+        )}-${currentPin.location.placeId.slice(0, 6)}`
         const imgRef = ref(storage, `/${folderName}/${photo.name}`)
         const uploadTask = uploadBytesResumable(imgRef, photo)
         uploadTask.on(
@@ -170,7 +170,7 @@ export default function Upload(props: UploadType) {
         {!hasFiles ? (
           <UploadImgLabel>
             <UploadImgIcon src={uploadIcon} />
-            Choose photos
+            {urls.length > 0 ? "Upload more" : "Choose photos"}
             <UploadImgInput
               type="file"
               accept="image/*"
