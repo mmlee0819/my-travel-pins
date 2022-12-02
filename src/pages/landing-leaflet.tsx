@@ -221,6 +221,7 @@ const myCustomStyle = {
   fillColor: "#fff",
   fillOpacity: 0.8,
   zIndex: 50,
+  cursor: "default",
 }
 
 function useOnClickOutside(

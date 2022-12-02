@@ -37,7 +37,7 @@ export const StyleMapContainer = styled(MapContainer)`
     margin: 10px 20px;
   }
   .leaflet-interactive {
-    cursor: default;
+    outline: none;
   }
 `
 

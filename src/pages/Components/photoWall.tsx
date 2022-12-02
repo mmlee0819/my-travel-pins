@@ -16,8 +16,15 @@ import au from "../assets/photoWall/au.png"
 import newZe from "../assets/photoWall/newZe.jpg"
 
 const polylineColor = { color: "#3c3c3c", weight: 0.8 }
-const rectangleColor = { color: "#fff", weight: 3 }
-const samplePhotoStyle = { color: "#fff", weight: 6, cursor: "pointer" }
+const rectangleStyle = {
+  color: "#fff",
+  weight: 3,
+  cursor: "default",
+}
+const samplePhotoStyle = {
+  color: "#fff",
+  weight: 6,
+}
 
 function MongoImg() {
   return (
@@ -30,7 +37,7 @@ function MongoImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -93,7 +100,7 @@ function JapanImg({
         />
       </Rectangle>
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds([12.793553091440867, 295], [48.22150512596082, 335])
@@ -126,7 +133,7 @@ function EuroImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -161,7 +168,7 @@ function GreenlandImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -197,7 +204,7 @@ function NYImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={new LatLngBounds([85, -190], [73, -150])}
       >
@@ -223,7 +230,7 @@ function WestUSImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={new LatLngBounds([48, -260], [65, -213])}
       >
@@ -249,7 +256,7 @@ function PeruImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -271,7 +278,7 @@ function PeruImg() {
         />
       </Rectangle>
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -307,7 +314,7 @@ function EgyptImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -343,7 +350,7 @@ function AustraliaImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(
@@ -379,7 +386,7 @@ function NewzealandImg() {
         ]}
       />
       <Rectangle
-        pathOptions={rectangleColor}
+        pathOptions={rectangleStyle}
         interactive={false}
         bounds={
           new LatLngBounds(

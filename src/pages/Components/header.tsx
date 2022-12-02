@@ -1,16 +1,15 @@
-import React, { useState, useContext } from "react"
+import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../Context/authContext"
-import logoutIcon from "../assets/buttons/logoutIcon.png"
 
 const HeaderContainer = styled.div`
   position: relative;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  margin: 0 auto;
+  margin: 0 auto 5px auto;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
@@ -41,35 +40,6 @@ const TabWrapper = styled.div`
   }
 `
 
-const BtnText = styled.div`
-  display: flex;
-  margin-left: 10px;
-  color: ${(props) => props.theme.color.bgDark};
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    border-bottom: 3px solid #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-  }
-`
-const BtnLogout = styled.div`
-  display: flex;
-  width: 30px;
-  height: 30px;
-  background-image: url(${logoutIcon});
-  background-size: 100% 100%;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    width: 25px;
-    height: 25px;
-  }
-`
-
 const UserAvatar = styled.div<{ avatarURL: string }>`
   display: flex;
   align-self: center;
@@ -81,7 +51,8 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: 3px 1px 1px #0000004c;
+    box-shadow: 1px 3px 6px #0000004c;
+    transform: box-shadow 1s;
   }
 `
 
@@ -112,9 +83,10 @@ const Tab = styled.div`
   text-decoration: none;
   cursor: pointer;
   &:hover {
+    height: 45px;
     color: ${(props) => props.theme.color.deepMain};
     background-color: ${(props) => props.theme.color.bgLight};
-    box-shadow: 3px 3px 1px #0000004c;
+    transition: background-color 0.3s;
   }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -122,14 +94,13 @@ const Tab = styled.div`
   }
 `
 const CurrentTab = styled(Tab)`
+  height: 45px;
   color: ${(props) => props.theme.color.bgLight};
   background-color: ${(props) => props.theme.color.lightMain};
-  box-shadow: 3px 3px 1px #0000004c;
   cursor: default;
   &:hover {
     color: ${(props) => props.theme.color.bgLight};
     background-color: ${(props) => props.theme.color.lightMain};
-    transition: background-color 0.3s;
   }
 `
 

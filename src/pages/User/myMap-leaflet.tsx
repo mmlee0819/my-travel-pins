@@ -77,7 +77,6 @@ const Xmark = styled.div`
   z-index: 50;
 `
 const PostPinWrapper = styled(Wrapper)`
-  top: 3px;
   display: flex;
   flex-flow: column nowrap;
   width: 50%;
