@@ -25,7 +25,13 @@ import {
   StyleMapContainer,
   Container,
   Wrapper,
-} from "./components/styles"
+} from "./components/styles/mapStyles"
+import {
+  StepText,
+  StepTitle,
+  Input,
+  BtnText,
+} from "./components/styles/formStyle"
 import home from "../assets/markers/home1.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
@@ -84,71 +90,8 @@ const PostPinWrapper = styled(Wrapper)`
   }
 `
 
-const Input = styled.input`
-  width: 100%;
-  height: 40px;
-  min-height: 40px;
-  padding-left: 10px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  font-size: ${(props) => props.theme.title.lg};
-  color: ${(props) => props.theme.color.bgDark};
-  background-color: #ffffff;
-  border: 3px solid #ffffff;
-  border-radius: 5px;
-  opacity: 1;
-  &:focus {
-    outline: #7ccbab;
-    border: 3px solid #7ccbab;
-  }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-`
-
-const StepText = styled.div`
-  display: flex;
-  padding: 0px 10px;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 700;
-  color: ${(props) => props.theme.color.bgDark};
-  border: none;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-    padding: 2px 10px;
-  }
-`
-const StepTitle = styled(StepText)`
-  font-weight: 500;
-`
 const LocationText = styled(StepText)`
   margin-top: 20px;
-`
-const BtnText = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 40px;
-  margin: 30px auto;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 400;
-  color: ${(props) => props.theme.color.bgLight};
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
-  border-radius: 5px;
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    color: #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-    height: 30px;
-    font-size: ${(props) => props.theme.title.md};
-  }
 `
 
 const BtnAddPin = styled.div`
@@ -222,7 +165,7 @@ const BlockArtiWrapper = styled.div`
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 60%;
+  height: calc(100% - 230px);
   background-color: #454545;
   opacity: 0.6;
   border-radius: 5px;
@@ -477,6 +420,17 @@ export default function MyMap() {
   const locationRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
+
+  // const namesArr = countries.features.map((country) => {
+  //   return country.properties.name
+  // })
+  // const findDuplicates = namesArr.reduce((prev: any, curr: any) => {
+  //   if (prev.includes(curr)) {
+  //     return [...prev, curr]
+  //   }
+  //   return prev
+  // })
+  // console.log({ findDuplicates })
 
   useEffect(() => {
     if (!selectedMarker) return

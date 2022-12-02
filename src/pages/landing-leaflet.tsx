@@ -8,7 +8,7 @@ import React, {
 } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent, LatLngTuple } from "leaflet"
-import { useMap, Marker, Popup, GeoJSON, useMapEvents } from "react-leaflet"
+import { useMap, Marker, Tooltip, GeoJSON, useMapEvents } from "react-leaflet"
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
@@ -20,7 +20,8 @@ import {
   Attribution,
   StyleMapContainer,
   Container,
-} from "../pages/User/components/styles"
+} from "./User/components/styles/mapStyles"
+import { StepTitle, Input, BtnText } from "./User/components/styles/formStyle"
 import finger from "./assets/buttons/blackFinger.png"
 import tip from "./assets/tip.png"
 import home from "./assets/markers/home1.png"
@@ -30,7 +31,7 @@ const HeaderWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  margin: 0 auto;
+  margin: 0 auto 5px auto;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
@@ -66,6 +67,11 @@ const Slogan = styled.div`
     font-size: 1rem;
   }
 `
+const AuthTitle = styled(StepTitle)`
+  margin-top: 15px;
+  font-weight: 700;
+  font-size: ${(props) => props.theme.title.md};
+`
 const TabWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -88,41 +94,45 @@ const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   border: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  cursor: pointer;
   &:hover {
-    box-shadow: 3px 3px 1px #0000004c;
+    height: 45px;
   }
   @media screen and (min-width: 600px), (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const SignUpTab = styled(Tab)`
+  height: ${(props) => props.isSignUp && "45px"};
   color: ${(props) => props.isSignUp && props.theme.color.bgLight};
   background-color: ${(props) =>
     props.isSignUp ? props.theme.color.lightMain : "none"};
-
+  cursor: ${(props) => (!props.isSignUp ? "pointer" : "default")};
   &:hover {
     color: ${(props) =>
       !props.isSignUp ? props.theme.color.deepMain : props.theme.color.bgLight};
     background-color: ${(props) =>
       !props.isSignUp && props.theme.color.bgLight};
-    transition: ${(props) =>
-      !props.isSignUp ? "background-color 0.3s" : "none"};
+    transition: ${(props) => !props.isSignUp && "background-color 0.5s"};
   }
 `
 
 const SignInTab = styled(Tab)`
+  height: ${(props) => props.isSignIn && "45px"};
   color: ${(props) => props.isSignIn && props.theme.color.bgLight};
   background-color: ${(props) =>
     props.isSignIn ? props.theme.color.lightMain : "none"};
+  cursor: ${(props) => (!props.isSignIn ? "pointer" : "default")};
   &:hover {
     color: ${(props) =>
       !props.isSignIn ? props.theme.color.deepMain : props.theme.color.bgLight};
     background-color: ${(props) =>
       !props.isSignIn && props.theme.color.bgLight};
-    transition: ${(props) =>
-      !props.isSignIn ? "background-color 0.3s" : "none"};
+    transition: ${(props) => !props.isSignIn && "background-color 0.5s"};
   }
+`
+const TabText = styled.div`
+  width: 100%;
+  height: 100%;
 `
 const TipText = styled.div`
   display: flex;
@@ -152,49 +162,23 @@ const TipTab = styled.div`
 `
 const Wrapper = styled.div`
   position: absolute;
-  margin: auto;
-  width: 50%;
-  padding: 20px 10px;
   top: 0;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   justify-content: flex-start;
-  font-family: "Poppins";
+  width: 50%;
+  max-height: 100%;
+  padding: 20px 40px;
   font-size: ${(props) => props.theme.title.md};
   background-color: rgb(255, 255, 255, 0.6);
   border-radius: 10px;
-  box-shadow: 0 8px 6px #0000004c;
-  gap: 15px;
+  box-shadow: 0px 8px 6px #0000004c;
   z-index: 100;
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
 `
 
-const Input = styled.input`
-  padding-left: 10px;
-  margin: 0 auto;
-  padding: 10px 0 10px 10px;
-  width: 90%;
-  height: 30px;
-  line-height: 30px;
-  border: none;
-`
-
-const Btn = styled.div`
-  display: flex;
-  margin: 30px auto;
-  justify-content: center;
-  align-self: center;
-  text-align: center;
-  width: 50%;
-  min-height: 30px;
-  line-height: 30px;
-  color: #fff;
-  background-color: ${(props) => props.theme.color.lightMain};
-  border-radius: 5px;
-  cursor: pointer;
-`
 const DefaultIcon = L.icon({
   iconUrl: home,
   iconSize: [30, 30],
@@ -303,33 +287,29 @@ function AuthArea(props: AuthProps) {
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignUp && (
           <>
-            <Input ref={nameRef} name="userName" placeholder="Name" />
+            <AuthTitle>Name</AuthTitle>
+            <Input ref={nameRef} name="userName" placeholder="Big Traveller" />
+            <AuthTitle>Email</AuthTitle>
             <Input
               ref={emailRef}
               name="accountEmail"
-              placeholder="Email: name@xxxx.com"
+              placeholder="name@xxxx.com"
             />
+            <AuthTitle>Password</AuthTitle>
             <Input
               type="password"
               ref={pwRef}
               name="password"
-              placeholder="Password: at least 6 letters"
+              placeholder="over 6 letters"
             />
+            <AuthTitle>Where is your hometown?</AuthTitle>
             <StandaloneSearchBox
               onLoad={onLoad}
               onPlacesChanged={onPlacesChanged}
             >
-              <Input
-                placeholder="City: your hometown"
-                style={{
-                  display: "flex",
-                  flex: "1 1 auto",
-                  width: "90%",
-                  margin: "0px auto",
-                }}
-              />
+              <Input placeholder="search and select a place" />
             </StandaloneSearchBox>
-            <Btn
+            <BtnText
               onClick={() => {
                 if (
                   result &&
@@ -347,24 +327,26 @@ function AuthArea(props: AuthProps) {
               }}
             >
               Create an account
-            </Btn>
+            </BtnText>
           </>
         )}
       {(!isLogin || currentUser === null || currentUser === undefined) &&
         isSignIn && (
           <>
+            <AuthTitle>Email</AuthTitle>
             <Input
               ref={emailRef}
               name="accountEmail"
-              placeholder="Account: name@xxxx.com"
+              placeholder="name@xxxx.com"
             />
+            <AuthTitle>Password</AuthTitle>
             <Input
               type="password"
               ref={pwRef}
               name="password"
-              placeholder="Password: at least 6 letters"
+              placeholder="over 6 letters"
             />
-            <Btn
+            <BtnText
               onClick={() => {
                 if (emailRef?.current !== null && pwRef?.current !== null) {
                   signIn(emailRef?.current?.value, pwRef?.current?.value)
@@ -372,7 +354,7 @@ function AuthArea(props: AuthProps) {
               }}
             >
               Sign in
-            </Btn>
+            </BtnText>
           </>
         )}
     </Wrapper>
@@ -523,7 +505,7 @@ function Home() {
               setIsSignUp(true)
             }}
           >
-            Sign up
+            <TabText> Sign up</TabText>
           </SignUpTab>
           <SignInTab
             isSignUp={isSignUp}
@@ -534,7 +516,7 @@ function Home() {
               setIsSignIn(true)
             }}
           >
-            Sign In
+            <TabText>Sign In</TabText>
           </SignInTab>
           {/* <TipText
             onClick={() => {
@@ -600,11 +582,22 @@ function Home() {
                   <PhotoWall setShowSamplePost={setShowSamplePost} />
                 </>
               )}
+              {isSignUp && (
+                <Marker position={[30, 121]}>
+                  <Tooltip
+                    direction="bottom"
+                    offset={[0, 20]}
+                    opacity={1}
+                    permanent
+                  >
+                    Your Hometown
+                  </Tooltip>
+                </Marker>
+              )}
               <Marker position={[30, 121]}>
-                <Popup offset={[0, -10]} keepInView>
-                  My Hometown <br />
-                  Taiwan
-                </Popup>
+                <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
+                  Hometown
+                </Tooltip>
               </Marker>
             </StyleMapContainer>
           </>

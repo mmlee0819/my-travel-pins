@@ -36,6 +36,9 @@ export const StyleMapContainer = styled(MapContainer)`
   .leaflet-popup-content {
     margin: 10px 20px;
   }
+  .leaflet-interactive {
+    cursor: default;
+  }
 `
 
 export const Container = styled.div`

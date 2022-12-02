@@ -17,7 +17,7 @@ import newZe from "../assets/photoWall/newZe.jpg"
 
 const polylineColor = { color: "#3c3c3c", weight: 0.8 }
 const rectangleColor = { color: "#fff", weight: 3 }
-const samplePinColor = { color: "#fff", weight: 6 }
+const samplePhotoStyle = { color: "#fff", weight: 6, cursor: "pointer" }
 
 function MongoImg() {
   return (
@@ -68,7 +68,7 @@ function JapanImg({
         ]}
       />
       <Rectangle
-        pathOptions={samplePinColor}
+        pathOptions={samplePhotoStyle}
         bounds={
           new LatLngBounds(
             [12.793553091440867, 240.88104007774922],
