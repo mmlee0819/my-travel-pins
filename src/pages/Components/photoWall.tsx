@@ -18,6 +18,7 @@ import newZe from "../assets/photoWall/newZe.jpg"
 const polylineColor = { color: "#3c3c3c", weight: 0.8 }
 const rectangleColor = { color: "#fff", weight: 3 }
 const samplePinColor = { color: "#fff", weight: 6 }
+
 function MongoImg() {
   return (
     <>
@@ -91,21 +92,11 @@ function JapanImg({
           }
         />
       </Rectangle>
-      <Polyline
-        pathOptions={polylineColor}
-        positions={[
-          [26.008390680425993, 296.5188740463553],
-          [41.1417597127094, 330.2580939304174],
-        ]}
-      />
       <Rectangle
         pathOptions={rectangleColor}
         interactive={false}
         bounds={
-          new LatLngBounds(
-            [55.08931726566487, 330.258093930417],
-            [27.264181034367702, 371.02631795699233]
-          )
+          new LatLngBounds([12.793553091440867, 295], [48.22150512596082, 335])
         }
       >
         <ImageOverlay
@@ -114,8 +105,8 @@ function JapanImg({
           url={ramen}
           bounds={
             new LatLngBounds(
-              [55.08931726566487, 330.258093930417],
-              [27.264181034367702, 371.02631795699233]
+              [12.793553091440867, 295],
+              [48.22150512596082, 335]
             )
           }
         />
@@ -127,31 +118,11 @@ function JapanImg({
 function EuroImg() {
   return (
     <>
-      {/* <Rectangle
-        pathOptions={rectangleColor}
-        bounds={
-          new LatLngBounds(
-            [75.98482299549886, 50.78115084640598],
-            [82.17828153342957, 7.764509174340645]
-          )
-        }
-      >
-        <ImageOverlay
-          zIndex={200}
-          url={euroLeft}
-          bounds={
-            new LatLngBounds(
-              [75.98482299549886, 50.78115084640598],
-              [82.17828153342957, 7.764509174340645]
-            )
-          }
-        />
-      </Rectangle> */}
       <Polyline
         pathOptions={polylineColor}
         positions={[
           [45.08194834149987, 10.78115084640598],
-          [75, 55.78115084640598],
+          [75.98482299549886, 60.17341894104317],
         ]}
       />
       <Rectangle
@@ -185,8 +156,8 @@ function GreenlandImg() {
       <Polyline
         pathOptions={polylineColor}
         positions={[
-          [70.24430678699626, -40.906371480254975],
-          [86.03638597001625, -26.725577122836423],
+          [76.24430678699626, -40.906371480254975],
+          [84.03638597001625, -24.725577122836423],
         ]}
       />
       <Rectangle
@@ -248,7 +219,7 @@ function WestUSImg() {
         pathOptions={polylineColor}
         positions={[
           [45, -110],
-          [60, -210],
+          [60, -212],
         ]}
       />
       <Rectangle
@@ -274,7 +245,7 @@ function PeruImg() {
         pathOptions={polylineColor}
         positions={[
           [-10, -70],
-          [-12.470980658060448, -109.73282674472917],
+          [-12.470980658060448, -115.73282674472917],
         ]}
       />
       <Rectangle
@@ -368,7 +339,7 @@ function AustraliaImg() {
         pathOptions={polylineColor}
         positions={[
           [-25, 135],
-          [-49.63711020835702, 115.17056716952166],
+          [-53.63711020835702, 112.17056716952166],
         ]}
       />
       <Rectangle
@@ -404,7 +375,7 @@ function NewzealandImg() {
         pathOptions={polylineColor}
         positions={[
           [-40, 175],
-          [-44.87384753412976, 216.38822682170786],
+          [-44.87384753412976, 220],
         ]}
       />
       <Rectangle
