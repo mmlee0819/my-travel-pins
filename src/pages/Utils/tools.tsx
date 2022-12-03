@@ -54,8 +54,14 @@ const Weather = styled(CurrencyIcon)`
 `
 
 function ToolsRobot() {
-  const { setCurrentRate, setConvertResult, setSelectedFrom, setSelectedTo } =
-    useContext(ToolContext)
+  const {
+    setCurrentRate,
+    setConvertResult,
+    selectedFrom,
+    setSelectedFrom,
+    selectedTo,
+    setSelectedTo,
+  } = useContext(ToolContext)
   const [showTools, setShowTools] = useState(false)
   const [showExchange, setShowExchange] = useState(false)
   const [currenciesData, setCurrenciesData] = useState<
@@ -141,11 +147,15 @@ function ToolsRobot() {
           onClick={(e) => {
             if ((e.target as Element).id === "robotIcon" && showTools) {
               setSelectedFrom({
-                id: "TWD",
-                flag: taiwan,
-                currency: "TWD (台幣)",
+                id: selectedFrom.id || "TWD",
+                flag: selectedFrom.flag || taiwan,
+                currency: selectedFrom.currency || "TWD (台幣)",
               })
-              setSelectedTo({ id: "USD", flag: usa, currency: "USD (美金)" })
+              setSelectedTo({
+                id: selectedTo.id || "USD",
+                flag: selectedTo.flag || usa,
+                currency: selectedTo.currency || "USD (美金)",
+              })
               setCurrentRate(0)
               setConvertResult(0)
               setShowExchange(false)
@@ -191,6 +201,7 @@ function ToolsRobot() {
                     showExchange
                   ) {
                     setShowExchange((prev) => !prev)
+                    setConvertResult(0)
                   }
                 }}
               />

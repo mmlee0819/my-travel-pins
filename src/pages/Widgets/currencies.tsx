@@ -7,8 +7,12 @@ import React, {
 } from "react"
 import { ToolContext } from "../Context/toolContext"
 import styled from "styled-components"
-import { Input } from "../User/components/styles/formStyle"
-import { Responsive, WidthProvider } from "react-grid-layout"
+import { Input } from "../Components/styles/formStyle"
+import {
+  GridContainer,
+  GridItemWrapper,
+  Xmark,
+} from "../Components/styles/gridStyles"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { DocumentData } from "@firebase/firestore-types"
@@ -39,51 +43,7 @@ import mexico from "../assets/flags/mexico.png"
 import turkey from "../assets/flags/turkey.png"
 import india from "../assets/flags/india.png"
 import calculator from "../assets/calculator.png"
-import xMark from "../assets/buttons/x-mark.png"
 
-const ResponsiveGridLayout = WidthProvider(Responsive)
-
-const GridContainer = styled(ResponsiveGridLayout)<{ showWidget: boolean }>`
-  position: absolute;
-  height: auto;
-  z-index: 180;
-  .react-grid-item {
-    box-shadow: 0 8px 6px #0000004c;
-    border: 2px solid #034961;
-  }
-  .react-grid-item > .react-resizable-handle::after {
-    border-right: 2px solid #034961;
-    border-bottom: 2px solid #034961;
-  }
-`
-const GridItemWrapper = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  min-width: 300px;
-  padding: 30px 43px 30px 40px;
-  font-size: ${(props) => props.theme.title.md};
-  color: #2d2d2d;
-  background: #ffffff;
-  border-radius: 5px;
-  @media screen and(max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.sm};
-  }
-`
-const Xmark = styled.div`
-  position: absolute;
-  top: 18px;
-  right: 20px;
-  background-image: url(${xMark});
-  background-size: 100% 100%;
-  width: 15px;
-  height: 15px;
-  z-index: 188;
-  cursor: pointer;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    width: 15px;
-    height: 15px;
-  }
-`
 const Title = styled.div`
   padding: 0;
   height: 30px;
@@ -94,7 +54,7 @@ const Title = styled.div`
     font-size: ${(props) => props.theme.title.md};
   }
 `
-const BtnClick = styled.div`
+const BtnClick = styled.div<{ showFrom: boolean; showTo: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,7 +66,8 @@ const BtnClick = styled.div`
   text-align: center;
   font-size: ${(props) => props.theme.title.md};
   color: #fff;
-  background-color: #034961;
+  background-color: ${(props) =>
+    props.showFrom || props.showTo ? "#fff" : "#034961"};
   border-radius: 5px;
   cursor: pointer;
   @media screen and(max-width: 600px), (max-height: 600px) {
@@ -124,13 +85,20 @@ const ExchangesRows = styled.div`
   align-items: center;
   justify-content: space-between;
 `
-const CurrenciesWrapper = styled.div<{ showCurrency: boolean }>`
+const CurrenciesFromWrapper = styled.div<{ showCurrency: boolean }>`
   position: absolute;
+  top: 75px;
   left: 0;
   display: flex;
   flex-flow: row wrap;
   margin-top: 5px;
+  background-color: #fff;
   z-index: 198;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
+  }
   ${(props) =>
     props.showCurrency &&
     `  min-width: 200px;
@@ -138,11 +106,14 @@ const CurrenciesWrapper = styled.div<{ showCurrency: boolean }>`
   border: 1px solid #2d2d2d;
   border-radius: 5px;`}
 `
+const CurrenciesToWrapper = styled(CurrenciesFromWrapper)`
+  top: 155px;
+`
 const CurrencyRow = styled(ExchangesRows)`
   position: relative;
   flex: 1 1 auto;
   justify-content: start;
-  min-width: 200px;
+  width: 200px;
   height: 36px;
   color: #2d2d2d;
   background-color: #ffffff;
@@ -156,6 +127,8 @@ const CurrencyRow = styled(ExchangesRows)`
   }
 `
 const CurrentOne = styled(CurrencyRow)`
+  width: 200px;
+  min-width: 200px;
   z-index: 185;
 `
 const ExchangesTitle = styled.div`
@@ -202,6 +175,7 @@ const FlagImg = styled.img`
 `
 
 const WhiteInputTitle = styled.div`
+  display: flex;
   width: 100%;
   height: 40px;
   min-height: 40px;
@@ -368,7 +342,7 @@ function CurrencyWidget(props: Props) {
       setCurrentRate(filteredRate)
       setConvertResult(0)
     }
-  }, [amount])
+  }, [currenciesData, amount])
 
   return (
     <GridContainer
@@ -386,11 +360,16 @@ function CurrencyWidget(props: Props) {
           onClick={() => {
             setShowExchange(false)
             setSelectedFrom({
-              id: "TWD",
-              flag: taiwan,
-              currency: "TWD (台幣)",
+              id: selectedFrom.id || "TWD",
+              flag: selectedFrom.flag || taiwan,
+              currency: selectedFrom.currency || "TWD (台幣)",
             })
-            setSelectedTo({ id: "USD", flag: usa, currency: "USD (美金)" })
+            setSelectedTo({
+              id: selectedTo.id || "USD",
+              flag: selectedTo.flag || usa,
+              currency: selectedTo.currency || "USD (美金)",
+            })
+            setConvertResult(0)
           }}
         />
         <Title>Currency Converter</Title>
@@ -410,7 +389,7 @@ function CurrencyWidget(props: Props) {
                 {selectedFrom.currency}
               </CurrentOne>
             )}
-            <CurrenciesWrapper showCurrency={showFrom}>
+            <CurrenciesFromWrapper showCurrency={showFrom}>
               {showFrom &&
                 currenciesArr &&
                 currenciesArr.map((item) => {
@@ -434,7 +413,7 @@ function CurrencyWidget(props: Props) {
                     </>
                   )
                 })}
-            </CurrenciesWrapper>
+            </CurrenciesFromWrapper>
           </WhiteInputTitle>
           <ExchangesTitle>To</ExchangesTitle>
           <WhiteInputTitle
@@ -449,7 +428,7 @@ function CurrencyWidget(props: Props) {
               {selectedTo.currency}
             </CurrentOne>
 
-            <CurrenciesWrapper showCurrency={showTo}>
+            <CurrenciesToWrapper showCurrency={showTo}>
               {showTo &&
                 currenciesArr &&
                 currenciesArr.map((item) => {
@@ -471,7 +450,7 @@ function CurrencyWidget(props: Props) {
                     </CurrencyRow>
                   )
                 })}
-            </CurrenciesWrapper>
+            </CurrenciesToWrapper>
           </WhiteInputTitle>
         </ExchangesWrapper>
         <AmountTitle>Amount</AmountTitle>
@@ -484,6 +463,8 @@ function CurrencyWidget(props: Props) {
         />
 
         <BtnClick
+          showFrom={showFrom}
+          showTo={showTo}
           onClick={() => {
             calculateRates(
               amount,
