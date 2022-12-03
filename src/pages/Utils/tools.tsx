@@ -174,9 +174,21 @@ function ToolsRobot() {
                 onClick={(e) => {
                   if (
                     (e.target as Element).id === "weatherIcon" &&
-                    !showWeather
+                    showExchange
                   ) {
                     setShowExchange(false)
+                    setSelectedFrom({
+                      id: selectedFrom.id || "TWD",
+                      flag: selectedFrom.flag || taiwan,
+                      currency: selectedFrom.currency || "TWD (台幣)",
+                    })
+                    setSelectedTo({
+                      id: selectedTo.id || "USD",
+                      flag: selectedTo.flag || usa,
+                      currency: selectedTo.currency || "USD (美金)",
+                    })
+                    setCurrentRate(0)
+                    setConvertResult(0)
                     setShowWeather((prev) => !prev)
                   } else if (
                     (e.target as Element).id === "weatherIcon" &&
