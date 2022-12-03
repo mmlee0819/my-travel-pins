@@ -5,34 +5,48 @@ export const Container = styled.div`
   margin: 0 auto;
   max-width: 1440px;
   width: 100%;
-  font-family: "Poppins";
   color: #2d2d2d;
   height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
+  background-color: rgb(255, 255, 255, 0.4);
   border-radius: 20px;
 `
+
 export const ContentArea = styled.div`
-  display: flex;
-  flex-flow: row wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
   height: 100%;
   margin: 0 auto;
   padding: 50px 50px;
   gap: 25px;
   border: none;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `
+
+// export const ContentArea = styled.div`
+//   display: flex;
+//   flex-flow: row wrap;
+//   width: 100%;
+//   height: 100%;
+//   margin: 0 auto;
+//   padding: 50px 50px;
+//   gap: 25px;
+//   border: none;
+// `
 export const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   flex: 1 1 auto;
   min-width: 40%;
-  font-family: "Poppins";
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   border: none;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    gap: 10px;
-    font-size: 16px;
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 export const ContentWrapper = styled.div`
@@ -52,16 +66,17 @@ export const ContentWrapper = styled.div`
 `
 export const MemoryList = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  height: 150px;
-  gap: 20px;
+  flex-flow: column nowrap;
+  width: 100%;
+  max-width: 250px;
+  min-width: 200px;
 `
 
 export const ImgWrapper = styled.div`
   position: relative;
   display: block;
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  height: 200px;
   border-radius: 5px;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   object-fit: cover;
@@ -81,8 +96,12 @@ export const MemoryImg = styled.img`
 export const IconInList = styled.img`
   align-self: center;
   margin-right: 10px;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    width: 10px;
+    height: 10px;
+  }
 `
 
 export const PhotoText = styled.div`
@@ -100,22 +119,24 @@ export const PhotoText = styled.div`
 `
 
 export const Text = styled.div`
+  display: flex;
+  align-items: center;
   vertical-align: text-bottom;
   height: 30px;
-  margin: 5px 0;
+  font-size: ${(props) => props.theme.title.sm};
   color: ${(props) => props.theme.color.bgDark};
   min-width: 30%;
 `
 export const Title = styled(Text)`
+  justify-content: space-between;
   flex: 1 1 auto;
-  margin-bottom: 20px;
   font-weight: 700;
-  font-size: ${(props) => props.theme.title.lg};
+  font-size: ${(props) => props.theme.title.md};
   cursor: pointer;
   &:hover {
     text-decoration: underline;
   }
   @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
+    font-size: ${(props) => props.theme.title.sm};
   }
 `

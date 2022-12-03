@@ -24,7 +24,7 @@ import {
   Title,
   PhotoText,
   IconInList,
-} from "./components/UIforMemoriesPage"
+} from "../Components/styles/memoriesStyles"
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
@@ -71,8 +71,8 @@ const BtnRed = styled(BtnBlue)`
 
 const BtnDelete = styled.img`
   align-self: center;
-  width: 30px;
-  height: 30px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
 `
 
@@ -190,12 +190,27 @@ export default function MyMemories() {
   return (
     <Container>
       <ContentArea>
-        <ContentWrapper>
-          {isLogin && isLoaded && memories ? (
-            memories.map((item: PinContent, index: number) => {
-              return (
-                <MemoryList key={item.id}>
-                  <ImgWrapper
+        {isLogin && isLoaded && memories ? (
+          memories.map((item: PinContent, index: number) => {
+            return (
+              <MemoryList key={item.id}>
+                <ImgWrapper
+                  id={item?.id}
+                  onClick={() => {
+                    if (typeof item.id !== "string") return
+                    setMemoryIsShow(true)
+                    setMemory(item)
+                    getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                  }}
+                >
+                  {item?.albumURLs ? (
+                    <MemoryImg src={item?.albumURLs[0]} />
+                  ) : (
+                    <PhotoText>No photo uploaded</PhotoText>
+                  )}
+                </ImgWrapper>
+                <ArticleWrapper>
+                  <Title
                     id={item?.id}
                     onClick={() => {
                       if (typeof item.id !== "string") return
@@ -204,90 +219,74 @@ export default function MyMemories() {
                       getSpecificPin(item?.id, setMemory, setMemoryIsShow)
                     }}
                   >
-                    {item?.albumURLs ? (
-                      <MemoryImg src={item?.albumURLs[0]} />
-                    ) : (
-                      <PhotoText>No photo uploaded</PhotoText>
-                    )}
-                  </ImgWrapper>
-                  <ArticleWrapper>
-                    <Title
-                      id={item?.id}
+                    {item?.article?.title === undefined ||
+                    item?.article?.title === ""
+                      ? "Untitled"
+                      : item?.article?.title}
+                    <BtnDelete
+                      id={item.id}
+                      src={trashBinBlack}
                       onClick={() => {
-                        if (typeof item.id !== "string") return
-                        setMemoryIsShow(true)
                         setMemory(item)
-                        getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                        setDeleteTargetIndex(index)
                       }}
-                    >
-                      {item?.article?.title === undefined ||
-                      item?.article?.title === ""
-                        ? "Untitled"
-                        : item?.article?.title}
-                    </Title>
-                    <Text>
-                      <IconInList src={calendar} />
-                      {item?.article?.travelDate}
-                    </Text>
+                    />
+                  </Title>
+                  <Text>
+                    <IconInList src={calendar} />
+                    {item?.article?.travelDate}
+                  </Text>
 
-                    <Text>
-                      <IconInList src={location} />
-                      {item?.location?.name}
-                    </Text>
-                  </ArticleWrapper>
-                  <BtnDelete
-                    id={item.id}
-                    src={trashBinBlack}
-                    onClick={() => {
-                      setMemory(item)
-                      setDeleteTargetIndex(index)
-                    }}
-                  />
-                  {deleteTargetIndex !== undefined &&
-                    deleteTargetIndex === index && (
-                      <>
-                        <BgOverlay
-                          onClick={() => {
-                            setDeleteTargetIndex(undefined)
-                          }}
-                        />
-                        <ReminderArea>
-                          <ReminderText>
-                            Are you sure <br />
-                            you want to delete this memory?
-                          </ReminderText>
-                          <DeleteTargetText>
-                            {memories[index]?.article?.title || "Untitled"}
-                          </DeleteTargetText>
-                          <BtnWrapper>
-                            <BtnRed
-                              onClick={() => {
-                                deleteMemory(index)
-                                setDeleteTargetIndex(undefined)
-                              }}
-                            >
-                              Confirm to delete
-                            </BtnRed>
-                            <BtnBlue
-                              onClick={() => {
-                                setDeleteTargetIndex(undefined)
-                              }}
-                            >
-                              Cancel
-                            </BtnBlue>
-                          </BtnWrapper>
-                        </ReminderArea>
-                      </>
-                    )}
-                </MemoryList>
-              )
-            })
-          ) : (
-            <Title>
-              <Spinner />
-            </Title>
-          )}
-        </ContentWrapper>
+                  <Text>
+                    <IconInList src={location} />
+                    {item?.location?.name}
+                  </Text>
+                </ArticleWrapper>
+
+                {deleteTargetIndex !== undefined &&
+                  deleteTargetIndex === index && (
+                    <>
+                      <BgOverlay
+                        onClick={() => {
+                          setDeleteTargetIndex(undefined)
+                        }}
+                      />
+                      <ReminderArea>
+                        <ReminderText>
+                          Are you sure <br />
+                          you want to delete this memory?
+                        </ReminderText>
+                        <DeleteTargetText>
+                          {memories[index]?.article?.title || "Untitled"}
+                        </DeleteTargetText>
+                        <BtnWrapper>
+                          <BtnRed
+                            onClick={() => {
+                              deleteMemory(index)
+                              setDeleteTargetIndex(undefined)
+                            }}
+                          >
+                            Confirm to delete
+                          </BtnRed>
+                          <BtnBlue
+                            onClick={() => {
+                              setDeleteTargetIndex(undefined)
+                            }}
+                          >
+                            Cancel
+                          </BtnBlue>
+                        </BtnWrapper>
+                      </ReminderArea>
+                    </>
+                  )}
+              </MemoryList>
+            )
+          })
+        ) : (
+          <Title>
+            <Spinner />
+          </Title>
+        )}
       </ContentArea>
       {memoryIsShow && memory && memory.location && (
         <DetailMemory selectedMarker={memory} setShowMemory={setMemoryIsShow} />
