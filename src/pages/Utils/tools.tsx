@@ -203,6 +203,7 @@ function ToolsRobot() {
       {showExchange && (
         <CurrencyWidget
           showExchange={showExchange}
+          setShowExchange={setShowExchange}
           showFrom={showFrom}
           setShowFrom={setShowFrom}
           showTo={showTo}

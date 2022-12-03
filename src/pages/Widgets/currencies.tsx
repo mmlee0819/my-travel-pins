@@ -39,7 +39,23 @@ import mexico from "../assets/flags/mexico.png"
 import turkey from "../assets/flags/turkey.png"
 import india from "../assets/flags/india.png"
 import calculator from "../assets/calculator.png"
+import xMark from "../assets/buttons/x-mark.png"
 
+const ResponsiveGridLayout = WidthProvider(Responsive)
+
+const GridContainer = styled(ResponsiveGridLayout)<{ showWidget: boolean }>`
+  position: absolute;
+  height: auto;
+  z-index: 180;
+  .react-grid-item {
+    box-shadow: 0 8px 6px #0000004c;
+    border: 2px solid #034961;
+  }
+  .react-grid-item > .react-resizable-handle::after {
+    border-right: 2px solid #034961;
+    border-bottom: 2px solid #034961;
+  }
+`
 const GridItemWrapper = styled.div`
   display: flex;
   flex-flow: column nowrap;
@@ -53,12 +69,24 @@ const GridItemWrapper = styled.div`
     font-size: ${(props) => props.theme.title.sm};
   }
 `
-
-const GridItemContent = styled.div`
+const Xmark = styled.div`
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background-image: url(${xMark});
+  background-size: 100% 100%;
+  width: 15px;
+  height: 15px;
+  z-index: 188;
+  cursor: pointer;
+  @media screen and (max-width: 799px), (max-height: 600px) {
+    width: 15px;
+    height: 15px;
+  }
+`
+const Title = styled.div`
   padding: 0;
   height: 30px;
-`
-const Title = styled(GridItemContent)`
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 700;
   margin-bottom: 20px;
@@ -102,13 +130,7 @@ const CurrenciesWrapper = styled.div<{ showCurrency: boolean }>`
   display: flex;
   flex-flow: row wrap;
   margin-top: 5px;
-
   z-index: 198;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  ::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-  }
   ${(props) =>
     props.showCurrency &&
     `  min-width: 200px;
@@ -143,15 +165,22 @@ const ExchangesTitle = styled.div`
 const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
 `
-const ResultTitle = styled(AmountTitle)<{ changeMoment: number }>`
-  ${(props) => props.changeMoment && "color: #f99c62; font-weight:700;"}
+
+const GridItemContent = styled(ExchangesTitle)`
+  margin: 20px 0 40px 0;
+`
+
+const ResultTitle = styled(AmountTitle)`
+  font-size: ${(props) => props.theme.title.lg};
+  font-weight: 700;
+  color: #034961;
+  margin: 10px 0 20px 0;
 `
 const Credits = styled.a`
   display: flex;
   flex: 1 1 auto;
-  justify-content: end;
-  margin: 20px 0 20px 8px;
-  padding: 8px;
+  justify-content: start;
+  margin-top: 35px;
   font-size: 16px;
   color: #b4b1b1;
   text-decoration: underline;
@@ -278,22 +307,6 @@ const calculateRates = (
   }
 }
 
-const ResponsiveGridLayout = WidthProvider(Responsive)
-
-const GridContainer = styled(ResponsiveGridLayout)<{ showExchange: boolean }>`
-  position: absolute;
-  height: auto;
-  z-index: 180;
-  .react-grid-item {
-    box-shadow: 0 8px 6px #0000004c;
-    border: 2px solid #034961;
-  }
-  .react-grid-item > .react-resizable-handle::after {
-    border-right: 2px solid #034961;
-    border-bottom: 2px solid #034961;
-  }
-`
-
 const layouts = {
   xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 4, maxH: 2 }],
   lg: [{ i: "exRate-2", x: 0, y: 0, w: 3, h: 2, maxW: 3, maxH: 2 }],
@@ -309,6 +322,7 @@ interface Props {
   showTo: boolean
   setShowTo: Dispatch<SetStateAction<boolean>>
   showExchange: boolean
+  setShowExchange: Dispatch<SetStateAction<boolean>>
 }
 
 function CurrencyWidget(props: Props) {
@@ -319,6 +333,7 @@ function CurrencyWidget(props: Props) {
     showTo,
     setShowTo,
     showExchange,
+    setShowExchange,
   } = props
   const {
     currentRate,
@@ -332,11 +347,9 @@ function CurrencyWidget(props: Props) {
   } = useContext(ToolContext)
 
   const [amount, setAmount] = useState("")
-  console.log(selectedTo.id)
-  console.log(selectedFrom.id)
+
   useEffect(() => {
-    if (!currenciesData || selectedFrom.id === "" || selectedTo.id === "")
-      return
+    if (!currenciesData || amount === "") return
     if (selectedFrom.id === "USD") {
       const filteredCurrency = `USD${selectedTo?.id}`
       const filteredRate = currenciesData?.[filteredCurrency]?.Exrate
@@ -355,11 +368,11 @@ function CurrencyWidget(props: Props) {
       setCurrentRate(filteredRate)
       setConvertResult(0)
     }
-  }, [selectedFrom.id, selectedTo.id])
+  }, [amount])
 
   return (
     <GridContainer
-      showExchange={showExchange}
+      showWidget={showExchange}
       layouts={layouts}
       key="currency-widget"
       breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
@@ -369,6 +382,17 @@ function CurrencyWidget(props: Props) {
       maxRows={1.5}
     >
       <GridItemWrapper key="exchange-rate">
+        <Xmark
+          onClick={() => {
+            setShowExchange(false)
+            setSelectedFrom({
+              id: "TWD",
+              flag: taiwan,
+              currency: "TWD (台幣)",
+            })
+            setSelectedTo({ id: "USD", flag: usa, currency: "USD (美金)" })
+          }}
+        />
         <Title>Currency Converter</Title>
         <ExchangesWrapper>
           <ExchangesTitle>From</ExchangesTitle>
@@ -473,22 +497,37 @@ function CurrencyWidget(props: Props) {
           <FlagImg src={calculator} />
           Convert
         </BtnClick>
-
-        {convertResult !== 0 && (
-          <>
-            <ResultTitle changeMoment={convertResult}>
-              {`Result: ${convertResult}`}
-            </ResultTitle>
-            <ResultTitle changeMoment={currentRate}>
-              {`Exchange rate: ${currentRate}`}
-            </ResultTitle>
-            <GridItemContent>{`Last updated: ${currenciesData?.USDTWD?.UTC}`}</GridItemContent>
-            <Credits href="https://tw.rter.info/howto_currencyapi.php">
-              Credits: ©RTER.info
-            </Credits>
-          </>
-        )}
       </GridItemWrapper>
+      {convertResult !== 0 && (
+        <GridItemWrapper
+          key="convert-result"
+          data-grid={{ x: 1, y: 0, w: 1, h: 1 }}
+        >
+          <Title>Result</Title>
+          <ExchangesTitle>
+            {`${amount} ${selectedFrom.currency} = `}
+          </ExchangesTitle>
+          <ResultTitle>{`${convertResult.toFixed(2)} ${
+            selectedTo.currency
+          }`}</ResultTitle>
+          <GridItemContent>
+            {`1 ${selectedFrom.id} = ${currentRate.toFixed(4)} ${
+              selectedTo.id
+            }`}
+            <br />
+            {`1 ${selectedTo.id} = ${(1 / currentRate).toFixed(4)} ${
+              selectedFrom.id
+            }`}
+          </GridItemContent>
+          <ExchangesTitle>
+            Last updated: <br />
+            {currenciesData?.USDTWD?.UTC} UTC
+          </ExchangesTitle>
+          <Credits href="https://tw.rter.info/howto_currencyapi.php">
+            Credits: ©RTER.info
+          </Credits>
+        </GridItemWrapper>
+      )}
     </GridContainer>
   )
 }
