@@ -558,7 +558,33 @@ export default function DetailMemory(props: Props) {
               {albumUrls.length > 0 ? (
                 <SwiperPhotos photos={albumUrls} />
               ) : (
-                <PhotoText>No photo uploaded</PhotoText>
+                <GoogleMap
+                  mapContainerStyle={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                  center={{
+                    lat: selectedMarker?.location.lat,
+                    lng: selectedMarker?.location.lng,
+                  }}
+                  zoom={14}
+                  options={{
+                    draggable: true,
+                    mapTypeControl: false,
+                    streetViewControl: true,
+                    scaleControl: false,
+                    fullscreenControl: true,
+                    scrollwheel: true,
+                    minZoom: 2,
+                  }}
+                >
+                  <Marker
+                    position={{
+                      lat: selectedMarker?.location.lat,
+                      lng: selectedMarker?.location.lng,
+                    }}
+                  />
+                </GoogleMap>
               )}
             </LeftWrapper>
             <MiddleSplit />
@@ -670,39 +696,39 @@ export default function DetailMemory(props: Props) {
                   </LocationText>{" "}
                 </>
               )}
-              {isLoaded && !showEditor && (
-                <>
-                  <StreetModeContainer id="street-mode-container">
-                    <StreetViewService onLoad={onStreetLoad} />
-                  </StreetModeContainer>
-                  <GoogleMap
-                    mapContainerStyle={{
-                      height: "40vh",
-                      width: "100%",
-                      marginTop: "20px",
-                    }}
-                    center={{
+              {isLoaded && (
+                <StreetModeContainer id="street-mode-container">
+                  <StreetViewService onLoad={onStreetLoad} />
+                </StreetModeContainer>
+              )}
+              {!showEditor && albumUrls.length > 0 && (
+                <GoogleMap
+                  mapContainerStyle={{
+                    height: "40vh",
+                    width: "100%",
+                    marginTop: "20px",
+                  }}
+                  center={{
+                    lat: selectedMarker?.location.lat,
+                    lng: selectedMarker?.location.lng,
+                  }}
+                  zoom={14}
+                  options={{
+                    draggable: true,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    scaleControl: false,
+                    fullscreenControl: true,
+                    scrollwheel: false,
+                  }}
+                >
+                  <Marker
+                    position={{
                       lat: selectedMarker?.location.lat,
                       lng: selectedMarker?.location.lng,
                     }}
-                    zoom={14}
-                    options={{
-                      draggable: true,
-                      mapTypeControl: false,
-                      streetViewControl: false,
-                      scaleControl: false,
-                      fullscreenControl: true,
-                      scrollwheel: false,
-                    }}
-                  >
-                    <Marker
-                      position={{
-                        lat: selectedMarker?.location.lat,
-                        lng: selectedMarker?.location.lng,
-                      }}
-                    />
-                  </GoogleMap>
-                </>
+                  />
+                </GoogleMap>
               )}
               {(isMyMap || isMyMemory) && showEditor && (
                 <BtnSaveBackWrapper>

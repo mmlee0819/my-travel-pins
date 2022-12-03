@@ -25,13 +25,13 @@ import {
   StyleMapContainer,
   Container,
   Wrapper,
-} from "./components/styles/mapStyles"
+} from "../Components/styles/mapStyles"
 import {
   StepText,
   StepTitle,
   Input,
   BtnText,
-} from "./components/styles/formStyle"
+} from "../Components/styles/formStyle"
 import home from "../assets/markers/home1.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
@@ -55,6 +55,7 @@ const PhotoText = styled.div`
   margin: 5px 0;
   width: 150px;
   height: 120px;
+  font-size: ${(props) => props.theme.title.md};
   color: ${(props) => props.theme.color.bgDark};
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
@@ -142,34 +143,20 @@ const BtnRed = styled(BtnBlue)`
   background-color: ${(props) => props.theme.btnColor.bgRed};
 `
 
-const ArticleWrapper = styled.div<{ hasAddPin: boolean }>`
+const ArticleWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: column nowrap;
   width: 100%;
   height: 100%;
   gap: 5px;
-  ${(props) =>
-    props.hasAddPin
-      ? `
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
-    display: none; 
-  }`
-      : "overflow:hidden;"}
+    display: none;
+  }
 `
-const BlockArtiWrapper = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100% - 230px);
-  background-color: #454545;
-  opacity: 0.6;
-  border-radius: 5px;
-  z-index: 10;
-`
+
 export const PinInfoArea = styled.div`
   background-color: #ffffff;
   cursor: pointer;
@@ -695,8 +682,7 @@ export default function MyMap() {
                     <LocationText>{newPin?.location?.name}</LocationText>
                   </>
                 )}
-                {!hasAddPin && <BlockArtiWrapper />}
-                <ArticleWrapper hasAddPin={hasAddPin}>
+                <ArticleWrapper>
                   <Input
                     placeholder="Title"
                     value={artiTitle}
@@ -790,41 +776,39 @@ export default function MyMap() {
               </Marker>
               {markers?.map((marker: any) => {
                 return (
-                  <>
-                    <Marker
-                      ref={popupRef}
-                      key={marker.location.placeId}
-                      position={[marker.location.lat, marker.location.lng]}
-                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                      eventHandlers={{
-                        click() {
-                          setSelectedMarker(marker)
-                        },
-                      }}
+                  <Marker
+                    ref={popupRef}
+                    key={marker.location.placeId}
+                    position={[marker.location.lat, marker.location.lng]}
+                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    eventHandlers={{
+                      click() {
+                        setSelectedMarker(marker)
+                      },
+                    }}
+                  >
+                    <Popup
+                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      keepInView={true}
                     >
-                      <Popup
-                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView={true}
+                      <PinInfoArea
+                        id={marker.location.placeId}
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
                       >
-                        <PinInfoArea
-                          id={marker.location.placeId}
-                          onClick={() => {
-                            setShowMemory(true)
-                          }}
-                        >
-                          <PinInfoTitle>
-                            {marker?.article?.travelDate}
-                          </PinInfoTitle>
-                          {marker.albumURLs && marker.albumURLs.length > 0 ? (
-                            <PinInfoImg src={marker?.albumURLs[0]} />
-                          ) : (
-                            <PhotoText>No photo uploaded</PhotoText>
-                          )}
-                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                        </PinInfoArea>
-                      </Popup>
-                    </Marker>
-                  </>
+                        <PinInfoTitle>
+                          {marker?.article?.travelDate}
+                        </PinInfoTitle>
+                        {marker.albumURLs && marker.albumURLs.length > 0 ? (
+                          <PinInfoImg src={marker?.albumURLs[0]} />
+                        ) : (
+                          <PhotoText>{marker?.article?.title}</PhotoText>
+                        )}
+                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                      </PinInfoArea>
+                    </Popup>
+                  </Marker>
                 )
               })}
             </StyleMapContainer>

@@ -95,8 +95,6 @@ export default function Upload(props: UploadType) {
     setUploadProgress,
   } = props
 
-  console.log({ urls })
-
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const options = {
       maxSizeMB: 0.5,
@@ -178,6 +176,7 @@ export default function Upload(props: UploadType) {
               onChange={(e) => {
                 handleChange(e)
               }}
+              disabled={currentPin.id === "" ? true : false}
             />
           </UploadImgLabel>
         ) : (
