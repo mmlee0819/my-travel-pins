@@ -10,6 +10,8 @@ import weather from "../assets/whiteWeather.png"
 import CurrencyWidget, { getRatesData } from "../Widgets/currencies"
 import WeatherWidget from "../Widgets/weather"
 import { ToolContext } from "../Context/toolContext"
+import usa from "../assets/flags/usa.png"
+import taiwan from "../assets/flags/taiwan.png"
 
 const ToolsWrapper = styled.div`
   position: absolute;
@@ -138,8 +140,12 @@ function ToolsRobot() {
           {...bindDrag()}
           onClick={(e) => {
             if ((e.target as Element).id === "robotIcon" && showTools) {
-              setSelectedFrom({ id: "", flag: "", currency: "" })
-              setSelectedTo({ id: "", flag: "", currency: "" })
+              setSelectedFrom({
+                id: "TWD",
+                flag: taiwan,
+                currency: "TWD (台幣)",
+              })
+              setSelectedTo({ id: "USD", flag: usa, currency: "USD (美金)" })
               setCurrentRate(0)
               setConvertResult(0)
               setShowExchange(false)
@@ -196,6 +202,7 @@ function ToolsRobot() {
       </ToolsWrapper>
       {showExchange && (
         <CurrencyWidget
+          showExchange={showExchange}
           showFrom={showFrom}
           setShowFrom={setShowFrom}
           showTo={showTo}
