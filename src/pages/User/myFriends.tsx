@@ -15,29 +15,142 @@ import {
   arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData } from "./ts_fn_commonUse"
+import { DefinedDocumentData } from "./functions/pins"
+import {
+  Container,
+  ArticleWrapper,
+  MemoryImg,
+  MemoryList,
+  Text,
+  Title,
+  PhotoText,
+  IconInList,
+  BtnSortWrapper,
+  SortIcon,
+} from "../Components/styles/memoriesStyles"
 
-export const Container = styled.div`
-  position: relative;
-  margin: 0 auto;
-  max-width: 1440px;
+const FixArea = styled.div`
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
   width: 100%;
-  color: ${(props) => props.theme.color.bgDark};
-  height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+  margin: 0 auto;
+  padding: 50px;
+  padding-top: 20px;
+  gap: 25px;
+  border: none;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `
-
-export const ContentArea = styled.div`
+const ContentArea = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 100%;
+  margin: 0 auto;
+  padding: 50px;
+  padding-top: 20px;
+  gap: 25px;
+  border: none;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+`
+const FriendWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-around;
-  height: 100%;
   margin: 0 auto;
-  padding: 15px;
-  gap: 20px;
-  border: none;
+  width: 100%;
+  height: 120px;
+  min-width: 150px;
+  background-color: #ffffffc2;
+  border-radius: 5px;
+  box-shadow: rgb(120 120 120) 0px 0px 5px;
+  cursor: pointer;
+  &:hover {
+    box-shadow: rgb(120 120 120) 0px 0px 15px;
+  }
 `
+const ImgWrapper = styled.div`
+  position: relative;
+  display: block;
+  margin: 20px;
+  width: 80px;
+  height: 80px;
+  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  object-fit: cover;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`
+const UserImg = styled.img`
+  display: block;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+`
+const UserInfo = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+  align-self: center;
+  margin: 20px;
+  margin-left: 0;
+  width: calc(100% - 290px);
+  font-size: ${(props) => props.theme.title.md};
+  border: none;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
+  }
+`
+const HomeTownText = styled.div`
+  font-size: 18px;
+`
+
+const BtnSort = styled.div<{ isCurrent: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 160px;
+  line-height: 20px;
+  height: 40px;
+  font-size: ${(props) => props.theme.title.md};
+  color: ${(props) => (props.isCurrent ? "#fff" : props.theme.color.deepMain)};
+  background-color: ${(props) =>
+    props.isCurrent ? props.theme.color.deepMain : "none"};
+  border-radius: 5px;
+  border: 1px solid
+    ${(props) => (props.isCurrent ? "none" : props.theme.btnColor.bgGray)};
+  cursor: pointer;
+`
+const FrReqWrapper = styled.div``
+// export const Container = styled.div`
+//   position: relative;
+//   margin: 0 auto;
+//   max-width: 1440px;
+//   width: 100%;
+//   color: ${(props) => props.theme.color.bgDark};
+//   height: calc(100vh - 120px);
+//   background-color: rgb(255, 255, 255, 0.1);
+//   border-radius: 20px;
+// `
+
+// export const ContentArea = styled.div`
+//   display: flex;
+//   flex-flow: row nowrap;
+//   justify-content: space-around;
+//   height: 100%;
+//   margin: 0 auto;
+//   padding: 15px;
+//   gap: 20px;
+//   border: none;
+// `
 
 const InviWrapper = styled.div`
   position: relative;
@@ -85,7 +198,7 @@ const FilteredFriendWrapper = styled(FilteredWrapper)`
 const ContentTitle = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px 10px 0 10px;
+
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 700;
   gap: 10px;
@@ -96,16 +209,17 @@ const ContentTitle = styled.div`
 
 const BtnWrapper = styled.div`
   display: flex;
-  flex: 1 1 auto;
-  min-width: 35%;
-  margin-right: 10px;
+  flex-flow: column nowrap;
+  min-width: 130px;
+  margin: 0 20px;
   justify-content: space-between;
   align-self: center;
   font-size: ${(props) => props.theme.title.md};
+  gap: 20px;
 `
 const BtnAccept = styled.div`
   display: flex;
-  width: 48%;
+  width: 100%;
   justify-content: center;
   color: #ffffff;
   background-color: ${(props) => props.theme.color.deepMain};
@@ -138,7 +252,6 @@ const NameText = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: start;
-  width: 30%;
   margin: 2px 10px 2px 0px;
   line-height: 30px;
   height: 30px;
@@ -151,12 +264,16 @@ const NameText = styled.div`
 `
 const StatusText = styled(NameText)`
   justify-content: end;
-  min-width: 35%;
+  align-self: center;
+  min-width: 130px;
+  margin: 0 20px;
+  font-size: ${(props) => props.theme.title.md};
 `
 const Avatar = styled.img`
   margin: 0 10px 0 10px;
   width: 30px;
   height: 30px;
+  border-radius: 50%;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     width: 24px;
@@ -196,6 +313,7 @@ export default function MyFriends() {
     DocumentData[] | DefinedDocumentData[]
   >([])
   const [myFriends, setMyFriends] = useState<string[]>([])
+  const [showFriendReq, setShowFriendReq] = useState(false)
 
   useEffect(() => {
     const relationRef = collection(db, "relationships")
@@ -372,101 +490,109 @@ export default function MyFriends() {
   return (
     <Container>
       <ContentArea>
-        <InviWrapper>
-          <Autocomplete
-            qResultIds={qResultIds}
-            setQResultIds={setQResultIds}
-            invitingIds={invitingIds}
-          />
-          <ContentTitle style={{ marginTop: "30px" }}>
-            You are inviting <SplitRight />
-          </ContentTitle>
-          <ContentWrapper>
-            {invitingList.length !== 0 &&
-              invitingList.map((inviting: DocumentData) => {
-                return (
-                  <FilteredWrapper key={inviting.id}>
-                    <Avatar src={inviting.photoURL} />
-                    <NameText>{inviting.name}</NameText>
-                    <NameText>{inviting.hometownName}</NameText>
-                    <StatusText>Awaiting reply</StatusText>
-                  </FilteredWrapper>
-                )
-              })}
-          </ContentWrapper>
-          <ContentTitle style={{ marginTop: "30px" }}>
-            They want to be your friend
-            <SplitRight />
-          </ContentTitle>
-          <ContentWrapper>
-            {beInvitedList.length !== 0 &&
-              beInvitedList.map((invited: DocumentData) => {
-                return (
-                  <FilteredWrapper key={invited.id}>
-                    <Avatar src={invited.photoURL} />
-                    <NameText>{invited.name}</NameText>
-                    <NameText>{invited.hometownName}</NameText>
-                    <BtnWrapper>
-                      <BtnAccept
-                        id={invited.id}
-                        onClick={(
-                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                        ) => {
-                          acceptFriendReq(e)
-                        }}
-                      >
-                        Accept
-                      </BtnAccept>
-                      <BtnDeny
-                        id={invited.id}
-                        onClick={(
-                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                        ) => {
-                          denyFriendReq(e)
-                        }}
-                      >
-                        Deny
-                      </BtnDeny>
-                    </BtnWrapper>
-                  </FilteredWrapper>
-                )
-              })}
-          </ContentWrapper>
-        </InviWrapper>
-        <FriendsWrapper>
-          <ContentTitle>
-            Here are your friends! <SplitRight />
-          </ContentTitle>
-          <ContentWrapper>
-            {friends.length !== 0 ? (
-              friends.map((friend: DocumentData) => {
-                return (
-                  <FilteredFriendWrapper
-                    key={friend.id}
-                    id={friend.id}
-                    onClick={() => {
-                      setCurrentFriendInfo({
-                        name: friend.name,
-                        id: friend.id,
-                      })
-                      navigate(
-                        `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
-                      )
+        <Autocomplete
+          qResultIds={qResultIds}
+          setQResultIds={setQResultIds}
+          invitingIds={invitingIds}
+        />
+        <ContentTitle>
+          <BtnSort
+            isCurrent={showFriendReq}
+            onClick={() => {
+              setShowFriendReq((prev) => !prev)
+            }}
+          >
+            Friend requests
+          </BtnSort>
+        </ContentTitle>
+
+        {showFriendReq &&
+          invitingList.length !== 0 &&
+          invitingList.map((inviting: DocumentData) => {
+            return (
+              <FriendWrapper key={inviting.id}>
+                <ImgWrapper>
+                  <UserImg src={inviting.photoURL} />
+                </ImgWrapper>
+                <UserInfo>
+                  <NameText>{inviting.name}</NameText>
+                  <HomeTownText>{inviting.hometownName}</HomeTownText>
+                </UserInfo>
+
+                <StatusText>Awaiting reply</StatusText>
+              </FriendWrapper>
+            )
+          })}
+
+        {showFriendReq &&
+          beInvitedList.length !== 0 &&
+          beInvitedList.map((invited: DocumentData) => {
+            return (
+              <FriendWrapper key={invited.id}>
+                <ImgWrapper>
+                  <UserImg src={invited.photoURL} />
+                </ImgWrapper>
+                <UserInfo>
+                  <NameText>{invited.name}</NameText>
+                  <HomeTownText>{invited.hometownName}</HomeTownText>
+                </UserInfo>
+                <BtnWrapper>
+                  <BtnAccept
+                    id={invited.id}
+                    onClick={(
+                      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                    ) => {
+                      acceptFriendReq(e)
                     }}
                   >
-                    <Avatar src={friend.photoURL} />
-                    <NameText>{friend.name}</NameText>
-                    <NameText>{friend.hometownName}</NameText>
-                  </FilteredFriendWrapper>
-                )
-              })
-            ) : (
-              <>
-                <FilteredContent>No friends</FilteredContent>
-              </>
-            )}
-          </ContentWrapper>
-        </FriendsWrapper>
+                    Accept
+                  </BtnAccept>
+                  <BtnDeny
+                    id={invited.id}
+                    onClick={(
+                      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                    ) => {
+                      denyFriendReq(e)
+                    }}
+                  >
+                    Deny
+                  </BtnDeny>
+                </BtnWrapper>
+              </FriendWrapper>
+            )
+          })}
+
+        {friends.length !== 0 ? (
+          friends.map((friend: DocumentData) => {
+            return (
+              <FriendWrapper
+                key={friend.id}
+                id={friend.id}
+                onClick={() => {
+                  setCurrentFriendInfo({
+                    name: friend.name,
+                    id: friend.id,
+                  })
+                  navigate(
+                    `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
+                  )
+                }}
+              >
+                <ImgWrapper>
+                  <UserImg src={friend.photoURL} />
+                </ImgWrapper>
+                <UserInfo>
+                  <NameText>{friend.name}</NameText>
+                  <HomeTownText>{friend.hometownName}</HomeTownText>
+                </UserInfo>
+              </FriendWrapper>
+            )
+          })
+        ) : (
+          <>
+            <FilteredContent>No friends</FilteredContent>
+          </>
+        )}
       </ContentArea>
     </Container>
   )

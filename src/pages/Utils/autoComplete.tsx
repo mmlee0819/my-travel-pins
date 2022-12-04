@@ -29,7 +29,7 @@ const InputWrapper = styled.div`
   flex-flow: column wrap;
   height: 4;
   line-height: 40px;
-  margin: 15px 5px;
+  margin: 15px 0px;
   padding: 0;
   align-items: center;
   gap: 8px;
@@ -125,8 +125,8 @@ const ResultContentWrapper = styled.div`
   padding-right: 5px;
   font-size: ${(props) => props.theme.title.lg};
   &:hover {
-    padding-left: 5px;
-    padding-right: 10px;
+    /* padding-left: 5px;
+    padding-right: 10px; */
     color: #e6e6e6;
     background-color: ${(props) => props.theme.color.deepMain};
     border: none;
@@ -436,14 +436,6 @@ export function Autocomplete(props: Props) {
     }
   }, [getEnvironmentProps, formRef, qInputRef, panelRef])
 
-  console.log(
-    "aaaa",
-    autocomplete.getInputProps({
-      inputElement: qInputRef.current,
-      placeholder: "Search a friend",
-    })
-  )
-
   const [clear, setClear] = useState("")
 
   return (
@@ -553,7 +545,6 @@ export function Autocomplete(props: Props) {
                 <BtnDeny>Deny</BtnDeny>
               </BtnWrapper>
             )}
-            {/* {friendStatus === "alreadyFriend" && <BtnDeny>Unfriend</BtnDeny>} */}
             {friendStatus === "awaitingReply" && (
               <FilteredContent>Awaiting reply</FilteredContent>
             )}
