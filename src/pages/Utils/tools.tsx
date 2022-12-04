@@ -190,10 +190,7 @@ function ToolsRobot() {
                     setCurrentRate(0)
                     setConvertResult(0)
                     setShowWeather((prev) => !prev)
-                  } else if (
-                    (e.target as Element).id === "weatherIcon" &&
-                    showWeather
-                  ) {
+                  } else if ((e.target as Element).id === "weatherIcon") {
                     setShowWeather((prev) => !prev)
                   }
                 }}

@@ -316,7 +316,6 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      console.log(event.target)
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
@@ -330,11 +329,9 @@ function useOnClickOutside(
         return
 
       if (
-        (locationRef.current !== undefined &&
-          locationRef.current !== null &&
-          locationRef?.current?.value !== "") ||
+        locationRef?.current?.value !== "" ||
         artiTitle !== "" ||
-        artiContent !== ""
+        (artiTitle !== "" && artiContent !== "<p><br></p>")
       ) {
         setShowAlert(true)
       }
@@ -406,18 +403,7 @@ export default function MyMap() {
   const locationRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
-
-  // const namesArr = countries.features.map((country) => {
-  //   return country.properties.name
-  // })
-  // const findDuplicates = namesArr.reduce((prev: any, curr: any) => {
-  //   if (prev.includes(curr)) {
-  //     return [...prev, curr]
-  //   }
-  //   return prev
-  // })
-  // console.log({ findDuplicates })
-
+  console.log(locationRef?.current?.value)
   useEffect(() => {
     if (!selectedMarker) return
     if (refReady && popupRef !== undefined) {
@@ -461,7 +447,7 @@ export default function MyMap() {
         }
         if (newLat && newLng && placeName && placeId) {
           const newPinInfo = {
-            id: `${currentUser?.id}-${placeId}`,
+            id: `${currentUser?.id}-${placeId}-${Date.now()}`,
             userId: `${currentUser?.id}`,
             location: {
               lat: newLat,
@@ -543,7 +529,7 @@ export default function MyMap() {
           name: newPin.location.name,
         },
       })
-      if (locationRef.current !== undefined && locationRef.current !== null) {
+      if (locationRef.current !== null) {
         locationRef.current.value = ""
       }
       setRefReady(true)
@@ -645,12 +631,9 @@ export default function MyMap() {
                 <Xmark
                   onClick={() => {
                     if (
-                      (locationRef.current !== undefined &&
-                        locationRef.current !== null &&
+                      (locationRef.current !== null &&
                         locationRef?.current?.value !== "") ||
-                      newPin.location.name !== "" ||
-                      artiTitle !== "" ||
-                      artiContent !== "" ||
+                      (artiTitle !== "" && artiContent !== "<p><br></p>") ||
                       urls.length !== 0
                     ) {
                       setShowAlert(true)
@@ -706,6 +689,7 @@ export default function MyMap() {
                     setArtiContent={setArtiContent}
                   />
                   <Upload
+                    hasAddPin={hasAddPin}
                     currentPin={newPin}
                     setFilesName={setFilesName}
                     hasUpload={hasUpload}
@@ -774,11 +758,11 @@ export default function MyMap() {
                   Hometown {currentUser?.hometownName}
                 </Tooltip>
               </Marker>
-              {markers?.map((marker: any) => {
+              {markers?.map((marker: any, index: number) => {
                 return (
                   <Marker
                     ref={popupRef}
-                    key={marker.location.placeId}
+                    key={`${marker.location.placeId}-${index}`}
                     position={[marker.location.lat, marker.location.lng]}
                     icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
                     eventHandlers={{

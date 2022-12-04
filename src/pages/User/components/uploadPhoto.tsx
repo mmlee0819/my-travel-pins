@@ -79,6 +79,7 @@ interface UploadType {
   urls: string[]
   setUrls: Dispatch<SetStateAction<string[]>>
   setUploadProgress: Dispatch<SetStateAction<number>>
+  hasAddPin?: boolean
 }
 
 export default function Upload(props: UploadType) {
@@ -86,6 +87,7 @@ export default function Upload(props: UploadType) {
   const [hasFiles, setHasFiles] = useState(false)
 
   const {
+    hasAddPin,
     currentPin,
     setFilesName,
     hasUpload,
@@ -176,7 +178,7 @@ export default function Upload(props: UploadType) {
               onChange={(e) => {
                 handleChange(e)
               }}
-              disabled={currentPin.id === "" ? true : false}
+              disabled={!hasAddPin || currentPin.id === "" ? true : false}
             />
           </UploadImgLabel>
         ) : (

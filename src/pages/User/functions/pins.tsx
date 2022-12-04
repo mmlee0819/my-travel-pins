@@ -11,6 +11,7 @@ import {
   onSnapshot,
   arrayUnion,
   arrayRemove,
+  orderBy,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../../Context/authContext"
@@ -64,6 +65,9 @@ export const getPins = async (
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
+    })
+    newMemories.sort(function (a, b) {
+      return b.postReadableTime.seconds - a.postReadableTime.seconds
     })
     setMemories(newMemories as PinContent[])
     setHasFetched(true)
@@ -143,7 +147,6 @@ export const checkRealTimePhotos = (
   setAlbumUrls: Dispatch<SetStateAction<string[]>>
 ) => {
   onSnapshot(doc(db, "pins", id), (snapshotData: DocumentData) => {
-    console.log(snapshotData.data())
     if (snapshotData.data() && snapshotData.data().albumURLs) {
       const newPhotos: string[] = snapshotData.data().albumURLs
       setAlbumUrls(newPhotos)
@@ -162,7 +165,7 @@ export const checkRealTimePinMessages = (
       )
         return
       const newMessages: MessagesType[] = messageData.data().messages
-      if (!newMessages || newMessages.length === 0) return
+      if (newMessages === undefined) return
       await Promise.all(
         newMessages.map(
           async (item: DocumentData | MessagesType, index: number) => {

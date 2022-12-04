@@ -506,7 +506,7 @@ export default function DetailMemory(props: Props) {
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
-    if (!selectedMarker?.id || messages === undefined) return
+    if (!selectedMarker?.id) return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
@@ -696,39 +696,42 @@ export default function DetailMemory(props: Props) {
                   </LocationText>{" "}
                 </>
               )}
-              {isLoaded && (
-                <StreetModeContainer id="street-mode-container">
-                  <StreetViewService onLoad={onStreetLoad} />
-                </StreetModeContainer>
-              )}
-              {!showEditor && albumUrls.length > 0 && (
-                <GoogleMap
-                  mapContainerStyle={{
-                    height: "40vh",
-                    width: "100%",
-                    marginTop: "20px",
-                  }}
-                  center={{
-                    lat: selectedMarker?.location.lat,
-                    lng: selectedMarker?.location.lng,
-                  }}
-                  zoom={14}
-                  options={{
-                    draggable: true,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    scaleControl: false,
-                    fullscreenControl: true,
-                    scrollwheel: false,
-                  }}
-                >
-                  <Marker
-                    position={{
-                      lat: selectedMarker?.location.lat,
-                      lng: selectedMarker?.location.lng,
-                    }}
-                  />
-                </GoogleMap>
+
+              {isLoaded && !showEditor && (
+                <>
+                  <StreetModeContainer id="street-mode-container">
+                    <StreetViewService onLoad={onStreetLoad} />
+                  </StreetModeContainer>
+                  {albumUrls.length > 0 && (
+                    <GoogleMap
+                      mapContainerStyle={{
+                        height: "40vh",
+                        width: "100%",
+                        marginTop: "20px",
+                      }}
+                      center={{
+                        lat: selectedMarker?.location.lat,
+                        lng: selectedMarker?.location.lng,
+                      }}
+                      zoom={14}
+                      options={{
+                        draggable: true,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        scaleControl: false,
+                        fullscreenControl: true,
+                        scrollwheel: false,
+                      }}
+                    >
+                      <Marker
+                        position={{
+                          lat: selectedMarker?.location.lat,
+                          lng: selectedMarker?.location.lng,
+                        }}
+                      />
+                    </GoogleMap>
+                  )}
+                </>
               )}
               {(isMyMap || isMyMemory) && showEditor && (
                 <BtnSaveBackWrapper>
