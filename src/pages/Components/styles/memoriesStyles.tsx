@@ -13,11 +13,12 @@ export const Container = styled.div`
 
 export const ContentArea = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   width: 100%;
-  height: 100%;
+  height: calc(100% - 90px);
   margin: 0 auto;
-  padding: 50px 50px;
+  padding: 50px;
+  padding-top: 20px;
   gap: 25px;
   border: none;
   overflow-y: scroll;
@@ -40,10 +41,13 @@ export const ContentArea = styled.div`
 export const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  flex: 1 1 auto;
-  min-width: 40%;
+  padding: 5px 15px;
+  width: 100%;
   font-size: ${(props) => props.theme.title.md};
+  background-color: #ffffffc2;
   border: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
@@ -67,9 +71,16 @@ export const ContentWrapper = styled.div`
 export const MemoryList = styled.div`
   display: flex;
   flex-flow: column nowrap;
+  margin: 0 auto;
   width: 100%;
+  height: fit-content;
   max-width: 250px;
   min-width: 200px;
+  border-radius: 5px;
+  box-shadow: rgb(120 120 120) 0px 0px 5px;
+  &:hover {
+    box-shadow: rgb(120 120 120) 0px 0px 15px;
+  }
 `
 
 export const ImgWrapper = styled.div`
@@ -77,10 +88,11 @@ export const ImgWrapper = styled.div`
   display: block;
   width: 100%;
   height: 200px;
-  border-radius: 5px;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   object-fit: cover;
-  border: 2px solid #fff;
+  border: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
   cursor: pointer;
 `
 export const MemoryImg = styled.img`
@@ -90,7 +102,8 @@ export const MemoryImg = styled.img`
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 `
 
 export const IconInList = styled.img`
@@ -128,15 +141,46 @@ export const Text = styled.div`
   min-width: 30%;
 `
 export const Title = styled(Text)`
-  justify-content: space-between;
-  flex: 1 1 auto;
   font-weight: 700;
   font-size: ${(props) => props.theme.title.md};
   cursor: pointer;
+
   &:hover {
     text-decoration: underline;
   }
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
+`
+export const TitleWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+`
+
+export const BtnSortWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  height: 90px;
+  line-height: 30px;
+  width: 100%;
+  gap: 20px;
+`
+export const BtnSort = styled.div<{ isCurrent: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 160px;
+  line-height: 20px;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.md};
+  color: ${(props) => (props.isCurrent ? "#fff" : props.theme.color.deepMain)};
+  background-color: ${(props) =>
+    props.isCurrent ? props.theme.color.deepMain : "none"};
+  border-radius: 5px;
+  border: 1px solid
+    ${(props) => (props.isCurrent ? "none" : props.theme.btnColor.bgGray)};
+  cursor: pointer;
 `
