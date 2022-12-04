@@ -27,6 +27,7 @@ import {
   IconInList,
   BtnSortWrapper,
   BtnSort,
+  SortIcon,
 } from "../Components/styles/memoriesStyles"
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 import calendar from "../assets/calendar.png"
@@ -35,11 +36,6 @@ import spinner from "../assets/dotsSpinner.svg"
 import whiteArrow from "../assets/buttons/down-arrow-white.png"
 import deepArrow from "../assets/buttons/down-arrow-deeMain.png"
 
-const SortIcon = styled(IconInList)`
-  margin: 2px 0 0 10px;
-  width: 20px;
-  height: 24px;
-`
 const Spinner = styled.div`
   width: 100%;
   height: 30px;
@@ -231,7 +227,7 @@ export default function MyMemories() {
         {isLogin && isLoaded && memories ? (
           memories.map((item: PinContent, index: number) => {
             return (
-              <MemoryList key={item.id}>
+              <MemoryList key={`${item.id}-${index}`}>
                 <ImgWrapper
                   id={item?.id}
                   onClick={() => {

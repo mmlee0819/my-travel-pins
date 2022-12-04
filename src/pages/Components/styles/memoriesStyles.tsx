@@ -184,3 +184,8 @@ export const BtnSort = styled.div<{ isCurrent: boolean }>`
     ${(props) => (props.isCurrent ? "none" : props.theme.btnColor.bgGray)};
   cursor: pointer;
 `
+export const SortIcon = styled(IconInList)`
+  margin: 2px 0 0 10px;
+  width: 20px;
+  height: 24px;
+`

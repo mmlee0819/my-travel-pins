@@ -1,7 +1,7 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
 import { AuthContext } from "../Context/authContext"
-import { getPins, getSpecificPin } from "./ts_fn_commonUse"
+import { getPins, getSpecificPin } from "./functions/pins"
 import {
   ContentWrapper,
   Container,
@@ -14,7 +14,10 @@ import {
   Title,
   PhotoText,
   IconInList,
-} from "./components/UIforMemoriesPage"
+  BtnSortWrapper,
+  BtnSort,
+  SortIcon,
+} from "../Components/styles/memoriesStyles"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -22,10 +25,12 @@ import {
   checkRealTimePinMessages,
   PinContent,
   checkRealTimePinsInfo,
-} from "../User/ts_fn_commonUse"
+} from "./functions/pins"
 import DetailMemory from "../Components/detailMemory"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
+import whiteArrow from "../assets/buttons/down-arrow-white.png"
+import deepArrow from "../assets/buttons/down-arrow-deeMain.png"
 
 function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
@@ -33,6 +38,8 @@ function FriendMemories() {
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
+  const [isSortByPost, setIsSortByPost] = useState(true)
+  const [isSortByDate, setIsSortByDate] = useState(false)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
 
   const msgRef = useRef<HTMLInputElement>(null)
@@ -91,13 +98,54 @@ function FriendMemories() {
 
   return (
     <Container>
+      <BtnSortWrapper>
+        <BtnSort
+          isCurrent={isSortByPost}
+          onClick={() => {
+            if (!isSortByPost) {
+              setIsSortByDate(false)
+              setIsSortByPost(true)
+            }
+          }}
+        >
+          Post time
+          <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
+        </BtnSort>
+        <BtnSort
+          isCurrent={isSortByDate}
+          onClick={() => {
+            if (!isSortByDate) {
+              setIsSortByPost(false)
+              setIsSortByDate(true)
+            }
+          }}
+        >
+          Travel date
+          <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
+        </BtnSort>
+      </BtnSortWrapper>
       <ContentArea>
-        <ContentWrapper>
-          {isLogin && isLoaded && memories ? (
-            memories.map((item: PinContent, index: number) => {
-              return (
-                <MemoryList key={`${item.id}-${item?.article?.title}`}>
-                  <ImgWrapper
+        {isLogin && isLoaded && memories ? (
+          memories.map((item: PinContent, index: number) => {
+            return (
+              <MemoryList key={`${item.id}-${item?.article?.title}`}>
+                <ImgWrapper
+                  id={item?.id}
+                  onClick={() => {
+                    if (typeof item.id !== "string") return
+                    setMemoryIsShow(true)
+                    setMemory(item)
+                    getSpecificPin(item?.id, setMemory, setMemoryIsShow)
+                  }}
+                >
+                  {item?.albumURLs ? (
+                    <MemoryImg src={item?.albumURLs[0]} />
+                  ) : (
+                    <PhotoText>No photo uploaded</PhotoText>
+                  )}
+                </ImgWrapper>
+                <ArticleWrapper>
+                  <Title
                     id={item?.id}
                     onClick={() => {
                       if (typeof item.id !== "string") return
@@ -106,43 +154,27 @@ function FriendMemories() {
                       getSpecificPin(item?.id, setMemory, setMemoryIsShow)
                     }}
                   >
-                    {item?.albumURLs ? (
-                      <MemoryImg src={item?.albumURLs[0]} />
-                    ) : (
-                      <PhotoText>No photo uploaded</PhotoText>
-                    )}
-                  </ImgWrapper>
-                  <ArticleWrapper>
-                    <Title
-                      id={item?.id}
-                      onClick={() => {
-                        if (typeof item.id !== "string") return
-                        setMemoryIsShow(true)
-                        setMemory(item)
-                        getSpecificPin(item?.id, setMemory, setMemoryIsShow)
-                      }}
-                    >
-                      {item?.article?.title === undefined
-                        ? "Untitled"
-                        : item?.article?.title}
-                    </Title>
-                    <Text>
-                      <IconInList src={calendar} />
-                      {item?.article?.travelDate}
-                    </Text>
-                    <Text>
-                      <IconInList src={location} />
-                      {item?.location?.name}
-                    </Text>
-                  </ArticleWrapper>
-                </MemoryList>
-              )
-            })
-          ) : (
-            <Title>Please wait...</Title>
-          )}
-        </ContentWrapper>
+                    {item?.article?.title === undefined
+                      ? "Untitled"
+                      : item?.article?.title}
+                  </Title>
+                  <Text>
+                    <IconInList src={calendar} />
+                    {item?.article?.travelDate}
+                  </Text>
+                  <Text>
+                    <IconInList src={location} />
+                    {item?.location?.name}
+                  </Text>
+                </ArticleWrapper>
+              </MemoryList>
+            )
+          })
+        ) : (
+          <Title>Please wait...</Title>
+        )}
       </ContentArea>
+
       {memoryIsShow && memory && memory.location && (
         <DetailMemory selectedMarker={memory} setShowMemory={setMemoryIsShow} />
       )}
