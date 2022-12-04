@@ -16,18 +16,7 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { DefinedDocumentData } from "./functions/pins"
-import {
-  Container,
-  ArticleWrapper,
-  MemoryImg,
-  MemoryList,
-  Text,
-  Title,
-  PhotoText,
-  IconInList,
-  BtnSortWrapper,
-  SortIcon,
-} from "../Components/styles/memoriesStyles"
+import { Container } from "../Components/styles/memoriesStyles"
 
 const FixArea = styled.div`
   display: grid;
@@ -47,7 +36,10 @@ const FixArea = styled.div`
 const ContentArea = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 120px;
+  align-items: center;
   width: 100%;
+  height: 100%;
   margin: 0 auto;
   padding: 50px;
   padding-top: 20px;
@@ -523,7 +515,6 @@ export default function MyFriends() {
               </FriendWrapper>
             )
           })}
-
         {showFriendReq &&
           beInvitedList.length !== 0 &&
           beInvitedList.map((invited: DocumentData) => {
@@ -562,7 +553,8 @@ export default function MyFriends() {
             )
           })}
 
-        {friends.length !== 0 ? (
+        {!showFriendReq &&
+          friends.length !== 0 &&
           friends.map((friend: DocumentData) => {
             return (
               <FriendWrapper
@@ -587,12 +579,7 @@ export default function MyFriends() {
                 </UserInfo>
               </FriendWrapper>
             )
-          })
-        ) : (
-          <>
-            <FilteredContent>No friends</FilteredContent>
-          </>
-        )}
+          })}
       </ContentArea>
     </Container>
   )

@@ -27,7 +27,7 @@ import queryFriendImg from "../assets/034961magnifying-friends.png"
 const InputWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
-  height: 4;
+  height: 40px;
   line-height: 40px;
   margin: 15px 0px;
   padding: 0;
@@ -98,11 +98,12 @@ const BtnQueryIcon = styled.button`
 
 const ResultsSection = styled.div`
   position: absolute;
-  top: 65px;
+  top: 100px;
   left: 0px;
+  width: calc(100% - 100px);
+  margin-left: 50px;
   display: flex;
   flex-flow: column wrap;
-  width: 100%;
   margin-top: 15px;
   padding: 5px 15px;
   color: #2d2d2d;
