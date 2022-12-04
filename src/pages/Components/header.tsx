@@ -135,15 +135,27 @@ function Header() {
   return (
     <>
       <HeaderContainer>
-        <Title>
-          <UserAvatar
-            avatarURL={avatarURL}
-            onClick={() => {
-              setIsProfile(true)
-            }}
-          />
-          {`Hello ${currentUser?.name} !`}
-        </Title>
+        {(isFriendHome || isFriendMemory) && (
+          <Title>
+            <UserAvatar
+              avatarURL={avatarURL}
+              onClick={() => {
+                setIsProfile(true)
+              }}
+            />
+          </Title>
+        )}
+        {(isMyMap || isMyMemory || isMyFriend) && (
+          <Title>
+            <UserAvatar
+              avatarURL={avatarURL}
+              onClick={() => {
+                setIsProfile(true)
+              }}
+            />
+            {`Hello ${currentUser?.name} !`}
+          </Title>
+        )}
         <TabWrapper>
           {isMyMap && (
             <>
