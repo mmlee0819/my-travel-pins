@@ -28,16 +28,6 @@ export const ContentArea = styled.div`
   }
 `
 
-// export const ContentArea = styled.div`
-//   display: flex;
-//   flex-flow: row wrap;
-//   width: 100%;
-//   height: 100%;
-//   margin: 0 auto;
-//   padding: 50px 50px;
-//   gap: 25px;
-//   border: none;
-// `
 export const ArticleWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -161,12 +151,13 @@ export const TitleWrapper = styled.div`
 export const BtnSortWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
+  padding: 20px 50px 0 50px;
   height: 90px;
   line-height: 30px;
   width: 100%;
-  gap: 20px;
+  gap: 10px;
 `
 export const BtnSort = styled.div<{ isCurrent: boolean }>`
   display: flex;

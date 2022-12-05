@@ -13,7 +13,6 @@ import {
   checkRealTimePinsInfo,
 } from "./functions/pins"
 import {
-  ContentWrapper,
   Container,
   ContentArea,
   ArticleWrapper,
@@ -51,10 +50,11 @@ const BtnWrapper = styled.div`
   flex: 1 1 auto;
   width: 100%;
   margin-right: 10px;
+  margin-bottom: 40px;
   justify-content: space-between;
   align-self: center;
 `
-const BtnBlue = styled.div`
+const BtnLight = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -63,16 +63,19 @@ const BtnBlue = styled.div`
   padding: 5px;
   font-family: "Poppins";
   font-size: ${(props) => props.theme.title.md};
-  color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgBlue};
+  color: #034961;
+  background-color: #ffffff;
   border-radius: 5px;
+  border: 1px solid ${(props) => props.theme.btnColor.bgGray};
   cursor: pointer;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
 `
-const BtnRed = styled(BtnBlue)`
-  background-color: ${(props) => props.theme.btnColor.bgRed};
+const BtnBlue = styled(BtnLight)`
+  color: #ffffff;
+  background-color: #5397bd;
+  border: none;
 `
 
 const BtnDelete = styled.img`
@@ -99,7 +102,6 @@ const ReminderArea = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   width: 50%;
-  height: 50%;
   padding: 20px;
   color: ${(props) => props.theme.color.bgDark};
   background-color: #fff;
@@ -116,8 +118,9 @@ const ReminderText = styled.div`
   }
 `
 const DeleteTargetText = styled(Title)`
+  justify-content: center;
   text-align: center;
-  margin-bottom: 40px;
+  margin: 20px auto 40px auto;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     margin-bottom: 30px;
@@ -296,20 +299,20 @@ export default function MyMemories() {
                           {memories[index]?.article?.title || "Untitled"}
                         </DeleteTargetText>
                         <BtnWrapper>
-                          <BtnRed
-                            onClick={() => {
-                              deleteMemory(index)
-                              setDeleteTargetIndex(undefined)
-                            }}
-                          >
-                            Confirm to delete
-                          </BtnRed>
-                          <BtnBlue
+                          <BtnLight
                             onClick={() => {
                               setDeleteTargetIndex(undefined)
                             }}
                           >
                             Cancel
+                          </BtnLight>
+                          <BtnBlue
+                            onClick={() => {
+                              deleteMemory(index)
+                              setDeleteTargetIndex(undefined)
+                            }}
+                          >
+                            Delete
                           </BtnBlue>
                         </BtnWrapper>
                       </ReminderArea>

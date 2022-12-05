@@ -3,7 +3,6 @@ import { useState, useContext, useEffect, useRef } from "react"
 import { AuthContext } from "../Context/authContext"
 import { getPins, getSpecificPin } from "./functions/pins"
 import {
-  ContentWrapper,
   Container,
   ContentArea,
   ArticleWrapper,
