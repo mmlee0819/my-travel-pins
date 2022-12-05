@@ -9,7 +9,8 @@ const HeaderContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  margin: 0 auto 5px auto;
+  margin: 0 auto;
+  padding-top: 5px;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
@@ -30,7 +31,7 @@ const TabWrapper = styled.div`
   padding-right: 20px;
   max-width: 1440px;
   width: 100%;
-  height: 40px;
+  height: 30px;
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 500;
   opacity: 1;
@@ -59,14 +60,16 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
 const Title = styled.div`
   display: flex;
   flex: 1 1 auto;
-  align-self: end;
   justify-content: start;
+  align-items: center;
   margin: 0 auto;
   width: 40%;
+  line-height: 40px;
   color: ${(props) => props.theme.color.bgDark};
+  font-size: ${(props) => props.theme.title.md};
   font-weight: 500;
   letter-spacing: 2px;
-  line-height: 40px;
+
   gap: 10px;
   z-index: 20;
 `
@@ -74,8 +77,9 @@ const Title = styled.div`
 const Tab = styled.div`
   display: flex;
   padding: 0 15px;
+  font-size: ${(props) => props.theme.title.md};
+  color: #7f7f7f;
   background-color: none;
-  color: ${(props) => props.theme.color.bgDark};
   border: 1px solid #fff;
   border: none;
   border-top-left-radius: 5px;
@@ -83,7 +87,6 @@ const Tab = styled.div`
   text-decoration: none;
   cursor: pointer;
   &:hover {
-    height: 45px;
     color: ${(props) => props.theme.color.deepMain};
     background-color: ${(props) => props.theme.color.bgLight};
     transition: background-color 0.3s;
@@ -94,7 +97,6 @@ const Tab = styled.div`
   }
 `
 const CurrentTab = styled(Tab)`
-  height: 45px;
   color: ${(props) => props.theme.color.bgLight};
   background-color: ${(props) => props.theme.color.lightMain};
   cursor: default;

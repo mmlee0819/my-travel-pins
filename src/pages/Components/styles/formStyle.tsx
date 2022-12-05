@@ -30,6 +30,9 @@ export const Input = styled.input`
   border: 3px solid #ffffff;
   border-radius: 5px;
   opacity: 1;
+  ::placeholder {
+    font-size: ${(props) => props.theme.title.md};
+  }
   &:focus {
     outline: #7ccbab;
     border: 3px solid #7ccbab;

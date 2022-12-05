@@ -20,8 +20,8 @@ import {
   Attribution,
   StyleMapContainer,
   Container,
-} from "./User/components/styles/mapStyles"
-import { StepTitle, Input, BtnText } from "./User/components/styles/formStyle"
+} from "./Components/styles/mapStyles"
+import { StepTitle, Input, BtnText } from "./Components/styles/formStyle"
 import finger from "./assets/buttons/blackFinger.png"
 import tip from "./assets/tip.png"
 import home from "./assets/markers/home1.png"
@@ -31,7 +31,8 @@ const HeaderWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  margin: 0 auto 5px auto;
+  margin: 0 auto;
+  padding-top: 5px;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
@@ -81,28 +82,25 @@ const TabWrapper = styled.div`
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
-  height: 40px;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.md};
+  font-weight: 500;
   opacity: 1;
   gap: 20px;
 `
 const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   display: flex;
   padding: 0 15px;
-  font-weight: 700;
   color: ${(props) => props.theme.color.bgDark};
   border: 1px solid #fff;
   border: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  &:hover {
-    height: 45px;
-  }
   @media screen and (min-width: 600px), (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const SignUpTab = styled(Tab)`
-  height: ${(props) => props.isSignUp && "45px"};
   color: ${(props) => props.isSignUp && props.theme.color.bgLight};
   background-color: ${(props) =>
     props.isSignUp ? props.theme.color.lightMain : "none"};
@@ -117,7 +115,6 @@ const SignUpTab = styled(Tab)`
 `
 
 const SignInTab = styled(Tab)`
-  height: ${(props) => props.isSignIn && "45px"};
   color: ${(props) => props.isSignIn && props.theme.color.bgLight};
   background-color: ${(props) =>
     props.isSignIn ? props.theme.color.lightMain : "none"};
