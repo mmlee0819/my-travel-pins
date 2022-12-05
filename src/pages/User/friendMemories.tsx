@@ -25,7 +25,7 @@ import {
   PinContent,
   checkRealTimePinsInfo,
 } from "./functions/pins"
-import DetailMemory from "../Components/detailMemory"
+import DetailMemory from "../Components/pinContent/detailMemory"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
 import whiteArrow from "../assets/buttons/down-arrow-white.png"

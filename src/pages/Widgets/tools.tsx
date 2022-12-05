@@ -5,10 +5,10 @@ import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
 import robot from "../assets/chatbot.png"
 import currency from "../assets/whiteCurrencies.png"
-import tripAdvisor from "../assets/tripadvisor.png"
+import questionMark from "../assets/question-mark.png"
 import weather from "../assets/whiteWeather.png"
-import CurrencyWidget, { getRatesData } from "../Widgets/currencies"
-import WeatherWidget from "../Widgets/weather"
+import CurrencyWidget, { getRatesData } from "./currencies"
+import WeatherWidget from "./weather"
 import { ToolContext } from "../Context/toolContext"
 import usa from "../assets/flags/usa.png"
 import taiwan from "../assets/flags/taiwan.png"
@@ -46,8 +46,8 @@ const CurrencyIcon = styled(RobotIcon)`
   cursor: pointer;
 `
 
-const TAIcon = styled(CurrencyIcon)`
-  background-image: url(${tripAdvisor});
+const QaIcon = styled(CurrencyIcon)`
+  background-image: url(${questionMark});
 `
 const Weather = styled(CurrencyIcon)`
   background-image: url(${weather});
@@ -215,7 +215,7 @@ function ToolsRobot() {
                 }}
               />
 
-              <TAIcon id="tripAdviIcon" />
+              <QaIcon id="questions" />
             </>
           )}
         </DragWrapper>

@@ -7,12 +7,12 @@ import React, {
 } from "react"
 import { ToolContext } from "../Context/toolContext"
 import styled from "styled-components"
-import { Input } from "../Components/styles/formStyle"
+import { Input } from "../Components/styles/formStyles"
 import {
   GridContainer,
   GridItemWrapper,
   Xmark,
-} from "../Components/styles/gridStyles"
+} from "../Components/styles/widgetStyles"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { DocumentData } from "@firebase/firestore-types"

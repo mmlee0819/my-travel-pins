@@ -21,7 +21,7 @@ import {
   StyleMapContainer,
   Container,
 } from "./Components/styles/mapStyles"
-import { StepTitle, Input, BtnText } from "./Components/styles/formStyle"
+import { StepTitle, Input, BtnText } from "./Components/styles/formStyles"
 import finger from "./assets/buttons/blackFinger.png"
 import tip from "./assets/tip.png"
 import home from "./assets/markers/home1.png"

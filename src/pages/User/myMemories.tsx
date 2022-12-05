@@ -5,7 +5,7 @@ import { doc, deleteDoc } from "firebase/firestore"
 import { db, storage } from "../Utils/firebase"
 import { AuthContext } from "../Context/authContext"
 import { ref, deleteObject } from "firebase/storage"
-import DetailMemory from "../Components/detailMemory"
+import DetailMemory from "../Components/pinContent/detailMemory"
 import {
   getPins,
   getSpecificPin,
@@ -28,6 +28,14 @@ import {
   BtnSort,
   SortIcon,
 } from "../Components/styles/memoriesStyles"
+import {
+  BgOverlay,
+  ReminderArea,
+  ReminderText,
+  BtnWrapper,
+  BtnLight,
+  BtnBlue,
+} from "../Components/styles/popupLayoutStyles"
 import trashBinBlack from "../assets/buttons/trashBinBlack.png"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
@@ -45,39 +53,6 @@ const Spinner = styled.div`
   border: none;
 `
 
-const BtnWrapper = styled.div`
-  display: flex;
-  flex: 1 1 auto;
-  width: 100%;
-  margin-right: 10px;
-  margin-bottom: 40px;
-  justify-content: space-between;
-  align-self: center;
-`
-const BtnLight = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 48%;
-  padding: 5px;
-  font-family: "Poppins";
-  font-size: ${(props) => props.theme.title.md};
-  color: #034961;
-  background-color: #ffffff;
-  border-radius: 5px;
-  border: 1px solid ${(props) => props.theme.btnColor.bgGray};
-  cursor: pointer;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.sm};
-  }
-`
-const BtnBlue = styled(BtnLight)`
-  color: #ffffff;
-  background-color: #5397bd;
-  border: none;
-`
-
 const BtnDelete = styled.img`
   align-self: center;
   width: 18px;
@@ -85,38 +60,6 @@ const BtnDelete = styled.img`
   cursor: pointer;
 `
 
-const BgOverlay = styled.div`
-  position: absolute;
-  top: 3px;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: ${(props) => props.theme.color.bgDark};
-  border-radius: 5px;
-  opacity: 0.9;
-  z-index: 50;
-`
-const ReminderArea = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  padding: 20px;
-  color: ${(props) => props.theme.color.bgDark};
-  background-color: #fff;
-  border-radius: 5px;
-  z-index: 52;
-`
-const ReminderText = styled.div`
-  margin: 20px auto 0 auto;
-  text-align: center;
-  font-size: ${(props) => props.theme.title.lg};
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-`
 const DeleteTargetText = styled(Title)`
   justify-content: center;
   text-align: center;

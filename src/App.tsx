@@ -3,7 +3,7 @@ import { createGlobalStyle, ThemeProvider } from "styled-components"
 import { Outlet } from "react-router-dom"
 import { AuthContextProvider } from "./pages/Context/authContext"
 import { ToolContextProvider } from "./pages/Context/toolContext"
-import ToolsRobot from "./pages/Utils/tools"
+import ToolsRobot from "./pages/Widgets/tools"
 import Header from "./pages/Components/header"
 import bg from "../src/pages/assets/bg.jpg"
 
@@ -12,24 +12,17 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
      
- /* @font-face {
-      font-family: "Jomhuria";
-      src: url("Jomhuria-Regular.ttf") ;
-      size-adjust: "60%";
-      unicode-range: "U+4E00-9FFF";
-  } */
-  
   body {
     font-family: "Poppins","sans-serif";
+    overflow: hidden;
    }
   #root {
     position: relative;
     min-height: 100vh;
-    padding: 10px 60px 20px 60px;
+    padding: 10px 60px;
     color:#fff;
     background-image: url(${bg});
     background-size: 100% 100%;
-        /* background: linear-gradient(#0f3a49,#5594b7,#0f3a49); */
   }
 `
 const theme = {
@@ -40,11 +33,10 @@ const theme = {
     lg: "1200px",
     xl: "1440px",
   },
-  title: { sm: "14px", md: "18px", lg: "24px" },
-  subTitle: { sm: "14px", md: "1rem", lg: "29px", xl: "29px" },
+  title: { sm: "14px", md: "18px", lg: "20px" },
   color: {
     deepMain: "#034961",
-    lightMain: "#7ccbab",
+    lightMain: "#5384a9",
     bgDark: "#454545",
     bgLight: "#ffffff",
   },
@@ -62,8 +54,8 @@ function App() {
       <ToolContextProvider>
         <GlobalStyle />
         <ThemeProvider theme={theme}>
-          <ToolsRobot />
           <Header />
+          <ToolsRobot />
           <Outlet />
         </ThemeProvider>
       </ToolContextProvider>

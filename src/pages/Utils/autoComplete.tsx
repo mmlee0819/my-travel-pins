@@ -21,7 +21,6 @@ import { Hit } from "@algolia/client-search"
 import { db } from "./firebase"
 import { AuthContext } from "../Context/authContext"
 import {
-  Container,
   Wrapper,
   ImgWrapper,
   UserImg,
@@ -227,11 +226,6 @@ const FilteredContent = styled.div`
   }
 `
 
-export const UserAvatar = styled.img`
-  width: 30px;
-  height: 30px;
-`
-
 export const BtnDefault = styled.div`
   position: absolute;
   right: 5px;
@@ -305,8 +299,6 @@ export function Autocomplete(props: Props) {
     useContext(AuthContext)
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [friendStatus, setFriendStatus] = useState("")
-  console.log({ queryResult })
-  console.log({ friendStatus })
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -359,6 +351,7 @@ export function Autocomplete(props: Props) {
   const qInputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { getEnvironmentProps } = autocomplete
+
   const checkRelation = async (id: string) => {
     if (!isLogin || currentUser === null) return
     const inviterIsMedocRef = doc(
