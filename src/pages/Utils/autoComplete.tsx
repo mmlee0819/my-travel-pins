@@ -20,6 +20,14 @@ import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
 import { db } from "./firebase"
 import { AuthContext } from "../Context/authContext"
+import {
+  Container,
+  Wrapper,
+  ImgWrapper,
+  UserImg,
+  UserInfo,
+  HomeTownText,
+} from "../Components/styles/friendStyles"
 import queryFriendImg from "../assets/034961magnifying-friends.png"
 
 /* eslint-disable react/jsx-props-no-spreading */
@@ -27,6 +35,8 @@ import queryFriendImg from "../assets/034961magnifying-friends.png"
 const InputWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
+  align-self: start;
+  width: 300px;
   height: 40px;
   line-height: 40px;
   margin: 15px 0px;
@@ -53,7 +63,7 @@ const QueryFriendInput = styled.input`
   border: 1px solid #8c8c8c;
   &:focus {
     color: #034961;
-    outline: 3px solid #fbcb63;
+    outline: 3px solid #7ccbab;
     border: none;
   }
   ::placeholder {
@@ -98,13 +108,12 @@ const BtnQueryIcon = styled.button`
 
 const ResultsSection = styled.div`
   position: absolute;
-  top: 100px;
+  top: 85px;
   left: 0px;
   width: calc(100% - 100px);
   margin-left: 50px;
   display: flex;
   flex-flow: column wrap;
-  margin-top: 15px;
   padding: 5px 15px;
   color: #2d2d2d;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
@@ -126,8 +135,6 @@ const ResultContentWrapper = styled.div`
   padding-right: 5px;
   font-size: ${(props) => props.theme.title.lg};
   &:hover {
-    /* padding-left: 5px;
-    padding-right: 10px; */
     color: #e6e6e6;
     background-color: ${(props) => props.theme.color.deepMain};
     border: none;
@@ -147,11 +154,6 @@ const Avatar = styled.img`
   @media screen and (max-width: 600px), (max-height: 600px) {
     width: 20px;
     height: 20px;
-  }
-`
-const ResultAvatar = styled(Avatar)<{ friendStatus: string }>`
-  &:hover {
-    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
   }
 `
 const NameText = styled.div`
@@ -189,19 +191,17 @@ const ResultContent = styled(ResultContentWrapper)`
   gap: 20px;
   cursor: pointer;
 `
-const FilteredWrapper = styled.div`
-  position: relative;
-  display: flex;
-  flex-flow: row nowrap;
+const StatusText = styled(NameText)`
   width: 100%;
-  margin: 10px 0;
-  font-size: ${(props) => props.theme.title.lg};
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
+  line-height: 25px;
+  height: 50px;
+  justify-content: center;
+  text-align: center;
+  font-size: 16px;
+  margin: 0px;
 `
-const FilteredFriendWrapper = styled(FilteredWrapper)<{ friendStatus: string }>`
-  padding: 10px 0;
+
+const FilteredWrapper = styled(Wrapper)<{ friendStatus: string }>`
   &:hover {
     border: none;
     border-radius: 5px;
@@ -305,6 +305,8 @@ export function Autocomplete(props: Props) {
     useContext(AuthContext)
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [friendStatus, setFriendStatus] = useState("")
+  console.log({ queryResult })
+  console.log({ friendStatus })
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -395,8 +397,8 @@ export function Autocomplete(props: Props) {
       const docRef = doc(db, "users", id)
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data())
         setQueryResult(docSnap.data())
+        console.log(docSnap.data())
       }
     } catch (error) {
       console.log(error)
@@ -436,8 +438,6 @@ export function Autocomplete(props: Props) {
       window.removeEventListener("touchmove", onTouchMove)
     }
   }, [getEnvironmentProps, formRef, qInputRef, panelRef])
-
-  const [clear, setClear] = useState("")
 
   return (
     <>
@@ -511,49 +511,59 @@ export function Autocomplete(props: Props) {
             <NoMatchText>No matches found</NoMatchText>
           </ResultsSection>
         )}
-      {queryResult &&
-        props.invitingIds !== undefined &&
-        !props.invitingIds.includes(queryResult.id) && (
-          <FilteredFriendWrapper
-            friendStatus={friendStatus}
-            onClick={() => {
-              if (friendStatus === "alreadyFriend") {
-                setCurrentFriendInfo({
-                  name: queryResult.name,
-                  id: queryResult.id,
-                })
-                navigate(
-                  `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
-                )
-              }
-            }}
-          >
-            <Avatar src={queryResult.photoURL} />
+
+      {queryResult && props.invitingIds !== undefined && (
+        <FilteredWrapper
+          friendStatus={friendStatus}
+          onClick={() => {
+            if (friendStatus === "alreadyFriend") {
+              setCurrentFriendInfo({
+                name: queryResult.name,
+                id: queryResult.id,
+              })
+              navigate(
+                `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
+              )
+            }
+          }}
+        >
+          <ImgWrapper>
+            <UserImg src={queryResult.photoURL} />
+          </ImgWrapper>
+          <UserInfo>
             <NameText>{queryResult.name}</NameText>
-            <NameText>{queryResult.hometownName}</NameText>
-            {friendStatus === "" && queryResult.id !== currentUser?.id && (
-              <BtnVisitLink
-                onClick={() => {
-                  addFriend(queryResult.id)
-                }}
-              >
-                Add friend
-              </BtnVisitLink>
-            )}
-            {friendStatus === "acceptOrDeny" && (
-              <BtnWrapper>
-                <BtnAccept>Accept</BtnAccept>
-                <BtnDeny>Deny</BtnDeny>
-              </BtnWrapper>
-            )}
-            {friendStatus === "awaitingReply" && (
-              <FilteredContent>Awaiting reply</FilteredContent>
-            )}
-            {friendStatus === "alreadyFriend" && (
-              <FilteredContent>friends</FilteredContent>
-            )}
-          </FilteredFriendWrapper>
-        )}
+            <HomeTownText>{queryResult.hometownName}</HomeTownText>
+          </UserInfo>
+          {friendStatus === "" && queryResult.id !== currentUser?.id && (
+            <BtnVisitLink
+              onClick={() => {
+                addFriend(queryResult.id)
+              }}
+            >
+              Add friend
+            </BtnVisitLink>
+          )}
+          {friendStatus === "acceptOrDeny" && (
+            <BtnWrapper>
+              <BtnAccept>Accept</BtnAccept>
+              <BtnDeny>Deny</BtnDeny>
+            </BtnWrapper>
+          )}
+          {friendStatus === "awaitingReply" && (
+            // <FilteredContent>Awaiting reply</FilteredContent>
+            <BtnWrapper>
+              <StatusText>
+                Awaiting
+                <br />
+                reply
+              </StatusText>
+            </BtnWrapper>
+          )}
+          {friendStatus === "alreadyFriend" && (
+            <FilteredContent>friends</FilteredContent>
+          )}
+        </FilteredWrapper>
+      )}
     </>
   )
 }
