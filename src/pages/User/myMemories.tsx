@@ -36,12 +36,12 @@ import {
   BtnLight,
   BtnBlue,
 } from "../../components/styles/modalStyles"
-import trashBinBlack from "../assets/buttons/trashBinBlack.png"
-import calendar from "../assets/calendar.png"
-import location from "../assets/location.png"
-import spinner from "../assets/dotsSpinner.svg"
-import whiteArrow from "../assets/buttons/down-arrow-white.png"
-import deepArrow from "../assets/buttons/down-arrow-deeMain.png"
+import trashBinBlack from "../../assets/buttons/trashBinBlack.png"
+import calendar from "../../assets/calendar.png"
+import location from "../../assets/location.png"
+import spinner from "../../assets/dotsSpinner.svg"
+import whiteArrow from "../../assets/buttons/down-arrow-white.png"
+import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 const Spinner = styled.div`
   width: 100%;

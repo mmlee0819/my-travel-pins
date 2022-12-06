@@ -25,7 +25,7 @@ import {
   Xmark,
   FormTitle,
 } from "../styles/widgetStyles"
-import spinner from "../assets/dotsSpinner.svg"
+import spinner from "../../assets/dotsSpinner.svg"
 
 const PlaceInput = styled(Input)`
   font-size: ${(props) => props.theme.title.md};

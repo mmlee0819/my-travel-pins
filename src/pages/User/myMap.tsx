@@ -9,6 +9,7 @@ import {
 } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent } from "leaflet"
+import { StandaloneSearchBox } from "@react-google-maps/api"
 import {
   Tooltip,
   useMap,
@@ -40,8 +41,6 @@ import {
   BtnLight,
   BtnBlue,
 } from "../../components/styles/modalStyles"
-import home from "../assets/markers/home1.png"
-import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../../context/authContext"
 import Upload from "../../components/post/uploadPhoto"
 import { db, storage } from "../../utils/firebase"
@@ -49,11 +48,12 @@ import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { getPins, PinContent } from "../../utils/pins"
 import Editor from "../../components/post/editor"
-import addPinIcon from "../assets/markers/addPin.png"
-import pins from "../assets/markers/pins.png"
+import addPinIcon from "../../assets/markers/addPin.png"
+import pins from "../../assets/markers/pins.png"
 import DetailMemory from "../../components/pinContent/detailMemory"
-import spinner from "../assets/dotsSpinner.svg"
-import xmark from "../assets/buttons/x-mark.png"
+import spinner from "../../assets/dotsSpinner.svg"
+import xmark from "../../assets/buttons/x-mark.png"
+import home from "../../assets/markers/home1.png"
 
 const PhotoText = styled.div`
   display: flex;

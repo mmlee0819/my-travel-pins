@@ -26,10 +26,10 @@ import {
   checkRealTimePinsInfo,
 } from "../../utils/pins"
 import DetailMemory from "../../components/pinContent/detailMemory"
-import calendar from "../assets/calendar.png"
-import location from "../assets/location.png"
-import whiteArrow from "../assets/buttons/down-arrow-white.png"
-import deepArrow from "../assets/buttons/down-arrow-deeMain.png"
+import calendar from "../../assets/calendar.png"
+import location from "../../assets/location.png"
+import whiteArrow from "../../assets/buttons/down-arrow-white.png"
+import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 function FriendMemories() {
   const { isLoaded, isLogin, currentUser } = useContext(AuthContext)

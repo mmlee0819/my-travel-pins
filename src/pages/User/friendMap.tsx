@@ -13,7 +13,7 @@ import {
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
-import homeMarker from "../assets/markers/home1.png"
+import homeMarker from "../../assets/markers/home1.png"
 import { AuthContext } from "../../context/authContext"
 import { db } from "../../utils/firebase"
 import {
@@ -26,7 +26,7 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { DefinedDocumentData, PinContent } from "../../utils/pins"
-import pins from "../assets/markers/pins.png"
+import pins from "../../assets/markers/pins.png"
 import DetailMemory from "../../components/pinContent/detailMemory"
 
 const PhotoText = styled.div`

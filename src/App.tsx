@@ -5,7 +5,7 @@ import { AuthContextProvider } from "./context/authContext"
 import { ToolContextProvider } from "./context/toolContext"
 import ToolsRobot from "./components/widgets/tools"
 import Header from "./components/header"
-import bg from "../src/pages/assets/bg.jpg"
+import bg from "./assets/bg.jpg"
 
 const GlobalStyle = createGlobalStyle`
   *{

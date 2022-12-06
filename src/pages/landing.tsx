@@ -22,9 +22,9 @@ import {
   Container,
 } from "../components/styles/mapStyles"
 import { StepTitle, Input, BtnText } from "../components/styles/formStyles"
-import finger from "./assets/buttons/blackFinger.png"
-import tip from "./assets/tip.png"
-import home from "./assets/markers/home1.png"
+import finger from "../assets/buttons/blackFinger.png"
+import tip from "../assets/tip.png"
+import home from "../assets/markers/home1.png"
 
 const HeaderWrapper = styled.div`
   position: relative;

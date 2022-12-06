@@ -11,7 +11,6 @@ import {
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
 import { auth, db, storage } from "../utils/firebase"
-// import { myGoogleApiKey } from "../utils/gmap"
 
 declare module "*.png"
 
@@ -119,7 +118,7 @@ export interface DocumentData {
 }
 
 const libraries: LoadScriptProps["libraries"] = ["places"]
-const myGoogleApiKey = process.env.REACT_APP_google_API_KEY
+const myGoogleApiKey = process.env.REACT_APP_google_API_KEY!
 
 export function AuthContextProvider({ children }: Props) {
   const [isLoading, setIsLoading] = useState(false)
