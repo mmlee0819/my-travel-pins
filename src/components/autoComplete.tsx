@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useContext,
 } from "react"
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
 import { getDoc, doc, setDoc } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import algoliasearch from "algoliasearch/lite"
@@ -20,17 +20,131 @@ import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
 import { db } from "../utils/firebase"
 import { AuthContext } from "../context/authContext"
-import {
-  Wrapper,
-  ImgWrapper,
-  UserImg,
-  UserInfo,
-  HomeTownText,
-} from "./styles/friendStyles"
+import { UserImg, HomeTownText } from "./styles/friendStyles"
 import queryFriendImg from "../assets/034961magnifying-friends.png"
+import xMark from "../assets/buttons/x-mark.png"
 
 /* eslint-disable react/jsx-props-no-spreading */
 
+const appear = keyframes`
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }`
+
+const BgOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: ${(props) => props.theme.color.bgDark};
+  border-radius: 5px;
+  opacity: 0.97;
+  z-index: 50;
+`
+const ProfileArea = styled.div<{ friendStatus: string }>`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  width: 300px;
+  padding: 30px;
+  font-size: ${(props) => props.theme.title.lg};
+  font-weight: 700;
+  color: ${(props) => props.theme.color.bgDark};
+  background-color: ${(props) => props.theme.color.bgLight};
+  box-shadow: rgb(120 120 120) 0px 0px 5px;
+  border-radius: 5px;
+  gap: 30px;
+  z-index: 52;
+  animation: ${appear} 0.5s ease-in-out;
+  &:hover {
+    border: none;
+    border-radius: 5px;
+    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
+  }
+  @media screen and(max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+  }
+`
+const Xmark = styled.div`
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-image: url(${xMark});
+  background-size: 100% 100%;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  z-index: 60;
+`
+const VisitArea = styled.div`
+  width: 100%;
+  height: 0px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(rgba(60, 60, 60, 0), rgb(60, 60, 60));
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+`
+const VisitText = styled.div`
+  margin: 20px;
+  width: 100%;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  line-height: 22px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`
+const SelectedUserInfo = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+  font-size: ${(props) => props.theme.title.md};
+  color: ${(props) => props.theme.color.bgDark};
+  border: none;
+  gap: 5px;
+  @media screen and (max-width: 900px) and (min-width: 600px),
+    (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.sm};
+  }
+`
+
+const ImgWrapper = styled.div`
+  position: relative;
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border: none;
+  border-radius: 50%;
+`
+const SelectedNameText = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+  line-height: 24px;
+  height: 24px;
+  font-size: ${(props) => props.theme.title.lg};
+  @media screen and (max-width: 600px), (max-height: 600px) {
+    font-size: ${(props) => props.theme.title.md};
+    line-height: 20px;
+    height: 20px;
+  }
+`
 const InputWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -187,7 +301,6 @@ const ResultContent = styled(ResultContentWrapper)`
   padding: 10px 0;
   line-height: 16px;
   font-size: ${(props) => props.theme.title.lg};
-  gap: 20px;
   cursor: pointer;
 `
 const StatusText = styled(NameText)`
@@ -197,72 +310,31 @@ const StatusText = styled(NameText)`
   justify-content: center;
   text-align: center;
   font-size: 16px;
+  color: ${(props) => props.theme.color.deepMain};
   margin: 0px;
 `
 
-const FilteredWrapper = styled(Wrapper)<{ friendStatus: string }>`
-  &:hover {
-    border: none;
-    border-radius: 5px;
-    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
-    color: ${(props) => props.friendStatus === "alreadyFriend" && "#fff"};
-    background-color: ${(props) =>
-      props.friendStatus === "alreadyFriend" && props.theme.color.deepMain};
-  }
-`
-
-const FilteredContent = styled.div`
+const StatusWrapper = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  margin: 2px;
-  line-height: 30px;
-  height: 30px;
-  font-size: ${(props) => props.theme.title.lg};
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-    line-height: 24px;
-    height: 24px;
-  }
-`
-
-export const BtnDefault = styled.div`
-  position: absolute;
-  right: 5px;
-  padding: 1px 5px;
-  align-self: center;
-  line-height: 30px;
-  height: 30px;
-  font-size: ${(props) => props.theme.title.md};
-  color: #ffffff;
-  background-color: ${(props) => props.theme.color.deepMain};
-  border-radius: 5px;
-  cursor: pointer;
-`
-const BtnWrapper = styled.div`
-  display: flex;
-  flex: 1 1 auto;
-  min-width: 35%;
-  margin-right: 10px;
-  justify-content: space-between;
-  align-self: center;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
 `
 const BtnAccept = styled.div`
   display: flex;
-  width: 48%;
+  width: 100px;
   justify-content: center;
   font-size: ${(props) => props.theme.title.md};
   color: #ffffff;
-  background-color: ${(props) => props.theme.color.deepMain};
+  background-color: ${(props) => props.theme.color.lightMain};
   border-radius: 5px;
   cursor: pointer;
 `
 const BtnDeny = styled(BtnAccept)`
   background-color: ${(props) => props.theme.btnColor.bgGray};
 `
-const BtnVisitLink = styled(BtnAccept)`
-  min-width: 35%;
-  margin-right: 10px;
+const BtnSendReq = styled(BtnAccept)`
+  width: 160px;
   font-size: ${(props) => props.theme.title.md};
   text-decoration: none;
 `
@@ -298,6 +370,8 @@ export function Autocomplete(props: Props) {
   const { currentUser, isLogin, navigate, setCurrentFriendInfo } =
     useContext(AuthContext)
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
+  const [showUserProfile, setShowUserProfile] = useState(false)
+  const [showVisit, setShowVisit] = useState(false)
   const [friendStatus, setFriendStatus] = useState("")
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
@@ -391,6 +465,7 @@ export function Autocomplete(props: Props) {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setQueryResult(docSnap.data())
+        setShowUserProfile(true)
       }
     } catch (error) {
       console.log(error)
@@ -503,57 +578,77 @@ export function Autocomplete(props: Props) {
           </ResultsSection>
         )}
 
-      {queryResult && props.invitingIds !== undefined && (
-        <FilteredWrapper
-          friendStatus={friendStatus}
-          onClick={() => {
-            if (friendStatus === "alreadyFriend") {
-              setCurrentFriendInfo({
-                name: queryResult.name,
-                id: queryResult.id,
-              })
-              navigate(
-                `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
-              )
-            }
-          }}
-        >
-          <ImgWrapper>
-            <UserImg src={queryResult.photoURL} />
-          </ImgWrapper>
-          <UserInfo>
-            <NameText>{queryResult.name}</NameText>
-            <HomeTownText>{queryResult.hometownName}</HomeTownText>
-          </UserInfo>
-          {friendStatus === "" && queryResult.id !== currentUser?.id && (
-            <BtnVisitLink
+      {queryResult && props.invitingIds !== undefined && showUserProfile && (
+        <BgOverlay>
+          <ProfileArea
+            friendStatus={friendStatus}
+            onClick={(e) => {
+              if ((e.target as HTMLDivElement).id === "closeIcon") return
+              if (friendStatus === "alreadyFriend") {
+                setCurrentFriendInfo({
+                  name: queryResult.name,
+                  id: queryResult.id,
+                })
+                navigate(
+                  `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
+                )
+              }
+            }}
+            onMouseEnter={() => setShowVisit(true)}
+            // onMouseLeave={() => {
+            //   setShowVisit(false)
+            // }}
+          >
+            {showVisit && (
+              <VisitArea>
+                <VisitText>Visit</VisitText>
+              </VisitArea>
+            )}
+            <Xmark
+              id="closeIcon"
               onClick={() => {
-                addFriend(queryResult.id)
+                setShowUserProfile(false)
+                setShowVisit(false)
               }}
-            >
-              Add friend
-            </BtnVisitLink>
-          )}
-          {friendStatus === "acceptOrDeny" && (
-            <BtnWrapper>
-              <BtnAccept>Accept</BtnAccept>
-              <BtnDeny>Deny</BtnDeny>
-            </BtnWrapper>
-          )}
-          {friendStatus === "awaitingReply" && (
-            // <FilteredContent>Awaiting reply</FilteredContent>
-            <BtnWrapper>
-              <StatusText>
-                Awaiting
-                <br />
-                reply
-              </StatusText>
-            </BtnWrapper>
-          )}
-          {friendStatus === "alreadyFriend" && (
-            <FilteredContent>friends</FilteredContent>
-          )}
-        </FilteredWrapper>
+            />
+            <ImgWrapper>
+              <UserImg
+                src={queryResult.photoURL}
+                alt={`${queryResult.name}-avatar`}
+              />
+            </ImgWrapper>
+            <SelectedUserInfo>
+              <SelectedNameText>{queryResult.name}</SelectedNameText>
+              <HomeTownText>{queryResult.hometownName}</HomeTownText>
+              <HomeTownText>{queryResult.email}</HomeTownText>
+            </SelectedUserInfo>
+            {friendStatus === "" && queryResult.id !== currentUser?.id && (
+              <BtnSendReq
+                onClick={() => {
+                  addFriend(queryResult.id)
+                }}
+              >
+                Add friend
+              </BtnSendReq>
+            )}
+            {friendStatus === "acceptOrDeny" && (
+              <StatusWrapper>
+                <BtnAccept>Accept</BtnAccept>
+                <BtnDeny>Deny</BtnDeny>
+              </StatusWrapper>
+            )}
+            {friendStatus === "awaitingReply" && (
+              <StatusWrapper>
+                <StatusText>Awaiting reply</StatusText>
+              </StatusWrapper>
+            )}
+            {friendStatus === "alreadyFriend" && (
+              <StatusWrapper>
+                <StatusText>Friends</StatusText>
+              </StatusWrapper>
+            )}
+          </ProfileArea>
+        </BgOverlay>
       )}
     </>
   )

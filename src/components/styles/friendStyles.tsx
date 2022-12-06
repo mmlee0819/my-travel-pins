@@ -64,5 +64,5 @@ export const UserInfo = styled.div`
 `
 
 export const HomeTownText = styled.div`
-  font-size: 18px;
+  font-size: ${(props) => props.theme.title.sm};
 `
