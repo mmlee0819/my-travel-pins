@@ -1,6 +1,8 @@
 import React from "react"
 import { createContext, useState, ReactNode } from "react"
 import { DocumentData } from "@firebase/firestore-types"
+import usa from "../assets/flags/usa.png"
+import taiwan from "../assets/flags/taiwan.png"
 
 interface ToolContextType {
   convertResult: number
@@ -35,9 +37,9 @@ export const ToolContext = createContext<ToolContextType>({
   convertResult: 0,
   currentRate: 0,
   selectedFrom: {
-    id: "",
-    flag: "",
-    currency: "",
+    id: "TWD",
+    flag: taiwan,
+    currency: "TWD (台幣)",
   },
   setSelectedFrom: (selectedTo: {
     id: string
@@ -45,9 +47,9 @@ export const ToolContext = createContext<ToolContextType>({
     currency: string
   }) => Response,
   selectedTo: {
-    id: "",
-    flag: "",
-    currency: "",
+    id: "USD",
+    flag: usa,
+    currency: "USD (美金)",
   },
   setSelectedTo: (selectedTo: { id: string; flag: string; currency: string }) =>
     Response,
@@ -62,14 +64,14 @@ export const ToolContextProvider = ({ children }: Props) => {
   const [currentRate, setCurrentRate] = useState(0)
   const [convertResult, setConvertResult] = useState(0)
   const [selectedFrom, setSelectedFrom] = useState({
-    id: "",
-    flag: "",
-    currency: "",
+    id: "TWD",
+    flag: taiwan,
+    currency: "TWD (台幣)",
   })
   const [selectedTo, setSelectedTo] = useState({
-    id: "",
-    flag: "",
-    currency: "",
+    id: "USD",
+    flag: usa,
+    currency: "USD (美金)",
   })
 
   return (

@@ -3,7 +3,7 @@ import { useState, useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
 import { storage } from "../../Utils/firebase"
 import { AuthContext } from "../../Context/authContext"
-import uploadIcon from "./uploadImgIcon.png"
+import uploadIcon from "../../assets/buttons/uploadImgIcon.png"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import imageCompression from "browser-image-compression"
 import spinner from "../../assets/dotsSpinner.svg"
@@ -79,6 +79,7 @@ interface UploadType {
   urls: string[]
   setUrls: Dispatch<SetStateAction<string[]>>
   setUploadProgress: Dispatch<SetStateAction<number>>
+  canUpload: boolean
 }
 
 export default function Upload(props: UploadType) {
@@ -86,6 +87,7 @@ export default function Upload(props: UploadType) {
   const [hasFiles, setHasFiles] = useState(false)
 
   const {
+    canUpload,
     currentPin,
     setFilesName,
     hasUpload,
@@ -94,8 +96,6 @@ export default function Upload(props: UploadType) {
     setUrls,
     setUploadProgress,
   } = props
-
-  console.log({ urls })
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const options = {
@@ -178,6 +178,7 @@ export default function Upload(props: UploadType) {
               onChange={(e) => {
                 handleChange(e)
               }}
+              disabled={!canUpload || currentPin.id === "" ? true : false}
             />
           </UploadImgLabel>
         ) : (

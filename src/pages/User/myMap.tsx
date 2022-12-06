@@ -25,19 +25,33 @@ import {
   StyleMapContainer,
   Container,
   Wrapper,
-} from "./components/styles"
+} from "../Components/styles/mapStyles"
+import {
+  StepText,
+  StepTitle,
+  Input,
+  BtnText,
+} from "../Components/styles/formStyles"
+import {
+  BgOverlay,
+  ReminderArea,
+  ReminderText,
+  BtnWrapper,
+  BtnLight,
+  BtnBlue,
+} from "../Components/styles/popupLayoutStyles"
 import home from "../assets/markers/home1.png"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import { AuthContext } from "../Context/authContext"
-import Upload from "./components/uploadPhoto"
+import Upload from "../Components/post/uploadPhoto"
 import { db, storage } from "../Utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { getPins, PinContent } from "./functions/pins"
-import Editor from "../Components/editor"
+import Editor from "../Components/post/editor"
 import addPinIcon from "../assets/markers/addPin.png"
 import pins from "../assets/markers/pins.png"
-import DetailMemory from "../Components/detailMemory"
+import DetailMemory from "../Components/pinContent/detailMemory"
 import spinner from "../assets/dotsSpinner.svg"
 import xmark from "../assets/buttons/x-mark.png"
 
@@ -49,6 +63,7 @@ const PhotoText = styled.div`
   margin: 5px 0;
   width: 150px;
   height: 120px;
+  font-size: ${(props) => props.theme.title.md};
   color: ${(props) => props.theme.color.bgDark};
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
@@ -71,7 +86,6 @@ const Xmark = styled.div`
   z-index: 50;
 `
 const PostPinWrapper = styled(Wrapper)`
-  top: 3px;
   display: flex;
   flex-flow: column nowrap;
   width: 50%;
@@ -84,71 +98,8 @@ const PostPinWrapper = styled(Wrapper)`
   }
 `
 
-const Input = styled.input`
-  width: 100%;
-  height: 40px;
-  min-height: 40px;
-  padding-left: 10px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  font-size: ${(props) => props.theme.title.lg};
-  color: ${(props) => props.theme.color.bgDark};
-  background-color: #ffffff;
-  border: 3px solid #ffffff;
-  border-radius: 5px;
-  opacity: 1;
-  &:focus {
-    outline: #7ccbab;
-    border: 3px solid #7ccbab;
-  }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-`
-
-const StepText = styled.div`
-  display: flex;
-  padding: 0px 10px;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 700;
-  color: ${(props) => props.theme.color.bgDark};
-  border: none;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-    padding: 2px 10px;
-  }
-`
-const StepTitle = styled(StepText)`
-  font-weight: 500;
-`
 const LocationText = styled(StepText)`
   margin-top: 20px;
-`
-const BtnText = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 40px;
-  margin: 30px auto;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 400;
-  color: ${(props) => props.theme.color.bgLight};
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
-  border-radius: 5px;
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    color: #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-    height: 30px;
-    font-size: ${(props) => props.theme.title.md};
-  }
 `
 
 const BtnAddPin = styled.div`
@@ -169,65 +120,20 @@ const BtnAddPin = styled.div`
   }
 `
 
-const BtnWrapper = styled.div`
-  display: flex;
-  flex: 1 1 auto;
-  width: 100%;
-  margin: 30px auto;
-
-  justify-content: space-between;
-  align-self: center;
-`
-const BtnBlue = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 48%;
-  padding: 5px;
-  font-family: "Poppins";
-  font-size: 20px;
-  color: #ffffff;
-  background-color: ${(props) => props.theme.btnColor.bgBlue};
-  border-radius: 5px;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: 16px;
-  }
-`
-const BtnRed = styled(BtnBlue)`
-  background-color: ${(props) => props.theme.btnColor.bgRed};
-`
-
-const ArticleWrapper = styled.div<{ hasAddPin: boolean }>`
+const ArticleWrapper = styled.div`
   position: relative;
   display: flex;
   flex-flow: column nowrap;
   width: 100%;
   height: 100%;
   gap: 5px;
-  ${(props) =>
-    props.hasAddPin
-      ? `
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
-    display: none; 
-  }`
-      : "overflow:hidden;"}
+    display: none;
+  }
 `
-const BlockArtiWrapper = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 60%;
-  background-color: #454545;
-  opacity: 0.6;
-  border-radius: 5px;
-  z-index: 10;
-`
+
 export const PinInfoArea = styled.div`
   background-color: #ffffff;
   cursor: pointer;
@@ -243,36 +149,6 @@ export const PinInfoTitle = styled.div`
   font-weight: 700;
 `
 
-const BgOverlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: ${(props) => props.theme.color.bgDark};
-  opacity: 0.9;
-  z-index: 50;
-`
-const ReminderArea = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  padding: 20px;
-  color: ${(props) => props.theme.color.bgDark};
-  background-color: #fff;
-  border-radius: 5px;
-  z-index: 52;
-`
-const ReminderText = styled.div`
-  margin: 20px auto 0 auto;
-  text-align: center;
-  font-size: ${(props) => props.theme.title.lg};
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
-`
 interface CenterType {
   center: LatLng | null
   setCenter: Dispatch<SetStateAction<LatLng | null>>
@@ -387,7 +263,6 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      console.log(event.target)
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
@@ -401,11 +276,9 @@ function useOnClickOutside(
         return
 
       if (
-        (locationRef.current !== undefined &&
-          locationRef.current !== null &&
-          locationRef?.current?.value !== "") ||
+        locationRef?.current?.value !== "" ||
         artiTitle !== "" ||
-        artiContent !== ""
+        (artiTitle !== "" && artiContent !== "<p><br></p>")
       ) {
         setShowAlert(true)
       }
@@ -473,6 +346,7 @@ export default function MyMap() {
   const [showMemory, setShowMemory] = useState(false)
   const [showPostArea, setShowPostArea] = useState(false)
   const [showAlert, setShowAlert] = useState(false)
+  const [canUpload, setCanUpload] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const locationRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
@@ -521,7 +395,7 @@ export default function MyMap() {
         }
         if (newLat && newLng && placeName && placeId) {
           const newPinInfo = {
-            id: `${currentUser?.id}-${placeId}`,
+            id: `${currentUser?.id}-${placeId}-${Date.now()}`,
             userId: `${currentUser?.id}`,
             location: {
               lat: newLat,
@@ -532,6 +406,7 @@ export default function MyMap() {
           }
           setNewPin(newPinInfo)
           setHasAddPin(true)
+          setCanUpload(true)
         }
       }
     } else console.log("失敗啦")
@@ -571,8 +446,8 @@ export default function MyMap() {
               travelDate: travelDate,
               content: artiContent,
             },
-            postTimestamp: Date.now(),
-            postReadableTime: new Date(),
+            postTimestamp: artiInfo.postTimestamp,
+            postReadableTime: artiInfo.postReadableTime,
             albumURLs: urls,
             albumNames: filesName,
             location: {
@@ -592,8 +467,8 @@ export default function MyMap() {
           travelDate: travelDate,
           content: artiContent,
         },
-        postTimestamp: Date.now(),
-        postReadableTime: new Date(),
+        postTimestamp: artiInfo.postTimestamp,
+        postReadableTime: artiInfo.postReadableTime,
         albumURLs: urls,
         albumNames: filesName,
         location: {
@@ -603,7 +478,7 @@ export default function MyMap() {
           name: newPin.location.name,
         },
       })
-      if (locationRef.current !== undefined && locationRef.current !== null) {
+      if (locationRef.current !== null) {
         locationRef.current.value = ""
       }
       setRefReady(true)
@@ -614,6 +489,7 @@ export default function MyMap() {
       setTravelDate(getCurrentDate)
       setArtiContent("")
       setHasAddPin(false)
+      setCanUpload(false)
     } catch (error) {
       console.log(error)
     }
@@ -667,26 +543,25 @@ export default function MyMap() {
               <ReminderArea>
                 <ReminderText>
                   Are you sure <br />
-                  you want to discard all changes <br />
-                  and edit later?
+                  you want to discard this post?
                 </ReminderText>
 
                 <BtnWrapper>
-                  <BtnRed
+                  <BtnLight
+                    onClick={() => {
+                      setShowAlert(false)
+                    }}
+                  >
+                    cancel
+                  </BtnLight>
+                  <BtnBlue
                     onClick={() => {
                       cancelPost()
                       setShowAlert(false)
                       // setShowPostArea(false)
                     }}
                   >
-                    Yes
-                  </BtnRed>
-                  <BtnBlue
-                    onClick={() => {
-                      setShowAlert(false)
-                    }}
-                  >
-                    No, back to edit
+                    Discard
                   </BtnBlue>
                 </BtnWrapper>
               </ReminderArea>
@@ -705,12 +580,9 @@ export default function MyMap() {
                 <Xmark
                   onClick={() => {
                     if (
-                      (locationRef.current !== undefined &&
-                        locationRef.current !== null &&
+                      (locationRef.current !== null &&
                         locationRef?.current?.value !== "") ||
-                      newPin.location.name !== "" ||
-                      artiTitle !== "" ||
-                      artiContent !== "" ||
+                      (artiTitle !== "" && artiContent !== "<p><br></p>") ||
                       urls.length !== 0
                     ) {
                       setShowAlert(true)
@@ -742,8 +614,7 @@ export default function MyMap() {
                     <LocationText>{newPin?.location?.name}</LocationText>
                   </>
                 )}
-                {!hasAddPin && <BlockArtiWrapper />}
-                <ArticleWrapper hasAddPin={hasAddPin}>
+                <ArticleWrapper>
                   <Input
                     placeholder="Title"
                     value={artiTitle}
@@ -767,6 +638,7 @@ export default function MyMap() {
                     setArtiContent={setArtiContent}
                   />
                   <Upload
+                    canUpload={canUpload}
                     currentPin={newPin}
                     setFilesName={setFilesName}
                     hasUpload={hasUpload}
@@ -835,43 +707,41 @@ export default function MyMap() {
                   Hometown {currentUser?.hometownName}
                 </Tooltip>
               </Marker>
-              {markers?.map((marker: any) => {
+              {markers?.map((marker: any, index: number) => {
                 return (
-                  <>
-                    <Marker
-                      ref={popupRef}
-                      key={marker.location.placeId}
-                      position={[marker.location.lat, marker.location.lng]}
-                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                      eventHandlers={{
-                        click() {
-                          setSelectedMarker(marker)
-                        },
-                      }}
+                  <Marker
+                    ref={popupRef}
+                    key={`${marker.location.placeId}-${index}`}
+                    position={[marker.location.lat, marker.location.lng]}
+                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    eventHandlers={{
+                      click() {
+                        setSelectedMarker(marker)
+                      },
+                    }}
+                  >
+                    <Popup
+                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      keepInView={true}
                     >
-                      <Popup
-                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView={true}
+                      <PinInfoArea
+                        id={marker.location.placeId}
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
                       >
-                        <PinInfoArea
-                          id={marker.location.placeId}
-                          onClick={() => {
-                            setShowMemory(true)
-                          }}
-                        >
-                          <PinInfoTitle>
-                            {marker?.article?.travelDate}
-                          </PinInfoTitle>
-                          {marker.albumURLs && marker.albumURLs.length > 0 ? (
-                            <PinInfoImg src={marker?.albumURLs[0]} />
-                          ) : (
-                            <PhotoText>No photo uploaded</PhotoText>
-                          )}
-                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                        </PinInfoArea>
-                      </Popup>
-                    </Marker>
-                  </>
+                        <PinInfoTitle>
+                          {marker?.article?.travelDate}
+                        </PinInfoTitle>
+                        {marker.albumURLs && marker.albumURLs.length > 0 ? (
+                          <PinInfoImg src={marker?.albumURLs[0]} />
+                        ) : (
+                          <PhotoText>{marker?.article?.title}</PhotoText>
+                        )}
+                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                      </PinInfoArea>
+                    </Popup>
+                  </Marker>
                 )
               })}
             </StyleMapContainer>

@@ -5,11 +5,13 @@ import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
 import robot from "../assets/chatbot.png"
 import currency from "../assets/whiteCurrencies.png"
-import tripAdvisor from "../assets/tripadvisor.png"
+import questionMark from "../assets/question-mark.png"
 import weather from "../assets/whiteWeather.png"
-import CurrencyWidget, { getRatesData } from "../Widgets/currencies"
-import WeatherWidget from "../Widgets/weather"
+import CurrencyWidget, { getRatesData } from "./currencies"
+import WeatherWidget from "./weather"
 import { ToolContext } from "../Context/toolContext"
+import usa from "../assets/flags/usa.png"
+import taiwan from "../assets/flags/taiwan.png"
 
 const ToolsWrapper = styled.div`
   position: absolute;
@@ -44,16 +46,22 @@ const CurrencyIcon = styled(RobotIcon)`
   cursor: pointer;
 `
 
-const TAIcon = styled(CurrencyIcon)`
-  background-image: url(${tripAdvisor});
+const QaIcon = styled(CurrencyIcon)`
+  background-image: url(${questionMark});
 `
 const Weather = styled(CurrencyIcon)`
   background-image: url(${weather});
 `
 
 function ToolsRobot() {
-  const { setCurrentRate, setConvertResult, setSelectedFrom, setSelectedTo } =
-    useContext(ToolContext)
+  const {
+    setCurrentRate,
+    setConvertResult,
+    selectedFrom,
+    setSelectedFrom,
+    selectedTo,
+    setSelectedTo,
+  } = useContext(ToolContext)
   const [showTools, setShowTools] = useState(false)
   const [showExchange, setShowExchange] = useState(false)
   const [currenciesData, setCurrenciesData] = useState<
@@ -138,8 +146,16 @@ function ToolsRobot() {
           {...bindDrag()}
           onClick={(e) => {
             if ((e.target as Element).id === "robotIcon" && showTools) {
-              setSelectedFrom({ id: "", flag: "", currency: "" })
-              setSelectedTo({ id: "", flag: "", currency: "" })
+              setSelectedFrom({
+                id: selectedFrom.id || "TWD",
+                flag: selectedFrom.flag || taiwan,
+                currency: selectedFrom.currency || "TWD (台幣)",
+              })
+              setSelectedTo({
+                id: selectedTo.id || "USD",
+                flag: selectedTo.flag || usa,
+                currency: selectedTo.currency || "USD (美金)",
+              })
               setCurrentRate(0)
               setConvertResult(0)
               setShowExchange(false)
@@ -158,14 +174,23 @@ function ToolsRobot() {
                 onClick={(e) => {
                   if (
                     (e.target as Element).id === "weatherIcon" &&
-                    !showWeather
+                    showExchange
                   ) {
                     setShowExchange(false)
+                    setSelectedFrom({
+                      id: selectedFrom.id || "TWD",
+                      flag: selectedFrom.flag || taiwan,
+                      currency: selectedFrom.currency || "TWD (台幣)",
+                    })
+                    setSelectedTo({
+                      id: selectedTo.id || "USD",
+                      flag: selectedTo.flag || usa,
+                      currency: selectedTo.currency || "USD (美金)",
+                    })
+                    setCurrentRate(0)
+                    setConvertResult(0)
                     setShowWeather((prev) => !prev)
-                  } else if (
-                    (e.target as Element).id === "weatherIcon" &&
-                    showWeather
-                  ) {
+                  } else if ((e.target as Element).id === "weatherIcon") {
                     setShowWeather((prev) => !prev)
                   }
                 }}
@@ -185,17 +210,20 @@ function ToolsRobot() {
                     showExchange
                   ) {
                     setShowExchange((prev) => !prev)
+                    setConvertResult(0)
                   }
                 }}
               />
 
-              <TAIcon id="tripAdviIcon" />
+              <QaIcon id="questions" />
             </>
           )}
         </DragWrapper>
       </ToolsWrapper>
       {showExchange && (
         <CurrencyWidget
+          showExchange={showExchange}
+          setShowExchange={setShowExchange}
           showFrom={showFrom}
           setShowFrom={setShowFrom}
           showTo={showTo}

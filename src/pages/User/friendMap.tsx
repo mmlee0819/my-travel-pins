@@ -1,12 +1,6 @@
 import React from "react"
 import { useParams } from "react-router-dom"
-import {
-  useState,
-  useContext,
-  useEffect,
-  Dispatch,
-  SetStateAction,
-} from "react"
+import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent } from "leaflet"
 import {
@@ -31,9 +25,9 @@ import {
   where,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData, PinContent } from "./ts_fn_commonUse"
+import { DefinedDocumentData, PinContent } from "./functions/pins"
 import pins from "../assets/markers/pins.png"
-import DetailMemory from "../Components/detailMemory"
+import DetailMemory from "../Components/pinContent/detailMemory"
 
 const PhotoText = styled.div`
   display: flex;
@@ -243,36 +237,34 @@ function FriendsMap() {
               </Marker>
               {markers?.map((marker: any) => {
                 return (
-                  <>
-                    <Marker
-                      key={marker.location.placeId}
-                      position={[marker.location.lat, marker.location.lng]}
-                      icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
-                      eventHandlers={{
-                        click() {
-                          setSelectedMarker(marker)
-                        },
-                      }}
+                  <Marker
+                    key={marker.location.placeId}
+                    position={[marker.location.lat, marker.location.lng]}
+                    icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
+                    eventHandlers={{
+                      click() {
+                        setSelectedMarker(marker)
+                      },
+                    }}
+                  >
+                    <Popup
+                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      keepInView
                     >
-                      <Popup
-                        offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                        keepInView
+                      <PinInfoArea
+                        onClick={() => {
+                          setShowMemory(true)
+                        }}
                       >
-                        <PinInfoArea
-                          onClick={() => {
-                            setShowMemory(true)
-                          }}
-                        >
-                          {marker.albumURLs ? (
-                            <PinInfoImg src={marker?.albumURLs[0]} />
-                          ) : (
-                            <PhotoText>No photo uploaded</PhotoText>
-                          )}
-                          <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
-                        </PinInfoArea>
-                      </Popup>
-                    </Marker>
-                  </>
+                        {marker.albumURLs ? (
+                          <PinInfoImg src={marker?.albumURLs[0]} />
+                        ) : (
+                          <PhotoText>No photo uploaded</PhotoText>
+                        )}
+                        <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
+                      </PinInfoArea>
+                    </Popup>
+                  </Marker>
                 )
               })}
             </MapContainer>

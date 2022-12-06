@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react"
+import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../Context/authContext"
-import logoutIcon from "../assets/buttons/logoutIcon.png"
 
 const HeaderContainer = styled.div`
   position: relative;
@@ -11,6 +10,7 @@ const HeaderContainer = styled.div`
   flex-flow: row nowrap;
   justify-content: space-between;
   margin: 0 auto;
+  padding-top: 5px;
   padding-left: 20px;
   max-width: 1440px;
   width: 100%;
@@ -31,42 +31,13 @@ const TabWrapper = styled.div`
   padding-right: 20px;
   max-width: 1440px;
   width: 100%;
-  height: 40px;
+  height: 30px;
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 500;
   opacity: 1;
   gap: 20px;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
-  }
-`
-
-const BtnText = styled.div`
-  display: flex;
-  margin-left: 10px;
-  color: ${(props) => props.theme.color.bgDark};
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    border-bottom: 3px solid #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-  }
-`
-const BtnLogout = styled.div`
-  display: flex;
-  width: 30px;
-  height: 30px;
-  background-image: url(${logoutIcon});
-  background-size: 100% 100%;
-  cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    width: 25px;
-    height: 25px;
   }
 `
 
@@ -81,21 +52,24 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: 3px 1px 1px #0000004c;
+    box-shadow: 1px 3px 6px #0000004c;
+    transform: box-shadow 1s;
   }
 `
 
 const Title = styled.div`
   display: flex;
   flex: 1 1 auto;
-  align-self: end;
   justify-content: start;
+  align-items: center;
   margin: 0 auto;
   width: 40%;
+  line-height: 40px;
   color: ${(props) => props.theme.color.bgDark};
+  font-size: ${(props) => props.theme.title.md};
   font-weight: 500;
   letter-spacing: 2px;
-  line-height: 40px;
+
   gap: 10px;
   z-index: 20;
 `
@@ -103,8 +77,9 @@ const Title = styled.div`
 const Tab = styled.div`
   display: flex;
   padding: 0 15px;
+  font-size: ${(props) => props.theme.title.md};
+  color: #7f7f7f;
   background-color: none;
-  color: ${(props) => props.theme.color.bgDark};
   border: 1px solid #fff;
   border: none;
   border-top-left-radius: 5px;
@@ -114,7 +89,7 @@ const Tab = styled.div`
   &:hover {
     color: ${(props) => props.theme.color.deepMain};
     background-color: ${(props) => props.theme.color.bgLight};
-    box-shadow: 3px 3px 1px #0000004c;
+    transition: background-color 0.3s;
   }
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
@@ -124,12 +99,10 @@ const Tab = styled.div`
 const CurrentTab = styled(Tab)`
   color: ${(props) => props.theme.color.bgLight};
   background-color: ${(props) => props.theme.color.lightMain};
-  box-shadow: 3px 3px 1px #0000004c;
   cursor: default;
   &:hover {
     color: ${(props) => props.theme.color.bgLight};
     background-color: ${(props) => props.theme.color.lightMain};
-    transition: background-color 0.3s;
   }
 `
 
@@ -164,15 +137,27 @@ function Header() {
   return (
     <>
       <HeaderContainer>
-        <Title>
-          <UserAvatar
-            avatarURL={avatarURL}
-            onClick={() => {
-              setIsProfile(true)
-            }}
-          />
-          {`Hello ${currentUser?.name} !`}
-        </Title>
+        {(isFriendHome || isFriendMemory) && (
+          <Title>
+            <UserAvatar
+              avatarURL={avatarURL}
+              onClick={() => {
+                setIsProfile(true)
+              }}
+            />
+          </Title>
+        )}
+        {(isMyMap || isMyMemory || isMyFriend) && (
+          <Title>
+            <UserAvatar
+              avatarURL={avatarURL}
+              onClick={() => {
+                setIsProfile(true)
+              }}
+            />
+            {`Hello ${currentUser?.name} !`}
+          </Title>
+        )}
         <TabWrapper>
           {isMyMap && (
             <>

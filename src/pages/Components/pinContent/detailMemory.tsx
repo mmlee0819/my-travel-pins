@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import parse from "html-react-parser"
-import { db, storage } from "../Utils/firebase"
+import { db, storage } from "../../Utils/firebase"
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
@@ -13,17 +13,17 @@ import {
   deleteMsg,
   PinContent,
   checkRealTimePhotos,
-} from "../User/functions/pins"
-import { AuthContext } from "../Context/authContext"
-import Editor from "../Components/editor"
-import Upload from "../User/components/uploadPhoto"
-import moreIcon from "../assets/buttons/moreIcon.png"
-import moreHoverIcon from "../assets/buttons/moreHover.png"
+} from "../../User/functions/pins"
+import { AuthContext } from "../../Context/authContext"
+import Editor from "../post/editor"
+import Upload from "../post/uploadPhoto"
 import SwiperPhotos from "./swiperPhoto"
-import whiteEditPencil from "../assets/buttons/edit.png"
-import blackEditPencil from "../assets/buttons/blackEdit.png"
-import calendar from "../assets/calendar.png"
-import location from "../assets/location.png"
+import moreIcon from "../../assets/buttons/moreIcon.png"
+import moreHoverIcon from "../../assets/buttons/moreHover.png"
+import whiteEditPencil from "../../assets/buttons/edit.png"
+import blackEditPencil from "../../assets/buttons/blackEdit.png"
+import calendar from "../../assets/calendar.png"
+import location from "../../assets/location.png"
 
 const Container = styled.div`
   position: absolute;
@@ -387,6 +387,7 @@ export default function DetailMemory(props: Props) {
   const [showUploadMore, setShowUploadMore] = useState(false)
   const [hasDiscard, setHasDiscard] = useState(false)
   const [selectedMsgId, setSelectedMsgId] = useState("")
+  const [canUpload, setCanUpload] = useState(true)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const updateTitle = async () => {
@@ -506,7 +507,7 @@ export default function DetailMemory(props: Props) {
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
-    if (!selectedMarker?.id || messages === undefined) return
+    if (!selectedMarker?.id) return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
@@ -558,7 +559,33 @@ export default function DetailMemory(props: Props) {
               {albumUrls.length > 0 ? (
                 <SwiperPhotos photos={albumUrls} />
               ) : (
-                <PhotoText>No photo uploaded</PhotoText>
+                <GoogleMap
+                  mapContainerStyle={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                  center={{
+                    lat: selectedMarker?.location.lat,
+                    lng: selectedMarker?.location.lng,
+                  }}
+                  zoom={14}
+                  options={{
+                    draggable: true,
+                    mapTypeControl: false,
+                    streetViewControl: true,
+                    scaleControl: false,
+                    fullscreenControl: true,
+                    scrollwheel: true,
+                    minZoom: 2,
+                  }}
+                >
+                  <Marker
+                    position={{
+                      lat: selectedMarker?.location.lat,
+                      lng: selectedMarker?.location.lng,
+                    }}
+                  />
+                </GoogleMap>
               )}
             </LeftWrapper>
             <MiddleSplit />
@@ -670,38 +697,41 @@ export default function DetailMemory(props: Props) {
                   </LocationText>{" "}
                 </>
               )}
+
               {isLoaded && !showEditor && (
                 <>
                   <StreetModeContainer id="street-mode-container">
                     <StreetViewService onLoad={onStreetLoad} />
                   </StreetModeContainer>
-                  <GoogleMap
-                    mapContainerStyle={{
-                      height: "40vh",
-                      width: "100%",
-                      marginTop: "20px",
-                    }}
-                    center={{
-                      lat: selectedMarker?.location.lat,
-                      lng: selectedMarker?.location.lng,
-                    }}
-                    zoom={14}
-                    options={{
-                      draggable: true,
-                      mapTypeControl: false,
-                      streetViewControl: false,
-                      scaleControl: false,
-                      fullscreenControl: true,
-                      scrollwheel: false,
-                    }}
-                  >
-                    <Marker
-                      position={{
+                  {albumUrls.length > 0 && (
+                    <GoogleMap
+                      mapContainerStyle={{
+                        height: "40vh",
+                        width: "100%",
+                        marginTop: "20px",
+                      }}
+                      center={{
                         lat: selectedMarker?.location.lat,
                         lng: selectedMarker?.location.lng,
                       }}
-                    />
-                  </GoogleMap>
+                      zoom={14}
+                      options={{
+                        draggable: true,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        scaleControl: false,
+                        fullscreenControl: true,
+                        scrollwheel: false,
+                      }}
+                    >
+                      <Marker
+                        position={{
+                          lat: selectedMarker?.location.lat,
+                          lng: selectedMarker?.location.lng,
+                        }}
+                      />
+                    </GoogleMap>
+                  )}
                 </>
               )}
               {(isMyMap || isMyMemory) && showEditor && (
@@ -776,6 +806,7 @@ export default function DetailMemory(props: Props) {
                       typeof selectedMarker.location.placeId === "string" &&
                       (showEditor || showUploadMore) && (
                         <Upload
+                          canUpload={canUpload}
                           currentPin={{
                             id: selectedMarker.id,
                             userId: selectedMarker.userId,
