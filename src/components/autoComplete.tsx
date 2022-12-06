@@ -18,15 +18,15 @@ import {
 } from "@algolia/autocomplete-core"
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
-import { db } from "./firebase"
-import { AuthContext } from "../Context/authContext"
+import { db } from "../utils/firebase"
+import { AuthContext } from "../context/authContext"
 import {
   Wrapper,
   ImgWrapper,
   UserImg,
   UserInfo,
   HomeTownText,
-} from "../Components/styles/friendStyles"
+} from "./styles/friendStyles"
 import queryFriendImg from "../assets/034961magnifying-friends.png"
 
 /* eslint-disable react/jsx-props-no-spreading */
@@ -391,7 +391,6 @@ export function Autocomplete(props: Props) {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setQueryResult(docSnap.data())
-        console.log(docSnap.data())
       }
     } catch (error) {
       console.log(error)
@@ -461,7 +460,6 @@ export function Autocomplete(props: Props) {
               <Section key={`source-${index}`} {...autocomplete.getListProps()}>
                 {items.length > 0 &&
                   items.map((item) => {
-                    console.log({ item })
                     return (
                       <ResultContentWrapper
                         key={item.objectID}

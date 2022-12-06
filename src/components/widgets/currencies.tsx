@@ -5,18 +5,14 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react"
-import { ToolContext } from "../Context/toolContext"
+import { ToolContext } from "../../context/toolContext"
 import styled from "styled-components"
-import { Input } from "../Components/styles/formStyles"
-import {
-  GridContainer,
-  GridItemWrapper,
-  Xmark,
-} from "../Components/styles/widgetStyles"
+import { Input } from "../styles/formStyles"
+import { GridContainer, GridItemWrapper, Xmark } from "../styles/widgetStyles"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { DocumentData } from "@firebase/firestore-types"
-import { db } from "../Utils/firebase"
+import { db } from "../../utils/firebase"
 import { doc, getDoc } from "firebase/firestore"
 import usa from "../assets/flags/usa.png"
 import canada from "../assets/flags/canada.png"

@@ -1,9 +1,9 @@
 import React from "react"
 import styled from "styled-components"
 import { useState, useEffect, useContext } from "react"
-import { AuthContext } from "../Context/authContext"
-import { Autocomplete } from "../Utils/autoComplete"
-import { db } from "../Utils/firebase"
+import { AuthContext } from "../../context/authContext"
+import { Autocomplete } from "../../components/autoComplete"
+import { db } from "../../utils/firebase"
 import {
   collection,
   query,
@@ -15,7 +15,7 @@ import {
   arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData } from "./functions/pins"
+import { DefinedDocumentData } from "../../utils/pins"
 import {
   Container,
   Wrapper,
@@ -23,7 +23,7 @@ import {
   UserImg,
   UserInfo,
   HomeTownText,
-} from "../Components/styles/friendStyles"
+} from "../../components/styles/friendStyles"
 
 const FixArea = styled.div`
   display: flex;

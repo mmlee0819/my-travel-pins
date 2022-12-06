@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import styled from "styled-components"
 import parse from "html-react-parser"
-import { db, storage } from "../../Utils/firebase"
+import { db, storage } from "../../utils/firebase"
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
 import { DocumentData } from "@firebase/firestore-types"
@@ -13,8 +13,8 @@ import {
   deleteMsg,
   PinContent,
   checkRealTimePhotos,
-} from "../../User/functions/pins"
-import { AuthContext } from "../../Context/authContext"
+} from "../../utils/pins"
+import { AuthContext } from "../../context/authContext"
 import Editor from "../post/editor"
 import Upload from "../post/uploadPhoto"
 import SwiperPhotos from "./swiperPhoto"
@@ -457,10 +457,7 @@ export default function DetailMemory(props: Props) {
       setUploadProgress(0)
       setShowUploadMore(true)
     } catch (error) {
-      console.log(
-        "Failed to update article content from specific memory page",
-        error
-      )
+      console.log("Failed to update photos from specific memory page", error)
     }
   }
   const updateToOrigin = async () => {
@@ -597,10 +594,6 @@ export default function DetailMemory(props: Props) {
                     <IconInList src={calendar} />
                     {travelDate}
                   </TextNoMargin>
-                </>
-              )}
-              {!showEditor && selectedMarker?.article?.content !== undefined && (
-                <>
                   <ArticleContentArea>{parse(artiContent)}</ArticleContentArea>
                   <MsgNumText>{messages?.length || 0} 則留言</MsgNumText>
                   <MsgColumnWrapper>

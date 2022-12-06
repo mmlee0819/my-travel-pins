@@ -1,10 +1,10 @@
 import React from "react"
 import { createGlobalStyle, ThemeProvider } from "styled-components"
 import { Outlet } from "react-router-dom"
-import { AuthContextProvider } from "./pages/Context/authContext"
-import { ToolContextProvider } from "./pages/Context/toolContext"
-import ToolsRobot from "./pages/Widgets/tools"
-import Header from "./pages/Components/header"
+import { AuthContextProvider } from "./context/authContext"
+import { ToolContextProvider } from "./context/toolContext"
+import ToolsRobot from "./components/widgets/tools"
+import Header from "./components/header"
 import bg from "../src/pages/assets/bg.jpg"
 
 const GlobalStyle = createGlobalStyle`

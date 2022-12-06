@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react"
-import { db } from "../../Utils/firebase"
+import { db } from "./firebase"
 import {
   doc,
   getDoc,
@@ -13,7 +13,7 @@ import {
   arrayRemove,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { UserInfoType } from "../../Context/authContext"
+import { UserInfoType } from "../context/authContext"
 
 export interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]

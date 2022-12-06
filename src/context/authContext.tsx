@@ -10,8 +10,8 @@ import {
 
 import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import { auth, db, storage } from "../Utils/firebase"
-import { myGoogleApiKey } from "../Utils/gmap"
+import { auth, db, storage } from "../utils/firebase"
+// import { myGoogleApiKey } from "../utils/gmap"
 
 declare module "*.png"
 
@@ -64,41 +64,35 @@ export const AuthContext = createContext<AuthContextType>({
     hometownLng: 121.5484174,
     friends: [],
   },
-  setCurrentUser: (currentUser: UserInfoType | DocumentData | undefined) =>
-    Response,
+  setCurrentUser: () => Response,
   isLogin: false,
-  setIsLogin: (isLogin: boolean) => Boolean,
-  signUp: (
-    name: string,
-    email: string,
-    password: string,
-    searchResult: google.maps.places.PlaceResult[]
-  ) => Response,
-  signIn: (email: string, password: string) => Response,
+  setIsLogin: () => Boolean,
+  signUp: () => Response,
+  signIn: () => Response,
   logOut: () => Response,
-  navigate: (path: string) => Response,
+  navigate: () => Response,
   isLoaded: true,
   mapZoom: "lg",
-  setMapZoom: (mapZoom: string) => Response,
+  setMapZoom: () => Response,
   isMyMap: false,
-  setIsMyMap: (isMyMap: boolean) => Response,
+  setIsMyMap: () => Response,
   isMyMemory: false,
-  setIsMyMemory: (isMyMemory: boolean) => Response,
+  setIsMyMemory: () => Response,
   isMyFriend: false,
-  setIsMyFriend: (isMyFriend: boolean) => Response,
+  setIsMyFriend: () => Response,
   isFriendHome: false,
-  setIsFriendHome: (isFriendHome: boolean) => Response,
+  setIsFriendHome: () => Response,
   isFriendMemory: false,
-  setIsFriendMemory: (isFriendMemory: boolean) => Response,
+  setIsFriendMemory: () => Response,
   currentFriendInfo: {
     name: "",
     id: "",
   },
-  setCurrentFriendInfo: (currentFriendInfo: CurrentFriendInfoType) => Response,
+  setCurrentFriendInfo: () => Response,
   isProfile: false,
-  setIsProfile: (isProfile: boolean) => Response,
+  setIsProfile: () => Response,
   avatarURL: "",
-  setAvatarURL: (avatarURL: string) => Response,
+  setAvatarURL: () => Response,
 })
 
 interface Props {
@@ -125,6 +119,7 @@ export interface DocumentData {
 }
 
 const libraries: LoadScriptProps["libraries"] = ["places"]
+const myGoogleApiKey = process.env.REACT_APP_google_API_KEY
 
 export function AuthContextProvider({ children }: Props) {
   const [isLoading, setIsLoading] = useState(false)
@@ -144,10 +139,9 @@ export function AuthContextProvider({ children }: Props) {
   >()
   const [avatarURL, setAvatarURL] = useState<string>("")
   const [mapZoom, setMapZoom] = useState<string>("lg")
-  console.log("mapZoom", mapZoom)
   const navigate = useNavigate()
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: myGoogleApiKey!,
+    googleMapsApiKey: myGoogleApiKey,
     libraries,
   })
 
@@ -169,21 +163,16 @@ export function AuthContextProvider({ children }: Props) {
         (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
         (window.innerWidth > window.innerHeight && window.innerHeight < 600)
       ) {
-        // console.log("條件1的window.innerWidth", window.innerWidth)
-        // console.log("條件1的window.innerHeight", window.innerHeight)
         setMapZoom("md")
       } else if (
         window.innerWidth > window.innerHeight &&
         window.innerWidth > 900 &&
         window.innerHeight > 600
       ) {
-        // console.log("條件2的window.innerWidth", window.innerWidth)
-        // console.log("條件2的window.innerHeight", window.innerHeight)
         setMapZoom("lg")
       }
     }
-    // console.log("初始window.innerWidth", window.innerWidth)
-    // console.log("初始window.innerHeight", window.innerHeight)
+
     onZoomChange()
     window.addEventListener("resize", handleResize)
     return () => {

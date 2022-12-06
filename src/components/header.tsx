@@ -2,7 +2,7 @@ import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
-import { AuthContext } from "../Context/authContext"
+import { AuthContext } from "../context/authContext"
 
 const HeaderContainer = styled.div`
   position: relative;

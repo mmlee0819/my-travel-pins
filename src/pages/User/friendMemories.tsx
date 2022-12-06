@@ -1,7 +1,7 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
-import { AuthContext } from "../Context/authContext"
-import { getPins, getSpecificPin } from "./functions/pins"
+import { AuthContext } from "../../context/authContext"
+import { getPins, getSpecificPin } from "../../utils/pins"
 import {
   Container,
   ContentArea,
@@ -16,7 +16,7 @@ import {
   BtnSortWrapper,
   BtnSort,
   SortIcon,
-} from "../Components/styles/memoriesStyles"
+} from "../../components/styles/memoriesStyles"
 import { DocumentData } from "@firebase/firestore-types"
 import {
   MessagesType,
@@ -24,8 +24,8 @@ import {
   checkRealTimePinMessages,
   PinContent,
   checkRealTimePinsInfo,
-} from "./functions/pins"
-import DetailMemory from "../Components/pinContent/detailMemory"
+} from "../../utils/pins"
+import DetailMemory from "../../components/pinContent/detailMemory"
 import calendar from "../assets/calendar.png"
 import location from "../assets/location.png"
 import whiteArrow from "../assets/buttons/down-arrow-white.png"
@@ -77,7 +77,6 @@ function FriendMemories() {
         msgRef.current !== undefined &&
         msgRef.current !== null
       ) {
-        console.log("Enter key was pressed. Run your function.")
         addMsg(currentUser?.id, memory?.id, msgRef?.current?.value)
         msgRef.current.value = ""
       } else return

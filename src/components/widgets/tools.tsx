@@ -9,7 +9,7 @@ import questionMark from "../assets/question-mark.png"
 import weather from "../assets/whiteWeather.png"
 import CurrencyWidget, { getRatesData } from "./currencies"
 import WeatherWidget from "./weather"
-import { ToolContext } from "../Context/toolContext"
+import { ToolContext } from "../../context/toolContext"
 import usa from "../assets/flags/usa.png"
 import taiwan from "../assets/flags/taiwan.png"
 

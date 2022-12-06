@@ -12,10 +12,10 @@ import {
   ZoomControl,
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
-import { countries } from "../Utils/customGeo"
+import { countries } from "../../utils/customGeo"
 import homeMarker from "../assets/markers/home1.png"
-import { AuthContext } from "../Context/authContext"
-import { db } from "../Utils/firebase"
+import { AuthContext } from "../../context/authContext"
+import { db } from "../../utils/firebase"
 import {
   doc,
   getDoc,
@@ -25,9 +25,9 @@ import {
   where,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData, PinContent } from "./functions/pins"
+import { DefinedDocumentData, PinContent } from "../../utils/pins"
 import pins from "../assets/markers/pins.png"
-import DetailMemory from "../Components/pinContent/detailMemory"
+import DetailMemory from "../../components/pinContent/detailMemory"
 
 const PhotoText = styled.div`
   display: flex;
@@ -147,8 +147,6 @@ function FriendsMap() {
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
   const { friendName, friendId } = useParams()
-  console.log({ friendName, friendId })
-  console.log("markers", markers)
 
   useEffect(() => {
     const getFriendInfo = async () => {

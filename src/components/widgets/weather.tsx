@@ -17,14 +17,14 @@ import {
   Filler,
 } from "chart.js"
 import { Line } from "react-chartjs-2"
-import { AuthContext } from "../Context/authContext"
-import { Input } from "../Components/styles/formStyles"
+import { AuthContext } from "../../context/authContext"
+import { Input } from "../styles/formStyles"
 import {
   GridContainer,
   GridItemWrapper,
   Xmark,
   FormTitle,
-} from "../Components/styles/widgetStyles"
+} from "../styles/widgetStyles"
 import spinner from "../assets/dotsSpinner.svg"
 
 const PlaceInput = styled(Input)`
