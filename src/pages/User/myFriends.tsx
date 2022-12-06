@@ -140,9 +140,6 @@ export default function MyFriends() {
     DocumentData | DefinedDocumentData
   >([])
   const [invitingIds, setInvitingIds] = useState<string[]>([])
-  const [invitingList, setInvitingList] = useState<
-    DocumentData | DefinedDocumentData
-  >([])
   const [beInvitedIds, setBeInvitedIds] = useState<string[]>([])
   const [beInvitedList, setBeInvitedList] = useState<
     DocumentData | DefinedDocumentData
@@ -222,27 +219,6 @@ export default function MyFriends() {
     }
     getFriendsList()
   }, [myFriends])
-
-  useEffect(() => {
-    const getInvitingList = async () => {
-      if (invitingIds.length === 0) {
-        setInvitingList([])
-        return
-      }
-      try {
-        const newInvitings: DocumentData = []
-        const q = query(usersRef, where("id", "in", invitingIds))
-        const querySnapshot = await getDocs(q)
-        querySnapshot.forEach((doc) => {
-          newInvitings.push(doc.data())
-        })
-        setInvitingList(newInvitings)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getInvitingList()
-  }, [invitingIds])
 
   useEffect(() => {
     const getInvitedList = async () => {

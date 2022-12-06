@@ -223,10 +223,13 @@ const ResultsSection = styled.div`
   position: absolute;
   top: 85px;
   left: 0px;
-  width: calc(100% - 100px);
-  margin-left: 50px;
   display: flex;
   flex-flow: column wrap;
+  justify-content: center;
+  margin-left: 50px;
+  min-height: 60px;
+  width: calc(100% - 100px);
+
   padding: 5px 15px;
   color: #2d2d2d;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
@@ -548,11 +551,6 @@ export function Autocomplete(props: Props) {
                             ...autocompleteState,
                             isOpen: false,
                           })
-                          if (
-                            qInputRef?.current?.value &&
-                            qInputRef?.current?.value.length !== 0
-                          )
-                            qInputRef.current.value = ""
                         }}
                       >
                         <ResultContent
@@ -572,7 +570,7 @@ export function Autocomplete(props: Props) {
       )}
       {!autocompleteState.isOpen &&
         qInputRef?.current?.value !== "" &&
-        !queryResult && (
+        autocompleteState?.collections[0]?.items?.length === 0 && (
           <ResultsSection>
             <NoMatchText>No matches found</NoMatchText>
           </ResultsSection>
