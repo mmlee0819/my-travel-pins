@@ -53,8 +53,7 @@ export const UserInfo = styled.div`
   display: flex;
   flex-flow: column wrap;
   align-self: center;
-  margin: 20px;
-  margin-left: 0;
+  margin: 20px auto 20px 0;
   font-size: ${(props) => props.theme.title.md};
   border: none;
   @media screen and (max-width: 900px) and (min-width: 600px),

@@ -90,9 +90,7 @@ const ContentTitle = styled.div`
 const BtnWrapper = styled.div`
   display: flex;
   flex-flow: column nowrap;
-  min-width: 100px;
-  margin: 0 0 0 auto;
-
+  min-width: 80px;
   justify-content: space-between;
   align-self: center;
   font-size: 16px;
@@ -107,7 +105,7 @@ const BtnAccept = styled.div`
   border-radius: 5px;
   cursor: pointer;
   &:hover {
-    box-shadow: 3px 3px #8c8c8c;
+    box-shadow: rgb(120 120 120) 0px 0px 3px;
   }
 `
 const BtnDeny = styled(BtnAccept)`
@@ -360,29 +358,6 @@ export default function MyFriends() {
 
       {showFriendReq && (
         <ContentArea>
-          {/* {showFriendReq &&
-            invitingList.length !== 0 &&
-            invitingList.map((inviting: DocumentData) => {
-              return (
-                <Wrapper key={inviting.id}>
-                  <ImgWrapper>
-                    <UserImg src={inviting.photoURL} />
-                  </ImgWrapper>
-                  <UserInfo>
-                    <NameText>{inviting.name}</NameText>
-                    <HomeTownText>{inviting.hometownName}</HomeTownText>
-                  </UserInfo>
-                  <BtnWrapper>
-                    <StatusText>
-                      Awaiting
-                      <br />
-                      reply
-                    </StatusText>
-                  </BtnWrapper>
-                </Wrapper>
-              )
-            })} */}
-
           {showFriendReq &&
             beInvitedList.length !== 0 &&
             beInvitedList.map((invited: DocumentData) => {
@@ -394,6 +369,7 @@ export default function MyFriends() {
                   <UserInfo>
                     <NameText>{invited.name}</NameText>
                     <HomeTownText>{invited.hometownName}</HomeTownText>
+                    <HomeTownText>{invited.email}</HomeTownText>
                   </UserInfo>
                   <BtnWrapper>
                     <BtnAccept
@@ -447,6 +423,7 @@ export default function MyFriends() {
                   <UserInfo>
                     <NameText>{friend.name}</NameText>
                     <HomeTownText>{friend.hometownName}</HomeTownText>
+                    <HomeTownText>{friend.email}</HomeTownText>
                   </UserInfo>
                 </Wrapper>
               )
