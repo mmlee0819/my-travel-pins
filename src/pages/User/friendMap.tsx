@@ -57,8 +57,19 @@ export const PinInfoArea = styled.div`
   cursor: pointer;
 `
 export const PinInfoImg = styled.img`
-  width: 150px;
+  width: 120px;
   height: 120px;
+`
+const UserInfoArea = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  background-color: #ffffff;
+  gap: 5px;
+`
+const AvatarImg = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
 `
 export const PinInfoTitle = styled.div`
   text-align: center;
@@ -148,28 +159,15 @@ function FriendsMap() {
   const [showMemory, setShowMemory] = useState(false)
   const [refReady, setRefReady] = useState(false)
   const { friendName, friendId } = useParams()
-  // const popupRef = useRef<React.RefObject<L.Popup>>(null)
-  // const popupRef = useRefReact.Ref<L.Popup>(null)
-  const popupRef = useRef<any>()
-  console.log({ friendInfo })
-  useEffect(() => {
-    if (!friendInfo) return
-    if (
-      refReady &&
-      friendInfo?.hometownLat &&
-      friendInfo?.hometownLng &&
-      popupRef !== undefined
-    ) {
-      popupRef.current.openPopup()
-    }
-  }, [friendInfo?.id])
+  const markerRef = useRef<L.Marker | null>(null)
 
-  // useEffect(() => {
-  //   if (!friendInfo || popupRef.current === null) return
-  //   if (friendInfo?.hometownLat && friendInfo?.hometownLng && popupRef) {
-  //     popupRef.current.openPopup()
-  //   }
-  // }, [friendInfo?.id, popupRef])
+  useEffect(() => {
+    if (!friendInfo || !markerRef.current) return
+    if (markerRef.current instanceof L.Marker) {
+      markerRef.current.openPopup()
+    }
+  }, [friendInfo, refReady, markerRef.current])
+
   useEffect(() => {
     const getFriendInfo = async () => {
       if (typeof friendId !== "string") return
@@ -177,7 +175,6 @@ function FriendsMap() {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setFriendInfo(docSnap.data())
-        setRefReady(true)
       } else {
         console.log("No such document!")
       }
@@ -208,7 +205,8 @@ function FriendsMap() {
       <Container>
         {isLoaded &&
           typeof friendInfo?.hometownLat === "number" &&
-          typeof friendInfo?.hometownLng === "number" && (
+          typeof friendInfo?.hometownLng === "number" &&
+          typeof friendInfo?.photoURL === "string" && (
             <MapContainer
               id={`${friendName}-map`}
               center={
@@ -249,28 +247,29 @@ function FriendsMap() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
+
               <Marker
+                ref={(ref) => {
+                  setRefReady(true)
+                  markerRef.current = ref
+                }}
                 position={[friendInfo?.hometownLat, friendInfo?.hometownLng]}
               >
-                {refReady && popupRef !== undefined && (
-                  <Popup
-                    ref={popupRef}
-                    offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
-                    keepInView
-                  >
-                    <PinInfoArea
-                      onClick={() => {
-                        setShowMemory(true)
-                      }}
-                    >
-                      <PhotoText>No photo uploaded</PhotoText>
-                    </PinInfoArea>
-                  </Popup>
-                )}
+                <Popup offset={[0, -5]} keepInView>
+                  <UserInfoArea>
+                    <AvatarImg
+                      src={friendInfo?.photoURL}
+                      alt={`${friendInfo.name} avatar`}
+                    />
+                    {friendInfo.name}
+                  </UserInfoArea>
+                </Popup>
+
                 <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
                   Hometown {friendInfo?.hometownName}
                 </Tooltip>
               </Marker>
+
               {markers?.map((marker: any) => {
                 return (
                   <Marker
