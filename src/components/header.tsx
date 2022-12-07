@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../context/authContext"
+import backHome from "../assets/backTohome.png"
+import backFriend from "../assets/backToFriend.png"
 
 const HeaderContainer = styled.div`
   position: relative;
@@ -55,6 +57,25 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
     box-shadow: 1px 3px 6px #0000004c;
     transform: box-shadow 1s;
   }
+`
+
+const BackHomeIcon = styled.div`
+  display: flex;
+  align-self: center;
+  width: 40px;
+  height: 40px;
+  background-image: url(${backHome});
+  background-size: 100% 100%;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  cursor: pointer;
+  &:hover {
+    box-shadow: 1px 3px 6px #0000004c;
+    transform: box-shadow 1s;
+  }
+`
+const BackToFriend = styled(BackHomeIcon)`
+  background-image: url(${backFriend});
 `
 
 const Title = styled.div`
@@ -143,6 +164,28 @@ function Header() {
               avatarURL={avatarURL}
               onClick={() => {
                 setIsProfile(true)
+              }}
+            />
+            <BackHomeIcon
+              to={`/${currentUser.name}`}
+              as={Link}
+              onClick={() => {
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyMap(true)
+              }}
+            />
+            <BackToFriend
+              to={`/${currentUser.name}/my-friends`}
+              as={Link}
+              onClick={() => {
+                setIsMyMap(false)
+                setIsMyMemory(false)
+                setIsFriendHome(false)
+                setIsFriendMemory(false)
+                setIsMyFriend(true)
               }}
             />
           </Title>
@@ -254,7 +297,7 @@ function Header() {
           )}
           {isFriendHome && (
             <>
-              <Tab
+              {/* <Tab
                 to={`/${currentUser.name}`}
                 as={Link}
                 onClick={() => {
@@ -266,7 +309,7 @@ function Header() {
                 }}
               >
                 My Map
-              </Tab>
+              </Tab> */}
               <CurrentTab>{`${currentFriendInfo?.name}'s Map`}</CurrentTab>
               <Tab
                 to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}/memories`}
@@ -285,19 +328,6 @@ function Header() {
           )}
           {isFriendMemory && (
             <>
-              <Tab
-                to={`/${currentUser.name}`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMemory(false)
-                  setIsMyFriend(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyMap(true)
-                }}
-              >
-                My Map
-              </Tab>
               <Tab
                 to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}`}
                 as={Link}
