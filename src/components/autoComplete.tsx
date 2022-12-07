@@ -149,7 +149,7 @@ const InputWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   align-self: start;
-  width: 300px;
+  width: 360px;
   height: 40px;
   line-height: 40px;
   margin: 15px 0px;
@@ -222,14 +222,12 @@ const BtnQueryIcon = styled.button`
 const ResultsSection = styled.div`
   position: absolute;
   top: 85px;
-  left: 0px;
+  right: 50px;
   display: flex;
   flex-flow: column wrap;
   justify-content: center;
-  margin-left: 50px;
   min-height: 60px;
-  width: calc(100% - 100px);
-
+  min-width: 360px;
   padding: 5px 15px;
   color: #2d2d2d;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
@@ -261,7 +259,7 @@ const ResultContentWrapper = styled.div`
   }
 `
 const Avatar = styled.img`
-  margin: 0 10px 0 10px;
+  margin-right: 10px;
   width: 30px;
   height: 30px;
   border-radius: 50%;
