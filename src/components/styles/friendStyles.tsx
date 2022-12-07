@@ -22,7 +22,6 @@ export const Wrapper = styled.div`
   background-color: #ffffffc2;
   border-radius: 5px;
   box-shadow: rgb(83, 132, 169, 0.2) 0px 0px 3px;
-  cursor: pointer;
   &:hover {
     box-shadow: rgb(83, 132, 169, 0.5) 0px 0px 8px;
   }
@@ -38,7 +37,6 @@ export const ImgWrapper = styled.div`
   object-fit: cover;
   border: none;
   border-radius: 50%;
-  cursor: pointer;
 `
 export const UserImg = styled.img`
   display: block;

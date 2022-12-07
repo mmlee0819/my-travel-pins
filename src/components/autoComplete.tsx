@@ -228,7 +228,7 @@ const ResultsSection = styled.div`
   justify-content: center;
   min-height: 60px;
   min-width: 360px;
-  padding: 5px 15px;
+  padding: 5px;
   color: #2d2d2d;
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
@@ -246,7 +246,7 @@ const ResultContentWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-right: 5px;
+  padding: 0 10px;
   font-size: ${(props) => props.theme.title.lg};
   &:hover {
     color: #e6e6e6;

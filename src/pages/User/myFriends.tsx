@@ -25,6 +25,40 @@ import {
   HomeTownText,
 } from "../../components/styles/friendStyles"
 
+const VisitArea = styled.div`
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  display: flex;
+  align-items: center;
+  max-width: 0px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    rgb(83, 132, 169, 0),
+    rgb(83, 132, 169)
+  );
+  transform-origin: bottom;
+  transition: max-width 0.2s ease-in;
+  cursor: pointer;
+`
+const VisitText = styled.div`
+  text-align: end;
+  margin-right: 20px;
+  width: 100px;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  line-height: 20px;
+`
+const FriendWrapper = styled(Wrapper)`
+  position: relative;
+  &:hover > ${VisitArea} {
+    max-width: 150px;
+  }
+`
+
 const FixArea = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -380,19 +414,20 @@ export default function MyFriends() {
             friends.length !== 0 &&
             friends.map((friend: DocumentData) => {
               return (
-                <Wrapper
-                  key={friend.id}
-                  id={friend.id}
-                  onClick={() => {
-                    setCurrentFriendInfo({
-                      name: friend.name,
-                      id: friend.id,
-                    })
-                    navigate(
-                      `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
-                    )
-                  }}
-                >
+                <FriendWrapper key={friend.id} id={friend.id}>
+                  <VisitArea
+                    onClick={() => {
+                      setCurrentFriendInfo({
+                        name: friend.name,
+                        id: friend.id,
+                      })
+                      navigate(
+                        `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
+                      )
+                    }}
+                  >
+                    <VisitText>Visit</VisitText>
+                  </VisitArea>
                   <ImgWrapper>
                     <UserImg src={friend.photoURL} />
                   </ImgWrapper>
@@ -401,7 +436,7 @@ export default function MyFriends() {
                     <HomeTownText>{friend.hometownName}</HomeTownText>
                     <HomeTownText>{friend.email}</HomeTownText>
                   </UserInfo>
-                </Wrapper>
+                </FriendWrapper>
               )
             })}
         </ContentArea>
