@@ -20,6 +20,19 @@ export const GridContainer = styled(ResponsiveGridLayout)<{
     border-right: 2px solid #034961;
     border-bottom: 2px solid #034961;
   }
+  .react-grid-item.react-grid-placeholder {
+    background: #03496190;
+    border-radius: 5px;
+    border: none;
+    opacity: 0.6;
+    transition-duration: 100ms;
+    z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
 `
 export const GridItemWrapper = styled.div`
   display: flex;
