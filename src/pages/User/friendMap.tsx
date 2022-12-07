@@ -128,13 +128,13 @@ const DefaultIcon = L.icon({
 })
 
 const lgNewPinIcon = L.icon({
-  iconSize: [40, 40],
-  iconAnchor: [40, 40],
+  iconSize: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 const mdNewPinIcon = L.icon({
   iconSize: [30, 30],
-  iconAnchor: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 
@@ -282,7 +282,7 @@ function FriendsMap() {
                     }}
                   >
                     <Popup
-                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      offset={mapZoom === "lg" ? [0, -20] : [0, -20]}
                       keepInView
                     >
                       <PinInfoArea
