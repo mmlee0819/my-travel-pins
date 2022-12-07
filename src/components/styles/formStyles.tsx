@@ -48,11 +48,12 @@ export const BtnText = styled.div`
   justify-content: center;
   width: 100%;
   height: 40px;
+  line-height: 40px;
   margin: 30px auto;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 400;
+  font-size: ${(props) => props.theme.title.md};
+  font-weight: 700;
   color: ${(props) => props.theme.color.bgLight};
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  background-color: ${(props) => props.theme.color.lightMain};
   border-radius: 5px;
   border: none;
   gap: 5px;
@@ -64,6 +65,6 @@ export const BtnText = styled.div`
     (max-height: 600px) {
     padding: 2px 10px;
     height: 30px;
-    font-size: ${(props) => props.theme.title.md};
+    font-size: ${(props) => props.theme.title.sm};
   }
 `

@@ -239,8 +239,8 @@ const ResultContentWrapper = styled.div`
   padding: 0 10px;
   font-size: ${(props) => props.theme.title.sm};
   &:hover {
-    color: #e6e6e6;
-    background-color: ${(props) => props.theme.color.deepMain};
+    color: #ffffff;
+    background-color: ${(props) => props.theme.color.lightMain};
     border: none;
     border-radius: 5px;
   }

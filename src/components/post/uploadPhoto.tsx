@@ -21,11 +21,11 @@ const UploadPhotoWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  font-size: 20px;
+  font-size: ${(props) => props.theme.title.md};
   height: 40px;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    font-size: 18px;
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const UploadImgLabel = styled.label`
