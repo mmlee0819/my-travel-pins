@@ -47,6 +47,28 @@ const BgOverlay = styled.div`
   opacity: 0.97;
   z-index: 50;
 `
+const VisitArea = styled.div`
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-height: 0px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: linear-gradient(rgb(83, 132, 169, 0), rgb(83, 132, 169));
+  transform-origin: bottom;
+  transition: max-height 0.5s ease-in-out;
+`
+const VisitText = styled.div`
+  margin: 25px 20px 15px 20px;
+  width: 100%;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  line-height: 20px;
+  text-align: center;
+`
 const ProfileArea = styled.div<{ friendStatus: string }>`
   position: absolute;
   top: 50%;
@@ -66,10 +88,11 @@ const ProfileArea = styled.div<{ friendStatus: string }>`
   gap: 30px;
   z-index: 52;
   animation: ${appear} 0.5s ease-in-out;
-  &:hover {
-    border: none;
-    border-radius: 5px;
-    cursor: ${(props) => props.friendStatus === "alreadyFriend" && "pointer"};
+  &:hover > ${VisitArea} {
+    ${(props) =>
+      props.friendStatus === "alreadyFriend" &&
+      `max-height: 100px;
+     cursor: pointer`}
   }
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
@@ -86,30 +109,7 @@ const Xmark = styled.div`
   cursor: pointer;
   z-index: 60;
 `
-const VisitArea = styled.div`
-  width: 100%;
-  height: 0px;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  background: linear-gradient(rgba(60, 60, 60, 0), rgb(60, 60, 60));
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-`
-const VisitText = styled.div`
-  margin: 20px;
-  width: 100%;
-  color: rgb(255, 255, 255);
-  font-size: 18px;
-  line-height: 22px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow-wrap: break-word;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`
+
 const SelectedUserInfo = styled.div`
   display: flex;
   flex-flow: column wrap;
@@ -592,12 +592,15 @@ export function Autocomplete(props: Props) {
                 )
               }
             }}
-            onMouseEnter={() => setShowVisit(true)}
-            // onMouseLeave={() => {
-            //   setShowVisit(false)
-            // }}
+            // onMouseEnter={() => setShowVisit(true)}
+            // // onMouseLeave={() => {
+            // //   setShowVisit(false)
+            // // }}
           >
-            {showVisit && (
+            {/* <VisitArea friendStatus={friendStatus}>
+              <VisitText>Visit</VisitText>
+            </VisitArea> */}
+            {friendStatus === "alreadyFriend" && (
               <VisitArea>
                 <VisitText>Visit</VisitText>
               </VisitArea>

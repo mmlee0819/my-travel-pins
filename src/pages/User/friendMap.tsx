@@ -1,8 +1,8 @@
 import React from "react"
 import { useParams } from "react-router-dom"
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect, useRef } from "react"
 import styled from "styled-components"
-import L, { LatLng, LeafletEvent } from "leaflet"
+import L, { LeafletEvent } from "leaflet"
 import {
   MapContainer,
   Tooltip,
@@ -146,8 +146,30 @@ function FriendsMap() {
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
+  const [refReady, setRefReady] = useState(false)
   const { friendName, friendId } = useParams()
+  // const popupRef = useRef<React.RefObject<L.Popup>>(null)
+  // const popupRef = useRefReact.Ref<L.Popup>(null)
+  const popupRef = useRef<any>()
+  console.log({ friendInfo })
+  useEffect(() => {
+    if (!friendInfo) return
+    if (
+      refReady &&
+      friendInfo?.hometownLat &&
+      friendInfo?.hometownLng &&
+      popupRef !== undefined
+    ) {
+      popupRef.current.openPopup()
+    }
+  }, [friendInfo?.id])
 
+  // useEffect(() => {
+  //   if (!friendInfo || popupRef.current === null) return
+  //   if (friendInfo?.hometownLat && friendInfo?.hometownLng && popupRef) {
+  //     popupRef.current.openPopup()
+  //   }
+  // }, [friendInfo?.id, popupRef])
   useEffect(() => {
     const getFriendInfo = async () => {
       if (typeof friendId !== "string") return
@@ -155,6 +177,7 @@ function FriendsMap() {
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         setFriendInfo(docSnap.data())
+        setRefReady(true)
       } else {
         console.log("No such document!")
       }
@@ -229,6 +252,21 @@ function FriendsMap() {
               <Marker
                 position={[friendInfo?.hometownLat, friendInfo?.hometownLng]}
               >
+                {refReady && popupRef !== undefined && (
+                  <Popup
+                    ref={popupRef}
+                    offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                    keepInView
+                  >
+                    <PinInfoArea
+                      onClick={() => {
+                        setShowMemory(true)
+                      }}
+                    >
+                      <PhotoText>No photo uploaded</PhotoText>
+                    </PinInfoArea>
+                  </Popup>
+                )}
                 <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
                   Hometown {friendInfo?.hometownName}
                 </Tooltip>

@@ -112,7 +112,7 @@ const LinkText = styled(TextNoMargin)`
     padding: 2px 10px;
   }
 `
-const XmarkTop = styled.div`
+const Xmark = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
@@ -123,8 +123,8 @@ const XmarkTop = styled.div`
   cursor: pointer;
   @media screen and (max-width: 799px), (max-height: 600px) {
     top: 30px;
-    width: 25px;
-    height: 25px;
+    width: 15px;
+    height: 15px;
   }
 `
 const StreetModeContainer = styled.div`
@@ -210,7 +210,7 @@ export function TipsContent({
   return (
     <Container>
       <ContentArea>
-        <XmarkTop
+        <Xmark
           onClick={() => {
             setShowTips(false)
           }}
@@ -271,7 +271,7 @@ export function SampleMemory({
   return (
     <Container>
       <ContentArea>
-        <XmarkTop
+        <Xmark
           onClick={() => {
             setShowSamplePost(false)
             setHasRead(true)

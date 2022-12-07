@@ -105,7 +105,7 @@ const BtnAccept = styled.div`
   border-radius: 5px;
   cursor: pointer;
   &:hover {
-    box-shadow: rgb(120 120 120) 0px 0px 3px;
+    box-shadow: rgb(83, 132, 169, 0.8) 0px 0px 3px;
   }
 `
 const BtnDeny = styled(BtnAccept)`

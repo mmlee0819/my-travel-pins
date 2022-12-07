@@ -21,10 +21,10 @@ export const Wrapper = styled.div`
   min-width: 200px;
   background-color: #ffffffc2;
   border-radius: 5px;
-  box-shadow: rgb(120 120 120) 0px 0px 5px;
+  box-shadow: rgb(83, 132, 169, 0.2) 0px 0px 3px;
   cursor: pointer;
   &:hover {
-    box-shadow: rgb(120 120 120) 0px 0px 15px;
+    box-shadow: rgb(83, 132, 169, 0.5) 0px 0px 8px;
   }
 `
 
