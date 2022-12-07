@@ -34,10 +34,11 @@ const VisitArea = styled.div`
   max-width: 0px;
   height: 120px;
   overflow: hidden;
-  border-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   background: linear-gradient(
     to right,
-    rgb(83, 132, 169, 0),
+    rgb(83, 132, 169, 0.3),
     rgb(83, 132, 169)
   );
   transform-origin: bottom;
@@ -46,8 +47,8 @@ const VisitArea = styled.div`
 `
 const VisitText = styled.div`
   text-align: end;
-  margin-right: 20px;
-  width: 100px;
+  margin-right: 15px;
+  width: 85px;
   color: rgb(255, 255, 255);
   font-size: 18px;
   line-height: 20px;

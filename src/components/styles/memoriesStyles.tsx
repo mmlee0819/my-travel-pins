@@ -8,7 +8,7 @@ export const Container = styled.div`
   color: #2d2d2d;
   height: calc(100vh - 120px);
   background-color: rgb(255, 255, 255, 0.4);
-  border-radius: 20px;
+  border-radius: 5px;
 `
 
 export const ContentArea = styled.div`
@@ -67,9 +67,9 @@ export const MemoryList = styled.div`
   max-width: 250px;
   min-width: 200px;
   border-radius: 5px;
-  box-shadow: rgb(120 120 120) 0px 0px 5px;
+  box-shadow: rgb(120, 120, 120) 0px 0px 3px;
   &:hover {
-    box-shadow: rgb(120 120 120) 0px 0px 15px;
+    box-shadow: rgb(120, 120, 120) 0px 0px 8px;
   }
 `
 

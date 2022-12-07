@@ -9,6 +9,19 @@ import { AuthContext } from "../context/authContext"
 import logoutIcon from "../assets/buttons/logoutIcon.png"
 import editPencil from "../assets/buttons/edit.png"
 import spinner from "../assets/dotsSpinner.svg"
+
+const BgOverlay = styled.div`
+  position: absolute;
+  top: 70px;
+  left: 60px;
+  margin: 0 auto;
+  max-width: 1440px;
+  width: calc(100% - 120px);
+  height: calc(100vh - 120px);
+  background-color: rgb(255, 255, 255, 0.4);
+  border-radius: 5px;
+  z-index: 120;
+`
 const ProfileArea = styled.div`
   position: absolute;
   top: 50%;
@@ -23,6 +36,7 @@ const ProfileArea = styled.div`
   font-weight: 700;
   color: ${(props) => props.theme.color.bgLight};
   background-color: ${(props) => props.theme.color.bgDark};
+  box-shadow: rgb(120 120 120) 0px 0px 5px;
   opacity: 0.97;
   border-radius: 5px;
   gap: 30px;
@@ -186,34 +200,36 @@ export default function Profile() {
 
   if (!isLogin || currentUser === undefined || currentUser === null) return null
   return (
-    <ProfileArea ref={overlayRef}>
-      {typeof currentUser.name === "string" && (
-        <Text>
-          {currentUser?.name}
-          <BtnEdit />
-        </Text>
-      )}
-      {hasFile && <Spinner />}
-      {!hasFile && typeof avatarURL === "string" && (
-        <UploadLabel>
-          <UserAvatar photoURL={avatarURL} />
-          <UploadInput
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              handleChange(e)
-            }}
-          />
-        </UploadLabel>
-      )}
-      <BtnText
-        onClick={() => {
-          logOut()
-        }}
-      >
-        <BtnLogout />
-        Sign out
-      </BtnText>
-    </ProfileArea>
+    <BgOverlay>
+      <ProfileArea ref={overlayRef}>
+        {typeof currentUser.name === "string" && (
+          <Text>
+            {currentUser?.name}
+            <BtnEdit />
+          </Text>
+        )}
+        {hasFile && <Spinner />}
+        {!hasFile && typeof avatarURL === "string" && (
+          <UploadLabel>
+            <UserAvatar photoURL={avatarURL} />
+            <UploadInput
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleChange(e)
+              }}
+            />
+          </UploadLabel>
+        )}
+        <BtnText
+          onClick={() => {
+            logOut()
+          }}
+        >
+          <BtnLogout />
+          Sign out
+        </BtnText>
+      </ProfileArea>
+    </BgOverlay>
   )
 }

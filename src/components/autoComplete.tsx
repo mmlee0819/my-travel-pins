@@ -26,16 +26,6 @@ import xMark from "../assets/buttons/x-mark.png"
 
 /* eslint-disable react/jsx-props-no-spreading */
 
-const appear = keyframes`
-  0% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }`
-
 const BgOverlay = styled.div`
   position: absolute;
   top: 0;
@@ -87,7 +77,6 @@ const ProfileArea = styled.div<{ friendStatus: string }>`
   border-radius: 5px;
   gap: 30px;
   z-index: 52;
-  animation: ${appear} 0.5s ease-in-out;
   &:hover > ${VisitArea} {
     ${(props) =>
       props.friendStatus === "alreadyFriend" &&
@@ -230,7 +219,8 @@ const ResultsSection = styled.div`
   min-width: 360px;
   padding: 5px;
   color: #2d2d2d;
-  background-color: ${(props) => props.theme.btnColor.bgGreen};
+  background-color: ${(props) => props.theme.color.bgLight};
+  box-shadow: rgb(120, 120, 120) 0px 0px 3px;
   border-radius: 5px;
   border-top: none;
   z-index: 20;
@@ -247,7 +237,7 @@ const ResultContentWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0 10px;
-  font-size: ${(props) => props.theme.title.lg};
+  font-size: ${(props) => props.theme.title.sm};
   &:hover {
     color: #e6e6e6;
     background-color: ${(props) => props.theme.color.deepMain};
@@ -255,7 +245,7 @@ const ResultContentWrapper = styled.div`
     border-radius: 5px;
   }
   @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
+    font-size: ${(props) => props.theme.title.sm};
   }
 `
 const Avatar = styled.img`
@@ -372,7 +362,6 @@ export function Autocomplete(props: Props) {
     useContext(AuthContext)
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [showUserProfile, setShowUserProfile] = useState(false)
-  const [showVisit, setShowVisit] = useState(false)
   const [friendStatus, setFriendStatus] = useState("")
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
@@ -576,30 +565,22 @@ export function Autocomplete(props: Props) {
 
       {queryResult && props.invitingIds !== undefined && showUserProfile && (
         <BgOverlay>
-          <ProfileArea
-            friendStatus={friendStatus}
-            onClick={(e) => {
-              if ((e.target as HTMLDivElement).id === "closeIcon") return
-              if (friendStatus === "alreadyFriend") {
-                setCurrentFriendInfo({
-                  name: queryResult.name,
-                  id: queryResult.id,
-                })
-                navigate(
-                  `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
-                )
-              }
-            }}
-            // onMouseEnter={() => setShowVisit(true)}
-            // // onMouseLeave={() => {
-            // //   setShowVisit(false)
-            // // }}
-          >
-            {/* <VisitArea friendStatus={friendStatus}>
-              <VisitText>Visit</VisitText>
-            </VisitArea> */}
+          <ProfileArea friendStatus={friendStatus}>
             {friendStatus === "alreadyFriend" && (
-              <VisitArea>
+              <VisitArea
+                onClick={(e) => {
+                  if ((e.target as HTMLDivElement).id === "closeIcon") return
+                  if (friendStatus === "alreadyFriend") {
+                    setCurrentFriendInfo({
+                      name: queryResult.name,
+                      id: queryResult.id,
+                    })
+                    navigate(
+                      `/${currentUser?.name}/my-friend/${queryResult.name}/${queryResult.id}`
+                    )
+                  }
+                }}
+              >
                 <VisitText>Visit</VisitText>
               </VisitArea>
             )}
@@ -607,7 +588,6 @@ export function Autocomplete(props: Props) {
               id="closeIcon"
               onClick={() => {
                 setShowUserProfile(false)
-                setShowVisit(false)
               }}
             />
             <ImgWrapper>

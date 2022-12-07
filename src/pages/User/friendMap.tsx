@@ -1,6 +1,5 @@
-import React from "react"
+import React, { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
-import { useState, useContext, useEffect, useRef } from "react"
 import styled from "styled-components"
 import L, { LeafletEvent } from "leaflet"
 import {
@@ -48,8 +47,8 @@ const Container = styled.div`
   max-width: 1440px;
   width: 100%;
   height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background-color: rgb(255, 255, 255, 0.4);
+  border-radius: 5px;
 `
 
 export const PinInfoArea = styled.div`

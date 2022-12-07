@@ -63,8 +63,8 @@ export const Wrapper = styled.div`
   font-family: "Poppins";
   font-size: ${(props) => props.theme.title.md};
   background-color: rgb(255, 255, 255, 0.6);
-  border-radius: 10px;
-  box-shadow: 0 8px 6px #0000004c;
+  border-radius: 5px;
+  box-shadow: rgb(83, 132, 169) 0px 0px 3px;
   gap: 15px;
   z-index: 100;
   @media screen and(max-width: 600px), (max-height: 600px) {

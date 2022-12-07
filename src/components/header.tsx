@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../context/authContext"
-import backHome from "../assets/backTohome.png"
 import backFriend from "../assets/backToFriend.png"
 
 const HeaderContainer = styled.div`
@@ -54,28 +53,25 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: 1px 3px 6px #0000004c;
+    box-shadow: rgb(83, 132, 169) 0px 0px 3px;
     transform: box-shadow 1s;
   }
 `
 
-const BackHomeIcon = styled.div`
+const BackToFriend = styled.div`
   display: flex;
   align-self: center;
   width: 40px;
   height: 40px;
-  background-image: url(${backHome});
+  background-image: url(${backFriend});
   background-size: 100% 100%;
   border-radius: 50%;
   border: 2px solid #fff;
   cursor: pointer;
   &:hover {
-    box-shadow: 1px 3px 6px #0000004c;
+    box-shadow: rgb(83, 132, 169) 0px 0px 3px;
     transform: box-shadow 1s;
   }
-`
-const BackToFriend = styled(BackHomeIcon)`
-  background-image: url(${backFriend});
 `
 
 const Title = styled.div`
@@ -164,17 +160,6 @@ function Header() {
               avatarURL={avatarURL}
               onClick={() => {
                 setIsProfile(true)
-              }}
-            />
-            <BackHomeIcon
-              to={`/${currentUser.name}`}
-              as={Link}
-              onClick={() => {
-                setIsFriendHome(false)
-                setIsFriendMemory(false)
-                setIsFriendHome(false)
-                setIsFriendMemory(false)
-                setIsMyMap(true)
               }}
             />
             <BackToFriend
