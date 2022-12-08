@@ -12,19 +12,19 @@ import { useMap, Marker, Tooltip, GeoJSON, useMapEvents } from "react-leaflet"
 import { LeafletTrackingMarker } from "react-leaflet-tracking-marker"
 import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
-import { countries } from "./Utils/customGeo"
-import { AuthContext } from "./Context/authContext"
-import PhotoWall from "./Components/photoWall"
-import { TipsContent, SampleMemory } from "./Components/sampleContent"
+import { countries } from "../utils/customGeo"
+import { AuthContext } from "../context/authContext"
+import PhotoWall from "../components/photoWall"
+import { TipsContent, SampleMemory } from "../components/sampleContent"
 import {
   Attribution,
   StyleMapContainer,
   Container,
-} from "./Components/styles/mapStyles"
-import { StepTitle, Input, BtnText } from "./Components/styles/formStyles"
-import finger from "./assets/buttons/blackFinger.png"
-import tip from "./assets/tip.png"
-import home from "./assets/markers/home1.png"
+} from "../components/styles/mapStyles"
+import { StepTitle, Input, BtnText } from "../components/styles/formStyles"
+import finger from "../assets/buttons/blackFinger.png"
+import tip from "../assets/tip.png"
+import home from "../assets/markers/home1.png"
 
 const HeaderWrapper = styled.div`
   position: relative;
@@ -230,7 +230,6 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      // Do nothing if clicking ref's element or descendent elements
       if (
         !ref.current ||
         ref.current.contains(event.target as Node) ||
@@ -265,7 +264,6 @@ function AuthArea(props: AuthProps) {
 
   const onPlacesChanged = () => {
     if (hometownBox instanceof google.maps.places.SearchBox) {
-      console.log(hometownBox.getPlaces())
       const searchResult = hometownBox.getPlaces()
       setResult(searchResult)
     } else console.log("失敗啦")
@@ -445,7 +443,6 @@ function Home() {
   const [position, setPosition] = useState<LatLng | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
-  // console.log({ position })
   const [showTips, setShowTips] = useState(false)
   const [showSamplePost, setShowSamplePost] = useState(false)
   const [hasRead, setHasRead] = useState(false)

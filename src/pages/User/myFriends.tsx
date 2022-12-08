@@ -1,9 +1,9 @@
 import React from "react"
 import styled from "styled-components"
 import { useState, useEffect, useContext } from "react"
-import { AuthContext } from "../Context/authContext"
-import { Autocomplete } from "../Utils/autoComplete"
-import { db } from "../Utils/firebase"
+import { AuthContext } from "../../context/authContext"
+import { Autocomplete } from "../../components/autoComplete"
+import { db } from "../../utils/firebase"
 import {
   collection,
   query,
@@ -15,7 +15,7 @@ import {
   arrayUnion,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData } from "./functions/pins"
+import { DefinedDocumentData } from "../../utils/pins"
 import {
   Container,
   Wrapper,
@@ -23,7 +23,43 @@ import {
   UserImg,
   UserInfo,
   HomeTownText,
-} from "../Components/styles/friendStyles"
+} from "../../components/styles/friendStyles"
+
+const VisitArea = styled.div`
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  display: flex;
+  align-items: center;
+  max-width: 0px;
+  height: 120px;
+  overflow: hidden;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  background: linear-gradient(
+    to right,
+    rgb(83, 132, 169, 0.3),
+    rgb(83, 132, 169)
+  );
+  transform-origin: bottom;
+  transition: max-width 0.2s ease-in;
+  cursor: pointer;
+`
+const VisitText = styled.div`
+  text-align: end;
+  margin-right: 15px;
+  width: 85px;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+  line-height: 20px;
+`
+const FriendWrapper = styled(Wrapper)`
+  position: relative;
+  cursor: pointer;
+  &:hover > ${VisitArea} {
+    max-width: 150px;
+  }
+`
 
 const FixArea = styled.div`
   display: flex;
@@ -89,13 +125,13 @@ const ContentTitle = styled.div`
 
 const BtnWrapper = styled.div`
   display: flex;
-  flex-flow: column nowrap;
-  min-width: 100px;
-  margin: 0 0 0 auto;
-
+  flex-flow: row nowrap;
   justify-content: space-between;
-  align-self: center;
-  font-size: 16px;
+  margin-top: 15px;
+  width: 150px;
+  /* min-width: 75px; */
+  align-self: start;
+  font-size: 14px;
   gap: 10px;
 `
 const BtnAccept = styled.div`
@@ -107,7 +143,7 @@ const BtnAccept = styled.div`
   border-radius: 5px;
   cursor: pointer;
   &:hover {
-    box-shadow: 3px 3px #8c8c8c;
+    box-shadow: rgb(83, 132, 169, 0.8) 0px 0px 3px;
   }
 `
 const BtnDeny = styled(BtnAccept)`
@@ -118,10 +154,12 @@ const NameText = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: start;
+  align-items: baseline;
   margin: 2px 10px 2px 0px;
   line-height: 30px;
   height: 30px;
   font-size: ${(props) => props.theme.title.lg};
+  gap: 15px;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
     line-height: 20px;
@@ -142,9 +180,6 @@ export default function MyFriends() {
     DocumentData | DefinedDocumentData
   >([])
   const [invitingIds, setInvitingIds] = useState<string[]>([])
-  const [invitingList, setInvitingList] = useState<
-    DocumentData | DefinedDocumentData
-  >([])
   const [beInvitedIds, setBeInvitedIds] = useState<string[]>([])
   const [beInvitedList, setBeInvitedList] = useState<
     DocumentData | DefinedDocumentData
@@ -224,27 +259,6 @@ export default function MyFriends() {
     }
     getFriendsList()
   }, [myFriends])
-
-  useEffect(() => {
-    const getInvitingList = async () => {
-      if (invitingIds.length === 0) {
-        setInvitingList([])
-        return
-      }
-      try {
-        const newInvitings: DocumentData = []
-        const q = query(usersRef, where("id", "in", invitingIds))
-        const querySnapshot = await getDocs(q)
-        querySnapshot.forEach((doc) => {
-          newInvitings.push(doc.data())
-        })
-        setInvitingList(newInvitings)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getInvitingList()
-  }, [invitingIds])
 
   useEffect(() => {
     const getInvitedList = async () => {
@@ -360,29 +374,6 @@ export default function MyFriends() {
 
       {showFriendReq && (
         <ContentArea>
-          {/* {showFriendReq &&
-            invitingList.length !== 0 &&
-            invitingList.map((inviting: DocumentData) => {
-              return (
-                <Wrapper key={inviting.id}>
-                  <ImgWrapper>
-                    <UserImg src={inviting.photoURL} />
-                  </ImgWrapper>
-                  <UserInfo>
-                    <NameText>{inviting.name}</NameText>
-                    <HomeTownText>{inviting.hometownName}</HomeTownText>
-                  </UserInfo>
-                  <BtnWrapper>
-                    <StatusText>
-                      Awaiting
-                      <br />
-                      reply
-                    </StatusText>
-                  </BtnWrapper>
-                </Wrapper>
-              )
-            })} */}
-
           {showFriendReq &&
             beInvitedList.length !== 0 &&
             beInvitedList.map((invited: DocumentData) => {
@@ -392,31 +383,35 @@ export default function MyFriends() {
                     <UserImg src={invited.photoURL} />
                   </ImgWrapper>
                   <UserInfo>
-                    <NameText>{invited.name}</NameText>
-                    <HomeTownText>{invited.hometownName}</HomeTownText>
+                    <NameText>
+                      {invited.name}
+                      <HomeTownText>{invited.hometownName}</HomeTownText>
+                    </NameText>
+
+                    <HomeTownText>{invited.email}</HomeTownText>
+                    <BtnWrapper>
+                      <BtnAccept
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          acceptFriendReq(e)
+                        }}
+                      >
+                        Accept
+                      </BtnAccept>
+                      <BtnDeny
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          denyFriendReq(e)
+                        }}
+                      >
+                        Deny
+                      </BtnDeny>
+                    </BtnWrapper>
                   </UserInfo>
-                  <BtnWrapper>
-                    <BtnAccept
-                      id={invited.id}
-                      onClick={(
-                        e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                      ) => {
-                        acceptFriendReq(e)
-                      }}
-                    >
-                      Accept
-                    </BtnAccept>
-                    <BtnDeny
-                      id={invited.id}
-                      onClick={(
-                        e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                      ) => {
-                        denyFriendReq(e)
-                      }}
-                    >
-                      Deny
-                    </BtnDeny>
-                  </BtnWrapper>
                 </Wrapper>
               )
             })}
@@ -428,7 +423,7 @@ export default function MyFriends() {
             friends.length !== 0 &&
             friends.map((friend: DocumentData) => {
               return (
-                <Wrapper
+                <FriendWrapper
                   key={friend.id}
                   id={friend.id}
                   onClick={() => {
@@ -441,14 +436,18 @@ export default function MyFriends() {
                     )
                   }}
                 >
+                  <VisitArea>
+                    <VisitText>Visit</VisitText>
+                  </VisitArea>
                   <ImgWrapper>
                     <UserImg src={friend.photoURL} />
                   </ImgWrapper>
                   <UserInfo>
                     <NameText>{friend.name}</NameText>
                     <HomeTownText>{friend.hometownName}</HomeTownText>
+                    <HomeTownText>{friend.email}</HomeTownText>
                   </UserInfo>
-                </Wrapper>
+                </FriendWrapper>
               )
             })}
         </ContentArea>

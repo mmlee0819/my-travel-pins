@@ -1,21 +1,17 @@
-import React from "react"
+import React, { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
-import { useState, useContext, useEffect } from "react"
 import styled from "styled-components"
-import L, { LatLng, LeafletEvent } from "leaflet"
 import {
-  MapContainer,
-  Tooltip,
-  Marker,
-  Popup,
-  GeoJSON,
-  ZoomControl,
-} from "react-leaflet"
+  StyleMapContainer,
+  Attribution,
+} from "../../components/styles/mapStyles"
+import L, { LeafletEvent } from "leaflet"
+import { Tooltip, Marker, Popup, GeoJSON, ZoomControl } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
-import { countries } from "../Utils/customGeo"
-import homeMarker from "../assets/markers/home1.png"
-import { AuthContext } from "../Context/authContext"
-import { db } from "../Utils/firebase"
+import { countries } from "../../utils/customGeo"
+import homeMarker from "../../assets/markers/home1.png"
+import { AuthContext } from "../../context/authContext"
+import { db } from "../../utils/firebase"
 import {
   doc,
   getDoc,
@@ -25,9 +21,9 @@ import {
   where,
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
-import { DefinedDocumentData, PinContent } from "./functions/pins"
-import pins from "../assets/markers/pins.png"
-import DetailMemory from "../Components/pinContent/detailMemory"
+import { DefinedDocumentData, PinContent } from "../../utils/pins"
+import pins from "../../assets/markers/pins.png"
+import DetailMemory from "../../components/pinContent/detailMemory"
 
 const PhotoText = styled.div`
   display: flex;
@@ -48,8 +44,8 @@ const Container = styled.div`
   max-width: 1440px;
   width: 100%;
   height: calc(100vh - 120px);
-  background-color: rgb(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background-color: rgb(255, 255, 255, 0.4);
+  border-radius: 5px;
 `
 
 export const PinInfoArea = styled.div`
@@ -57,8 +53,19 @@ export const PinInfoArea = styled.div`
   cursor: pointer;
 `
 export const PinInfoImg = styled.img`
-  width: 150px;
+  width: 120px;
   height: 120px;
+`
+const UserInfoArea = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  background-color: #ffffff;
+  gap: 5px;
+`
+const AvatarImg = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
 `
 export const PinInfoTitle = styled.div`
   text-align: center;
@@ -118,13 +125,13 @@ const DefaultIcon = L.icon({
 })
 
 const lgNewPinIcon = L.icon({
-  iconSize: [40, 40],
-  iconAnchor: [40, 40],
+  iconSize: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 const mdNewPinIcon = L.icon({
   iconSize: [30, 30],
-  iconAnchor: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 
@@ -146,9 +153,16 @@ function FriendsMap() {
   >([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
+  const [refReady, setRefReady] = useState(false)
   const { friendName, friendId } = useParams()
-  console.log({ friendName, friendId })
-  console.log("markers", markers)
+  const markerRef = useRef<L.Marker | null>(null)
+
+  useEffect(() => {
+    if (!friendInfo || !markerRef.current) return
+    if (markerRef.current instanceof L.Marker) {
+      markerRef.current.openPopup()
+    }
+  }, [friendInfo, refReady, markerRef.current])
 
   useEffect(() => {
     const getFriendInfo = async () => {
@@ -187,8 +201,9 @@ function FriendsMap() {
       <Container>
         {isLoaded &&
           typeof friendInfo?.hometownLat === "number" &&
-          typeof friendInfo?.hometownLng === "number" && (
-            <MapContainer
+          typeof friendInfo?.hometownLng === "number" &&
+          typeof friendInfo?.photoURL === "string" && (
+            <StyleMapContainer
               id={`${friendName}-map`}
               center={
                 mapZoom === "lg"
@@ -225,16 +240,31 @@ function FriendsMap() {
                   data={country}
                   style={myCustomStyle}
                   onEachFeature={onEachFeature}
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
+
               <Marker
+                ref={(ref) => {
+                  setRefReady(true)
+                  markerRef.current = ref
+                }}
                 position={[friendInfo?.hometownLat, friendInfo?.hometownLng]}
               >
+                <Popup offset={[0.9, -5]} keepInView>
+                  <UserInfoArea>
+                    <AvatarImg
+                      src={friendInfo?.photoURL}
+                      alt={`${friendInfo.name} avatar`}
+                    />
+                    {friendInfo.name}
+                  </UserInfoArea>
+                </Popup>
+
                 <Tooltip direction="bottom" offset={[0, 20]} opacity={1}>
                   Hometown {friendInfo?.hometownName}
                 </Tooltip>
               </Marker>
+
               {markers?.map((marker: any) => {
                 return (
                   <Marker
@@ -248,7 +278,7 @@ function FriendsMap() {
                     }}
                   >
                     <Popup
-                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      offset={mapZoom === "lg" ? [0, -20] : [0, -20]}
                       keepInView
                     >
                       <PinInfoArea
@@ -267,8 +297,9 @@ function FriendsMap() {
                   </Marker>
                 )
               })}
-            </MapContainer>
+            </StyleMapContainer>
           )}
+        <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
       </Container>
       {showMemory && (
         <DetailMemory

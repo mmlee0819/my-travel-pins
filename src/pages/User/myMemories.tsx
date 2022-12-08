@@ -2,16 +2,16 @@ import React from "react"
 import styled from "styled-components"
 import { useState, useContext, useEffect } from "react"
 import { doc, deleteDoc } from "firebase/firestore"
-import { db, storage } from "../Utils/firebase"
-import { AuthContext } from "../Context/authContext"
+import { db, storage } from "../../utils/firebase"
+import { AuthContext } from "../../context/authContext"
 import { ref, deleteObject } from "firebase/storage"
-import DetailMemory from "../Components/pinContent/detailMemory"
+import DetailMemory from "../../components/pinContent/detailMemory"
 import {
   getPins,
   getSpecificPin,
   PinContent,
   checkRealTimePinsInfo,
-} from "./functions/pins"
+} from "../../utils/pins"
 import {
   Container,
   ContentArea,
@@ -27,7 +27,7 @@ import {
   BtnSortWrapper,
   BtnSort,
   SortIcon,
-} from "../Components/styles/memoriesStyles"
+} from "../../components/styles/memoriesStyles"
 import {
   BgOverlay,
   ReminderArea,
@@ -35,13 +35,13 @@ import {
   BtnWrapper,
   BtnLight,
   BtnBlue,
-} from "../Components/styles/popupLayoutStyles"
-import trashBinBlack from "../assets/buttons/trashBinBlack.png"
-import calendar from "../assets/calendar.png"
-import location from "../assets/location.png"
-import spinner from "../assets/dotsSpinner.svg"
-import whiteArrow from "../assets/buttons/down-arrow-white.png"
-import deepArrow from "../assets/buttons/down-arrow-deeMain.png"
+} from "../../components/styles/modalStyles"
+import trashBinBlack from "../../assets/buttons/trashBinBlack.png"
+import calendar from "../../assets/calendar.png"
+import location from "../../assets/location.png"
+import spinner from "../../assets/dotsSpinner.svg"
+import whiteArrow from "../../assets/buttons/down-arrow-white.png"
+import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 const Spinner = styled.div`
   width: 100%;
@@ -83,10 +83,7 @@ export default function MyMemories() {
     number | undefined
   >(undefined)
 
-  console.log({ memories })
-
   const deleteMemory = async (index: number) => {
-    console.log({ memory })
     try {
       if (typeof memories[0].userId !== "string") return
       const folderName = `${memories[0].userId.slice(

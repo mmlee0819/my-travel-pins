@@ -9,6 +9,7 @@ import {
 } from "react"
 import styled from "styled-components"
 import L, { LatLng, LeafletEvent } from "leaflet"
+import { StandaloneSearchBox } from "@react-google-maps/api"
 import {
   Tooltip,
   useMap,
@@ -19,19 +20,19 @@ import {
   useMapEvents,
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
-import { countries } from "../Utils/customGeo"
+import { countries } from "../../utils/customGeo"
 import {
   Attribution,
   StyleMapContainer,
   Container,
   Wrapper,
-} from "../Components/styles/mapStyles"
+} from "../../components/styles/mapStyles"
 import {
   StepText,
   StepTitle,
   Input,
   BtnText,
-} from "../Components/styles/formStyles"
+} from "../../components/styles/formStyles"
 import {
   BgOverlay,
   ReminderArea,
@@ -39,21 +40,20 @@ import {
   BtnWrapper,
   BtnLight,
   BtnBlue,
-} from "../Components/styles/popupLayoutStyles"
-import home from "../assets/markers/home1.png"
-import { StandaloneSearchBox } from "@react-google-maps/api"
-import { AuthContext } from "../Context/authContext"
-import Upload from "../Components/post/uploadPhoto"
-import { db, storage } from "../Utils/firebase"
+} from "../../components/styles/modalStyles"
+import { AuthContext } from "../../context/authContext"
+import Upload from "../../components/post/uploadPhoto"
+import { db, storage } from "../../utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins, PinContent } from "./functions/pins"
-import Editor from "../Components/post/editor"
-import addPinIcon from "../assets/markers/addPin.png"
-import pins from "../assets/markers/pins.png"
-import DetailMemory from "../Components/pinContent/detailMemory"
-import spinner from "../assets/dotsSpinner.svg"
-import xmark from "../assets/buttons/x-mark.png"
+import { getPins, PinContent } from "../../utils/pins"
+import Editor from "../../components/post/editor"
+import addPinIcon from "../../assets/markers/addPin.png"
+import pins from "../../assets/markers/pins.png"
+import DetailMemory from "../../components/pinContent/detailMemory"
+import spinner from "../../assets/dotsSpinner.svg"
+import xmark from "../../assets/buttons/x-mark.png"
+import home from "../../assets/markers/home1.png"
 
 const PhotoText = styled.div`
   display: flex;
@@ -244,13 +244,13 @@ const DefaultIcon = L.icon({
 })
 
 const lgNewPinIcon = L.icon({
-  iconSize: [40, 40],
-  iconAnchor: [40, 40],
+  iconSize: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 const mdNewPinIcon = L.icon({
   iconSize: [30, 30],
-  iconAnchor: [30, 30],
+  iconAnchor: [12, 30],
   iconUrl: pins,
 })
 
@@ -315,7 +315,7 @@ export default function MyMap() {
     setIsFriendHome,
     setIsFriendMemory,
   } = useContext(AuthContext)
-  console.log("currentUser", currentUser)
+
   const [center, setCenter] = useState<LatLng | null>(null)
   const [location, setLocation] = useState<google.maps.LatLng | Position>()
   const [newPin, setNewPin] = useState({
@@ -358,8 +358,6 @@ export default function MyMap() {
       popupRef.current.openPopup()
     }
   }, [selectedMarker?.location.placeId])
-
-  console.log({ selectedMarker })
 
   useOnClickOutside(overlayRef, locationRef, artiTitle, artiContent, () =>
     setShowAlert(true)
@@ -721,7 +719,7 @@ export default function MyMap() {
                     }}
                   >
                     <Popup
-                      offset={mapZoom === "lg" ? [-20, -30] : [-15, -20]}
+                      offset={mapZoom === "lg" ? [0, -20] : [0, -20]}
                       keepInView={true}
                     >
                       <PinInfoArea
