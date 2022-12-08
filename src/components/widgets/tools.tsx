@@ -1,15 +1,19 @@
 import React, { useState, useContext, useEffect } from "react"
+import styled from "styled-components"
+
 import { useDrag } from "@use-gesture/react"
 import { useSpring, animated } from "@react-spring/web"
-import styled from "styled-components"
 import { DocumentData } from "@firebase/firestore-types"
+
+import TipsContent from "../sampleContent"
+import CurrencyWidget, { getRatesData } from "./currencies"
+import WeatherWidget from "./weather"
+import { ToolContext } from "../../context/toolContext"
+
 import robot from "../../assets/chatbot.png"
 import currency from "../../assets/whiteCurrencies.png"
 import questionMark from "../../assets/question-mark.png"
 import weather from "../../assets/whiteWeather.png"
-import CurrencyWidget, { getRatesData } from "./currencies"
-import WeatherWidget from "./weather"
-import { ToolContext } from "../../context/toolContext"
 import usa from "../../assets/flags/usa.png"
 import taiwan from "../../assets/flags/taiwan.png"
 
@@ -70,7 +74,7 @@ function ToolsRobot() {
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
   const [showWeather, setShowWeather] = useState(false)
-
+  const [showTips, setShowTips] = useState(false)
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -215,7 +219,14 @@ function ToolsRobot() {
                 }}
               />
 
-              <QaIcon id="questions" />
+              <QaIcon
+                id="questions"
+                onClick={() => {
+                  setShowExchange(false)
+                  setShowWeather(false)
+                  setShowTips((prev) => !prev)
+                }}
+              />
             </>
           )}
         </DragWrapper>
@@ -232,6 +243,7 @@ function ToolsRobot() {
         />
       )}
       {showWeather && <WeatherWidget showWeather={showWeather} />}
+      {showTips && <TipsContent setShowTips={setShowTips} />}
     </>
   )
 }

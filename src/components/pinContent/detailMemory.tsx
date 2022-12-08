@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
+import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
 import styled from "styled-components"
 import parse from "html-react-parser"
 import { db, storage } from "../../utils/firebase"
@@ -31,7 +32,6 @@ const Container = styled.div`
   left: 0;
   height: 100%;
   width: 100%;
-  font-family: "Poppins", "sans-serif";
   background-color: rgb(45, 45, 45, 0.8);
   border-radius: 5px;
   z-index: 120;
@@ -255,7 +255,7 @@ const BtnGreen = styled.div`
 const BtnDelete = styled(BtnGreen)<{ showDelete: boolean }>`
   top: 25px;
   display: ${(props) => (props.showDelete ? "flex" : "none")};
-  background-color: ${(props) => props.theme.btnColor.bgGray};
+  background-color: ${(props) => props.theme.color.lightMain};
 `
 
 const ArtiWrapper = styled.div`
@@ -310,8 +310,8 @@ const MsgInput = styled.input`
   border: none;
   border-radius: 5px;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: #7ccbab;
+    border: 3px solid #7ccbab;
     background-color: #e3e3e3;
   }
   ::placeholder {
@@ -362,6 +362,11 @@ function useOnClickOutside(
   }, [ref, showEditor])
 }
 
+const swiperModules = {
+  manyPhoto: [Autoplay, FreeMode, Navigation, Thumbs],
+  onePhoto: [FreeMode, Thumbs],
+}
+
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
@@ -389,6 +394,9 @@ export default function DetailMemory(props: Props) {
   const [selectedMsgId, setSelectedMsgId] = useState("")
   const [canUpload, setCanUpload] = useState(true)
   const overlayRef = useRef<HTMLDivElement>(null)
+
+  const memorySwiperModule =
+    albumUrls.length > 1 ? swiperModules.manyPhoto : swiperModules.onePhoto
 
   const updateTitle = async () => {
     if (!selectedMarker?.id) return
@@ -554,7 +562,10 @@ export default function DetailMemory(props: Props) {
 
             <LeftWrapper>
               {albumUrls.length > 0 ? (
-                <SwiperPhotos photos={albumUrls} />
+                <SwiperPhotos
+                  photos={albumUrls}
+                  swiperModule={memorySwiperModule}
+                />
               ) : (
                 <GoogleMap
                   mapContainerStyle={{

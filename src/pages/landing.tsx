@@ -15,7 +15,7 @@ import "leaflet/dist/leaflet.css"
 import { countries } from "../utils/customGeo"
 import { AuthContext } from "../context/authContext"
 import PhotoWall from "../components/photoWall"
-import { TipsContent, SampleMemory } from "../components/sampleContent"
+import TipsContent from "../components/sampleContent"
 import {
   Attribution,
   StyleMapContainer,
@@ -23,7 +23,6 @@ import {
 } from "../components/styles/mapStyles"
 import { StepTitle, Input, BtnText } from "../components/styles/formStyles"
 import finger from "../assets/buttons/blackFinger.png"
-import tip from "../assets/tip.png"
 import home from "../assets/markers/home1.png"
 
 const HeaderWrapper = styled.div`
@@ -131,32 +130,7 @@ const TabText = styled.div`
   width: 100%;
   height: 100%;
 `
-const TipText = styled.div`
-  display: flex;
-  padding: 0 15px;
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    border-bottom: 3px solid #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-  }
-`
-const TipTab = styled.div`
-  display: flex;
-  width: 30px;
-  height: 30px;
-  background-image: url(${tip});
-  background-size: contain;
-  cursor: pointer;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    width: 25px;
-    height: 25px;
-  }
-`
+
 const Wrapper = styled.div`
   position: absolute;
   top: 0;
@@ -444,8 +418,6 @@ function Home() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSignIn, setIsSignIn] = useState(false)
   const [showTips, setShowTips] = useState(false)
-  const [showSamplePost, setShowSamplePost] = useState(false)
-  const [hasRead, setHasRead] = useState(false)
 
   const [fingerRoute, setFingerRoute] = useState({
     lat: 76.28248506785224,
@@ -471,7 +443,7 @@ function Home() {
   }, [mapZoom])
 
   useEffect(() => {
-    if (showSamplePost) return
+    if (showTips) return
     setFingerRoute(routePositions[cursor])
     const interval = setInterval(() => {
       if (cursor === routePositions.length - 1) {
@@ -485,7 +457,7 @@ function Home() {
     return () => {
       clearInterval(interval)
     }
-  }, [showSamplePost, routePositions])
+  }, [showTips, routePositions])
 
   return (
     <>
@@ -495,7 +467,7 @@ function Home() {
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
-              setShowSamplePost(false)
+              setShowTips(false)
               setIsSignIn(false)
               setIsSignUp(true)
             }}
@@ -506,33 +478,17 @@ function Home() {
             isSignUp={isSignUp}
             isSignIn={isSignIn}
             onClick={() => {
-              setShowSamplePost(false)
+              setShowTips(false)
               setIsSignUp(false)
               setIsSignIn(true)
             }}
           >
             <TabText>Sign In</TabText>
           </SignInTab>
-          {/* <TipText
-            onClick={() => {
-              setShowTips((prev) => !prev)
-            }}
-          >
-            <TipTab />
-            Tips
-          </TipText> */}
         </TabWrapper>
         <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
-        {showSamplePost && (
-          <SampleMemory
-            setShowSamplePost={setShowSamplePost}
-            setHasRead={setHasRead}
-            setIsSignUp={setIsSignUp}
-            setIsSignIn={setIsSignIn}
-          />
-        )}
         <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
@@ -564,9 +520,7 @@ function Home() {
                   onEachFeature={onEachFeature}
                 />
               ))}
-              {!hasRead && !showSamplePost && (
-                <FingerMarker data={fingerRoute} />
-              )}
+              {!showTips && <FingerMarker data={fingerRoute} />}
               {(isSignUp || isSignIn) && <ChangeCenter />}
               {}
               <TargetArea position={position} setPosition={setPosition} />
@@ -574,7 +528,7 @@ function Home() {
               {!isSignUp && !isSignIn && overlayRef.current === null && (
                 <>
                   <ChangeCenterBack />
-                  <PhotoWall setShowSamplePost={setShowSamplePost} />
+                  <PhotoWall setShowTips={setShowTips} />
                 </>
               )}
               {isSignUp && (
