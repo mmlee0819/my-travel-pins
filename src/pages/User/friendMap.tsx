@@ -1,15 +1,12 @@
 import React, { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import styled from "styled-components"
-import L, { LeafletEvent } from "leaflet"
 import {
-  MapContainer,
-  Tooltip,
-  Marker,
-  Popup,
-  GeoJSON,
-  ZoomControl,
-} from "react-leaflet"
+  StyleMapContainer,
+  Attribution,
+} from "../../components/styles/mapStyles"
+import L, { LeafletEvent } from "leaflet"
+import { Tooltip, Marker, Popup, GeoJSON, ZoomControl } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
 import homeMarker from "../../assets/markers/home1.png"
@@ -206,7 +203,7 @@ function FriendsMap() {
           typeof friendInfo?.hometownLat === "number" &&
           typeof friendInfo?.hometownLng === "number" &&
           typeof friendInfo?.photoURL === "string" && (
-            <MapContainer
+            <StyleMapContainer
               id={`${friendName}-map`}
               center={
                 mapZoom === "lg"
@@ -243,7 +240,6 @@ function FriendsMap() {
                   data={country}
                   style={myCustomStyle}
                   onEachFeature={onEachFeature}
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
               ))}
 
@@ -254,7 +250,7 @@ function FriendsMap() {
                 }}
                 position={[friendInfo?.hometownLat, friendInfo?.hometownLng]}
               >
-                <Popup offset={[0, -5]} keepInView>
+                <Popup offset={[0.9, -5]} keepInView>
                   <UserInfoArea>
                     <AvatarImg
                       src={friendInfo?.photoURL}
@@ -301,8 +297,9 @@ function FriendsMap() {
                   </Marker>
                 )
               })}
-            </MapContainer>
+            </StyleMapContainer>
           )}
+        <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
       </Container>
       {showMemory && (
         <DetailMemory

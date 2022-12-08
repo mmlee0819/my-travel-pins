@@ -210,7 +210,7 @@ const BtnQueryIcon = styled.button`
 
 const ResultsSection = styled.div`
   position: absolute;
-  top: 85px;
+  top: 80px;
   right: 50px;
   display: flex;
   flex-flow: column wrap;
@@ -225,7 +225,7 @@ const ResultsSection = styled.div`
   border-top: none;
   z-index: 20;
   @media screen and (max-width: 600px), (max-height: 600px) {
-    top: 55px;
+    top: 65px;
   }
 `
 const Section = styled.section`

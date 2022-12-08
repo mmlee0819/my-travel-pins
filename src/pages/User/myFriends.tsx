@@ -55,6 +55,7 @@ const VisitText = styled.div`
 `
 const FriendWrapper = styled(Wrapper)`
   position: relative;
+  cursor: pointer;
   &:hover > ${VisitArea} {
     max-width: 150px;
   }
@@ -124,11 +125,13 @@ const ContentTitle = styled.div`
 
 const BtnWrapper = styled.div`
   display: flex;
-  flex-flow: column nowrap;
-  min-width: 80px;
+  flex-flow: row nowrap;
   justify-content: space-between;
-  align-self: center;
-  font-size: 16px;
+  margin-top: 15px;
+  width: 150px;
+  /* min-width: 75px; */
+  align-self: start;
+  font-size: 14px;
   gap: 10px;
 `
 const BtnAccept = styled.div`
@@ -151,10 +154,12 @@ const NameText = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: start;
+  align-items: baseline;
   margin: 2px 10px 2px 0px;
   line-height: 30px;
   height: 30px;
   font-size: ${(props) => props.theme.title.lg};
+  gap: 15px;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
     line-height: 20px;
@@ -378,32 +383,35 @@ export default function MyFriends() {
                     <UserImg src={invited.photoURL} />
                   </ImgWrapper>
                   <UserInfo>
-                    <NameText>{invited.name}</NameText>
-                    <HomeTownText>{invited.hometownName}</HomeTownText>
+                    <NameText>
+                      {invited.name}
+                      <HomeTownText>{invited.hometownName}</HomeTownText>
+                    </NameText>
+
                     <HomeTownText>{invited.email}</HomeTownText>
+                    <BtnWrapper>
+                      <BtnAccept
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          acceptFriendReq(e)
+                        }}
+                      >
+                        Accept
+                      </BtnAccept>
+                      <BtnDeny
+                        id={invited.id}
+                        onClick={(
+                          e: React.MouseEvent<HTMLDivElement, MouseEvent>
+                        ) => {
+                          denyFriendReq(e)
+                        }}
+                      >
+                        Deny
+                      </BtnDeny>
+                    </BtnWrapper>
                   </UserInfo>
-                  <BtnWrapper>
-                    <BtnAccept
-                      id={invited.id}
-                      onClick={(
-                        e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                      ) => {
-                        acceptFriendReq(e)
-                      }}
-                    >
-                      Accept
-                    </BtnAccept>
-                    <BtnDeny
-                      id={invited.id}
-                      onClick={(
-                        e: React.MouseEvent<HTMLDivElement, MouseEvent>
-                      ) => {
-                        denyFriendReq(e)
-                      }}
-                    >
-                      Deny
-                    </BtnDeny>
-                  </BtnWrapper>
                 </Wrapper>
               )
             })}
@@ -415,18 +423,20 @@ export default function MyFriends() {
             friends.length !== 0 &&
             friends.map((friend: DocumentData) => {
               return (
-                <FriendWrapper key={friend.id} id={friend.id}>
-                  <VisitArea
-                    onClick={() => {
-                      setCurrentFriendInfo({
-                        name: friend.name,
-                        id: friend.id,
-                      })
-                      navigate(
-                        `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
-                      )
-                    }}
-                  >
+                <FriendWrapper
+                  key={friend.id}
+                  id={friend.id}
+                  onClick={() => {
+                    setCurrentFriendInfo({
+                      name: friend.name,
+                      id: friend.id,
+                    })
+                    navigate(
+                      `/${currentUser?.name}/my-friend/${friend.name}/${friend.id}`
+                    )
+                  }}
+                >
+                  <VisitArea>
                     <VisitText>Visit</VisitText>
                   </VisitArea>
                   <ImgWrapper>

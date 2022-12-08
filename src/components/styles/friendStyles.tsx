@@ -11,6 +11,7 @@ export const Container = styled.div`
   background-color: rgb(255, 255, 255, 0.4);
   border-radius: 5px;
 `
+
 export const Wrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -49,9 +50,9 @@ export const UserImg = styled.img`
 `
 export const UserInfo = styled.div`
   display: flex;
+  flex: 1 1 auto;
   flex-flow: column wrap;
   align-self: center;
-  margin: 20px auto 20px 0;
   font-size: ${(props) => props.theme.title.md};
   border: none;
   @media screen and (max-width: 900px) and (min-width: 600px),
