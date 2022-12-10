@@ -25,6 +25,7 @@ import {
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import { Input } from "../styles/formStyles"
 import {
   GridContainer,
@@ -245,7 +246,7 @@ const myOpenweatherApiKey = process.env.REACT_APP_openweather_API_KEY
 
 function WeatherWidget(props: Props) {
   const { currentWidget, setCurrentWidget } = props
-  const { isLoaded } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const [showForecast, setShowForecast] = useState(false)
   const [location, setLocation] = useState<LocationType>({
     lat: 0,

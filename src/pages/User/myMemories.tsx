@@ -43,6 +43,7 @@ import spinner from "../../assets/dotsSpinner.svg"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
 import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 import { notifyError } from "../../components/reminder"
+import { MapContext } from "../../context/mapContext"
 
 const Spinner = styled.div`
   width: 100%;
@@ -72,7 +73,8 @@ const DeleteTargetText = styled(Title)`
 `
 
 export default function MyMemories() {
-  const { currentUser, isLoaded, isLogin } = useContext(AuthContext)
+  const { currentUser, isLogin } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()

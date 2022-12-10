@@ -1,6 +1,7 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import { getPins, getSpecificPin } from "../../utils/pins"
 import {
   Container,
@@ -32,7 +33,8 @@ import whiteArrow from "../../assets/buttons/down-arrow-white.png"
 import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 function FriendMemories() {
-  const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
+  const { isLogin, currentUser } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()
@@ -109,7 +111,7 @@ function FriendMemories() {
           Post time
           <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
         </BtnSort>
-        <BtnSort
+        {/* <BtnSort
           isCurrent={isSortByDate}
           onClick={() => {
             if (!isSortByDate) {
@@ -120,7 +122,7 @@ function FriendMemories() {
         >
           Travel date
           <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
-        </BtnSort>
+        </BtnSort> */}
       </BtnSortWrapper>
       <ContentArea>
         {isLogin && isLoaded && memories ? (

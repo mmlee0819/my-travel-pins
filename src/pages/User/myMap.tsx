@@ -43,6 +43,7 @@ import {
   BtnBlue,
 } from "../../components/styles/modalStyles"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import Upload from "../../components/post/uploadPhoto"
 import { db, storage } from "../../utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
@@ -227,7 +228,7 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
   })
 }
 function ChangeCenter() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const miniMap = useMap()
   if (mapZoom === "lg") {
     miniMap.flyTo([45, -170], 1.25)
@@ -237,7 +238,7 @@ function ChangeCenter() {
   return null
 }
 function ChangeCenterBack() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const originMap = useMap()
   if (mapZoom === "lg") {
     originMap.flyTo([45, 10], 1.75)
@@ -276,17 +277,15 @@ const getCurrentDate = () => {
 
 export default function MyMap() {
   const {
-    isLoaded,
     isLogin,
     currentUser,
-    mapZoom,
     setIsMyMap,
     setIsMyMemory,
     setIsMyFriend,
     setIsFriendHome,
     setIsFriendMemory,
   } = useContext(AuthContext)
-
+  const { isLoaded, mapZoom } = useContext(MapContext)
   const [center, setCenter] = useState<LatLng | null>(null)
   const [newPin, setNewPin] = useState({
     id: "",

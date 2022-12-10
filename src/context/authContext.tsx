@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
-import { useJsApiLoader, LoadScriptProps } from "@react-google-maps/api"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -30,9 +29,6 @@ interface AuthContextType {
   isLogin: boolean
   setIsLogin: (isLogin: boolean) => void
   navigate: (path: string) => void
-  isLoaded: boolean
-  mapZoom: string
-  setMapZoom: (mapZoom: string) => void
   isMyMap: boolean
   setIsMyMap: (isMyMap: boolean) => void
   isMyMemory: boolean
@@ -74,9 +70,6 @@ export const AuthContext = createContext<AuthContextType>({
   signIn: () => Response,
   logOut: () => Response,
   navigate: () => Response,
-  isLoaded: true,
-  mapZoom: "lg",
-  setMapZoom: () => Response,
   isMyMap: false,
   setIsMyMap: () => Response,
   isMyMemory: false,
@@ -123,9 +116,6 @@ export interface DocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
 
-const libraries: LoadScriptProps["libraries"] = ["places"]
-const myGoogleApiKey = process.env.REACT_APP_google_API_KEY!
-
 export function AuthContextProvider({ children }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(false)
@@ -143,47 +133,7 @@ export function AuthContextProvider({ children }: Props) {
     UserInfoType | DocumentData | undefined
   >()
   const [avatarURL, setAvatarURL] = useState<string>("")
-  const [mapZoom, setMapZoom] = useState<string>("lg")
   const navigate = useNavigate()
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: myGoogleApiKey,
-    libraries,
-  })
-
-  const onZoomChange = () => {
-    if (
-      (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
-      (window.innerWidth > window.innerHeight && window.innerHeight < 600)
-    ) {
-      setMapZoom("md")
-    } else if (window.innerWidth > 900 && window.innerHeight > 600) {
-      setMapZoom("lg")
-    }
-  }
-  useEffect(() => {
-    const handleResize = () => {
-      // console.log("resize的window.innerWidth", window.innerWidth)
-      // console.log("resize的window.innerHeight", window.innerHeight)
-      if (
-        (window.innerWidth > window.innerHeight && window.innerWidth < 900) ||
-        (window.innerWidth > window.innerHeight && window.innerHeight < 600)
-      ) {
-        setMapZoom("md")
-      } else if (
-        window.innerWidth > window.innerHeight &&
-        window.innerWidth > 900 &&
-        window.innerHeight > 600
-      ) {
-        setMapZoom("lg")
-      }
-    }
-
-    onZoomChange()
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [mapZoom])
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -313,9 +263,6 @@ export function AuthContextProvider({ children }: Props) {
         isLogin,
         setIsLogin,
         navigate,
-        isLoaded,
-        mapZoom,
-        setMapZoom,
         isMyMap,
         setIsMyMap,
         isMyMemory,

@@ -11,6 +11,7 @@ import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
 import homeMarker from "../../assets/markers/home1.png"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import { db } from "../../utils/firebase"
 import {
   doc,
@@ -138,16 +139,14 @@ const mdNewPinIcon = L.icon({
 
 function FriendsMap() {
   const {
-    isLoaded,
     currentUser,
-    mapZoom,
     setIsMyMap,
     setIsMyMemory,
     setIsMyFriend,
     setIsFriendHome,
     setIsFriendMemory,
   } = useContext(AuthContext)
-
+  const { isLoaded, mapZoom } = useContext(MapContext)
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
   const [markers, setMarkers] = useState<
     DocumentData[] | DefinedDocumentData[] | PinContent[]

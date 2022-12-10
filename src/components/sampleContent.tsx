@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
 import { FreeMode, Navigation, Thumbs } from "swiper"
 import { AuthContext } from "../context/authContext"
+import { MapContext } from "../context/mapContext"
 import SwiperPhotos from "./pinContent/swiperPhoto"
 import xMark from "../assets/buttons/x-mark.png"
 import tip1 from "../assets/samplePhotos/1.png"
@@ -118,7 +119,8 @@ const samplePhotos = [tip1, tip2, tip3, tip4, tip5, tip6, tip7]
 const sampleSwiperModule = [FreeMode, Navigation, Thumbs]
 
 export default function TipsContent(props: Props) {
-  const { isLoaded, isLogin } = useContext(AuthContext)
+  const { isLogin } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const { setShowTips, setCurrentWidget } = props
   const onStreetLoad = () => {
     new google.maps.StreetViewPanorama(

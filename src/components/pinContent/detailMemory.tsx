@@ -16,6 +16,7 @@ import {
   checkRealTimePhotos,
 } from "../../utils/pins"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import Editor from "../post/editor"
 import Upload from "../post/uploadPhoto"
 import SwiperPhotos from "./swiperPhoto"
@@ -370,7 +371,8 @@ const swiperModules = {
 
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
-  const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
+  const { currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
   const msgRef = useRef<HTMLInputElement>(null)
   const [showDelete, setShowDelete] = useState(false)
