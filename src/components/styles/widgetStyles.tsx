@@ -6,25 +6,23 @@ import "/node_modules/react-resizable/css/styles.css"
 import xMark from "../../assets/buttons/x-mark.png"
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
-export const GridContainer = styled(ResponsiveGridLayout)<{
-  showWidget: boolean
-}>`
+export const GridContainer = styled(ResponsiveGridLayout)`
   position: absolute;
   height: auto;
   z-index: 180;
   .react-grid-item {
     box-shadow: 0 8px 6px #0000004c;
-    border: 2px solid #034961;
+    border: none;
+    cursor: grab;
   }
   .react-grid-item > .react-resizable-handle::after {
     border-right: 2px solid #034961;
     border-bottom: 2px solid #034961;
   }
   .react-grid-item.react-grid-placeholder {
-    background: #03496190;
+    background: none;
     border-radius: 5px;
     border: none;
-    opacity: 0.6;
     transition-duration: 100ms;
     z-index: 2;
     -webkit-user-select: none;
@@ -71,5 +69,23 @@ export const FormTitle = styled.div`
   margin-bottom: 20px;
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
+  }
+`
+export const Credits = styled.a`
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: start;
+  font-size: 14px;
+  color: #b4b1b1;
+  text-decoration: underline;
+  &:visited {
+    color: #b4b1b1;
+    text-decoration: none;
+  }
+  &:hover {
+    color: #454545;
+  }
+  &:active {
+    color: #b4b1b1;
   }
 `

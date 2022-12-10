@@ -21,6 +21,7 @@ import {
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
+import { notifyError, notifyWarn } from "../../components/reminder"
 import {
   Attribution,
   StyleMapContainer,
@@ -46,7 +47,7 @@ import Upload from "../../components/post/uploadPhoto"
 import { db, storage } from "../../utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { ref, deleteObject } from "firebase/storage"
-import { getPins, PinContent } from "../../utils/pins"
+import { checkRealTimePinsInfo, getPins, PinContent } from "../../utils/pins"
 import Editor from "../../components/post/editor"
 import addPinIcon from "../../assets/markers/addPin.png"
 import pins from "../../assets/markers/pins.png"
@@ -54,6 +55,7 @@ import DetailMemory from "../../components/pinContent/detailMemory"
 import spinner from "../../assets/dotsSpinner.svg"
 import xmark from "../../assets/buttons/x-mark.png"
 import home from "../../assets/markers/home1.png"
+import pinIcon from "../../assets/location.png"
 
 const PhotoText = styled.div`
   display: flex;
@@ -61,7 +63,8 @@ const PhotoText = styled.div`
   align-items: center;
   text-align: center;
   margin: 5px 0;
-  width: 150px;
+  width: 100%;
+  min-width: 150px;
   height: 120px;
   font-size: ${(props) => props.theme.title.md};
   color: ${(props) => props.theme.color.bgDark};
@@ -69,6 +72,12 @@ const PhotoText = styled.div`
   border-radius: 5px;
 `
 const Spinner = styled(Container)`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 80px;
   background-image: url(${spinner});
   background-size: 100% 100%;
   background-color: rgb(255, 255, 255, 0);
@@ -76,12 +85,12 @@ const Spinner = styled(Container)`
 `
 const Xmark = styled.div`
   position: absolute;
-  top: 30px;
-  right: 30px;
+  top: 25px;
+  right: 20px;
   background-image: url(${xmark});
   background-size: 100% 100%;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   cursor: pointer;
   z-index: 50;
 `
@@ -99,9 +108,15 @@ const PostPinWrapper = styled(Wrapper)`
 `
 
 const LocationText = styled(StepText)`
-  margin-top: 20px;
+  align-items: center;
+  gap: 10px;
 `
-
+const PinIcon = styled.div`
+  width: 15px;
+  height: 15px;
+  background-image: url(${pinIcon});
+  background-size: 100% 100%;
+`
 const BtnAddPin = styled.div`
   position: absolute;
   top: 20px;
@@ -140,7 +155,8 @@ export const PinInfoArea = styled.div`
 `
 export const PinInfoImg = styled.img`
   margin: 5px 0;
-  width: 150px;
+  width: 100%;
+  min-width: 150px;
   height: 120px;
 `
 export const PinInfoTitle = styled.div`
@@ -152,12 +168,6 @@ export const PinInfoTitle = styled.div`
 interface CenterType {
   center: LatLng | null
   setCenter: Dispatch<SetStateAction<LatLng | null>>
-}
-interface Position {
-  placeId?: string | undefined
-  name?: string | undefined
-  lat: number | undefined
-  lng: number | undefined
 }
 
 interface CountryType {
@@ -220,7 +230,7 @@ function ChangeCenter() {
   const { mapZoom } = useContext(AuthContext)
   const miniMap = useMap()
   if (mapZoom === "lg") {
-    miniMap.flyTo([45, -185], 1.25)
+    miniMap.flyTo([45, -170], 1.25)
   } else {
     miniMap.flyTo([42, 167], 1)
   }
@@ -254,45 +264,6 @@ const mdNewPinIcon = L.icon({
   iconUrl: pins,
 })
 
-function useOnClickOutside(
-  ref: React.RefObject<HTMLDivElement>,
-  locationRef: React.RefObject<HTMLInputElement>,
-  artiTitle: string,
-  artiContent: string,
-  setShowAlert: Dispatch<React.SetStateAction<boolean>>
-) {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (
-        !ref.current ||
-        ref.current.contains(event.target as Node) ||
-        (event?.target as HTMLDivElement)?.classList.contains(
-          "leaflet-marker-icon"
-        ) ||
-        (event?.target as HTMLDivElement)?.className === "pac-item" ||
-        (event?.target as Node)?.parentElement?.className === "pac-item" ||
-        (event?.target as Node)?.parentElement?.className === "pac-container"
-      )
-        return
-
-      if (
-        locationRef?.current?.value !== "" ||
-        artiTitle !== "" ||
-        (artiTitle !== "" && artiContent !== "<p><br></p>")
-      ) {
-        setShowAlert(true)
-      }
-    }
-
-    window.addEventListener("mousedown", listener)
-    window.addEventListener("touchstart", listener)
-    return () => {
-      window.removeEventListener("mousedown", listener)
-      window.removeEventListener("touchstart", listener)
-    }
-  }, [ref])
-}
-
 const getCurrentDate = () => {
   const dateObj = new Date()
   const month = ("0" + (dateObj.getMonth() + 1)).slice(-2)
@@ -317,7 +288,6 @@ export default function MyMap() {
   } = useContext(AuthContext)
 
   const [center, setCenter] = useState<LatLng | null>(null)
-  const [location, setLocation] = useState<google.maps.LatLng | Position>()
   const [newPin, setNewPin] = useState({
     id: "",
     userId: "",
@@ -349,19 +319,17 @@ export default function MyMap() {
   const [canUpload, setCanUpload] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const locationRef = useRef<HTMLInputElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
   const popupRef = useRef<any>(null)
 
   useEffect(() => {
     if (!selectedMarker) return
+
     if (refReady && popupRef !== undefined) {
       popupRef.current.openPopup()
     }
-  }, [selectedMarker?.location.placeId])
-
-  useOnClickOutside(overlayRef, locationRef, artiTitle, artiContent, () =>
-    setShowAlert(true)
-  )
+  }, [selectedMarker?.location.placeId, refReady])
 
   useEffect(() => {
     setIsMyMap(true)
@@ -369,7 +337,7 @@ export default function MyMap() {
     setIsMyFriend(false)
     setIsFriendHome(false)
     setIsFriendMemory(false)
-    if (typeof currentUser?.id === "string") {
+    if (typeof currentUser?.id === "string" && !showMemory) {
       getPins(
         currentUser,
         currentUser?.id,
@@ -378,6 +346,16 @@ export default function MyMap() {
         setMarkers
       )
     } else return
+  }, [currentUser?.id, showMemory])
+  useEffect(() => {
+    if (
+      currentUser !== undefined &&
+      currentUser !== null &&
+      typeof currentUser?.id === "string"
+    ) {
+      checkRealTimePinsInfo(currentUser?.id, setMarkers)
+      return checkRealTimePinsInfo(currentUser?.id, setMarkers)
+    }
   }, [currentUser?.id])
 
   const onPlacesChanged = () => {
@@ -388,9 +366,6 @@ export default function MyMap() {
         const newLng = searchResult[0]?.geometry?.location?.lng()
         const placeName = searchResult[0]?.name
         const placeId = searchResult[0]?.place_id
-        if (newLat && newLng) {
-          setLocation({ lat: newLat, lng: newLng })
-        }
         if (newLat && newLng && placeName && placeId) {
           const newPinInfo = {
             id: `${currentUser?.id}-${placeId}-${Date.now()}`,
@@ -407,20 +382,35 @@ export default function MyMap() {
           setCanUpload(true)
         }
       }
-    } else console.log("失敗啦")
+    }
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
+  const handleClosePostArea = () => {
+    if (
+      newPin.location.placeId !== "" ||
+      (artiTitle !== "" && artiContent !== "<p><br></p>") ||
+      urls.length !== 0
+    ) {
+      setShowAlert(true)
+    } else {
+      setShowPostArea(false)
+    }
+  }
   const addMemory = async () => {
-    if (!newPin) return
+    if (newPin.location.placeId === "") {
+      locationRef?.current?.focus()
+      notifyWarn("Place marker is required")
+      return
+    }
+    if (artiTitle === "") {
+      titleRef?.current?.focus()
+      titleRef?.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      notifyWarn("Title is required")
+      return
+    }
     try {
       await setDoc(doc(db, "pins", newPin?.id), newPin)
-      if (filesName.length !== 0 && !hasUpload) {
-        alert(
-          "It seems that you have some photos, please click upload button first!"
-        )
-        return
-      }
       const docRef = doc(db, "pins", newPin.id)
       const artiInfo = {
         article: {
@@ -433,12 +423,13 @@ export default function MyMap() {
         albumURLs: urls,
         albumNames: filesName,
       }
-
       await updateDoc(docRef, artiInfo)
       setMarkers((prev) => {
         return [
           ...prev,
           {
+            id: newPin.id,
+            userId: newPin.userId,
             article: {
               title: artiTitle,
               travelDate: travelDate,
@@ -476,7 +467,7 @@ export default function MyMap() {
           name: newPin.location.name,
         },
       })
-      if (locationRef.current !== null) {
+      if (newPin.location.placeId !== "" && locationRef.current !== null) {
         locationRef.current.value = ""
       }
       setRefReady(true)
@@ -489,7 +480,12 @@ export default function MyMap() {
       setHasAddPin(false)
       setCanUpload(false)
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to add a new memory, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -504,14 +500,23 @@ export default function MyMap() {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
         })
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to delete uploaded photos, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
+    if (locationRef.current !== null) locationRef.current.value === ""
     setHasAddPin(false)
     setShowAlert(false)
     setUploadProgress(0)
     setFilesName([])
     setUrls([])
+    setArtiTitle("")
+    setArtiContent("")
+    setTravelDate(getCurrentDate)
     setNewPin({
       id: "",
       userId: "",
@@ -522,6 +527,8 @@ export default function MyMap() {
         placeId: "",
       },
     })
+    setShowAlert(false)
+    setShowPostArea(false)
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
@@ -552,15 +559,7 @@ export default function MyMap() {
                   >
                     cancel
                   </BtnLight>
-                  <BtnBlue
-                    onClick={() => {
-                      cancelPost()
-                      setShowAlert(false)
-                      // setShowPostArea(false)
-                    }}
-                  >
-                    Discard
-                  </BtnBlue>
+                  <BtnBlue onClick={cancelPost}>Discard</BtnBlue>
                 </BtnWrapper>
               </ReminderArea>
             </>
@@ -575,20 +574,7 @@ export default function MyMap() {
             )}
             {showPostArea && (
               <PostPinWrapper ref={overlayRef}>
-                <Xmark
-                  onClick={() => {
-                    if (
-                      (locationRef.current !== null &&
-                        locationRef?.current?.value !== "") ||
-                      (artiTitle !== "" && artiContent !== "<p><br></p>") ||
-                      urls.length !== 0
-                    ) {
-                      setShowAlert(true)
-                    } else {
-                      setShowPostArea(false)
-                    }
-                  }}
-                />
+                <Xmark onClick={handleClosePostArea} />
                 {!hasAddPin ? (
                   <>
                     <StepTitle>To remember your trip</StepTitle>
@@ -609,11 +595,15 @@ export default function MyMap() {
                 ) : (
                   <>
                     <StepText>Log your memory</StepText>
-                    <LocationText>{newPin?.location?.name}</LocationText>
+                    <LocationText>
+                      <PinIcon />
+                      {newPin?.location?.name}
+                    </LocationText>
                   </>
                 )}
                 <ArticleWrapper>
                   <Input
+                    ref={titleRef}
                     placeholder="Title"
                     value={artiTitle}
                     onChange={(e) => {
@@ -636,6 +626,7 @@ export default function MyMap() {
                     setArtiContent={setArtiContent}
                   />
                   <Upload
+                    locationRef={locationRef}
                     canUpload={canUpload}
                     currentPin={newPin}
                     setFilesName={setFilesName}
@@ -645,13 +636,7 @@ export default function MyMap() {
                     setUrls={setUrls}
                     setUploadProgress={setUploadProgress}
                   />
-                  <BtnText
-                    onClick={() => {
-                      addMemory()
-                    }}
-                  >
-                    Confirm to post
-                  </BtnText>
+                  <BtnText onClick={addMemory}>Confirm to post</BtnText>
                 </ArticleWrapper>
               </PostPinWrapper>
             )}
@@ -676,8 +661,11 @@ export default function MyMap() {
               dragging={true}
               trackResize
               style={{
+                position: `${showPostArea ? "absolute" : "initial"}`,
+                top: `${showPostArea ? "0" : "initial"}`,
+                right: `${showPostArea ? "0" : "initial"}`,
                 margin: "0 auto",
-                width: "100%",
+                width: `${showPostArea ? "50%" : "100%"}`,
                 height: "100%",
                 zIndex: "30",
                 backgroundColor: "rgb(255, 255, 255, 0)",
@@ -714,18 +702,20 @@ export default function MyMap() {
                     icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
                     eventHandlers={{
                       click() {
+                        setRefReady(false)
                         setSelectedMarker(marker)
                       },
                     }}
                   >
                     <Popup
-                      offset={mapZoom === "lg" ? [0, -20] : [0, -20]}
+                      offset={mapZoom === "lg" ? [-1, -20] : [0, -20]}
                       keepInView={true}
                     >
                       <PinInfoArea
                         id={marker.location.placeId}
                         onClick={() => {
                           setShowMemory(true)
+                          popupRef.current.closePopup()
                         }}
                       >
                         <PinInfoTitle>

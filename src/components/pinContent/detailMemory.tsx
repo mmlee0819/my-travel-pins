@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef, Dispatch } from "react"
 import { StreetViewService, GoogleMap, Marker } from "@react-google-maps/api"
+import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
 import styled from "styled-components"
 import parse from "html-react-parser"
 import { db, storage } from "../../utils/firebase"
@@ -24,6 +25,7 @@ import whiteEditPencil from "../../assets/buttons/edit.png"
 import blackEditPencil from "../../assets/buttons/blackEdit.png"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
+import { notifyError } from "../reminder"
 
 const Container = styled.div`
   position: absolute;
@@ -31,7 +33,6 @@ const Container = styled.div`
   left: 0;
   height: 100%;
   width: 100%;
-  font-family: "Poppins", "sans-serif";
   background-color: rgb(45, 45, 45, 0.8);
   border-radius: 5px;
   z-index: 120;
@@ -89,8 +90,8 @@ const EditWrapper = styled.div`
   flex-flow: column nowrap;
   flex: 1 1 auto;
   margin: 20px 0 0 0;
-  height: calc(90% - 30px);
-  gap: 20px;
+  height: calc(100% - 30px);
+  gap: 15px;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
@@ -128,8 +129,8 @@ const Input = styled(Text)`
   border: 3px solid #ffffff;
   border-radius: 5px;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: ${(props) => props.theme.color.lightGreen};
+    border: 3px solid ${(props) => props.theme.color.lightGreen};
   }
 `
 
@@ -255,7 +256,7 @@ const BtnGreen = styled.div`
 const BtnDelete = styled(BtnGreen)<{ showDelete: boolean }>`
   top: 25px;
   display: ${(props) => (props.showDelete ? "flex" : "none")};
-  background-color: ${(props) => props.theme.btnColor.bgGray};
+  background-color: ${(props) => props.theme.color.lightMain};
 `
 
 const ArtiWrapper = styled.div`
@@ -310,8 +311,8 @@ const MsgInput = styled.input`
   border: none;
   border-radius: 5px;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: #7ccbab;
+    border: 3px solid #7ccbab;
     background-color: #e3e3e3;
   }
   ::placeholder {
@@ -362,6 +363,11 @@ function useOnClickOutside(
   }, [ref, showEditor])
 }
 
+const swiperModules = {
+  manyPhoto: [Autoplay, FreeMode, Navigation, Thumbs],
+  onePhoto: [FreeMode, Thumbs],
+}
+
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
   const { isLoaded, currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
@@ -390,59 +396,9 @@ export default function DetailMemory(props: Props) {
   const [canUpload, setCanUpload] = useState(true)
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  const updateTitle = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log("Failed to revert contents to original", error)
-    }
-  }
+  const memorySwiperModule =
+    albumUrls.length > 1 ? swiperModules.manyPhoto : swiperModules.onePhoto
 
-  const updateTravelDate = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log(
-        "Failed to update travelDate from specific memory page",
-        error
-      )
-    }
-  }
-
-  const updateArtiContent = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log(
-        "Failed to update article content from specific memory page",
-        error
-      )
-    }
-  }
   const updatePhotos = async () => {
     if (!selectedMarker?.id) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -457,9 +413,15 @@ export default function DetailMemory(props: Props) {
       setUploadProgress(0)
       setShowUploadMore(true)
     } catch (error) {
-      console.log("Failed to update photos from specific memory page", error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to upload photos, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
+
   const updateToOrigin = async () => {
     if (!selectedMarker?.id || !hasDiscard) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -475,10 +437,12 @@ export default function DetailMemory(props: Props) {
       })
       setHasDiscard(false)
     } catch (error) {
-      console.log(
-        "Failed to update article content from specific memory page",
-        error
-      )
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to update contents of specific memory, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
   const cancelPhotos = async () => {
@@ -492,7 +456,12 @@ export default function DetailMemory(props: Props) {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
         })
       } catch (error) {
-        console.log("Failed to cancel uploaded", error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to delete uploaded photos, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     setHasUpload(false)
@@ -501,16 +470,36 @@ export default function DetailMemory(props: Props) {
     setUrls([])
   }
 
+  const handleUpdate = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    if (hasUpload) {
+      updatePhotos()
+    }
+    await updateDoc(docRef, {
+      article: {
+        title: artiTitle,
+        travelDate: travelDate,
+        content: artiContent,
+      },
+    })
+    setShowEditor(false)
+    setCanUpload(false)
+    setArtiTitle(artiTitle)
+    setTravelDate(travelDate)
+    setArtiContent(artiContent)
+  }
+
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
-    if (!selectedMarker?.id) return
+    if (!selectedMarker || selectedMarker?.id === "") return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
 
   useEffect(() => {
-    if (!selectedMarker?.id) return
+    if (!selectedMarker || selectedMarker?.id === "") return
     checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
     return checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
   }, [selectedMarker?.id])
@@ -548,13 +537,17 @@ export default function DetailMemory(props: Props) {
                 onClick={() => {
                   setShowEditor(true)
                   setHasUpload(false)
+                  setCanUpload(true)
                 }}
               />
             )}
 
             <LeftWrapper>
               {albumUrls.length > 0 ? (
-                <SwiperPhotos photos={albumUrls} />
+                <SwiperPhotos
+                  photos={albumUrls}
+                  swiperModule={memorySwiperModule}
+                />
               ) : (
                 <GoogleMap
                   mapContainerStyle={{
@@ -741,26 +734,12 @@ export default function DetailMemory(props: Props) {
                       setShowMore(false)
                       setHasDiscard(true)
                       setShowEditor(false)
+                      setCanUpload(false)
                     }}
                   >
                     Back
                   </BtnCancel>
-                  <BtnDone
-                    onClick={() => {
-                      if (hasUpload) {
-                        updatePhotos()
-                      }
-                      updateTitle()
-                      updateTravelDate()
-                      updateArtiContent()
-                      setShowEditor(false)
-                      setArtiTitle(artiTitle)
-                      setTravelDate(travelDate)
-                      setArtiContent(artiContent)
-                    }}
-                  >
-                    Done
-                  </BtnDone>
+                  <BtnDone onClick={handleUpdate}>Done</BtnDone>
                 </BtnSaveBackWrapper>
               )}
               {showEditor && (
@@ -791,33 +770,26 @@ export default function DetailMemory(props: Props) {
                         setArtiContent={setArtiContent}
                       />
                     </ArtiWrapper>
-                    {selectedMarker &&
-                      typeof selectedMarker.id === "string" &&
-                      typeof selectedMarker.userId === "string" &&
-                      typeof selectedMarker.location.lat === "number" &&
-                      typeof selectedMarker.location.lng === "number" &&
-                      typeof selectedMarker.location.placeId === "string" &&
-                      (showEditor || showUploadMore) && (
-                        <Upload
-                          canUpload={canUpload}
-                          currentPin={{
-                            id: selectedMarker.id,
-                            userId: selectedMarker.userId,
-                            location: {
-                              lat: selectedMarker.location.lat,
-                              lng: selectedMarker.location.lng,
-                              name: selectedMarker.location.name,
-                              placeId: selectedMarker.location.placeId,
-                            },
-                          }}
-                          setFilesName={setFilesName}
-                          hasUpload={hasUpload}
-                          setHasUpload={setHasUpload}
-                          urls={urls}
-                          setUrls={setUrls}
-                          setUploadProgress={setUploadProgress}
-                        />
-                      )}
+
+                    <Upload
+                      canUpload={canUpload}
+                      currentPin={{
+                        id: selectedMarker.id,
+                        userId: selectedMarker.userId,
+                        location: {
+                          lat: selectedMarker.location.lat,
+                          lng: selectedMarker.location.lng,
+                          name: selectedMarker.location.name,
+                          placeId: selectedMarker.location.placeId,
+                        },
+                      }}
+                      setFilesName={setFilesName}
+                      hasUpload={hasUpload}
+                      setHasUpload={setHasUpload}
+                      urls={urls}
+                      setUrls={setUrls}
+                      setUploadProgress={setUploadProgress}
+                    />
                   </EditWrapper>
                 </>
               )}

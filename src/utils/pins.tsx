@@ -14,28 +14,27 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../context/authContext"
+import { notifyError } from "../components/reminder"
 
 export interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]
 }
 
 export interface PinContent {
-  id?: string
-  userId?: string
-  name?: string
-  placeId?: string
+  id: string
+  userId: string
   location: {
     placeId: string
     lat: number
     lng: number
     name: string
   }
-  albumNames?: string[]
-  albumURLs?: string[]
-  article?: {
-    title?: string
+  albumNames: string[]
+  albumURLs: string[]
+  article: {
+    title: string
     content?: string
-    travelDate?: string
+    travelDate: string
   }
   postTimestamp?: number
   postReadableTime?: Date | string
@@ -65,7 +64,7 @@ export const getPins = async (
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
     })
-    newMemories.sort(function (a, b) {
+    newMemories.sort((a, b) => {
       return b.postReadableTime.seconds - a.postReadableTime.seconds
     })
     setMemories(newMemories as PinContent[])
@@ -102,8 +101,9 @@ export const getSpecificPin = async (
     setMemory(docSnap.data() as PinContent)
     setMemoryIsShow(true)
   } else {
-    // doc.data() will be undefined in this case
-    console.log("No such document!")
+    notifyError(
+      "Sorry, we can not find this memory record, please contact mika@test.com"
+    )
   }
 }
 
@@ -124,7 +124,12 @@ export const addMsg = async (
       }),
     })
   } catch (error) {
-    console.log(error)
+    if (error instanceof Error) {
+      const errorMsg = error["message"].slice(9) as string
+      notifyError(
+        `Failed to add new message, please take a note of ${errorMsg} and contact mika@test.com`
+      )
+    }
   }
 }
 
@@ -134,11 +139,14 @@ export const checkRealTimePinsInfo = (
 ) => {
   const q = query(collection(db, "pins"), where("userId", "==", id))
   onSnapshot(q, (querySnapshot) => {
-    const newMemories: PinContent[] = []
+    const newMemories: DocumentData[] = []
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
     })
-    setMemories(newMemories)
+    newMemories.sort((a, b) => {
+      return b?.postReadableTime?.seconds - a?.postReadableTime?.seconds
+    })
+    setMemories(newMemories as PinContent[])
   })
 }
 export const checkRealTimePhotos = (
@@ -152,6 +160,7 @@ export const checkRealTimePhotos = (
     }
   })
 }
+
 export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>
@@ -195,6 +204,11 @@ export const deleteMsg = async (id: string, item: DocumentData) => {
       }),
     })
   } catch (error) {
-    console.log(error)
+    if (error instanceof Error) {
+      const errorMsg = error["message"].slice(9) as string
+      notifyError(
+        `Failed to delete a message, please take a note of ${errorMsg} and contact mika@test.com`
+      )
+    }
   }
 }

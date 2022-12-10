@@ -15,7 +15,7 @@ const toolbarOptions = [
 ]
 
 const StyleQuill = styled(ReactQuill)`
-  min-height: 300px;
+  min-height: 200px;
   margin-top: 5px;
   border-radius: 5px;
   border: none;

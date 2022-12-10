@@ -3,7 +3,8 @@ import styled from "styled-components"
 
 import { Swiper, SwiperSlide } from "swiper/react"
 import { type Swiper as SwiperRef } from "swiper"
-import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper"
+import { FreeMode, Navigation, Thumbs } from "swiper"
+import { SwiperModule } from "swiper/types"
 
 import "swiper/css/bundle"
 import "swiper/css"
@@ -73,7 +74,13 @@ const ButtomSwiper = styled(Swiper)`
   }
 `
 
-export default function SwiperPhotos({ photos }: { photos: string[] }) {
+export default function SwiperPhotos({
+  photos,
+  swiperModule,
+}: {
+  photos: string[]
+  swiperModule: SwiperModule[]
+}) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperRef | null>(null)
 
   return (
@@ -84,11 +91,7 @@ export default function SwiperPhotos({ photos }: { photos: string[] }) {
         spaceBetween={10}
         navigation={true}
         thumbs={{ swiper: thumbsSwiper }}
-        modules={
-          photos.length > 1
-            ? [Autoplay, FreeMode, Navigation, Thumbs]
-            : [FreeMode, Thumbs]
-        }
+        modules={swiperModule}
         className="mySwiper2"
         autoplay={{
           delay: 2000,

@@ -9,6 +9,7 @@ import { AuthContext } from "../context/authContext"
 import logoutIcon from "../assets/buttons/logoutIcon.png"
 import editPencil from "../assets/buttons/edit.png"
 import spinner from "../assets/dotsSpinner.svg"
+import { notifyError } from "./reminder"
 
 const BgOverlay = styled.div`
   position: absolute;
@@ -47,36 +48,36 @@ const ProfileArea = styled.div`
 `
 const Text = styled.div`
   display: flex;
-  margin-left: 10px;
   letter-spacing: 2px;
   border: none;
   gap: 5px;
-  cursor: pointer;
+
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const BtnText = styled(Text)`
-  &:hover {
-    border-bottom: 2px solid #fff;
-  }
+  align-items: center;
+  cursor: pointer;
 `
 const BtnLogout = styled.div`
   display: flex;
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   background-image: url(${logoutIcon});
   background-size: 100% 100%;
   cursor: pointer;
   @media screen and (max-width: 900px) and (min-width: 600px),
     (max-height: 600px) {
-    width: 25px;
-    height: 25px;
+    width: 15px;
+    height: 15px;
   }
 `
 const BtnEdit = styled(BtnLogout)`
-  margin-left: 20px;
+  position: absolute;
+  top: 35px;
+  right: 30px;
   background-image: url(${editPencil});
 `
 const UploadLabel = styled.label`
@@ -142,10 +143,10 @@ export default function Profile() {
     avatarURL,
     setAvatarURL,
     setIsProfile,
+    isLoading,
   } = useContext(AuthContext)
 
   const [uploadProgress, setUploadProgress] = useState(0)
-  // const [avatarURL, setAvatarURL] = useState(currentUser?.photoURL || "")
   const [hasFile, setHasFile] = useState(false)
   const [hasCompressed, setHasCompressed] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -177,7 +178,10 @@ export default function Profile() {
             setUploadProgress(progress)
           },
           (error) => {
-            console.log("Failed to upload file to Storage", error)
+            const errorMsg = error["message"] as string
+            notifyError(
+              `Failed to upload avatar, please take a note of ${errorMsg} and contact mika@test.com`
+            )
           },
           async () => {
             const url = await getDownloadURL(
@@ -194,7 +198,12 @@ export default function Profile() {
         )
       }
     } catch (error) {
-      console.log("Failed to compress files", error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"] as string
+        notifyError(
+          `Failed to compress file ane upload, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -202,11 +211,9 @@ export default function Profile() {
   return (
     <BgOverlay>
       <ProfileArea ref={overlayRef}>
+        <BtnEdit />
         {typeof currentUser.name === "string" && (
-          <Text>
-            {currentUser?.name}
-            <BtnEdit />
-          </Text>
+          <Text>{currentUser?.name}</Text>
         )}
         {hasFile && <Spinner />}
         {!hasFile && typeof avatarURL === "string" && (
@@ -226,8 +233,16 @@ export default function Profile() {
             logOut()
           }}
         >
-          <BtnLogout />
-          Sign out
+          {isLoading ? (
+            <Spinner
+              style={{ width: "40px", height: "40px", margin: "0 auto" }}
+            />
+          ) : (
+            <>
+              <BtnLogout />
+              Sign out
+            </>
+          )}
         </BtnText>
       </ProfileArea>
     </BgOverlay>

@@ -3,9 +3,10 @@ import { useState, useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
 import { storage } from "../../utils/firebase"
 import { AuthContext } from "../../context/authContext"
-import uploadIcon from "../../assets/buttons/uploadImgIcon.png"
+import { notifyError, notifyWarn } from "../reminder"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import imageCompression from "browser-image-compression"
+import uploadIcon from "../../assets/buttons/uploadImgIcon.png"
 import spinner from "../../assets/dotsSpinner.svg"
 
 const Spinner = styled.div`
@@ -28,13 +29,13 @@ const UploadPhotoWrapper = styled.div`
     font-size: ${(props) => props.theme.title.sm};
   }
 `
-const UploadImgLabel = styled.label`
+const UploadImgLabel = styled.label<{ canUpload: boolean }>`
   display: flex;
   align-items: center;
-  height: 64px;
+  height: 40px;
   color: ${(props) => props.theme.color.bgDark};
   gap: 15px;
-  cursor: pointer;
+  cursor: ${(props) => props.canUpload && "pointer"};
 `
 const UrlsImgWrapper = styled.div`
   position: relative;
@@ -80,6 +81,7 @@ interface UploadType {
   setUrls: Dispatch<SetStateAction<string[]>>
   setUploadProgress: Dispatch<SetStateAction<number>>
   canUpload: boolean
+  locationRef?: React.RefObject<HTMLInputElement>
 }
 
 export default function Upload(props: UploadType) {
@@ -95,6 +97,7 @@ export default function Upload(props: UploadType) {
     urls,
     setUrls,
     setUploadProgress,
+    locationRef,
   } = props
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +105,9 @@ export default function Upload(props: UploadType) {
       maxSizeMB: 0.5,
       maxWidthOrHeight: 1920,
       useWebWorker: true,
+    }
+    if (currentPin.location.placeId === "") {
+      notifyWarn("Please pin a place first")
     }
     try {
       if (e.target.files !== null) {
@@ -117,7 +123,12 @@ export default function Upload(props: UploadType) {
         handleUpload(newFiles)
       }
     } catch (error) {
-      console.log("Failed to compress files", error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to upload photos, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -139,7 +150,11 @@ export default function Upload(props: UploadType) {
             setUploadProgress(progress)
           },
           (error) => {
-            console.log(error)
+            notifyError(
+              `Failed to upload photos, please take a note of ${
+                error["message"] as string
+              } and contact mika@test.com`
+            )
           },
           async () => {
             const url = await getDownloadURL(
@@ -168,7 +183,13 @@ export default function Upload(props: UploadType) {
       )}
       <UploadPhotoWrapper>
         {!hasFiles ? (
-          <UploadImgLabel>
+          <UploadImgLabel
+            canUpload={canUpload}
+            onClick={() => {
+              !canUpload && notifyWarn("Please pin a place first")
+              locationRef?.current?.focus()
+            }}
+          >
             <UploadImgIcon src={uploadIcon} />
             {urls.length > 0 ? "Upload more" : "Choose photos"}
             <UploadImgInput

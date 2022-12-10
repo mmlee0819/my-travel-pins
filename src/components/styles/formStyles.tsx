@@ -1,5 +1,15 @@
 import React from "react"
 import styled from "styled-components"
+import spinner from "../../assets/dotsSpinner.svg"
+
+export const Spinner = styled.div`
+  width: 100%;
+  height: 100%;
+  background-image: url(${spinner});
+  background-size: 100% 100%;
+  background-color: rgb(255, 255, 255, 0);
+  border: none;
+`
 
 export const StepText = styled.div`
   display: flex;

@@ -61,9 +61,9 @@ function MongoImg() {
   )
 }
 function JapanImg({
-  setShowSamplePost,
+  setShowTips,
 }: {
-  setShowSamplePost: Dispatch<SetStateAction<boolean>>
+  setShowTips: Dispatch<SetStateAction<boolean>>
 }) {
   return (
     <>
@@ -84,7 +84,7 @@ function JapanImg({
         }
         eventHandlers={{
           click() {
-            setShowSamplePost(true)
+            setShowTips(true)
           },
         }}
       >
@@ -411,13 +411,13 @@ function NewzealandImg() {
   )
 }
 export default function PhotoWall({
-  setShowSamplePost,
+  setShowTips,
 }: {
-  setShowSamplePost: Dispatch<SetStateAction<boolean>>
+  setShowTips: Dispatch<SetStateAction<boolean>>
 }) {
   return (
     <>
-      <JapanImg setShowSamplePost={setShowSamplePost} />
+      <JapanImg setShowTips={setShowTips} />
       <MongoImg />
       <EuroImg />
       <GreenlandImg />

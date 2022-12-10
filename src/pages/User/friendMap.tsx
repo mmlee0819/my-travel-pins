@@ -24,6 +24,7 @@ import { DocumentData } from "@firebase/firestore-types"
 import { DefinedDocumentData, PinContent } from "../../utils/pins"
 import pins from "../../assets/markers/pins.png"
 import DetailMemory from "../../components/pinContent/detailMemory"
+import { notifyWarn } from "../../components/reminder"
 
 const PhotoText = styled.div`
   display: flex;
@@ -172,7 +173,9 @@ function FriendsMap() {
       if (docSnap.exists()) {
         setFriendInfo(docSnap.data())
       } else {
-        console.log("No such document!")
+        notifyWarn(
+          "No such user, please contact mika@test.com if you have other concerns."
+        )
       }
     }
     setIsMyMap(false)

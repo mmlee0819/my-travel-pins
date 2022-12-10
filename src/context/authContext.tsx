@@ -12,6 +12,8 @@ import { ref, getDownloadURL } from "firebase/storage"
 import { doc, setDoc, getDoc } from "firebase/firestore"
 import { auth, db, storage } from "../utils/firebase"
 
+import { notifySuccess, notifyError } from "../components/reminder"
+
 declare module "*.png"
 
 interface AuthContextType {
@@ -50,6 +52,8 @@ interface AuthContextType {
   setIsProfile: (isProfile: boolean) => void
   avatarURL: string
   setAvatarURL: (avatarURL: string) => void
+  isLoading: boolean
+  setIsLoading: (isProfile: boolean) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -92,6 +96,8 @@ export const AuthContext = createContext<AuthContextType>({
   setIsProfile: () => Response,
   avatarURL: "",
   setAvatarURL: () => Response,
+  isLoading: false,
+  setIsLoading: () => Response,
 })
 
 interface Props {
@@ -180,32 +186,24 @@ export function AuthContextProvider({ children }: Props) {
   }, [mapZoom])
 
   useEffect(() => {
-    const checkLoginStatus = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user !== null) {
-          const docRef = doc(db, "users", user.uid)
-          const docSnap = await getDoc(docRef)
-          const userInfo: DocumentData | undefined = docSnap.data()
-          if (
-            userInfo !== undefined &&
-            typeof userInfo?.photoURL === "string"
-          ) {
-            setCurrentUser(userInfo)
-            setAvatarURL(userInfo?.photoURL)
-            setIsLogin(true)
-            setIsProfile(false)
-            setIsMyMap(true)
-            navigate(`/${userInfo?.name}`)
-          }
-        } else {
-          setIsLogin(false)
-          navigate("/")
+    onAuthStateChanged(auth, async (user) => {
+      if (user !== null) {
+        const docRef = doc(db, "users", user.uid)
+        const docSnap = await getDoc(docRef)
+        const userInfo: DocumentData | undefined = docSnap.data()
+        if (userInfo !== undefined && typeof userInfo?.photoURL === "string") {
+          setCurrentUser(userInfo)
+          setAvatarURL(userInfo?.photoURL)
+          setIsLogin(true)
+          setIsProfile(false)
+          // setIsMyMap(true)
+          // navigate(`/${userInfo?.name}`)
         }
-      } catch (error) {
-        console.log(error)
+      } else {
+        setIsLogin(false)
+        navigate("/")
       }
     })
-    return checkLoginStatus
   }, [])
 
   const signUp = async (
@@ -216,7 +214,7 @@ export function AuthContextProvider({ children }: Props) {
   ) => {
     if (!name || !email || !password) return
     try {
-      console.log("註冊中")
+      setIsLoading(true)
       const engLetter = /^[a-zA-Z]*$/
       let UpdatedName = ""
       if (engLetter.test(name[0])) {
@@ -252,19 +250,23 @@ export function AuthContextProvider({ children }: Props) {
         setIsLogin(true)
         setIsMyFriend(false)
         setIsMyMap(true)
-        console.log("註冊完成，已登入")
         setIsProfile(false)
         navigate(`/${userInfo?.name}`)
       }
-    } catch (error: unknown) {
-      console.log(error)
+    } catch (error) {
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(errorMsg)
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const signIn = async (email: string, password: string) => {
     if (!email || !password) return
     try {
-      console.log("登入中")
+      setIsLoading(true)
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email.trim(),
@@ -277,28 +279,28 @@ export function AuthContextProvider({ children }: Props) {
         setCurrentUser(userInfo)
         setAvatarURL(userInfo?.photoURL)
         setIsLogin(true)
-        setIsLogin(true)
         setIsMyFriend(false)
         setIsMyMap(true)
         setIsProfile(false)
-        console.log("已登入")
         navigate(`/${userInfo?.name}`)
       }
-    } catch (error: unknown) {
-      console.log(error)
+    } catch (error) {
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(errorMsg)
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const logOut = async () => {
-    try {
-      console.log("登出中")
-      await signOut(auth)
-      console.log("已登出")
-      setIsLogin(false)
-      navigate("/")
-    } catch (error) {
-      console.log(error)
-    }
+    setIsLoading(true)
+    await signOut(auth)
+    setIsLogin(false)
+    setIsLoading(false)
+    notifySuccess("You have successfully been logged out")
+    navigate("/")
   }
   return (
     <AuthContext.Provider
@@ -330,6 +332,8 @@ export function AuthContextProvider({ children }: Props) {
         setIsProfile,
         avatarURL,
         setAvatarURL,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}

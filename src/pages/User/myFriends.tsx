@@ -24,6 +24,7 @@ import {
   UserInfo,
   HomeTownText,
 } from "../../components/styles/friendStyles"
+import { notifyError } from "../../components/reminder"
 
 const VisitArea = styled.div`
   position: absolute;
@@ -254,7 +255,12 @@ export default function MyFriends() {
         setFriendIds(newIds)
         setFriends(newFriends)
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to get friends' information, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     getFriendsList()
@@ -275,7 +281,12 @@ export default function MyFriends() {
         })
         setBeInvitedList(newInviteds)
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to get invited list, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     getInvitedList()
@@ -285,7 +296,6 @@ export default function MyFriends() {
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     if (!isLogin || currentUser === null) return
-    console.log((e.target as Element).id)
     try {
       if (typeof currentUser?.id === "string") {
         const currentUserRef = doc(db, "users", currentUser?.id)
@@ -305,7 +315,6 @@ export default function MyFriends() {
           status: "accept",
           beFriend: today,
         })
-        console.log("relation的status已改")
         const newBeInviteds = beInvitedIds.filter((item) => {
           return item !== (e.target as Element).id
         })
@@ -315,7 +324,12 @@ export default function MyFriends() {
         setBeInvitedIds(newBeInviteds)
       }
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `An error occurred when accept a friend request, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -339,7 +353,12 @@ export default function MyFriends() {
         setBeInvitedIds(newBeInviteds)
       }
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `An error occurred when deny a friend request, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
   return (

@@ -1,4 +1,11 @@
-import React, { useState, useContext, useRef, useEffect } from "react"
+import React, {
+  useState,
+  useContext,
+  useRef,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react"
 import styled from "styled-components"
 import {
   GoogleMap,
@@ -24,8 +31,10 @@ import {
   GridItemWrapper,
   Xmark,
   FormTitle,
+  Credits,
 } from "../styles/widgetStyles"
 import spinner from "../../assets/dotsSpinner.svg"
+import { notifyError } from "../reminder"
 
 const PlaceInput = styled(Input)`
   font-size: ${(props) => props.theme.title.md};
@@ -83,12 +92,10 @@ const RowNoWrapper = styled.div`
   gap: 5px;
 `
 
-const RowWrapper = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  gap: 5px;
-`
-const ForecastRowWrapper = styled(RowWrapper)`
+const ForecastRowWrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: 100%;
   font-size: ${(props) => props.theme.title.lg};
   gap: 0;
   justify-content: space-between;
@@ -102,9 +109,8 @@ const ColumnWrapper = styled.div`
   align-self: center;
 `
 const ForecastColumnArea = styled(ColumnWrapper)`
-  margin: 20px 0;
+  margin: 20px auto;
   min-height: 50%;
-  padding-left: 15px;
 `
 const WeatherContentArea = styled.div`
   background-color: #ffffff;
@@ -115,12 +121,15 @@ const WeatherContentArea = styled.div`
     display: none;
   }
 `
+const ForecastWrapper = styled(RowNoWrapper)`
+  justify-content: end;
+`
 const TitleWrapper = styled(RowNoWrapper)`
   display: flex;
   flex-flow: column wrap;
-  justify-content: end;
+  align-items: end;
   font-size: ${(props) => props.theme.title.sm};
-  font-weight: 500;
+  font-weight: 400;
 `
 const MaxTempText = styled(ForecastWeatherText)`
   color: #f99c62;
@@ -135,6 +144,12 @@ const PopText = styled(ForecastWeatherText)`
   color: #2b2a2a;
 `
 
+const HumidInfoText = styled(HumidityText)`
+  font-weight: 500;
+`
+const PopInfoText = styled(PopText)`
+  font-weight: 500;
+`
 const Spinner = styled.div`
   width: 100%;
   height: 60px;
@@ -146,15 +161,39 @@ const Spinner = styled.div`
 `
 
 const layouts = {
-  xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 4, maxH: 2 }],
-  lg: [{ i: "exRate-2", x: 0, y: 0, w: 3, h: 2, maxW: 3, maxH: 2 }],
-  md: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 2 }],
-  sm: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xl: [
+    {
+      i: "weather-1",
+      x: 0,
+      y: 0,
+      w: 1.2,
+      h: 1,
+      minW: 1.2,
+      maxW: 1.5,
+      minH: 1.2,
+      maxH: 1.5,
+    },
+  ],
+  lg: [
+    {
+      i: "weather-2",
+      x: 0,
+      y: 0,
+      w: 1.2,
+      h: 2,
+      minW: 1.2,
+      maxW: 1.5,
+      maxH: 1.2,
+    },
+  ],
+  md: [{ i: "weather-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 2 }],
+  sm: [{ i: "weather-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  xs: [{ i: "weather-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
 }
 
 interface Props {
-  showWeather: boolean
+  currentWidget: string
+  setCurrentWidget: Dispatch<SetStateAction<string>>
 }
 interface LocationType {
   lat: number
@@ -205,7 +244,7 @@ ChartJS.register(
 const myOpenweatherApiKey = process.env.REACT_APP_openweather_API_KEY
 
 function WeatherWidget(props: Props) {
-  const { showWeather } = props
+  const { currentWidget, setCurrentWidget } = props
   const { isLoaded } = useContext(AuthContext)
   const [showForecast, setShowForecast] = useState(false)
   const [location, setLocation] = useState<LocationType>({
@@ -286,27 +325,26 @@ function WeatherWidget(props: Props) {
     showLine: false,
   }
   const onPlacesChanged = () => {
-    if (searchBox instanceof google.maps.places.SearchBox) {
-      const searchResult = searchBox.getPlaces()
-      if (searchResult !== undefined) {
-        const newLat = searchResult[0]?.geometry?.location?.lat()
-        const newLng = searchResult[0]?.geometry?.location?.lng()
-        const placeName = searchResult[0]?.name
-        if (newLat && newLng) {
-          setLocation({
-            lat: newLat,
-            lng: newLng,
-            name: placeName,
-          })
-          setShowForecast(true)
-        }
-      }
-    } else console.log("失敗啦")
+    if (!searchBox || searchBox instanceof StandaloneSearchBox) return
+    const searchResult = searchBox.getPlaces()
+    if (!searchResult) return
+    const newLat = searchResult[0]?.geometry?.location?.lat()
+    const newLng = searchResult[0]?.geometry?.location?.lng()
+    const placeName = searchResult[0]?.name
+    if (newLat && newLng && placeName) {
+      setLocation({
+        lat: newLat,
+        lng: newLng,
+        name: placeName,
+      })
+      setShowForecast(true)
+    }
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
   useEffect(() => {
-    if (!showWeather || location.name === "") return
+    locationRef?.current?.focus()
+    if (currentWidget !== "weather" || location.name === "") return
     const getWeatherData = async () => {
       try {
         const weatherURL = `https://api.openweathermap.org/data/3.0/onecall?lat=${location.lat}&lon=${location.lng}&exclude=minutely,hourly,alerts&cnt=7&units=metric&appid=${myOpenweatherApiKey}`
@@ -353,15 +391,19 @@ function WeatherWidget(props: Props) {
         setTheMax(maximum)
         setForecastStatus(forecastInfos)
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"] as string
+          notifyError(
+            `Sorry, we failed to get weather forecast data, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     getWeatherData()
-  }, [location])
+  }, [location.name])
 
   return (
     <GridContainer
-      showWidget={showWeather}
       layouts={layouts}
       key="weather-widget"
       breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
@@ -381,6 +423,10 @@ function WeatherWidget(props: Props) {
                 lng: 0,
                 name: "",
               })
+              setCurrentWidget("")
+              if (locationRef.current !== null) {
+                locationRef.current.value = ""
+              }
             }}
           />
           <FormTitle>Weather</FormTitle>
@@ -453,7 +499,16 @@ function WeatherWidget(props: Props) {
       {location.name !== "" && (
         <GridItemWrapper
           key="weather-result"
-          data-grid={{ x: 1, y: 0, w: 2, h: 1 }}
+          data-grid={{
+            x: 1,
+            y: 0,
+            w: 1.2,
+            h: 1.1,
+            minW: 1.2,
+            minH: 1.1,
+            maxW: 1.5,
+            maxH: 1.5,
+          }}
         >
           {showForecast && (
             <WeatherContentArea key="weather-query">
@@ -466,13 +521,13 @@ function WeatherWidget(props: Props) {
                 {forecastStatus.map((item) => {
                   return (
                     <ForecastColumnArea key={item.date}>
-                      <RowNoWrapper
+                      <ForecastWrapper
                         key={`${item.date}-icon-forecast-${item.icon}`}
                       >
                         <ForecastWeatherImg
                           src={`http://openweathermap.org/img/wn/${item.icon}@2x.png`}
                         />
-                      </RowNoWrapper>
+                      </ForecastWrapper>
                       <RowNoWrapper
                         key={`${item.date}-maxTemp-${item.maxTemp}`}
                       >
@@ -494,11 +549,14 @@ function WeatherWidget(props: Props) {
                     </ForecastColumnArea>
                   )
                 })}
-                <TitleWrapper>
-                  <HumidityText>Humidity</HumidityText>
-                  <PopText>Probability of Precipitation,POP</PopText>
-                </TitleWrapper>
               </ForecastRowWrapper>
+              <TitleWrapper>
+                <HumidInfoText>Humidity</HumidInfoText>
+                <PopInfoText>Probability of Precipitation,POP</PopInfoText>
+                <Credits href="https://openweathermap.org/">
+                  Credits: OpenWeather®
+                </Credits>
+              </TitleWrapper>
             </WeatherContentArea>
           )}
         </GridItemWrapper>

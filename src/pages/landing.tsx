@@ -15,15 +15,20 @@ import "leaflet/dist/leaflet.css"
 import { countries } from "../utils/customGeo"
 import { AuthContext } from "../context/authContext"
 import PhotoWall from "../components/photoWall"
-import { TipsContent, SampleMemory } from "../components/sampleContent"
+import TipsContent from "../components/sampleContent"
+import { notifyWarn } from "../components/reminder"
 import {
   Attribution,
   StyleMapContainer,
   Container,
 } from "../components/styles/mapStyles"
-import { StepTitle, Input, BtnText } from "../components/styles/formStyles"
+import {
+  StepTitle,
+  Input,
+  BtnText,
+  Spinner,
+} from "../components/styles/formStyles"
 import finger from "../assets/buttons/blackFinger.png"
-import tip from "../assets/tip.png"
 import home from "../assets/markers/home1.png"
 
 const HeaderWrapper = styled.div`
@@ -88,7 +93,7 @@ const TabWrapper = styled.div`
   opacity: 1;
   gap: 20px;
 `
-const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
+const Tab = styled.div<{ authStatus: string }>`
   display: flex;
   padding: 0 15px;
   color: ${(props) => props.theme.color.bgDark};
@@ -96,67 +101,45 @@ const Tab = styled.div<{ isSignUp: boolean; isSignIn: boolean }>`
   border: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+  cursor: pointer;
   @media screen and (min-width: 600px), (max-height: 600px) {
     padding: 2px 10px;
   }
 `
 const SignUpTab = styled(Tab)`
-  color: ${(props) => props.isSignUp && props.theme.color.bgLight};
-  background-color: ${(props) =>
-    props.isSignUp ? props.theme.color.lightMain : "none"};
-  cursor: ${(props) => (!props.isSignUp ? "pointer" : "default")};
+  ${(props) =>
+    props.authStatus === "isSigningUp" &&
+    ` color: ${props.theme.color.bgLight};
+      background-color:${props.theme.color.lightMain};
+      cursor:default;`}
   &:hover {
-    color: ${(props) =>
-      !props.isSignUp ? props.theme.color.deepMain : props.theme.color.bgLight};
-    background-color: ${(props) =>
-      !props.isSignUp && props.theme.color.bgLight};
-    transition: ${(props) => !props.isSignUp && "background-color 0.5s"};
+    ${(props) =>
+      props.authStatus !== "isSigningUp" &&
+      `color: ${props.theme.color.deepMain};
+       background-color:${props.theme.color.bgLight};
+       transition: background-color 0.5s;`}
   }
 `
 
 const SignInTab = styled(Tab)`
-  color: ${(props) => props.isSignIn && props.theme.color.bgLight};
-  background-color: ${(props) =>
-    props.isSignIn ? props.theme.color.lightMain : "none"};
-  cursor: ${(props) => (!props.isSignIn ? "pointer" : "default")};
+  ${(props) =>
+    props.authStatus === "isSigningIn" &&
+    ` color: ${props.theme.color.bgLight};
+      background-color:${props.theme.color.lightMain};
+      cursor:default;`}
   &:hover {
-    color: ${(props) =>
-      !props.isSignIn ? props.theme.color.deepMain : props.theme.color.bgLight};
-    background-color: ${(props) =>
-      !props.isSignIn && props.theme.color.bgLight};
-    transition: ${(props) => !props.isSignIn && "background-color 0.5s"};
+    ${(props) =>
+      props.authStatus !== "isSigningIn" &&
+      `color: ${props.theme.color.deepMain};
+       background-color:${props.theme.color.bgLight};
+       transition: background-color 0.5s;`}
   }
 `
 const TabText = styled.div`
   width: 100%;
   height: 100%;
 `
-const TipText = styled.div`
-  display: flex;
-  padding: 0 15px;
-  border: none;
-  gap: 5px;
-  cursor: pointer;
-  &:hover {
-    border-bottom: 3px solid #fff;
-  }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    padding: 2px 10px;
-  }
-`
-const TipTab = styled.div`
-  display: flex;
-  width: 30px;
-  height: 30px;
-  background-image: url(${tip});
-  background-size: contain;
-  cursor: pointer;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    width: 25px;
-    height: 25px;
-  }
-`
+
 const Wrapper = styled.div`
   position: absolute;
   top: 0;
@@ -189,10 +172,8 @@ interface Props {
 }
 
 interface AuthProps {
-  isSignUp: boolean
-  isSignIn: boolean
-  setIsSignUp: Dispatch<SetStateAction<boolean>>
-  setIsSignIn: Dispatch<SetStateAction<boolean>>
+  authStatus: string
+  setAuthStatus: Dispatch<SetStateAction<string>>
   overlayRef: React.RefObject<HTMLDivElement>
 }
 
@@ -223,24 +204,23 @@ const myCustomStyle = {
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-  isSignUp: boolean,
-  isSignIn: boolean,
-  setIsSignUp: Dispatch<React.SetStateAction<boolean>>,
-  setIsSignIn: Dispatch<React.SetStateAction<boolean>>
+  setAuthStatus: Dispatch<SetStateAction<string>>
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
+      const targetNode = event?.target as Node
+      const targetElement = event?.target as Element
       if (
         !ref.current ||
-        ref.current.contains(event.target as Node) ||
-        (event?.target as Node)?.parentElement?.className === "pac-item" ||
-        (event?.target as Node)?.parentElement?.className === "pac-container"
+        ref.current.contains(targetNode) ||
+        targetElement.classList.contains("pac-item") ||
+        targetElement.classList.contains("    pac-matched") ||
+        targetNode?.parentElement?.className === "pac-item" ||
+        targetNode?.parentElement?.className === "pac-container"
       ) {
         return
       }
-      if (isSignUp && !isSignIn) setIsSignUp(false)
-
-      if (isSignIn && !isSignUp) setIsSignIn(false)
+      setAuthStatus("")
     }
     window.addEventListener("mousedown", listener)
     window.addEventListener("touchstart", listener)
@@ -252,11 +232,13 @@ function useOnClickOutside(
 }
 
 function AuthArea(props: AuthProps) {
-  const { currentUser, isLogin, signUp, signIn } = useContext(AuthContext)
-  const { overlayRef, isSignUp, isSignIn, setIsSignUp, setIsSignIn } = props
+  const { currentUser, isLogin, signUp, signIn, isLoading } =
+    useContext(AuthContext)
+  const { overlayRef, authStatus, setAuthStatus } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
+  const hometownRef = useRef<HTMLInputElement>(null)
   const [hometownBox, setHometownBox] = useState<
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
@@ -266,30 +248,90 @@ function AuthArea(props: AuthProps) {
     if (hometownBox instanceof google.maps.places.SearchBox) {
       const searchResult = hometownBox.getPlaces()
       setResult(searchResult)
-    } else console.log("失敗啦")
+    }
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setHometownBox(ref)
 
-  useOnClickOutside(
-    overlayRef,
-    isSignUp,
-    isSignIn,
-    () => setIsSignUp(false),
-    () => setIsSignIn(false)
-  )
+  useEffect(() => {
+    if (authStatus === "") return
+    if (authStatus === "isSigningUp") nameRef?.current?.focus()
+    if (authStatus === "isSigningIn") emailRef?.current?.focus()
+  }, [authStatus])
+
+  const handleSignUp = () => {
+    if (nameRef?.current?.value.trim() === "") {
+      nameRef.current.focus()
+      notifyWarn("Your name is required")
+      return
+    }
+    if (emailRef?.current?.value.trim() === "") {
+      emailRef?.current.focus()
+      notifyWarn("Email is required")
+      return
+    }
+    if (pwRef?.current?.value.trim() === "") {
+      pwRef?.current.focus()
+      notifyWarn("Password is required")
+      return
+    }
+    if (!result && hometownRef?.current !== null) {
+      hometownRef?.current.focus()
+      notifyWarn("Please select your hometown")
+      return
+    }
+    if (
+      typeof nameRef?.current?.value === "string" &&
+      typeof emailRef?.current?.value === "string" &&
+      typeof pwRef?.current?.value === "string" &&
+      result
+    ) {
+      signUp(
+        nameRef?.current?.value,
+        emailRef?.current?.value,
+        pwRef?.current?.value,
+        result
+      )
+    }
+  }
+
+  const handleSignIn = () => {
+    if (emailRef?.current?.value.trim() === "") {
+      emailRef?.current.focus()
+      notifyWarn("Invalid Email")
+      return
+    }
+    if (pwRef?.current?.value.trim() === "") {
+      pwRef?.current.focus()
+      notifyWarn("Invalid password")
+      return
+    }
+    if (
+      typeof emailRef?.current?.value === "string" &&
+      typeof pwRef?.current?.value === "string"
+    ) {
+      signIn(emailRef?.current?.value, pwRef?.current?.value)
+    }
+  }
+  useOnClickOutside(overlayRef, () => setAuthStatus(""))
 
   return (
     <Wrapper ref={overlayRef}>
       {(!isLogin || currentUser === null || currentUser === undefined) &&
-        isSignUp && (
+        authStatus === "isSigningUp" && (
           <>
             <AuthTitle>Name</AuthTitle>
-            <Input ref={nameRef} name="userName" placeholder="Big Traveller" />
+            <Input
+              ref={nameRef}
+              name="userName"
+              placeholder="Big Traveller"
+              required
+            />
             <AuthTitle>Email</AuthTitle>
             <Input
               ref={emailRef}
               name="accountEmail"
               placeholder="name@xxxx.com"
+              required
             />
             <AuthTitle>Password</AuthTitle>
             <Input
@@ -297,43 +339,33 @@ function AuthArea(props: AuthProps) {
               ref={pwRef}
               name="password"
               placeholder="over 6 letters"
+              required
             />
             <AuthTitle>Where is your hometown?</AuthTitle>
             <StandaloneSearchBox
               onLoad={onLoad}
               onPlacesChanged={onPlacesChanged}
             >
-              <Input placeholder="search and select a place" />
+              <Input
+                ref={hometownRef}
+                placeholder="search and select a place"
+                required
+              />
             </StandaloneSearchBox>
-            <BtnText
-              onClick={() => {
-                if (
-                  result &&
-                  nameRef?.current !== null &&
-                  emailRef?.current !== null &&
-                  pwRef?.current !== null
-                ) {
-                  signUp(
-                    nameRef?.current?.value,
-                    emailRef?.current?.value,
-                    pwRef?.current?.value,
-                    result
-                  )
-                }
-              }}
-            >
-              Create an account
+            <BtnText id="BtnSignUp" onClick={handleSignUp}>
+              {isLoading ? <Spinner /> : "Create an account"}
             </BtnText>
           </>
         )}
       {(!isLogin || currentUser === null || currentUser === undefined) &&
-        isSignIn && (
+        authStatus === "isSigningIn" && (
           <>
             <AuthTitle>Email</AuthTitle>
             <Input
               ref={emailRef}
               name="accountEmail"
               placeholder="name@xxxx.com"
+              required
             />
             <AuthTitle>Password</AuthTitle>
             <Input
@@ -341,15 +373,10 @@ function AuthArea(props: AuthProps) {
               ref={pwRef}
               name="password"
               placeholder="over 6 letters"
+              required
             />
-            <BtnText
-              onClick={() => {
-                if (emailRef?.current !== null && pwRef?.current !== null) {
-                  signIn(emailRef?.current?.value, pwRef?.current?.value)
-                }
-              }}
-            >
-              Sign in
+            <BtnText onClick={handleSignIn}>
+              {isLoading ? <Spinner /> : "Sign in"}
             </BtnText>
           </>
         )}
@@ -441,11 +468,8 @@ function Home() {
   const { currentUser, isLogin, mapZoom } = useContext(AuthContext)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<LatLng | null>(null)
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [isSignIn, setIsSignIn] = useState(false)
+  const [authStatus, setAuthStatus] = useState("")
   const [showTips, setShowTips] = useState(false)
-  const [showSamplePost, setShowSamplePost] = useState(false)
-  const [hasRead, setHasRead] = useState(false)
 
   const [fingerRoute, setFingerRoute] = useState({
     lat: 76.28248506785224,
@@ -471,7 +495,7 @@ function Home() {
   }, [mapZoom])
 
   useEffect(() => {
-    if (showSamplePost) return
+    if (showTips) return
     setFingerRoute(routePositions[cursor])
     const interval = setInterval(() => {
       if (cursor === routePositions.length - 1) {
@@ -485,54 +509,34 @@ function Home() {
     return () => {
       clearInterval(interval)
     }
-  }, [showSamplePost, routePositions])
+  }, [showTips, routePositions])
 
   return (
     <>
       <HeaderWrapper>
         <TabWrapper>
           <SignUpTab
-            isSignUp={isSignUp}
-            isSignIn={isSignIn}
+            authStatus={authStatus}
             onClick={() => {
-              setShowSamplePost(false)
-              setIsSignIn(false)
-              setIsSignUp(true)
+              setShowTips(false)
+              setAuthStatus("isSigningUp")
             }}
           >
             <TabText> Sign up</TabText>
           </SignUpTab>
           <SignInTab
-            isSignUp={isSignUp}
-            isSignIn={isSignIn}
+            authStatus={authStatus}
             onClick={() => {
-              setShowSamplePost(false)
-              setIsSignUp(false)
-              setIsSignIn(true)
+              setShowTips(false)
+              setAuthStatus("isSigningIn")
             }}
           >
             <TabText>Sign In</TabText>
           </SignInTab>
-          {/* <TipText
-            onClick={() => {
-              setShowTips((prev) => !prev)
-            }}
-          >
-            <TipTab />
-            Tips
-          </TipText> */}
         </TabWrapper>
         <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
-        {showSamplePost && (
-          <SampleMemory
-            setShowSamplePost={setShowSamplePost}
-            setHasRead={setHasRead}
-            setIsSignUp={setIsSignUp}
-            setIsSignIn={setIsSignIn}
-          />
-        )}
         <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
@@ -564,20 +568,17 @@ function Home() {
                   onEachFeature={onEachFeature}
                 />
               ))}
-              {!hasRead && !showSamplePost && (
-                <FingerMarker data={fingerRoute} />
-              )}
-              {(isSignUp || isSignIn) && <ChangeCenter />}
-              {}
+              {!showTips && <FingerMarker data={fingerRoute} />}
+              {authStatus !== "" && <ChangeCenter />}
               <TargetArea position={position} setPosition={setPosition} />
 
-              {!isSignUp && !isSignIn && overlayRef.current === null && (
+              {authStatus === "" && overlayRef.current === null && (
                 <>
                   <ChangeCenterBack />
-                  <PhotoWall setShowSamplePost={setShowSamplePost} />
+                  <PhotoWall setShowTips={setShowTips} />
                 </>
               )}
-              {isSignUp && (
+              {authStatus === "isSigningUp" && (
                 <Marker position={[30, 121]}>
                   <Tooltip
                     direction="bottom"
@@ -597,12 +598,10 @@ function Home() {
             </StyleMapContainer>
           </>
         )}
-        {(isSignUp || isSignIn) && (
+        {authStatus !== "" && (
           <AuthArea
-            isSignUp={isSignUp}
-            isSignIn={isSignIn}
-            setIsSignUp={setIsSignUp}
-            setIsSignIn={setIsSignIn}
+            authStatus={authStatus}
+            setAuthStatus={setAuthStatus}
             overlayRef={overlayRef}
           />
         )}

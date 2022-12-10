@@ -42,6 +42,7 @@ import location from "../../assets/location.png"
 import spinner from "../../assets/dotsSpinner.svg"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
 import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
+import { notifyError } from "../../components/reminder"
 
 const Spinner = styled.div`
   width: 100%;
@@ -108,7 +109,12 @@ export default function MyMemories() {
       setMemories(newMemories)
       setMemory(undefined)
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to delete a specific message, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
   useEffect(() => {
@@ -153,7 +159,7 @@ export default function MyMemories() {
           Post time
           <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
         </BtnSort>
-        <BtnSort
+        {/* <BtnSort
           isCurrent={isSortByDate}
           onClick={() => {
             if (!isSortByDate) {
@@ -164,7 +170,7 @@ export default function MyMemories() {
         >
           Travel date
           <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
-        </BtnSort>
+        </BtnSort> */}
       </BtnSortWrapper>
       <ContentArea>
         {isLogin && isLoaded && memories ? (
