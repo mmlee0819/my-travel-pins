@@ -8,7 +8,12 @@ import React, {
 import { ToolContext } from "../../context/toolContext"
 import styled from "styled-components"
 import { Input } from "../styles/formStyles"
-import { GridContainer, GridItemWrapper, Xmark } from "../styles/widgetStyles"
+import {
+  GridContainer,
+  GridItemWrapper,
+  Xmark,
+  Credits,
+} from "../styles/widgetStyles"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import { DocumentData } from "@firebase/firestore-types"
@@ -130,39 +135,23 @@ const CurrentOne = styled(CurrencyRow)`
 `
 const ExchangesTitle = styled.div`
   font-weight: 500;
+  font-size: 16px;
 `
 const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
 `
 
 const GridItemContent = styled(ExchangesTitle)`
-  margin: 20px 0 40px 0;
+  margin-top: auto;
+  font-size: 14px;
+  font-weight: 400;
 `
 
 const ResultTitle = styled(AmountTitle)`
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 700;
   color: #034961;
-  margin: 10px 0 20px 0;
-`
-const Credits = styled.a`
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: start;
-  margin-top: 35px;
-  font-size: 16px;
-  color: #b4b1b1;
-  text-decoration: underline;
-  &:visited {
-    color: #b4b1b1;
-    text-decoration: none;
-  }
-  &:hover {
-    color: #454545;
-  }
-  &:active {
-    color: #b4b1b1;
-  }
+  margin: 10px 0 40px 0;
 `
 const FlagImg = styled.img`
   margin: 0 5px;
@@ -296,8 +285,8 @@ interface Props {
   setShowFrom: Dispatch<SetStateAction<boolean>>
   showTo: boolean
   setShowTo: Dispatch<SetStateAction<boolean>>
-  showExchange: boolean
-  setShowExchange: Dispatch<SetStateAction<boolean>>
+  currentWidget: string
+  setCurrentWidget: Dispatch<SetStateAction<string>>
 }
 
 function CurrencyWidget(props: Props) {
@@ -307,8 +296,8 @@ function CurrencyWidget(props: Props) {
     setShowFrom,
     showTo,
     setShowTo,
-    showExchange,
-    setShowExchange,
+    currentWidget,
+    setCurrentWidget,
   } = props
   const {
     currentRate,
@@ -347,7 +336,6 @@ function CurrencyWidget(props: Props) {
 
   return (
     <GridContainer
-      showWidget={showExchange}
       layouts={layouts}
       key="currency-widget"
       breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
@@ -359,7 +347,7 @@ function CurrencyWidget(props: Props) {
       <GridItemWrapper key="exchange-rate">
         <Xmark
           onClick={() => {
-            setShowExchange(false)
+            setCurrentWidget("")
             setSelectedFrom({
               id: selectedFrom.id || "TWD",
               flag: selectedFrom.flag || taiwan,
@@ -492,7 +480,7 @@ function CurrencyWidget(props: Props) {
           <ResultTitle>{`${convertResult.toFixed(2)} ${
             selectedTo.currency
           }`}</ResultTitle>
-          <GridItemContent>
+          <ExchangesTitle>
             {`1 ${selectedFrom.id} = ${currentRate.toFixed(4)} ${
               selectedTo.id
             }`}
@@ -500,14 +488,15 @@ function CurrencyWidget(props: Props) {
             {`1 ${selectedTo.id} = ${(1 / currentRate).toFixed(4)} ${
               selectedFrom.id
             }`}
-          </GridItemContent>
-          <ExchangesTitle>
+          </ExchangesTitle>
+          <GridItemContent>
             Last updated: <br />
             {currenciesData?.USDTWD?.UTC} UTC
-          </ExchangesTitle>
-          <Credits href="https://tw.rter.info/howto_currencyapi.php">
-            Credits: ©RTER.info
-          </Credits>
+            <br />
+            <Credits href="https://tw.rter.info/howto_currencyapi.php">
+              Credits: ©RTER.info
+            </Credits>
+          </GridItemContent>
         </GridItemWrapper>
       )}
     </GridContainer>

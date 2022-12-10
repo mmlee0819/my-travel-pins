@@ -110,17 +110,16 @@ const Xmark = styled.div`
 const StreetModeContainer = styled.div`
   height: 40vh;
 `
-
+interface Props {
+  setShowTips?: Dispatch<SetStateAction<boolean>>
+  setCurrentWidget?: Dispatch<SetStateAction<string>>
+}
 const samplePhotos = [tip1, tip2, tip3, tip4, tip5, tip6, tip7]
 const sampleSwiperModule = [FreeMode, Navigation, Thumbs]
 
-export default function TipsContent({
-  setShowTips,
-}: {
-  setShowTips: Dispatch<SetStateAction<boolean>>
-}) {
+export default function TipsContent(props: Props) {
   const { isLoaded, isLogin } = useContext(AuthContext)
-
+  const { setShowTips, setCurrentWidget } = props
   const onStreetLoad = () => {
     new google.maps.StreetViewPanorama(
       document.getElementById("street-mode-container") as HTMLElement,
@@ -137,14 +136,19 @@ export default function TipsContent({
     )
   }
 
+  const handleCloseTips = () => {
+    if (setShowTips) {
+      setShowTips(false)
+    }
+    if (setCurrentWidget) {
+      setCurrentWidget("")
+    }
+  }
+
   return (
     <Container>
       <ContentArea>
-        <Xmark
-          onClick={() => {
-            setShowTips(false)
-          }}
-        />
+        <Xmark onClick={handleCloseTips} />
         <LeftWrapper>
           <SwiperPhotos
             photos={samplePhotos}

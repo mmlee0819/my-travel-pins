@@ -22,6 +22,7 @@ const ToolsWrapper = styled.div`
   display: flex;
   top: 80px;
   right: 35px;
+  border-radius: 20px;
   z-index: 200;
 `
 const DragWrapper = styled(animated.div)`
@@ -33,28 +34,46 @@ const DragWrapper = styled(animated.div)`
   cursor: grab;
 `
 
-const RobotIcon = styled.div`
+const RobotIcon = styled.div<{ showTools: boolean }>`
   height: 50px;
   width: 50px;
-  border-radius: 10%;
+  border-radius: 10px;
   background-image: url(${robot});
   background-size: contain;
   cursor: grab;
+  ${(props) =>
+    props.showTools &&
+    ` border-radius: 0;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;`}
 `
-const CurrencyIcon = styled(RobotIcon)`
-  height: 30px;
-  width: 30px;
-  margin: 10px auto;
+const WidgetIcon = styled.div<{ currentWidget: string }>`
+  height: 50px;
+  width: 50px;
   background-image: url(${currency});
-  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 60% 60%;
   cursor: pointer;
+  &:hover {
+    background-color: ${(props) => props.theme.btnColor.bgBlue};
+    border-radius: 0;
+  }
+`
+const CurrencyIcon = styled(WidgetIcon)`
+  background-color: ${(props) =>
+    props.currentWidget === "exchange" && props.theme.btnColor.bgBlue};
+`
+const Weather = styled(WidgetIcon)`
+  background-image: url(${weather});
+  background-color: ${(props) =>
+    props.currentWidget === "weather" ? props.theme.btnColor.bgBlue : "none"};
 `
 
-const QaIcon = styled(CurrencyIcon)`
+const QaIcon = styled(WidgetIcon)`
   background-image: url(${questionMark});
-`
-const Weather = styled(CurrencyIcon)`
-  background-image: url(${weather});
+  background-color: ${(props) =>
+    props.currentWidget === "tips" ? props.theme.btnColor.bgBlue : "none"};
 `
 
 function ToolsRobot() {
@@ -66,15 +85,14 @@ function ToolsRobot() {
     selectedTo,
     setSelectedTo,
   } = useContext(ToolContext)
+  const [currentWidget, setCurrentWidget] = useState("")
   const [showTools, setShowTools] = useState(false)
-  const [showExchange, setShowExchange] = useState(false)
   const [currenciesData, setCurrenciesData] = useState<
     DocumentData | undefined
   >({})
   const [showFrom, setShowFrom] = useState(false)
   const [showTo, setShowTo] = useState(false)
-  const [showWeather, setShowWeather] = useState(false)
-  const [showTips, setShowTips] = useState(false)
+
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -142,99 +160,68 @@ function ToolsRobot() {
     }
   }, [showTools])
 
+  const handleClickWeather = () => {
+    if (currentWidget === "exchange") {
+      setSelectedFrom({
+        id: selectedFrom.id || "TWD",
+        flag: selectedFrom.flag || taiwan,
+        currency: selectedFrom.currency || "TWD (台幣)",
+      })
+      setSelectedTo({
+        id: selectedTo.id || "USD",
+        flag: selectedTo.flag || usa,
+        currency: selectedTo.currency || "USD (美金)",
+      })
+      setCurrentRate(0)
+      setConvertResult(0)
+      setCurrentWidget("weather")
+    } else {
+      setCurrentWidget("weather")
+    }
+  }
+
+  const handleClickCurrency = () => {
+    if (currentWidget !== "exchange") {
+      getRatesData(setCurrenciesData)
+      setCurrentWidget("exchange")
+    }
+  }
+
   return (
     <>
       <ToolsWrapper>
-        <DragWrapper
-          style={{ x, y, ...styles }}
-          {...bindDrag()}
-          onClick={(e) => {
-            if ((e.target as Element).id === "robotIcon" && showTools) {
-              setSelectedFrom({
-                id: selectedFrom.id || "TWD",
-                flag: selectedFrom.flag || taiwan,
-                currency: selectedFrom.currency || "TWD (台幣)",
-              })
-              setSelectedTo({
-                id: selectedTo.id || "USD",
-                flag: selectedTo.flag || usa,
-                currency: selectedTo.currency || "USD (美金)",
-              })
-              setCurrentRate(0)
-              setConvertResult(0)
-              setShowExchange(false)
+        <DragWrapper style={{ x, y, ...styles }} {...bindDrag()}>
+          <RobotIcon
+            showTools={showTools}
+            id="robotIcon"
+            onClick={() => {
               setShowTools((prev) => !prev)
-              setShowWeather(false)
-            } else if ((e.target as Element).id === "robotIcon" && !showTools) {
-              setShowTools((prev) => !prev)
-            }
-          }}
-        >
-          <RobotIcon id="robotIcon" />
+            }}
+          />
           {showTools && (
             <>
               <Weather
-                id="weatherIcon"
-                onClick={(e) => {
-                  if (
-                    (e.target as Element).id === "weatherIcon" &&
-                    showExchange
-                  ) {
-                    setShowExchange(false)
-                    setSelectedFrom({
-                      id: selectedFrom.id || "TWD",
-                      flag: selectedFrom.flag || taiwan,
-                      currency: selectedFrom.currency || "TWD (台幣)",
-                    })
-                    setSelectedTo({
-                      id: selectedTo.id || "USD",
-                      flag: selectedTo.flag || usa,
-                      currency: selectedTo.currency || "USD (美金)",
-                    })
-                    setCurrentRate(0)
-                    setConvertResult(0)
-                    setShowWeather((prev) => !prev)
-                  } else if ((e.target as Element).id === "weatherIcon") {
-                    setShowWeather((prev) => !prev)
-                  }
-                }}
+                currentWidget={currentWidget}
+                onClick={handleClickWeather}
               />
               <CurrencyIcon
-                id="currencyIcon"
-                onClick={(e) => {
-                  if (
-                    (e.target as Element).id === "currencyIcon" &&
-                    !showExchange
-                  ) {
-                    getRatesData(setCurrenciesData)
-                    setShowExchange((prev) => !prev)
-                    setShowWeather(false)
-                  } else if (
-                    (e.target as Element).id === "currencyIcon" &&
-                    showExchange
-                  ) {
-                    setShowExchange((prev) => !prev)
-                    setConvertResult(0)
-                  }
-                }}
+                currentWidget={currentWidget}
+                onClick={handleClickCurrency}
               />
-
               <QaIcon
-                id="questions"
+                currentWidget={currentWidget}
                 onClick={() => {
-                  setShowExchange(false)
-                  setShowWeather(false)
-                  setShowTips((prev) => !prev)
+                  setCurrentWidget("tips")
                 }}
               />
             </>
           )}
         </DragWrapper>
       </ToolsWrapper>
-      {showExchange && (
+      {currentWidget === "exchange" && (
         <CurrencyWidget
-          showExchange={showExchange}
-          setShowExchange={setShowExchange}
+          currentWidget={currentWidget}
+          setCurrentWidget={setCurrentWidget}
           showFrom={showFrom}
           setShowFrom={setShowFrom}
           showTo={showTo}
@@ -242,8 +229,15 @@ function ToolsRobot() {
           currenciesData={currenciesData}
         />
       )}
-      {showWeather && <WeatherWidget showWeather={showWeather} />}
-      {showTips && <TipsContent setShowTips={setShowTips} />}
+      {currentWidget === "weather" && (
+        <WeatherWidget
+          currentWidget={currentWidget}
+          setCurrentWidget={setCurrentWidget}
+        />
+      )}
+      {currentWidget === "tips" && (
+        <TipsContent setCurrentWidget={setCurrentWidget} />
+      )}
     </>
   )
 }
