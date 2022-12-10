@@ -3,7 +3,7 @@ import { useState, useContext, Dispatch, SetStateAction } from "react"
 import styled from "styled-components"
 import { storage } from "../../utils/firebase"
 import { AuthContext } from "../../context/authContext"
-import { notifyWarn } from "../reminder"
+import { notifyError, notifyWarn } from "../reminder"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import imageCompression from "browser-image-compression"
 import uploadIcon from "../../assets/buttons/uploadImgIcon.png"
@@ -123,7 +123,12 @@ export default function Upload(props: UploadType) {
         handleUpload(newFiles)
       }
     } catch (error) {
-      console.log("Failed to compress files", error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to upload photos, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -145,7 +150,11 @@ export default function Upload(props: UploadType) {
             setUploadProgress(progress)
           },
           (error) => {
-            console.log(error)
+            notifyError(
+              `Failed to upload photos, please take a note of ${
+                error["message"] as string
+              } and contact mika@test.com`
+            )
           },
           async () => {
             const url = await getDownloadURL(

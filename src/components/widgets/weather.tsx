@@ -26,6 +26,7 @@ import {
   FormTitle,
 } from "../styles/widgetStyles"
 import spinner from "../../assets/dotsSpinner.svg"
+import { notifyError } from "../reminder"
 
 const PlaceInput = styled(Input)`
   font-size: ${(props) => props.theme.title.md};
@@ -286,22 +287,20 @@ function WeatherWidget(props: Props) {
     showLine: false,
   }
   const onPlacesChanged = () => {
-    if (searchBox instanceof google.maps.places.SearchBox) {
-      const searchResult = searchBox.getPlaces()
-      if (searchResult !== undefined) {
-        const newLat = searchResult[0]?.geometry?.location?.lat()
-        const newLng = searchResult[0]?.geometry?.location?.lng()
-        const placeName = searchResult[0]?.name
-        if (newLat && newLng) {
-          setLocation({
-            lat: newLat,
-            lng: newLng,
-            name: placeName,
-          })
-          setShowForecast(true)
-        }
-      }
-    } else console.log("失敗啦")
+    if (!searchBox || searchBox instanceof StandaloneSearchBox) return
+    const searchResult = searchBox.getPlaces()
+    if (!searchResult) return
+    const newLat = searchResult[0]?.geometry?.location?.lat()
+    const newLng = searchResult[0]?.geometry?.location?.lng()
+    const placeName = searchResult[0]?.name
+    if (newLat && newLng && placeName) {
+      setLocation({
+        lat: newLat,
+        lng: newLng,
+        name: placeName,
+      })
+      setShowForecast(true)
+    }
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
@@ -353,7 +352,12 @@ function WeatherWidget(props: Props) {
         setTheMax(maximum)
         setForecastStatus(forecastInfos)
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"] as string
+          notifyError(
+            `Sorry, we failed to get weather forecast data, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     getWeatherData()

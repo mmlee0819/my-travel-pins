@@ -39,6 +39,7 @@ import mexico from "../../assets/flags/mexico.png"
 import turkey from "../../assets/flags/turkey.png"
 import india from "../../assets/flags/india.png"
 import calculator from "../../assets/calculator.png"
+import { notifyError } from "../reminder"
 
 const Title = styled.div`
   padding: 0;
@@ -129,7 +130,6 @@ const CurrentOne = styled(CurrencyRow)`
 `
 const ExchangesTitle = styled.div`
   font-weight: 500;
-  /* margin: 10px 0; */
 `
 const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
@@ -248,7 +248,12 @@ export const getRatesData = async (
       setCurrenciesData(data)
     }
   } catch (error) {
-    console.log(error)
+    if (error instanceof Error) {
+      const errorMsg = error["message"].slice(9) as string
+      notifyError(
+        `Sorry, we failed to get rates data, please take a note of ${errorMsg} and contact mika@test.com`
+      )
+    }
   }
 }
 

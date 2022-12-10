@@ -25,6 +25,7 @@ import whiteEditPencil from "../../assets/buttons/edit.png"
 import blackEditPencil from "../../assets/buttons/blackEdit.png"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
+import { notifyError } from "../reminder"
 
 const Container = styled.div`
   position: absolute;
@@ -398,59 +399,6 @@ export default function DetailMemory(props: Props) {
   const memorySwiperModule =
     albumUrls.length > 1 ? swiperModules.manyPhoto : swiperModules.onePhoto
 
-  const updateTitle = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log("Failed to revert contents to original", error)
-    }
-  }
-
-  const updateTravelDate = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log(
-        "Failed to update travelDate from specific memory page",
-        error
-      )
-    }
-  }
-
-  const updateArtiContent = async () => {
-    if (!selectedMarker?.id) return
-    const docRef = doc(db, "pins", selectedMarker?.id)
-    try {
-      await updateDoc(docRef, {
-        article: {
-          title: artiTitle,
-          travelDate: travelDate,
-          content: artiContent,
-        },
-      })
-    } catch (error) {
-      console.log(
-        "Failed to update article content from specific memory page",
-        error
-      )
-    }
-  }
   const updatePhotos = async () => {
     if (!selectedMarker?.id) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -465,9 +413,15 @@ export default function DetailMemory(props: Props) {
       setUploadProgress(0)
       setShowUploadMore(true)
     } catch (error) {
-      console.log("Failed to update photos from specific memory page", error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to upload photos, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
+
   const updateToOrigin = async () => {
     if (!selectedMarker?.id || !hasDiscard) return
     const docRef = doc(db, "pins", selectedMarker?.id)
@@ -483,10 +437,12 @@ export default function DetailMemory(props: Props) {
       })
       setHasDiscard(false)
     } catch (error) {
-      console.log(
-        "Failed to update article content from specific memory page",
-        error
-      )
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to update contents of specific memory, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
   const cancelPhotos = async () => {
@@ -500,13 +456,38 @@ export default function DetailMemory(props: Props) {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
         })
       } catch (error) {
-        console.log("Failed to cancel uploaded", error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to delete uploaded photos, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     setHasUpload(false)
     setFilesName([])
     setUploadProgress(0)
     setUrls([])
+  }
+
+  const handleUpdate = async () => {
+    if (!selectedMarker?.id) return
+    const docRef = doc(db, "pins", selectedMarker?.id)
+    if (hasUpload) {
+      updatePhotos()
+    }
+    await updateDoc(docRef, {
+      article: {
+        title: artiTitle,
+        travelDate: travelDate,
+        content: artiContent,
+      },
+    })
+    setShowEditor(false)
+    setCanUpload(false)
+    setArtiTitle(artiTitle)
+    setTravelDate(travelDate)
+    setArtiContent(artiContent)
   }
 
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
@@ -758,23 +739,7 @@ export default function DetailMemory(props: Props) {
                   >
                     Back
                   </BtnCancel>
-                  <BtnDone
-                    onClick={() => {
-                      if (hasUpload) {
-                        updatePhotos()
-                      }
-                      updateTitle()
-                      updateTravelDate()
-                      updateArtiContent()
-                      setShowEditor(false)
-                      setCanUpload(false)
-                      setArtiTitle(artiTitle)
-                      setTravelDate(travelDate)
-                      setArtiContent(artiContent)
-                    }}
-                  >
-                    Done
-                  </BtnDone>
+                  <BtnDone onClick={handleUpdate}>Done</BtnDone>
                 </BtnSaveBackWrapper>
               )}
               {showEditor && (

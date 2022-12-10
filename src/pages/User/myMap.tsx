@@ -21,7 +21,7 @@ import {
 } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
-import { notifyWarn } from "../../components/reminder"
+import { notifyError, notifyWarn } from "../../components/reminder"
 import {
   Attribution,
   StyleMapContainer,
@@ -72,6 +72,12 @@ const PhotoText = styled.div`
   border-radius: 5px;
 `
 const Spinner = styled(Container)`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 80px;
   background-image: url(${spinner});
   background-size: 100% 100%;
   background-color: rgb(255, 255, 255, 0);
@@ -376,7 +382,7 @@ export default function MyMap() {
           setCanUpload(true)
         }
       }
-    } else console.log("失敗啦")
+    }
   }
   const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
@@ -474,7 +480,12 @@ export default function MyMap() {
       setHasAddPin(false)
       setCanUpload(false)
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `Failed to add a new memory, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 
@@ -489,11 +500,15 @@ export default function MyMap() {
           await deleteObject(ref(storage, `/${folderName}/${file}`))
         })
       } catch (error) {
-        console.log(error)
+        if (error instanceof Error) {
+          const errorMsg = error["message"].slice(9) as string
+          notifyError(
+            `Failed to delete uploaded photos, please take a note of ${errorMsg} and contact mika@test.com`
+          )
+        }
       }
     }
     if (locationRef.current !== null) locationRef.current.value === ""
-
     setHasAddPin(false)
     setShowAlert(false)
     setUploadProgress(0)
@@ -512,6 +527,8 @@ export default function MyMap() {
         placeId: "",
       },
     })
+    setShowAlert(false)
+    setShowPostArea(false)
   }
 
   if (!isLogin || currentUser === undefined || currentUser === null)
@@ -542,15 +559,7 @@ export default function MyMap() {
                   >
                     cancel
                   </BtnLight>
-                  <BtnBlue
-                    onClick={() => {
-                      cancelPost()
-                      setShowAlert(false)
-                      setShowPostArea(false)
-                    }}
-                  >
-                    Discard
-                  </BtnBlue>
+                  <BtnBlue onClick={cancelPost}>Discard</BtnBlue>
                 </BtnWrapper>
               </ReminderArea>
             </>

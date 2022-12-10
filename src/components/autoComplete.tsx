@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useContext,
 } from "react"
-import styled, { keyframes } from "styled-components"
+import styled from "styled-components"
 import { getDoc, doc, setDoc } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import algoliasearch from "algoliasearch/lite"
@@ -23,6 +23,7 @@ import { AuthContext } from "../context/authContext"
 import { UserImg, HomeTownText } from "./styles/friendStyles"
 import queryFriendImg from "../assets/034961magnifying-friends.png"
 import xMark from "../assets/buttons/x-mark.png"
+import { notifyError } from "./reminder"
 
 /* eslint-disable react/jsx-props-no-spreading */
 
@@ -445,7 +446,6 @@ export function Autocomplete(props: Props) {
     ) {
       setFriendStatus("acceptOrDeny")
     } else {
-      console.log("No such document!")
       setFriendStatus("")
     }
   }
@@ -458,7 +458,12 @@ export function Autocomplete(props: Props) {
         setShowUserProfile(true)
       }
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `It seems that no such user, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
   const addFriend = async (id: string) => {
@@ -472,7 +477,12 @@ export function Autocomplete(props: Props) {
       })
       setFriendStatus("awaitingReply")
     } catch (error) {
-      console.log(error)
+      if (error instanceof Error) {
+        const errorMsg = error["message"].slice(9) as string
+        notifyError(
+          `It seems that no such user, please take a note of ${errorMsg} and contact mika@test.com`
+        )
+      }
     }
   }
 

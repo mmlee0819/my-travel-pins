@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { UserInfoType } from "../context/authContext"
+import { notifyError } from "../components/reminder"
 
 export interface DefinedDocumentData {
   [field: string]: string | number | null | undefined | string[]
@@ -100,8 +101,9 @@ export const getSpecificPin = async (
     setMemory(docSnap.data() as PinContent)
     setMemoryIsShow(true)
   } else {
-    // doc.data() will be undefined in this case
-    console.log("No such document!")
+    notifyError(
+      "Sorry, we can not find this memory record, please contact mika@test.com"
+    )
   }
 }
 
@@ -122,7 +124,12 @@ export const addMsg = async (
       }),
     })
   } catch (error) {
-    console.log(error)
+    if (error instanceof Error) {
+      const errorMsg = error["message"].slice(9) as string
+      notifyError(
+        `Failed to add new message, please take a note of ${errorMsg} and contact mika@test.com`
+      )
+    }
   }
 }
 
@@ -197,6 +204,11 @@ export const deleteMsg = async (id: string, item: DocumentData) => {
       }),
     })
   } catch (error) {
-    console.log(error)
+    if (error instanceof Error) {
+      const errorMsg = error["message"].slice(9) as string
+      notifyError(
+        `Failed to delete a message, please take a note of ${errorMsg} and contact mika@test.com`
+      )
+    }
   }
 }
