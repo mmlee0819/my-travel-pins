@@ -3,6 +3,7 @@ import { createGlobalStyle, ThemeProvider } from "styled-components"
 import { Outlet } from "react-router-dom"
 import { AuthContextProvider } from "./context/authContext"
 import { ToolContextProvider } from "./context/toolContext"
+import { Reminder } from "./components/reminder"
 import ToolsRobot from "./components/widgets/tools"
 import Header from "./components/header"
 import bg from "./assets/bg.jpg"
@@ -39,6 +40,7 @@ const theme = {
     lightMain: "#5384a9",
     bgDark: "#454545",
     bgLight: "#ffffff",
+    lightGreen: "#7ccbab",
   },
   btnColor: {
     bgGreen: "#a5b7af",
@@ -52,6 +54,7 @@ function App() {
   return (
     <AuthContextProvider>
       <ToolContextProvider>
+        <Reminder />
         <GlobalStyle />
         <ThemeProvider theme={theme}>
           <Header />
