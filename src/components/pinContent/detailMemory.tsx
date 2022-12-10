@@ -89,8 +89,8 @@ const EditWrapper = styled.div`
   flex-flow: column nowrap;
   flex: 1 1 auto;
   margin: 20px 0 0 0;
-  height: calc(90% - 30px);
-  gap: 20px;
+  height: calc(100% - 30px);
+  gap: 15px;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
@@ -128,8 +128,8 @@ const Input = styled(Text)`
   border: 3px solid #ffffff;
   border-radius: 5px;
   &:focus {
-    outline: #f99c62;
-    border: 3px solid #f99c62;
+    outline: ${(props) => props.theme.color.lightGreen};
+    border: 3px solid ${(props) => props.theme.color.lightGreen};
   }
 `
 
@@ -512,13 +512,13 @@ export default function DetailMemory(props: Props) {
   useOnClickOutside(overlayRef, () => setShowMemory(false), showEditor)
 
   useEffect(() => {
-    if (!selectedMarker?.id) return
+    if (!selectedMarker || selectedMarker?.id === "") return
     checkRealTimePinMessages(selectedMarker?.id, setMessages)
     return checkRealTimePinMessages(selectedMarker?.id, setMessages)
   }, [selectedMarker?.id])
 
   useEffect(() => {
-    if (!selectedMarker?.id) return
+    if (!selectedMarker || selectedMarker?.id === "") return
     checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
     return checkRealTimePhotos(selectedMarker?.id, setAlbumUrls)
   }, [selectedMarker?.id])
@@ -556,6 +556,7 @@ export default function DetailMemory(props: Props) {
                 onClick={() => {
                   setShowEditor(true)
                   setHasUpload(false)
+                  setCanUpload(true)
                 }}
               />
             )}
@@ -752,6 +753,7 @@ export default function DetailMemory(props: Props) {
                       setShowMore(false)
                       setHasDiscard(true)
                       setShowEditor(false)
+                      setCanUpload(false)
                     }}
                   >
                     Back
@@ -765,6 +767,7 @@ export default function DetailMemory(props: Props) {
                       updateTravelDate()
                       updateArtiContent()
                       setShowEditor(false)
+                      setCanUpload(false)
                       setArtiTitle(artiTitle)
                       setTravelDate(travelDate)
                       setArtiContent(artiContent)
@@ -802,33 +805,26 @@ export default function DetailMemory(props: Props) {
                         setArtiContent={setArtiContent}
                       />
                     </ArtiWrapper>
-                    {selectedMarker &&
-                      typeof selectedMarker.id === "string" &&
-                      typeof selectedMarker.userId === "string" &&
-                      typeof selectedMarker.location.lat === "number" &&
-                      typeof selectedMarker.location.lng === "number" &&
-                      typeof selectedMarker.location.placeId === "string" &&
-                      (showEditor || showUploadMore) && (
-                        <Upload
-                          canUpload={canUpload}
-                          currentPin={{
-                            id: selectedMarker.id,
-                            userId: selectedMarker.userId,
-                            location: {
-                              lat: selectedMarker.location.lat,
-                              lng: selectedMarker.location.lng,
-                              name: selectedMarker.location.name,
-                              placeId: selectedMarker.location.placeId,
-                            },
-                          }}
-                          setFilesName={setFilesName}
-                          hasUpload={hasUpload}
-                          setHasUpload={setHasUpload}
-                          urls={urls}
-                          setUrls={setUrls}
-                          setUploadProgress={setUploadProgress}
-                        />
-                      )}
+
+                    <Upload
+                      canUpload={canUpload}
+                      currentPin={{
+                        id: selectedMarker.id,
+                        userId: selectedMarker.userId,
+                        location: {
+                          lat: selectedMarker.location.lat,
+                          lng: selectedMarker.location.lng,
+                          name: selectedMarker.location.name,
+                          placeId: selectedMarker.location.placeId,
+                        },
+                      }}
+                      setFilesName={setFilesName}
+                      hasUpload={hasUpload}
+                      setHasUpload={setHasUpload}
+                      urls={urls}
+                      setUrls={setUrls}
+                      setUploadProgress={setUploadProgress}
+                    />
                   </EditWrapper>
                 </>
               )}

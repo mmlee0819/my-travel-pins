@@ -20,22 +20,20 @@ export interface DefinedDocumentData {
 }
 
 export interface PinContent {
-  id?: string
-  userId?: string
-  name?: string
-  placeId?: string
+  id: string
+  userId: string
   location: {
     placeId: string
     lat: number
     lng: number
     name: string
   }
-  albumNames?: string[]
-  albumURLs?: string[]
-  article?: {
-    title?: string
+  albumNames: string[]
+  albumURLs: string[]
+  article: {
+    title: string
     content?: string
-    travelDate?: string
+    travelDate: string
   }
   postTimestamp?: number
   postReadableTime?: Date | string
@@ -65,7 +63,7 @@ export const getPins = async (
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
     })
-    newMemories.sort(function (a, b) {
+    newMemories.sort((a, b) => {
       return b.postReadableTime.seconds - a.postReadableTime.seconds
     })
     setMemories(newMemories as PinContent[])
@@ -134,11 +132,14 @@ export const checkRealTimePinsInfo = (
 ) => {
   const q = query(collection(db, "pins"), where("userId", "==", id))
   onSnapshot(q, (querySnapshot) => {
-    const newMemories: PinContent[] = []
+    const newMemories: DocumentData[] = []
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
     })
-    setMemories(newMemories)
+    newMemories.sort((a, b) => {
+      return b?.postReadableTime?.seconds - a?.postReadableTime?.seconds
+    })
+    setMemories(newMemories as PinContent[])
   })
 }
 export const checkRealTimePhotos = (
@@ -152,6 +153,7 @@ export const checkRealTimePhotos = (
     }
   })
 }
+
 export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>
