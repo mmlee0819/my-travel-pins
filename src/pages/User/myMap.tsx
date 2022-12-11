@@ -276,15 +276,7 @@ const getCurrentDate = () => {
 }
 
 export default function MyMap() {
-  const {
-    isLogin,
-    currentUser,
-    setIsMyMap,
-    setIsMyMemory,
-    setIsMyFriend,
-    setIsFriendHome,
-    setIsFriendMemory,
-  } = useContext(AuthContext)
+  const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
   const { isLoaded, mapZoom } = useContext(MapContext)
   const [center, setCenter] = useState<LatLng | null>(null)
   const [newPin, setNewPin] = useState({
@@ -331,11 +323,6 @@ export default function MyMap() {
   }, [selectedMarker?.location.placeId, refReady])
 
   useEffect(() => {
-    setIsMyMap(true)
-    setIsMyMemory(false)
-    setIsMyFriend(false)
-    setIsFriendHome(false)
-    setIsFriendMemory(false)
     if (typeof currentUser?.id === "string" && !showMemory) {
       getPins(
         currentUser,
@@ -346,12 +333,14 @@ export default function MyMap() {
       )
     } else return
   }, [currentUser?.id, showMemory])
+
   useEffect(() => {
     if (
       currentUser !== undefined &&
       currentUser !== null &&
       typeof currentUser?.id === "string"
     ) {
+      setCurrentPage("myMap")
       checkRealTimePinsInfo(currentUser?.id, setMarkers)
       return checkRealTimePinsInfo(currentUser?.id, setMarkers)
     }

@@ -371,7 +371,7 @@ const swiperModules = {
 
 export default function DetailMemory(props: Props) {
   const { selectedMarker, setShowMemory } = props
-  const { currentUser, isMyMap, isMyMemory } = useContext(AuthContext)
+  const { currentUser, currentPage } = useContext(AuthContext)
   const { isLoaded } = useContext(MapContext)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
   const msgRef = useRef<HTMLInputElement>(null)
@@ -534,15 +534,16 @@ export default function DetailMemory(props: Props) {
         typeof selectedMarker?.location?.lat === "number" &&
         typeof selectedMarker?.location?.lng === "number" && (
           <ContentArea ref={overlayRef} showEditor={showEditor}>
-            {(isMyMap || isMyMemory) && !showEditor && (
-              <BtnEdit
-                onClick={() => {
-                  setShowEditor(true)
-                  setHasUpload(false)
-                  setCanUpload(true)
-                }}
-              />
-            )}
+            {(currentPage === "myMap" || currentPage === "myMemories") &&
+              !showEditor && (
+                <BtnEdit
+                  onClick={() => {
+                    setShowEditor(true)
+                    setHasUpload(false)
+                    setCanUpload(true)
+                  }}
+                />
+              )}
 
             <LeftWrapper>
               {albumUrls.length > 0 ? (
@@ -722,28 +723,29 @@ export default function DetailMemory(props: Props) {
                   )}
                 </>
               )}
-              {(isMyMap || isMyMemory) && showEditor && (
-                <BtnSaveBackWrapper>
-                  <BtnCancel
-                    onClick={() => {
-                      setArtiTitle(selectedMarker?.article?.title || "")
-                      setTravelDate(selectedMarker?.article?.travelDate || "")
-                      setArtiContent(selectedMarker?.article?.content || "")
-                      if (hasUpload) {
-                        cancelPhotos()
-                      }
-                      updateToOrigin()
-                      setShowMore(false)
-                      setHasDiscard(true)
-                      setShowEditor(false)
-                      setCanUpload(false)
-                    }}
-                  >
-                    Back
-                  </BtnCancel>
-                  <BtnDone onClick={handleUpdate}>Done</BtnDone>
-                </BtnSaveBackWrapper>
-              )}
+              {(currentPage === "myMap" || currentPage === "myMemories") &&
+                showEditor && (
+                  <BtnSaveBackWrapper>
+                    <BtnCancel
+                      onClick={() => {
+                        setArtiTitle(selectedMarker?.article?.title || "")
+                        setTravelDate(selectedMarker?.article?.travelDate || "")
+                        setArtiContent(selectedMarker?.article?.content || "")
+                        if (hasUpload) {
+                          cancelPhotos()
+                        }
+                        updateToOrigin()
+                        setShowMore(false)
+                        setHasDiscard(true)
+                        setShowEditor(false)
+                        setCanUpload(false)
+                      }}
+                    >
+                      Back
+                    </BtnCancel>
+                    <BtnDone onClick={handleUpdate}>Done</BtnDone>
+                  </BtnSaveBackWrapper>
+                )}
               {showEditor && (
                 <>
                   <EditWrapper>

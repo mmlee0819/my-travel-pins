@@ -33,7 +33,7 @@ import whiteArrow from "../../assets/buttons/down-arrow-white.png"
 import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 function FriendMemories() {
-  const { isLogin, currentUser } = useContext(AuthContext)
+  const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
   const { isLoaded } = useContext(MapContext)
   const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
@@ -64,6 +64,7 @@ function FriendMemories() {
 
   useEffect(() => {
     if (friendId) {
+      setCurrentPage("friendMemories")
       checkRealTimePinsInfo(friendId, setMemories)
       return checkRealTimePinsInfo(friendId, setMemories)
     }

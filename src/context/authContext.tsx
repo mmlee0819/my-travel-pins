@@ -29,16 +29,6 @@ interface AuthContextType {
   isLogin: boolean
   setIsLogin: (isLogin: boolean) => void
   navigate: (path: string) => void
-  isMyMap: boolean
-  setIsMyMap: (isMyMap: boolean) => void
-  isMyMemory: boolean
-  setIsMyMemory: (isMyMemory: boolean) => void
-  isMyFriend: boolean
-  setIsMyFriend: (isMyFriend: boolean) => void
-  isFriendHome: boolean
-  setIsFriendHome: (isFriendHome: boolean) => void
-  isFriendMemory: boolean
-  setIsFriendMemory: (isFriendMemory: boolean) => void
   currentFriendInfo: {
     name: string
     id: string
@@ -50,6 +40,8 @@ interface AuthContextType {
   setAvatarURL: (avatarURL: string) => void
   isLoading: boolean
   setIsLoading: (isProfile: boolean) => void
+  currentPage: string
+  setCurrentPage: (currentPage: string) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -70,16 +62,6 @@ export const AuthContext = createContext<AuthContextType>({
   signIn: () => Response,
   logOut: () => Response,
   navigate: () => Response,
-  isMyMap: false,
-  setIsMyMap: () => Response,
-  isMyMemory: false,
-  setIsMyMemory: () => Response,
-  isMyFriend: false,
-  setIsMyFriend: () => Response,
-  isFriendHome: false,
-  setIsFriendHome: () => Response,
-  isFriendMemory: false,
-  setIsFriendMemory: () => Response,
   currentFriendInfo: {
     name: "",
     id: "",
@@ -91,6 +73,8 @@ export const AuthContext = createContext<AuthContextType>({
   setAvatarURL: () => Response,
   isLoading: false,
   setIsLoading: () => Response,
+  currentPage: "",
+  setCurrentPage: () => Response,
 })
 
 interface Props {
@@ -120,11 +104,6 @@ export function AuthContextProvider({ children }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(false)
   const [isProfile, setIsProfile] = useState(false)
-  const [isMyMap, setIsMyMap] = useState(false)
-  const [isMyMemory, setIsMyMemory] = useState(false)
-  const [isMyFriend, setIsMyFriend] = useState(false)
-  const [isFriendHome, setIsFriendHome] = useState(false)
-  const [isFriendMemory, setIsFriendMemory] = useState(false)
   const [currentFriendInfo, setCurrentFriendInfo] = useState({
     name: "",
     id: "",
@@ -134,6 +113,7 @@ export function AuthContextProvider({ children }: Props) {
   >()
   const [avatarURL, setAvatarURL] = useState<string>("")
   const navigate = useNavigate()
+  const [currentPage, setCurrentPage] = useState("")
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -146,8 +126,6 @@ export function AuthContextProvider({ children }: Props) {
           setAvatarURL(userInfo?.photoURL)
           setIsLogin(true)
           setIsProfile(false)
-          // setIsMyMap(true)
-          // navigate(`/${userInfo?.name}`)
         }
       } else {
         setIsLogin(false)
@@ -198,9 +176,8 @@ export function AuthContextProvider({ children }: Props) {
         setCurrentUser(userInfo)
         setAvatarURL(userInfo?.photoURL)
         setIsLogin(true)
-        setIsMyFriend(false)
-        setIsMyMap(true)
         setIsProfile(false)
+        setCurrentPage("myMap")
         navigate(`/${userInfo?.name}`)
       }
     } catch (error) {
@@ -229,9 +206,8 @@ export function AuthContextProvider({ children }: Props) {
         setCurrentUser(userInfo)
         setAvatarURL(userInfo?.photoURL)
         setIsLogin(true)
-        setIsMyFriend(false)
-        setIsMyMap(true)
         setIsProfile(false)
+        setCurrentPage("myMap")
         navigate(`/${userInfo?.name}`)
       }
     } catch (error) {
@@ -263,16 +239,6 @@ export function AuthContextProvider({ children }: Props) {
         isLogin,
         setIsLogin,
         navigate,
-        isMyMap,
-        setIsMyMap,
-        isMyMemory,
-        setIsMyMemory,
-        isMyFriend,
-        setIsMyFriend,
-        isFriendHome,
-        setIsFriendHome,
-        isFriendMemory,
-        setIsFriendMemory,
         currentFriendInfo,
         setCurrentFriendInfo,
         isProfile,
@@ -281,6 +247,8 @@ export function AuthContextProvider({ children }: Props) {
         setAvatarURL,
         isLoading,
         setIsLoading,
+        currentPage,
+        setCurrentPage,
       }}
     >
       {children}

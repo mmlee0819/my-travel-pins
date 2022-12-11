@@ -73,7 +73,7 @@ const DeleteTargetText = styled(Title)`
 `
 
 export default function MyMemories() {
-  const { currentUser, isLogin } = useContext(AuthContext)
+  const { currentUser, isLogin, setCurrentPage } = useContext(AuthContext)
   const { isLoaded } = useContext(MapContext)
   const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
@@ -125,6 +125,7 @@ export default function MyMemories() {
       currentUser !== null &&
       typeof currentUser?.id === "string"
     ) {
+      setCurrentPage("myMemories")
       checkRealTimePinsInfo(currentUser?.id, setMemories)
       return checkRealTimePinsInfo(currentUser?.id, setMemories)
     }

@@ -102,7 +102,6 @@ const MiniTabWrapper = styled.div<{ showMiniTab: boolean }>`
     display: flex;
     flex-flow: row nowrap;
     width: fit-content;
-
     justify-content: center;
     align-self: end;
     overflow: hidden;
@@ -136,9 +135,6 @@ const TabMenu = styled.div<{ showMiniTab: boolean }>`
       props.showMiniTab ? `url(${menu})` : `url(${whiteMenu})`};
     background-size: 100% 100%;
     cursor: pointer;
-    &:hover {
-      background-image: url(${menu});
-    }
   }
 `
 const Tab = styled.div<{ authStatus: string }>`
@@ -274,7 +270,13 @@ function useOnClickOutside(
         targetElement.classList.contains("pac-item") ||
         targetElement.classList.contains("pac-matched") ||
         targetNode?.parentElement?.className === "pac-item" ||
-        targetNode?.parentElement?.className === "pac-container"
+        targetNode?.parentElement?.className === "pac-container" ||
+        targetElement?.parentElement?.classList.contains("mini-tab-wrapper") ||
+        targetElement?.parentElement?.classList.contains("mini-sign-up") ||
+        targetElement?.parentElement?.classList.contains("mini-sign-in") ||
+        targetElement.classList.contains("mini-tab-wrapper") ||
+        targetElement.classList.contains("mini-sign-up") ||
+        targetElement.classList.contains("mini-sign-in")
       ) {
         return
       }
@@ -602,16 +604,19 @@ function Home() {
     }
   }, [showTips, mapZoom, authStatus])
 
-  console.log({ position })
+  // console.log({ position })
+
   return (
     <>
       <HeaderWrapper>
         <TabMenu
           showMiniTab={showMiniTab}
           onClick={() => {
-            setShowMiniTab((isShown) => !isShown)
             if (showMiniTab) {
               setAuthStatus("")
+              setShowMiniTab(false)
+            } else {
+              setShowMiniTab(true)
             }
           }}
         />
@@ -638,8 +643,9 @@ function Home() {
         <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
-        <MiniTabWrapper showMiniTab={showMiniTab}>
+        <MiniTabWrapper className="mini-tab-wrapper" showMiniTab={showMiniTab}>
           <SignUpTab
+            className="mini-sign-up"
             authStatus={authStatus}
             onClick={() => {
               setShowTips(false)
@@ -649,6 +655,7 @@ function Home() {
             <TabText> Sign up</TabText>
           </SignUpTab>
           <SignInTab
+            className="mini-sign-in"
             authStatus={authStatus}
             onClick={() => {
               setShowTips(false)

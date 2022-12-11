@@ -138,14 +138,7 @@ const mdNewPinIcon = L.icon({
 })
 
 function FriendsMap() {
-  const {
-    currentUser,
-    setIsMyMap,
-    setIsMyMemory,
-    setIsMyFriend,
-    setIsFriendHome,
-    setIsFriendMemory,
-  } = useContext(AuthContext)
+  const { currentUser, setCurrentPage } = useContext(AuthContext)
   const { isLoaded, mapZoom } = useContext(MapContext)
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
   const [markers, setMarkers] = useState<
@@ -177,11 +170,7 @@ function FriendsMap() {
         )
       }
     }
-    setIsMyMap(false)
-    setIsMyMemory(false)
-    setIsMyFriend(false)
-    setIsFriendMemory(false)
-    setIsFriendHome(true)
+    setCurrentPage("friendMap")
     getFriendInfo()
   }, [friendId])
 
