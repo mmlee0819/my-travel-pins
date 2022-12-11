@@ -174,8 +174,13 @@ const today = `${new Date().getFullYear()}-${
 }-${new Date().getDate()}`
 
 export default function MyFriends() {
-  const { currentUser, isLogin, setCurrentFriendInfo, navigate } =
-    useContext(AuthContext)
+  const {
+    currentUser,
+    isLogin,
+    setCurrentFriendInfo,
+    navigate,
+    setCurrentPage,
+  } = useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
     DocumentData | DefinedDocumentData
@@ -218,6 +223,7 @@ export default function MyFriends() {
 
   useEffect(() => {
     if (!isLogin || currentUser === null) return
+    setCurrentPage("myFriends")
     if (relationships && relationships.length !== 0) {
       const newInvitingIds = relationships
         ?.filter((doc: DocumentData | DefinedDocumentData) => {

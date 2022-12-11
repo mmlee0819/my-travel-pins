@@ -147,19 +147,21 @@ function FriendsMap() {
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
   const [refReady, setRefReady] = useState(false)
-  const { friendName, friendId } = useParams()
+
   const markerRef = useRef<L.Marker | null>(null)
 
+  const { friendName, friendId } = useParams()
+
   useEffect(() => {
-    if (!friendInfo || !markerRef.current) return
+    if (!friendId || !markerRef.current) return
     if (markerRef.current instanceof L.Marker) {
       markerRef.current.openPopup()
     }
-  }, [friendInfo, refReady, markerRef.current])
+  }, [friendId, refReady, markerRef.current])
 
   useEffect(() => {
     const getFriendInfo = async () => {
-      if (typeof friendId !== "string") return
+      if (!friendId) return
       const docRef = doc(db, "users", friendId)
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
@@ -185,7 +187,7 @@ function FriendsMap() {
       setMarkers(newMarkers)
     }
     getAllPinsOfFriend()
-  }, [])
+  }, [friendId])
 
   return (
     <>

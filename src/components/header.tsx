@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useContext, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../context/authContext"
@@ -288,7 +288,7 @@ function Header() {
     currentPage,
     setCurrentPage,
   } = useContext(AuthContext)
-
+  const { friendName, friendId } = useParams()
   const [showMiniTab, setShowMiniTab] = useState(false)
   console.log({ currentPage })
   if (
@@ -351,28 +351,37 @@ function Header() {
           )}
           {currentPage === "friendMap" && (
             <>
-              <CurrentTab>{`${currentFriendInfo?.name}'s Map`}</CurrentTab>
+              <CurrentTab>{`${
+                friendName || currentFriendInfo?.name
+              }'s Map`}</CurrentTab>
               <Tab
-                to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}/memories`}
+                to={`/${currentUser?.name}/my-friend/${
+                  friendName || currentFriendInfo?.name
+                }/${friendId || currentFriendInfo?.id}/memories`}
                 as={Link}
                 onClick={() => {
                   setCurrentPage("friendMemories")
                 }}
               >
-                {`${currentFriendInfo?.name}'s Memories`}
+                {`${friendName || currentFriendInfo?.name}'s Memories`}
               </Tab>
             </>
           )}
           {currentPage === "friendMemories" && (
             <>
               <Tab
-                to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}`}
+                to={`/${currentUser?.name}/my-friend/${
+                  friendName || currentFriendInfo?.name
+                }/${friendId || currentFriendInfo?.id}`}
                 as={Link}
                 onClick={() => {
                   setCurrentPage("friendMap")
                 }}
-              >{`${currentFriendInfo?.name}'s Map`}</Tab>
-              <CurrentTab>{`${currentFriendInfo?.name}'s Memories`}</CurrentTab>
+              >{`${friendName || currentFriendInfo?.name}'s Map`}</Tab>
+
+              <CurrentTab>{`${
+                friendName || currentFriendInfo?.name
+              }'s Memories`}</CurrentTab>
             </>
           )}
         </TabWrapper>

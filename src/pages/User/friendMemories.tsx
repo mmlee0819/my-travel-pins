@@ -31,6 +31,7 @@ import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
 import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
+import { useParams } from "react-router-dom"
 
 function FriendMemories() {
   const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
@@ -40,23 +41,18 @@ function FriendMemories() {
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
   const [isSortByPost, setIsSortByPost] = useState(true)
-  const [isSortByDate, setIsSortByDate] = useState(false)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
 
   const msgRef = useRef<HTMLInputElement>(null)
 
-  const url = window.location.href
-  const splitUrlArr = url.split("/")
-  const friendId = splitUrlArr.slice(-2, -1)[0]
-  let friendName = splitUrlArr.slice(-3, -2)[0]
-  if (friendName[0] === "%") {
-    friendName = decodeURI(friendName)
-  }
+  const { friendId } = useParams()
+
   useEffect(() => {
     if (
       currentUser !== undefined &&
       currentUser !== null &&
-      typeof currentUser?.id === "string"
+      typeof currentUser?.id === "string" &&
+      friendId
     ) {
       getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
     }
@@ -100,34 +96,14 @@ function FriendMemories() {
   return (
     <Container>
       <BtnSortWrapper>
-        <BtnSort
-          isCurrent={isSortByPost}
-          onClick={() => {
-            if (!isSortByPost) {
-              setIsSortByDate(false)
-              setIsSortByPost(true)
-            }
-          }}
-        >
+        <BtnSort isCurrent={isSortByPost}>
           Post time
           <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
         </BtnSort>
-        {/* <BtnSort
-          isCurrent={isSortByDate}
-          onClick={() => {
-            if (!isSortByDate) {
-              setIsSortByPost(false)
-              setIsSortByDate(true)
-            }
-          }}
-        >
-          Travel date
-          <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
-        </BtnSort> */}
       </BtnSortWrapper>
       <ContentArea>
         {isLogin && isLoaded && memories ? (
-          memories.map((item: PinContent, index: number) => {
+          memories.map((item: PinContent) => {
             return (
               <MemoryList key={`${item.id}-${item?.article?.title}`}>
                 <ImgWrapper
