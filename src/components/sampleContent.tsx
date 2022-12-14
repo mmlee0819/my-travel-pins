@@ -26,6 +26,9 @@ const Container = styled.div`
   background-color: rgb(45, 45, 45, 0.8);
   border-radius: 5px;
   z-index: 199;
+  @media screen and (max-width: 700px) {
+    width: calc(100% - 60px);
+  }
 `
 const ContentArea = styled.div`
   position: absolute;
@@ -41,12 +44,44 @@ const ContentArea = styled.div`
   font-size: ${(props) => props.theme.title.lg};
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
+  @media screen and (max-width: 1000px) {
+    width: 90%;
+  }
+  @media screen and (max-width: 925px) {
+    width: 95%;
+  }
+  @media screen and (max-width: 870px) {
+    flex-flow: column nowrap;
+    width: 60%;
+    height: 90%;
+  }
+  @media screen and (max-width: 560px) {
+    flex-flow: column nowrap;
+    width: 70%;
+  }
+  @media screen and (max-width: 500px) {
+    flex-flow: column nowrap;
+    width: 80%;
+  }
+  @media screen and (max-width: 440px) {
+    flex-flow: column nowrap;
+    width: 90%;
+  }
+  @media screen and (max-width: 400px) {
+    flex-flow: column nowrap;
+    width: 95%;
+  }
 `
 const LeftWrapper = styled.div`
   position: relative;
   align-self: center;
   width: 50%;
   height: 90%;
+  @media screen and (max-width: 870px) {
+    width: 100%;
+    height: 60%;
+    margin-top: 20px;
+  }
 `
 const RightWrapper = styled.div`
   position: relative;
@@ -58,11 +93,17 @@ const RightWrapper = styled.div`
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
+  @media screen and (max-width: 870px) {
+    width: 100%;
+  }
 `
 const MiddleSplit = styled.div`
   margin: 0 20px 0 10px;
   border-left: 2px dashed #454545;
   height: 100%;
+  @media screen and (max-width: 870px) {
+    display: none;
+  }
 `
 const Title = styled.div`
   min-height: 60px;
@@ -70,17 +111,20 @@ const Title = styled.div`
   @media screen and (min-width: 1100px) {
     font-size: ${(props) => props.theme.title.lg};
   }
-  @media screen and (max-width: 1100px) and (min-width: 800px) {
+  @media screen and (max-width: 1100px) {
     font-size: ${(props) => props.theme.title.md};
   }
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
+  @media screen and (max-width: 799px) {
+    min-height: 30px;
+  }
+  @media screen and (max-width: 560px) {
+    font-size: 16px;
   }
 `
 const Text = styled.div`
   font-size: ${(props) => props.theme.title.md};
   margin: 20px 0;
-  @media screen and (max-width: 799px), (max-height: 600px) {
+  @media screen and (max-width: 799px) {
     font-size: ${(props) => props.theme.title.sm};
   }
 `
@@ -102,8 +146,8 @@ const Xmark = styled.div`
   width: 15px;
   height: 15px;
   cursor: pointer;
-  @media screen and (max-width: 799px), (max-height: 600px) {
-    top: 30px;
+  @media screen and (max-width: 870px) {
+    top: 15px;
     width: 15px;
     height: 15px;
   }
