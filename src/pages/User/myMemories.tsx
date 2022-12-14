@@ -12,6 +12,11 @@ import {
   PinContent,
   checkRealTimePinsInfo,
 } from "../../utils/pins"
+
+import { notifyError } from "../../components/reminder"
+import { MapContext } from "../../context/mapContext"
+import { Spinner } from "./myMap"
+
 import {
   Container,
   ContentArea,
@@ -36,24 +41,11 @@ import {
   BtnLight,
   BtnBlue,
 } from "../../components/styles/modalStyles"
+
 import trashBinBlack from "../../assets/buttons/trashBinBlack.png"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
-import spinner from "../../assets/dotsSpinner.svg"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
-import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
-import { notifyError } from "../../components/reminder"
-import { MapContext } from "../../context/mapContext"
-
-const Spinner = styled.div`
-  width: 100%;
-  height: 30px;
-  margin: 0 auto;
-  background-image: url(${spinner});
-  background-size: 100% 100%;
-  background-color: rgb(255, 255, 255, 0);
-  border: none;
-`
 
 const BtnDelete = styled.img`
   align-self: center;
@@ -79,9 +71,6 @@ export default function MyMemories() {
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
-  const [isSortByPost, setIsSortByPost] = useState(true)
-  const [isSortByDate, setIsSortByDate] = useState(false)
-  const [qResultIds, setQResultIds] = useState<string[]>([])
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<
     number | undefined
   >(undefined)
@@ -150,30 +139,10 @@ export default function MyMemories() {
   return (
     <Container>
       <BtnSortWrapper>
-        <BtnSort
-          isCurrent={isSortByPost}
-          onClick={() => {
-            if (!isSortByPost) {
-              setIsSortByDate(false)
-              setIsSortByPost(true)
-            }
-          }}
-        >
+        <BtnSort>
           Post time
-          <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
+          <SortIcon src={whiteArrow} />
         </BtnSort>
-        {/* <BtnSort
-          isCurrent={isSortByDate}
-          onClick={() => {
-            if (!isSortByDate) {
-              setIsSortByPost(false)
-              setIsSortByDate(true)
-            }
-          }}
-        >
-          Travel date
-          <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
-        </BtnSort> */}
       </BtnSortWrapper>
       <ContentArea>
         {isLogin && isLoaded && memories ? (
@@ -271,9 +240,7 @@ export default function MyMemories() {
             )
           })
         ) : (
-          <Title>
-            <Spinner />
-          </Title>
+          <Spinner />
         )}
       </ContentArea>
       {memoryIsShow && memory && memory.location && (

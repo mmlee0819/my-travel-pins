@@ -1,8 +1,10 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
+import { useParams } from "react-router-dom"
 import { AuthContext } from "../../context/authContext"
 import { MapContext } from "../../context/mapContext"
 import { getPins, getSpecificPin } from "../../utils/pins"
+import { Spinner } from "./myMap"
 import {
   Container,
   ContentArea,
@@ -30,8 +32,6 @@ import DetailMemory from "../../components/pinContent/detailMemory"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
-import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
-import { useParams } from "react-router-dom"
 
 function FriendMemories() {
   const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
@@ -40,7 +40,6 @@ function FriendMemories() {
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
-  const [isSortByPost, setIsSortByPost] = useState(true)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
 
   const msgRef = useRef<HTMLInputElement>(null)
@@ -96,9 +95,9 @@ function FriendMemories() {
   return (
     <Container>
       <BtnSortWrapper>
-        <BtnSort isCurrent={isSortByPost}>
+        <BtnSort>
           Post time
-          <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
+          <SortIcon src={whiteArrow} />
         </BtnSort>
       </BtnSortWrapper>
       <ContentArea>
@@ -148,7 +147,7 @@ function FriendMemories() {
             )
           })
         ) : (
-          <Title>Please wait...</Title>
+          <Spinner />
         )}
       </ContentArea>
 

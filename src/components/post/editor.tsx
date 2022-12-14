@@ -23,7 +23,6 @@ const StyleQuill = styled(ReactQuill)`
   color: #2d2d2d;
   .ql-toolbar.ql-snow {
     border-radius: 5px;
-    height: 40px;
   }
   .ql-container.ql-snow {
     height: calc(100% - 40px);
@@ -32,9 +31,7 @@ const StyleQuill = styled(ReactQuill)`
   .ql-editor.ql-blank {
     height: 100%;
   }
-  .ql-formats {
-    height: 40px;
-  }
+
   .ql-editor {
     font-size: 18px;
   }
