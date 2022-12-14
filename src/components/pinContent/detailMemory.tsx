@@ -121,6 +121,9 @@ const EditWrapper = styled.div`
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
+  @media screen and (max-width: 550px) {
+    width: 100%;
+  }
 `
 
 const Text = styled.div`
@@ -572,43 +575,44 @@ export default function DetailMemory(props: Props) {
                   }}
                 />
               )}
-
-            <LeftWrapper>
-              {albumUrls.length > 0 ? (
-                <SwiperPhotos
-                  photos={albumUrls}
-                  swiperModule={memorySwiperModule}
-                />
-              ) : (
-                <GoogleMap
-                  mapContainerStyle={{
-                    height: "100%",
-                    width: "100%",
-                  }}
-                  center={{
-                    lat: selectedMarker?.location.lat,
-                    lng: selectedMarker?.location.lng,
-                  }}
-                  zoom={14}
-                  options={{
-                    draggable: true,
-                    mapTypeControl: false,
-                    streetViewControl: true,
-                    scaleControl: false,
-                    fullscreenControl: true,
-                    scrollwheel: true,
-                    minZoom: 2,
-                  }}
-                >
-                  <Marker
-                    position={{
+            {window.innerWidth >= 550 && (
+              <LeftWrapper>
+                {albumUrls.length > 0 ? (
+                  <SwiperPhotos
+                    photos={albumUrls}
+                    swiperModule={memorySwiperModule}
+                  />
+                ) : (
+                  <GoogleMap
+                    mapContainerStyle={{
+                      height: "100%",
+                      width: "100%",
+                    }}
+                    center={{
                       lat: selectedMarker?.location.lat,
                       lng: selectedMarker?.location.lng,
                     }}
-                  />
-                </GoogleMap>
-              )}
-            </LeftWrapper>
+                    zoom={14}
+                    options={{
+                      draggable: true,
+                      mapTypeControl: false,
+                      streetViewControl: true,
+                      scaleControl: false,
+                      fullscreenControl: true,
+                      scrollwheel: true,
+                      minZoom: 2,
+                    }}
+                  >
+                    <Marker
+                      position={{
+                        lat: selectedMarker?.location.lat,
+                        lng: selectedMarker?.location.lng,
+                      }}
+                    />
+                  </GoogleMap>
+                )}
+              </LeftWrapper>
+            )}
             <MiddleSplit />
             <RightWrapper showEditor={showEditor}>
               {!showEditor && (
