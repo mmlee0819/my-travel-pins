@@ -26,6 +26,7 @@ import whiteEditPencil from "../../assets/buttons/edit.png"
 import blackEditPencil from "../../assets/buttons/blackEdit.png"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
+
 import { notifyError } from "../reminder"
 
 const Container = styled.div`
@@ -44,7 +45,7 @@ const ContentArea = styled.div<{ showEditor: boolean }>`
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  flex: row nowrap;
+  flex-flow: row nowrap;
   padding: 20px;
   width: 80%;
   height: 80%;
@@ -53,12 +54,28 @@ const ContentArea = styled.div<{ showEditor: boolean }>`
   color: #2d2d2d;
   background-color: rgb(255, 255, 255, 0.9);
   ${(props) => props.showEditor && "gap: 2%;"}
+  @media screen and (max-width:900px) {
+    width: 90%;
+  }
+  @media screen and (max-width: 700px) {
+    width: 95%;
+  }
+  @media screen and (max-width: 550px) {
+    flex-flow: column nowrap;
+    width: 90%;
+    height: 90%;
+  }
 `
 const LeftWrapper = styled.div`
   position: relative;
   align-self: center;
   width: 50%;
   height: 90%;
+  @media screen and (max-width: 550px) {
+    width: 100%;
+    height: 50%;
+    margin-top: 20px;
+  }
 `
 const RightWrapper = styled.div<{ showEditor: boolean }>`
   position: relative;
@@ -73,11 +90,17 @@ const RightWrapper = styled.div<{ showEditor: boolean }>`
   ::-webkit-scrollbar {
     display: none; 
   }`}
+  @media screen and (max-width: 550px) {
+    width: 100%;
+  }
 `
 const MiddleSplit = styled.div`
   margin: 0 20px 0 10px;
   border-left: 2px dashed #454545;
   height: 100%;
+  @media screen and (max-width: 550px) {
+    display: none;
+  }
 `
 const IconInList = styled.img`
   align-self: center;
@@ -155,13 +178,11 @@ const ArticleContentArea = styled(Text)`
 const StreetModeContainer = styled.div`
   height: 40vh;
   margin-bottom: 20px;
-`
-
-const Photo = styled.div`
-  width: 100%;
-  height: 200px;
-  margin-bottom: 15px;
-  background-size: 100% 100%;
+  @media screen and (max-width: 799px) {
+    height: 30vh;
+    width: 100%;
+    margin-top: 10px;
+  }
 `
 
 const MsgNumText = styled.div`
@@ -169,10 +190,10 @@ const MsgNumText = styled.div`
   justify-content: end;
   width: 100%;
   margin-top: 30px;
-  /* padding-right: 20px; */
   font-size: ${(props) => props.theme.title.md};
   border-bottom: 2px solid #d4d4d4;
-  @media screen and (max-width: 799px), (max-height: 600px) {
+  @media screen and (max-width: 900px) {
+    margin-top: 15px;
     font-size: ${(props) => props.theme.title.sm};
   }
 `
@@ -183,7 +204,10 @@ const MsgContent = styled.div`
   padding-left: 8px;
   background-color: #f6f6f6;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
+  @media screen and (max-width: 900px) {
+    font-size: ${(props) => props.theme.title.sm};
+  }
 `
 const UserAvatar = styled.div<{ avatarURL: string }>`
   display: flex;
@@ -207,6 +231,9 @@ const MsgRowNoWrapper = styled.div`
   flex-flow: row wrap;
   justify-content: flex-start;
   margin: 5px 0;
+  @media screen and (max-width: 930px) {
+    flex-flow: row nowrap;
+  }
 `
 const BtnEdit = styled.div`
   position: absolute;
@@ -219,6 +246,10 @@ const BtnEdit = styled.div`
   cursor: pointer;
   &:hover {
     background-image: url(${whiteEditPencil});
+  }
+  @media screen and (max-width: 550px) {
+    width: 20px;
+    height: 20px;
   }
 `
 
@@ -235,6 +266,11 @@ const BtnMore = styled.div<{ showMore: boolean }>`
   cursor: pointer;
   &:hover {
     background-image: url(${moreHoverIcon});
+  }
+  @media screen and (max-width: 900px) {
+    right: 10px;
+    width: 20px;
+    height: 20px;
   }
 `
 
@@ -304,6 +340,7 @@ const MsgInput = styled.input`
   align-self: center;
   margin: 10px 0;
   padding-left: 10px;
+  width: calc(100% - 40px);
   height: 30px;
   line-height: 30px;
   font-size: ${(props) => props.theme.title.md};
@@ -318,19 +355,10 @@ const MsgInput = styled.input`
   }
   ::placeholder {
     font-size: ${(props) => props.theme.title.md};
+    @media screen and (max-width: 799px) {
+      font-size: ${(props) => props.theme.title.sm};
+    }
   }
-`
-
-const PhotoText = styled.div`
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  text-align: center;
-  margin: 5px 0;
-  width: 100%;
-  height: 100%;
-  color: ${(props) => props.theme.color.bgDark};
-  border-radius: 5px;
 `
 
 interface Props {
