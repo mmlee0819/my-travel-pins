@@ -26,6 +26,10 @@ export const Wrapper = styled.div`
   &:hover {
     box-shadow: rgb(83, 132, 169, 0.5) 0px 0px 8px;
   }
+  @media screen and (max-width: 630px) {
+    margin: 10px 0;
+    height: 100px;
+  }
 `
 
 export const ImgWrapper = styled.div`
@@ -38,6 +42,14 @@ export const ImgWrapper = styled.div`
   object-fit: cover;
   border: none;
   border-radius: 50%;
+  @media screen and (max-width: 630px) {
+    padding-top: 10px;
+    width: 80px;
+    height: 80px;
+  }
+  @media screen and (max-width: 450px) {
+    padding-top: 0px;
+  }
 `
 export const UserImg = styled.img`
   display: block;
@@ -55,12 +67,14 @@ export const UserInfo = styled.div`
   align-self: center;
   font-size: ${(props) => props.theme.title.md};
   border: none;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.sm};
+  @media screen and (max-width: 630px) {
+    font-size: 16px;
   }
 `
 
 export const HomeTownText = styled.div`
   font-size: ${(props) => props.theme.title.sm};
+  @media screen and (max-width: 630px) {
+    font-size: 12px;
+  }
 `

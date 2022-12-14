@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { useState, useEffect, useContext } from "react"
 import { AuthContext } from "../../context/authContext"
-import { Autocomplete } from "../../components/autoComplete"
+import { Autocomplete } from "../../components/friends/autoComplete"
 import { db } from "../../utils/firebase"
 import {
   collection,
@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore"
 import { DocumentData } from "@firebase/firestore-types"
 import { DefinedDocumentData } from "../../utils/pins"
+import { Spinner } from "./myMap"
 import {
   Container,
   Wrapper,
@@ -25,6 +26,7 @@ import {
   HomeTownText,
 } from "../../components/styles/friendStyles"
 import { notifyError } from "../../components/reminder"
+import SwitchBtn from "../../components/friends/switchBtn"
 
 const VisitArea = styled.div`
   position: absolute;
@@ -56,9 +58,13 @@ const VisitText = styled.div`
 `
 const FriendWrapper = styled(Wrapper)`
   position: relative;
+  align-items: center;
   cursor: pointer;
   &:hover > ${VisitArea} {
     max-width: 150px;
+  }
+  @media screen and (max-width: 630px) {
+    height: 100px;
   }
 `
 
@@ -76,6 +82,11 @@ const FixArea = styled.div`
   scrollbar-width: none;
   ::-webkit-scrollbar {
     display: none;
+  }
+  @media screen and (max-width: 630px) {
+    padding: 20px;
+    padding-bottom: 0px;
+    margin-bottom: 20px;
   }
 `
 const ContentArea = styled.div`
@@ -95,32 +106,13 @@ const ContentArea = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-`
-
-const BtnSort = styled.div<{ isCurrent: boolean }>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 160px;
-  line-height: 20px;
-  height: 30px;
-  font-size: ${(props) => props.theme.title.md};
-  color: ${(props) => (props.isCurrent ? "#fff" : props.theme.color.deepMain)};
-  background-color: ${(props) =>
-    props.isCurrent ? props.theme.color.deepMain : "none"};
-  border-radius: 5px;
-  border: 1px solid
-    ${(props) => (props.isCurrent ? "none" : props.theme.btnColor.bgGray)};
-  cursor: pointer;
-`
-
-const ContentTitle = styled.div`
-  display: flex;
-  justify-content: start;
-  font-size: ${(props) => props.theme.title.lg};
-  gap: 10px;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
+  @media screen and (max-width: 630px) {
+    grid-auto-rows: 100px;
+    padding: 0 20px;
+    height: calc(100% - 110px);
+  }
+  @media screen and (max-width: 450px) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 `
 
@@ -130,10 +122,12 @@ const BtnWrapper = styled.div`
   justify-content: space-between;
   margin-top: 15px;
   width: 150px;
-  /* min-width: 75px; */
   align-self: start;
   font-size: 14px;
   gap: 10px;
+  @media screen and (max-width: 450px) {
+    font-size: 12px;
+  }
 `
 const BtnAccept = styled.div`
   display: flex;
@@ -166,6 +160,10 @@ const NameText = styled.div`
     line-height: 20px;
     height: 20px;
   }
+  @media screen and (max-width: 450px) {
+    font-size: 16px;
+    font-weight: 500;
+  }
 `
 
 const usersRef = collection(db, "users")
@@ -180,6 +178,8 @@ export default function MyFriends() {
     setCurrentFriendInfo,
     navigate,
     setCurrentPage,
+    isLoading,
+    setIsLoading,
   } = useContext(AuthContext)
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
@@ -190,13 +190,12 @@ export default function MyFriends() {
   const [beInvitedList, setBeInvitedList] = useState<
     DocumentData | DefinedDocumentData
   >([])
-  const [friendIds, setFriendIds] = useState<string[]>([])
   const [friends, setFriends] = useState<
     DocumentData[] | DefinedDocumentData[]
   >([])
   const [myFriends, setMyFriends] = useState<string[]>([])
-  const [showFriendReq, setShowFriendReq] = useState(false)
-  const [showAll, setShowAll] = useState(true)
+  const [currentSort, setCurrentSort] = useState("friends")
+
   useEffect(() => {
     const relationRef = collection(db, "relationships")
     const checkRealtimeRelationships = onSnapshot(relationRef, (snapshot) => {
@@ -223,7 +222,6 @@ export default function MyFriends() {
 
   useEffect(() => {
     if (!isLogin || currentUser === null) return
-    setCurrentPage("myFriends")
     if (relationships && relationships.length !== 0) {
       const newInvitingIds = relationships
         ?.filter((doc: DocumentData | DefinedDocumentData) => {
@@ -246,19 +244,17 @@ export default function MyFriends() {
   }, [relationships])
 
   useEffect(() => {
+    setCurrentPage("myFriends")
     const getFriendsList = async () => {
       try {
-        if (myFriends.length === 0) return
+        setIsLoading(true)
+        if (!myFriends || myFriends.length === 0) return
         const newFriends: DocumentData[] = []
         const q = query(usersRef, where("id", "in", myFriends))
         const querySnapshot = await getDocs(q)
         querySnapshot.forEach((doc) => {
           newFriends.push(doc.data())
         })
-        const newIds = newFriends.map((friend) => {
-          return friend.id
-        })
-        setFriendIds(newIds)
         setFriends(newFriends)
       } catch (error) {
         if (error instanceof Error) {
@@ -267,6 +263,8 @@ export default function MyFriends() {
             `Failed to get friends' information, please take a note of ${errorMsg} and contact mika@test.com`
           )
         }
+      } finally {
+        setIsLoading(false)
       }
     }
     getFriendsList()
@@ -274,11 +272,12 @@ export default function MyFriends() {
 
   useEffect(() => {
     const getInvitedList = async () => {
-      if (beInvitedIds.length === 0) {
+      if (!beInvitedIds || beInvitedIds.length === 0) {
         setBeInvitedList([])
         return
       }
       try {
+        setIsLoading(true)
         const newInviteds: DocumentData = []
         const q = query(usersRef, where("id", "in", beInvitedIds))
         const querySnapshot = await getDocs(q)
@@ -293,6 +292,8 @@ export default function MyFriends() {
             `Failed to get invited list, please take a note of ${errorMsg} and contact mika@test.com`
           )
         }
+      } finally {
+        setIsLoading(false)
       }
     }
     getInvitedList()
@@ -302,17 +303,18 @@ export default function MyFriends() {
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     if (!isLogin || currentUser === null) return
+    const target = e.target as Element
     try {
       if (typeof currentUser?.id === "string") {
         const currentUserRef = doc(db, "users", currentUser?.id)
-        const inviterRef = doc(db, "users", (e.target as Element).id)
+        const inviterRef = doc(db, "users", target.id)
         const currentRelationRef = doc(
           db,
           "relationships",
-          `${(e.target as Element).id}${currentUser?.id}`
+          `${target.id}${currentUser?.id}`
         )
         await updateDoc(currentUserRef, {
-          friends: arrayUnion((e.target as Element).id),
+          friends: arrayUnion(target.id),
         })
         await updateDoc(inviterRef, {
           friends: arrayUnion(currentUser?.id),
@@ -322,10 +324,7 @@ export default function MyFriends() {
           beFriend: today,
         })
         const newBeInviteds = beInvitedIds.filter((item) => {
-          return item !== (e.target as Element).id
-        })
-        setFriendIds((prev) => {
-          return [...prev, (e.target as Element).id]
+          return item !== target.id
         })
         setBeInvitedIds(newBeInviteds)
       }
@@ -342,19 +341,20 @@ export default function MyFriends() {
   const denyFriendReq = async (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
+    const target = e.target as Element
     try {
       if (typeof currentUser?.id === "string") {
         const currentRelationRef = doc(
           db,
           "relationships",
-          `${(e.target as Element).id}${currentUser?.id}`
+          `${target.id}${currentUser?.id}`
         )
         await updateDoc(currentRelationRef, {
           status: "reject",
           rejectedDay: today,
         })
         const newBeInviteds = beInvitedIds.filter((item) => {
-          return item !== (e.target as Element).id
+          return item !== target.id
         })
         setBeInvitedIds(newBeInviteds)
       }
@@ -367,39 +367,22 @@ export default function MyFriends() {
       }
     }
   }
+
   return (
     <Container>
       <FixArea>
-        <ContentTitle>
-          <BtnSort
-            isCurrent={showAll}
-            onClick={() => {
-              setShowFriendReq(false)
-              setShowAll(true)
-            }}
-          >
-            Friends
-          </BtnSort>
-          <BtnSort
-            isCurrent={showFriendReq}
-            onClick={() => {
-              setShowAll(false)
-              setShowFriendReq(true)
-            }}
-          >
-            Friend requests
-          </BtnSort>
-        </ContentTitle>
+        <SwitchBtn currentSort={currentSort} setCurrentSort={setCurrentSort} />
         <Autocomplete
           qResultIds={qResultIds}
           setQResultIds={setQResultIds}
           invitingIds={invitingIds}
         />
       </FixArea>
-
-      {showFriendReq && (
+      {isLoading ? (
+        <Spinner />
+      ) : (
         <ContentArea>
-          {showFriendReq &&
+          {currentSort === "friendRequests" &&
             beInvitedList.length !== 0 &&
             beInvitedList.map((invited: DocumentData) => {
               return (
@@ -440,12 +423,8 @@ export default function MyFriends() {
                 </Wrapper>
               )
             })}
-        </ContentArea>
-      )}
-      {showAll && (
-        <ContentArea>
-          {showAll &&
-            friends.length !== 0 &&
+          {currentSort === "friends" &&
+            friends?.length !== 0 &&
             friends.map((friend: DocumentData) => {
               return (
                 <FriendWrapper
@@ -475,6 +454,16 @@ export default function MyFriends() {
                 </FriendWrapper>
               )
             })}
+          {currentSort === "friends" && (!friends || friends.length === 0) && (
+            <FriendWrapper>
+              No friends. <br />
+              Search a user and send a friend request!
+            </FriendWrapper>
+          )}
+          {currentSort === "friendRequests" &&
+            (!beInvitedList || beInvitedList.length === 0) && (
+              <FriendWrapper>No friend request.</FriendWrapper>
+            )}
         </ContentArea>
       )}
     </Container>
