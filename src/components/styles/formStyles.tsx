@@ -23,6 +23,9 @@ export const StepText = styled.div`
     font-size: ${(props) => props.theme.title.md};
     padding: 2px 10px;
   }
+  @media screen and (max-width: 450px) {
+    font-size: 16px;
+  }
 `
 export const StepTitle = styled(StepText)`
   font-weight: 500;
@@ -59,7 +62,7 @@ export const BtnText = styled.div`
   width: 100%;
   height: 40px;
   line-height: 40px;
-  margin: 30px auto;
+  margin: 15px auto;
   font-size: ${(props) => props.theme.title.md};
   font-weight: 700;
   color: ${(props) => props.theme.color.bgLight};
@@ -71,8 +74,7 @@ export const BtnText = styled.div`
   &:hover {
     color: #fff;
   }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 900px) {
     padding: 2px 10px;
     height: 30px;
     font-size: ${(props) => props.theme.title.sm};
