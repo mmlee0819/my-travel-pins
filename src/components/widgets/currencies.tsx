@@ -4,6 +4,7 @@ import React, {
   useContext,
   Dispatch,
   SetStateAction,
+  useRef,
 } from "react"
 import { ToolContext } from "../../context/toolContext"
 import styled from "styled-components"
@@ -13,6 +14,9 @@ import {
   GridItemWrapper,
   Xmark,
   Credits,
+  Title,
+  MobileContainer,
+  MobileWrapper,
 } from "../styles/widgetStyles"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
@@ -44,18 +48,26 @@ import mexico from "../../assets/flags/mexico.png"
 import turkey from "../../assets/flags/turkey.png"
 import india from "../../assets/flags/india.png"
 import calculator from "../../assets/calculator.png"
-import { notifyError } from "../reminder"
+import { notifyError, notifyWarn } from "../reminder"
 
-const Title = styled.div`
-  padding: 0;
-  height: 30px;
-  font-size: ${(props) => props.theme.title.lg};
-  font-weight: 700;
-  margin-bottom: 20px;
-  @media screen and(max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
+const ConverterGrid = styled(GridItemWrapper)`
+  @media screen and (max-width: 650px) {
+    display: none;
   }
 `
+const ConverterContainer = styled.div`
+  height: 450px;
+  @media screen and (max-width: 650px) {
+    max-width: 300px;
+    height: 500px;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+`
+
 const BtnClick = styled.div<{ showFrom: boolean; showTo: boolean }>`
   display: flex;
   justify-content: center;
@@ -64,7 +76,7 @@ const BtnClick = styled.div<{ showFrom: boolean; showTo: boolean }>`
   width: 100%;
   min-width: 140px;
   height: 40px;
-  line-height: 20px;
+  line-height: 40px;
   text-align: center;
   font-size: ${(props) => props.theme.title.md};
   color: #fff;
@@ -72,8 +84,12 @@ const BtnClick = styled.div<{ showFrom: boolean; showTo: boolean }>`
     props.showFrom || props.showTo ? "#fff" : "#034961"};
   border-radius: 5px;
   cursor: pointer;
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 800px) {
+    margin-top: 15px;
+  }
+  @media screen and (max-width: 650px) {
     font-size: ${(props) => props.theme.title.sm};
+    margin-bottom: 15px;
   }
 `
 const ExchangesWrapper = styled.div`
@@ -139,12 +155,18 @@ const ExchangesTitle = styled.div`
 `
 const AmountTitle = styled(ExchangesTitle)`
   margin-top: 20px;
+  @media screen and (max-width: 800px) {
+    margin-top: 10px;
+  }
 `
 
 const GridItemContent = styled(ExchangesTitle)`
   margin-top: auto;
   font-size: 14px;
   font-weight: 400;
+  @media screen and (max-width: 650px) {
+    margin-top: 20px;
+  }
 `
 
 const ResultTitle = styled(AmountTitle)`
@@ -231,7 +253,6 @@ export const getRatesData = async (
       const data = docSnap.data()
       setCurrenciesData(data)
     } else {
-      // doc.data() will be undefined in this case
       const oldDocSnap = await getDoc(yesterdayDocRef)
       const data = oldDocSnap.data()
       setCurrenciesData(data)
@@ -274,9 +295,9 @@ const calculateRates = (
 const layouts = {
   xl: [{ i: "exRate-1", x: 0, y: 0, w: 2, h: 1, maxW: 4, maxH: 2 }],
   lg: [{ i: "exRate-2", x: 0, y: 0, w: 3, h: 2, maxW: 3, maxH: 2 }],
-  md: [{ i: "exRate-3", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  sm: [{ i: "exRate-4", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
-  xs: [{ i: "exRate-5", x: 0, y: 0, w: 1, h: 1, maxW: 1, maxH: 1 }],
+  md: [{ i: "exRate-3", x: 0, y: 0, w: 0.5, h: 1, maxW: 0.8, maxH: 1 }],
+  sm: [{ i: "exRate-4", x: 0, y: 0, w: 0.5, h: 1, maxW: 0.8, maxH: 1 }],
+  xs: [{ i: "exRate-5", x: 0, y: 0, w: 0.5, h: 1, maxW: 0.8, maxH: 1 }],
 }
 
 interface Props {
@@ -285,8 +306,63 @@ interface Props {
   setShowFrom: Dispatch<SetStateAction<boolean>>
   showTo: boolean
   setShowTo: Dispatch<SetStateAction<boolean>>
-  currentWidget: string
   setCurrentWidget: Dispatch<SetStateAction<string>>
+}
+interface ResultProps {
+  resultRef: React.RefObject<HTMLDivElement>
+  amount: string
+  currentRate: number
+  selectedFrom: {
+    id: string
+    flag: string
+    currency: string
+  }
+  selectedTo: {
+    id: string
+    flag: string
+    currency: string
+  }
+  currenciesData: DocumentData | undefined
+  convertResult: number
+}
+
+function Result(props: ResultProps) {
+  const {
+    amount,
+    currentRate,
+    selectedFrom,
+    selectedTo,
+    currenciesData,
+    convertResult,
+    resultRef,
+  } = props
+  return (
+    <>
+      <Title>Result</Title>
+      <ExchangesTitle>{`${amount} ${selectedFrom.currency} = `}</ExchangesTitle>
+      <ResultTitle>{`${convertResult.toFixed(2)} ${
+        selectedTo.currency
+      }`}</ResultTitle>
+      <ExchangesTitle>
+        {`1 ${selectedFrom.id} = ${currentRate.toFixed(4)} ${selectedTo.id}`}
+        <br />
+        {`1 ${selectedTo.id} = ${(1 / currentRate).toFixed(4)} ${
+          selectedFrom.id
+        }`}
+      </ExchangesTitle>
+      <GridItemContent ref={resultRef}>
+        Last updated: <br />
+        {currenciesData?.USDTWD?.UTC} UTC
+        <br />
+        <Credits
+          href="https://tw.rter.info/howto_currencyapi.php"
+          target="_blank"
+        >
+          Credits: ©RTER.info
+        </Credits>
+      </GridItemContent>
+    </>
+  )
 }
 
 function CurrencyWidget(props: Props) {
@@ -296,7 +372,6 @@ function CurrencyWidget(props: Props) {
     setShowFrom,
     showTo,
     setShowTo,
-    currentWidget,
     setCurrentWidget,
   } = props
   const {
@@ -311,6 +386,26 @@ function CurrencyWidget(props: Props) {
   } = useContext(ToolContext)
 
   const [amount, setAmount] = useState("")
+  const amountRef = useRef<HTMLInputElement>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
+  const handleClickConvert = () => {
+    if (!amount || amount === "") {
+      amountRef?.current?.focus()
+      notifyWarn("Please enter a number in the amount field.")
+      return
+    }
+    calculateRates(
+      amount,
+      currentRate,
+      selectedFrom,
+      selectedTo,
+      setConvertResult
+    )
+    resultRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      // block: "center",
+    })
+  }
 
   useEffect(() => {
     if (!currenciesData || amount === "") return
@@ -335,16 +430,156 @@ function CurrencyWidget(props: Props) {
   }, [currenciesData, amount])
 
   return (
-    <GridContainer
-      layouts={layouts}
-      key="currency-widget"
-      breakpoints={{ xl: 1440, lg: 1200, md: 900, sm: 600, xs: 375 }}
-      cols={{ xl: 4, lg: 3, md: 3, sm: 3, xs: 1 }}
-      rowHeight={450}
-      z-index={160}
-      maxRows={1.5}
-    >
-      <GridItemWrapper key="exchange-rate">
+    <>
+      <GridContainer
+        layouts={layouts}
+        key="currency-widget"
+        breakpoints={{ xl: 1440, lg: 1200, md: 800, sm: 550, xs: 375 }}
+        cols={{ xl: 4, lg: 3, md: 4, sm: 1, xs: 1 }}
+        rowHeight={window.innerWidth > 810 ? 450 : 420}
+        z-index={160}
+        maxRows={1.5}
+      >
+        <ConverterGrid key="exchange-rate">
+          <Xmark
+            onClick={() => {
+              setCurrentWidget("")
+              setSelectedFrom({
+                id: selectedFrom.id || "TWD",
+                flag: selectedFrom.flag || taiwan,
+                currency: selectedFrom.currency || "TWD (台幣)",
+              })
+              setSelectedTo({
+                id: selectedTo.id || "USD",
+                flag: selectedTo.flag || usa,
+                currency: selectedTo.currency || "USD (美金)",
+              })
+              setConvertResult(0)
+            }}
+          />
+          <Title>Currency Converter</Title>
+          <ConverterContainer>
+            <ExchangesWrapper>
+              <ExchangesTitle>From</ExchangesTitle>
+              <WhiteInputTitle
+                onClick={() => {
+                  if (showTo) {
+                    setShowTo(false)
+                  }
+                  setShowFrom((prev: boolean) => !prev)
+                }}
+              >
+                {selectedFrom.id !== "" && (
+                  <CurrentOne>
+                    <FlagImg src={selectedFrom.flag} />
+                    {selectedFrom.currency}
+                  </CurrentOne>
+                )}
+                <CurrenciesFromWrapper showCurrency={showFrom}>
+                  {showFrom &&
+                    currenciesArr &&
+                    currenciesArr.map((item) => {
+                      return (
+                        <>
+                          <CurrencyRow
+                            key={`from-${item.id}`}
+                            id={item.id}
+                            onClick={(e) => {
+                              const filteredCurrency = currenciesArr.filter(
+                                (item) => {
+                                  return item.id === (e.target as Element).id
+                                }
+                              )
+                              setSelectedFrom(filteredCurrency[0])
+                            }}
+                          >
+                            <FlagImg src={item.flag} />
+                            {item.currency}
+                          </CurrencyRow>
+                        </>
+                      )
+                    })}
+                </CurrenciesFromWrapper>
+              </WhiteInputTitle>
+              <ExchangesTitle>To</ExchangesTitle>
+              <WhiteInputTitle
+                onClick={() => {
+                  if (!showFrom) {
+                    setShowTo((prev: boolean) => !prev)
+                  }
+                }}
+              >
+                <CurrentOne>
+                  <FlagImg src={selectedTo.flag} />
+                  {selectedTo.currency}
+                </CurrentOne>
+
+                <CurrenciesToWrapper showCurrency={showTo}>
+                  {showTo &&
+                    currenciesArr &&
+                    currenciesArr.map((item) => {
+                      return (
+                        <CurrencyRow
+                          key={`to-${item.id}`}
+                          id={item.id}
+                          onClick={(e) => {
+                            const filteredCurrency = currenciesArr.filter(
+                              (item) => {
+                                return item.id === (e.target as Element).id
+                              }
+                            )
+                            setSelectedTo(filteredCurrency[0])
+                          }}
+                        >
+                          <FlagImg src={item.flag} />
+                          {item.currency}
+                        </CurrencyRow>
+                      )
+                    })}
+                </CurrenciesToWrapper>
+              </WhiteInputTitle>
+            </ExchangesWrapper>
+            <AmountTitle>Amount</AmountTitle>
+            <AmountInput
+              ref={amountRef}
+              type="number"
+              min="1"
+              onChange={(e) => {
+                setAmount(e.target.value)
+              }}
+            />
+            <BtnClick
+              showFrom={showFrom}
+              showTo={showTo}
+              onClick={handleClickConvert}
+            >
+              <FlagImg src={calculator} />
+              Convert
+            </BtnClick>
+          </ConverterContainer>
+        </ConverterGrid>
+        {convertResult !== 0 && window.innerWidth > 650 && (
+          <GridItemWrapper
+            key="convert-result"
+            data-grid={{ x: 1, y: 0, w: 0.6, h: 1 }}
+            style={
+              window.innerWidth < 800 ? { left: "-100px" } : { left: "initial" }
+            }
+          >
+            <Result
+              resultRef={resultRef}
+              amount={amount}
+              currentRate={currentRate}
+              selectedFrom={selectedFrom}
+              selectedTo={selectedTo}
+              currenciesData={currenciesData}
+              convertResult={convertResult}
+            />
+          </GridItemWrapper>
+        )}
+      </GridContainer>
+
+      <MobileContainer>
         <Xmark
           onClick={() => {
             setCurrentWidget("")
@@ -362,30 +597,69 @@ function CurrencyWidget(props: Props) {
           }}
         />
         <Title>Currency Converter</Title>
-        <ExchangesWrapper>
-          <ExchangesTitle>From</ExchangesTitle>
-          <WhiteInputTitle
-            onClick={() => {
-              if (showTo) {
-                setShowTo(false)
-              }
-              setShowFrom((prev: boolean) => !prev)
-            }}
-          >
-            {selectedFrom.id !== "" && (
+        <MobileWrapper>
+          <ExchangesWrapper>
+            <ExchangesTitle>From</ExchangesTitle>
+            <WhiteInputTitle
+              onClick={() => {
+                if (showTo) {
+                  setShowTo(false)
+                }
+                setShowFrom((prev: boolean) => !prev)
+              }}
+            >
+              {selectedFrom.id !== "" && (
+                <CurrentOne>
+                  <FlagImg src={selectedFrom.flag} />
+                  {selectedFrom.currency}
+                </CurrentOne>
+              )}
+              <CurrenciesFromWrapper showCurrency={showFrom}>
+                {showFrom &&
+                  currenciesArr &&
+                  currenciesArr.map((item) => {
+                    return (
+                      <>
+                        <CurrencyRow
+                          key={`from-${item.id}-mobile`}
+                          id={item.id}
+                          onClick={(e) => {
+                            const filteredCurrency = currenciesArr.filter(
+                              (item) => {
+                                return item.id === (e.target as Element).id
+                              }
+                            )
+                            setSelectedFrom(filteredCurrency[0])
+                          }}
+                        >
+                          <FlagImg src={item.flag} />
+                          {item.currency}
+                        </CurrencyRow>
+                      </>
+                    )
+                  })}
+              </CurrenciesFromWrapper>
+            </WhiteInputTitle>
+            <ExchangesTitle>To</ExchangesTitle>
+            <WhiteInputTitle
+              onClick={() => {
+                if (!showFrom) {
+                  setShowTo((prev: boolean) => !prev)
+                }
+              }}
+            >
               <CurrentOne>
-                <FlagImg src={selectedFrom.flag} />
-                {selectedFrom.currency}
+                <FlagImg src={selectedTo.flag} />
+                {selectedTo.currency}
               </CurrentOne>
-            )}
-            <CurrenciesFromWrapper showCurrency={showFrom}>
-              {showFrom &&
-                currenciesArr &&
-                currenciesArr.map((item) => {
-                  return (
-                    <>
+
+              <CurrenciesToWrapper showCurrency={showTo}>
+                {showTo &&
+                  currenciesArr &&
+                  currenciesArr.map((item) => {
+                    return (
                       <CurrencyRow
-                        key={`from-${item.id}`}
+                        key={`to-${item.id}-mobile`}
                         id={item.id}
                         onClick={(e) => {
                           const filteredCurrency = currenciesArr.filter(
@@ -393,113 +667,47 @@ function CurrencyWidget(props: Props) {
                               return item.id === (e.target as Element).id
                             }
                           )
-                          setSelectedFrom(filteredCurrency[0])
+                          setSelectedTo(filteredCurrency[0])
                         }}
                       >
                         <FlagImg src={item.flag} />
                         {item.currency}
                       </CurrencyRow>
-                    </>
-                  )
-                })}
-            </CurrenciesFromWrapper>
-          </WhiteInputTitle>
-          <ExchangesTitle>To</ExchangesTitle>
-          <WhiteInputTitle
-            onClick={() => {
-              if (!showFrom) {
-                setShowTo((prev: boolean) => !prev)
-              }
+                    )
+                  })}
+              </CurrenciesToWrapper>
+            </WhiteInputTitle>
+          </ExchangesWrapper>
+          <AmountTitle>Amount</AmountTitle>
+          <AmountInput
+            ref={amountRef}
+            type="number"
+            min="1"
+            onChange={(e) => {
+              setAmount(e.target.value)
             }}
+          />
+
+          <BtnClick
+            showFrom={showFrom}
+            showTo={showTo}
+            onClick={handleClickConvert}
           >
-            <CurrentOne>
-              <FlagImg src={selectedTo.flag} />
-              {selectedTo.currency}
-            </CurrentOne>
-
-            <CurrenciesToWrapper showCurrency={showTo}>
-              {showTo &&
-                currenciesArr &&
-                currenciesArr.map((item) => {
-                  return (
-                    <CurrencyRow
-                      key={`to-${item.id}`}
-                      id={item.id}
-                      onClick={(e) => {
-                        const filteredCurrency = currenciesArr.filter(
-                          (item) => {
-                            return item.id === (e.target as Element).id
-                          }
-                        )
-                        setSelectedTo(filteredCurrency[0])
-                      }}
-                    >
-                      <FlagImg src={item.flag} />
-                      {item.currency}
-                    </CurrencyRow>
-                  )
-                })}
-            </CurrenciesToWrapper>
-          </WhiteInputTitle>
-        </ExchangesWrapper>
-        <AmountTitle>Amount</AmountTitle>
-        <AmountInput
-          type="number"
-          min="1"
-          onChange={(e) => {
-            setAmount(e.target.value)
-          }}
-        />
-
-        <BtnClick
-          showFrom={showFrom}
-          showTo={showTo}
-          onClick={() => {
-            calculateRates(
-              amount,
-              currentRate,
-              selectedFrom,
-              selectedTo,
-              setConvertResult
-            )
-          }}
-        >
-          <FlagImg src={calculator} />
-          Convert
-        </BtnClick>
-      </GridItemWrapper>
-      {convertResult !== 0 && (
-        <GridItemWrapper
-          key="convert-result"
-          data-grid={{ x: 1, y: 0, w: 1, h: 1 }}
-        >
-          <Title>Result</Title>
-          <ExchangesTitle>
-            {`${amount} ${selectedFrom.currency} = `}
-          </ExchangesTitle>
-          <ResultTitle>{`${convertResult.toFixed(2)} ${
-            selectedTo.currency
-          }`}</ResultTitle>
-          <ExchangesTitle>
-            {`1 ${selectedFrom.id} = ${currentRate.toFixed(4)} ${
-              selectedTo.id
-            }`}
-            <br />
-            {`1 ${selectedTo.id} = ${(1 / currentRate).toFixed(4)} ${
-              selectedFrom.id
-            }`}
-          </ExchangesTitle>
-          <GridItemContent>
-            Last updated: <br />
-            {currenciesData?.USDTWD?.UTC} UTC
-            <br />
-            <Credits href="https://tw.rter.info/howto_currencyapi.php">
-              Credits: ©RTER.info
-            </Credits>
-          </GridItemContent>
-        </GridItemWrapper>
-      )}
-    </GridContainer>
+            <FlagImg src={calculator} />
+            Convert
+          </BtnClick>
+          <Result
+            resultRef={resultRef}
+            amount={amount}
+            currentRate={currentRate}
+            selectedFrom={selectedFrom}
+            selectedTo={selectedTo}
+            currenciesData={currenciesData}
+            convertResult={convertResult}
+          />
+        </MobileWrapper>
+      </MobileContainer>
+    </>
   )
 }
 export default CurrencyWidget

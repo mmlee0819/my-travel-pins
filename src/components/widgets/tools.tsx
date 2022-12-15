@@ -186,6 +186,9 @@ function ToolsRobot() {
   }
 
   const handleClickCurrency = () => {
+    if (window.innerWidth < 420) {
+      setShowTools(false)
+    }
     if (currentWidget !== "exchange") {
       getRatesData(setCurrenciesData)
       setCurrentWidget("exchange")
@@ -231,7 +234,6 @@ function ToolsRobot() {
       </ToolsWrapper>
       {currentWidget === "exchange" && (
         <CurrencyWidget
-          currentWidget={currentWidget}
           setCurrentWidget={setCurrentWidget}
           showFrom={showFrom}
           setShowFrom={setShowFrom}
