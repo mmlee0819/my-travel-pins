@@ -47,10 +47,14 @@ export const GridItemWrapper = styled.div`
     min-width: 200px;
     padding: 20px 33px 20px 30px;
   }
-  @media screen and (max-width: 500px) {
-    padding: 20px 13px 20px 10px;
-    max-width: 320px;
+  @media screen and (max-width: 650px) {
+    display: none;
   }
+  /* @media screen and (max-width: 500px) {
+    padding: 20px 13px 20px 10px;
+    max-width: 300px;
+    min-width: 200px;
+  } */
 `
 export const Xmark = styled.div`
   position: absolute;
@@ -94,5 +98,48 @@ export const Credits = styled.a`
   }
   &:active {
     color: #b4b1b1;
+  }
+`
+
+export const Title = styled.div`
+  padding: 0;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.md};
+  font-weight: 700;
+  margin-bottom: 20px;
+  @media screen and (max-width: 800px) {
+    margin-bottom: 10px;
+  }
+  @media screen and (max-width: 650px) {
+    font-size: ${(props) => props.theme.title.sm};
+  }
+`
+
+export const MobileContainer = styled.div`
+  display: none;
+  @media screen and (max-width: 650px) {
+    position: absolute;
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 20px 23px 20px 20px;
+    width: calc(100% - 60px);
+    max-width: 400px;
+    height: 380px;
+    font-size: ${(props) => props.theme.title.md};
+    color: #2d2d2d;
+    background-color: #ffffff;
+    border-radius: 5px;
+    z-index: 199;
+  }
+`
+export const MobileWrapper = styled(MobileContainer)`
+  position: relative;
+  padding: 0;
+  width: 100%;
+  height: 400px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
   }
 `
