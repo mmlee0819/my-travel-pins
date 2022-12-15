@@ -4,6 +4,7 @@ import { Responsive, WidthProvider } from "react-grid-layout"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import xMark from "../../assets/buttons/x-mark.png"
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 export const GridContainer = styled(ResponsiveGridLayout)`
@@ -41,8 +42,14 @@ export const GridItemWrapper = styled.div`
   color: #2d2d2d;
   background: #ffffff;
   border-radius: 5px;
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 900px) {
     font-size: ${(props) => props.theme.title.sm};
+    min-width: 200px;
+    padding: 20px 33px 20px 30px;
+  }
+  @media screen and (max-width: 500px) {
+    padding: 20px 13px 20px 10px;
+    max-width: 320px;
   }
 `
 export const Xmark = styled.div`
