@@ -7,11 +7,12 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import { doc, updateDoc } from "firebase/firestore"
 import { AuthContext } from "../context/authContext"
 import logoutIcon from "../assets/buttons/logoutIcon.png"
-import editPencil from "../assets/buttons/edit.png"
+import camera from "../assets/add-photo.png"
 import spinner from "../assets/dotsSpinner.svg"
 import { notifyError } from "./reminder"
 
-const BgOverlay = styled.div`
+const BgOverlay = styled.div<{ isProfile: boolean }>`
+  display: ${(props) => (props.isProfile ? "flex" : "none")};
   position: absolute;
   top: 70px;
   left: 60px;
@@ -22,17 +23,20 @@ const BgOverlay = styled.div`
   background-color: rgb(255, 255, 255, 0.4);
   border-radius: 5px;
   z-index: 120;
+  @media screen and (max-width: 700px) {
+    left: 30px;
+    width: calc(100% - 60px);
+  }
 `
-const ProfileArea = styled.div`
+const ProfileArea = styled.div<{ width: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  flex-flow: column nowrap;
+  flex-direction: column;
   align-items: center;
-  width: 300px;
-  padding: 30px;
+  width: ${(props) => props.width};
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 700;
   color: ${(props) => props.theme.color.bgLight};
@@ -40,11 +44,20 @@ const ProfileArea = styled.div`
   box-shadow: rgb(120 120 120) 0px 0px 5px;
   opacity: 0.97;
   border-radius: 5px;
-  gap: 30px;
-  z-index: 52;
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  z-index: 152;
+  overflow: hidden;
+  transition: all 0.8s ease 0s;
+  @media screen and (max-width: 600px) {
     font-size: ${(props) => props.theme.title.md};
   }
+`
+const InnerContainer = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  padding: 30px;
+  width: 300px;
+  gap: 30px;
 `
 const Text = styled.div`
   display: flex;
@@ -52,8 +65,7 @@ const Text = styled.div`
   border: none;
   gap: 5px;
 
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 900px) {
     padding: 2px 10px;
   }
 `
@@ -63,30 +75,33 @@ const BtnText = styled(Text)`
 `
 const BtnLogout = styled.div`
   display: flex;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background-image: url(${logoutIcon});
   background-size: 100% 100%;
   cursor: pointer;
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
-    width: 15px;
-    height: 15px;
+`
+const CameraIcon = styled(BtnLogout)`
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  background-image: url(${camera});
+  @media screen and (max-width: 700px) {
+    bottom: 0px;
+    right: 0px;
   }
 `
-const BtnEdit = styled(BtnLogout)`
-  position: absolute;
-  top: 35px;
-  right: 30px;
-  background-image: url(${editPencil});
-`
 const UploadLabel = styled.label`
+  position: relative;
   display: flex;
   align-items: center;
   width: 150px;
   height: 150px;
-  margin: 30px auto 60px auto;
   cursor: pointer;
+  @media screen and (max-width: 700px) {
+    margin: 30px auto 30px auto;
+    height: 100px;
+  }
 `
 const UploadInput = styled.input`
   display: none;
@@ -121,7 +136,6 @@ function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      // Do nothing if clicking ref's element or descendent elements
       if (!ref.current || ref.current.contains(event.target as Node)) return
       setIsProfile(false)
     }
@@ -135,7 +149,7 @@ function useOnClickOutside(
   }, [ref])
 }
 
-export default function Profile() {
+export default function Profile({ isProfile }: { isProfile: boolean }) {
   const {
     isLogin,
     currentUser,
@@ -209,42 +223,45 @@ export default function Profile() {
 
   if (!isLogin || currentUser === undefined || currentUser === null) return null
   return (
-    <BgOverlay>
-      <ProfileArea ref={overlayRef}>
-        <BtnEdit />
-        {typeof currentUser.name === "string" && (
-          <Text>{currentUser?.name}</Text>
-        )}
-        {hasFile && <Spinner />}
-        {!hasFile && typeof avatarURL === "string" && (
-          <UploadLabel>
-            <UserAvatar photoURL={avatarURL} />
-            <UploadInput
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                handleChange(e)
-              }}
-            />
-          </UploadLabel>
-        )}
-        <BtnText
-          onClick={() => {
-            logOut()
-          }}
-        >
-          {isLoading ? (
-            <Spinner
-              style={{ width: "40px", height: "40px", margin: "0 auto" }}
-            />
-          ) : (
-            <>
-              <BtnLogout />
-              Sign out
-            </>
+    <>
+      <BgOverlay isProfile={isProfile} />
+      <ProfileArea ref={overlayRef} width={isProfile ? "250px" : "0"}>
+        <InnerContainer>
+          {typeof currentUser.name === "string" && (
+            <Text>{currentUser?.name}</Text>
           )}
-        </BtnText>
+          {hasFile && <Spinner />}
+          {!hasFile && typeof avatarURL === "string" && (
+            <UploadLabel>
+              <UserAvatar photoURL={avatarURL} />
+              <CameraIcon />
+              <UploadInput
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  handleChange(e)
+                }}
+              />
+            </UploadLabel>
+          )}
+          <BtnText
+            onClick={() => {
+              logOut()
+            }}
+          >
+            {isLoading ? (
+              <Spinner
+                style={{ width: "40px", height: "40px", margin: "0 auto" }}
+              />
+            ) : (
+              <>
+                <BtnLogout />
+                Sign out
+              </>
+            )}
+          </BtnText>
+        </InnerContainer>
       </ProfileArea>
-    </BgOverlay>
+    </>
   )
 }

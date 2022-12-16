@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useContext, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useLocation } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../context/authContext"
@@ -20,7 +20,6 @@ const HeaderContainer = styled.div`
   height: 60px;
   font-size: ${(props) => props.theme.title.lg};
   opacity: 1;
-  gap: 20px;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
   }
@@ -41,16 +40,9 @@ const TabWrapper = styled.div<{ currentPage: string }>`
     font-size: ${(props) => props.theme.title.md};
     gap: 10px;
   }
-  @media screen and (max-width: 630px) {
+  @media screen and (max-width: 643px) {
     display: none;
   }
-  /* ${(props) =>
-    (props.currentPage === "myMap" ||
-      props.currentPage === "myMemories" ||
-      props.currentPage === "myFriends") &&
-    ` @media screen and (max-width: 630px) {
-    display: none;
-    }`} */
 `
 
 const UserAvatar = styled.div<{ avatarURL: string }>`
@@ -115,7 +107,7 @@ const Tab = styled.div`
     background-color: ${(props) => props.theme.color.bgLight};
     transition: background-color 0.3s;
   }
-  @media screen and (max-width: 900px) and (min-width: 630px) {
+  @media screen and (max-width: 900px) {
     padding: 2px 10px;
     font-size: 16px;
   }
@@ -156,7 +148,7 @@ const MiniCurrentTabInFriend = styled.div`
 
 const TabMenu = styled.div<{ showMiniTab: boolean }>`
   display: none;
-  @media screen and (max-width: 630px) {
+  @media screen and (max-width: 643px) {
     display: flex;
     margin-bottom: 5px;
     width: 20px;
@@ -212,7 +204,7 @@ function TabsInMyMap({
 }: {
   setShowMiniTab: Dispatch<SetStateAction<boolean>>
 }) {
-  const { currentUser, setCurrentPage } = useContext(AuthContext)
+  const { currentUser } = useContext(AuthContext)
 
   return (
     <>
@@ -221,7 +213,6 @@ function TabsInMyMap({
         to={`/${currentUser?.name}/my-memories`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myMemories")
           setShowMiniTab(false)
         }}
       >
@@ -231,7 +222,6 @@ function TabsInMyMap({
         to={`/${currentUser?.name}/my-friends`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myFriends")
           setShowMiniTab(false)
         }}
       >
@@ -246,14 +236,13 @@ function TabsInMyMemories({
 }: {
   setShowMiniTab: Dispatch<SetStateAction<boolean>>
 }) {
-  const { currentUser, setCurrentPage } = useContext(AuthContext)
+  const { currentUser } = useContext(AuthContext)
   return (
     <>
       <Tab
         to={`/${currentUser?.name}`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myMap")
           setShowMiniTab(false)
         }}
       >
@@ -264,7 +253,6 @@ function TabsInMyMemories({
         to={`/${currentUser?.name}/my-friends`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myFriends")
           setShowMiniTab(false)
         }}
       >
@@ -279,14 +267,13 @@ function TabsInMyFriends({
 }: {
   setShowMiniTab: Dispatch<SetStateAction<boolean>>
 }) {
-  const { currentUser, setCurrentPage } = useContext(AuthContext)
+  const { currentUser } = useContext(AuthContext)
   return (
     <>
       <Tab
         to={`/${currentUser?.name}`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myMap")
           setShowMiniTab(false)
         }}
       >
@@ -296,7 +283,6 @@ function TabsInMyFriends({
         to={`/${currentUser?.name}/my-memories`}
         as={Link}
         onClick={() => {
-          setCurrentPage("myMemories")
           setShowMiniTab(false)
         }}
       >
@@ -312,8 +298,7 @@ function TabInFriendMap({
 }: {
   setShowMiniTab: Dispatch<SetStateAction<boolean>>
 }) {
-  const { currentUser, currentFriendInfo, setCurrentPage } =
-    useContext(AuthContext)
+  const { currentUser, currentFriendInfo } = useContext(AuthContext)
   const { friendName, friendId } = useParams()
   return (
     <>
@@ -326,7 +311,6 @@ function TabInFriendMap({
         }/${friendId || currentFriendInfo?.id}/memories`}
         as={Link}
         onClick={() => {
-          setCurrentPage("friendMemories")
           setShowMiniTab(false)
         }}
       >
@@ -341,8 +325,7 @@ function TabInFriendMemories({
 }: {
   setShowMiniTab: Dispatch<SetStateAction<boolean>>
 }) {
-  const { currentUser, currentFriendInfo, setCurrentPage } =
-    useContext(AuthContext)
+  const { currentUser, currentFriendInfo } = useContext(AuthContext)
   const { friendName, friendId } = useParams()
   return (
     <>
@@ -352,7 +335,6 @@ function TabInFriendMemories({
         }/${friendId || currentFriendInfo?.id}`}
         as={Link}
         onClick={() => {
-          setCurrentPage("friendMap")
           setShowMiniTab(false)
         }}
       >{`${friendName || currentFriendInfo?.name}'s Map`}</Tab>
@@ -396,15 +378,16 @@ function Header() {
   const {
     currentUser,
     isLogin,
-    currentFriendInfo,
     isProfile,
     setIsProfile,
     avatarURL,
     currentPage,
-    setCurrentPage,
+    currentFriendInfo,
   } = useContext(AuthContext)
-  const { friendName } = useParams()
+  const { user, friendName, friendId } = useParams()
   const [showMiniTab, setShowMiniTab] = useState(false)
+
+  const currentURL = useLocation().pathname
 
   if (
     !isLogin ||
@@ -417,42 +400,35 @@ function Header() {
   return (
     <>
       <HeaderContainer>
-        {(currentPage === "friendMap" || currentPage === "friendMemories") && (
-          <Title>
-            <UserAvatar
-              avatarURL={avatarURL}
-              onClick={() => {
-                setIsProfile(true)
-              }}
-            />
-            <BackToFriend
-              to={`/${currentUser.name}/my-friends`}
-              as={Link}
-              onClick={() => {
-                setCurrentPage("myFriends")
-              }}
-            />
-          </Title>
-        )}
-        {(currentPage === "myMap" ||
-          currentPage === "myMemories" ||
-          currentPage === "myFriends") && (
-          <Title>
-            <UserAvatar
-              avatarURL={avatarURL}
-              onClick={() => {
-                setIsProfile(true)
-              }}
-            />
-            {`Hello ${currentUser?.name} !`}
-            <TabMenu
-              showMiniTab={showMiniTab}
-              onClick={() => {
-                setShowMiniTab((isShown) => !isShown)
-              }}
-            />
-          </Title>
-        )}
+        <Title>
+          <UserAvatar
+            avatarURL={avatarURL}
+            onClick={() => {
+              setIsProfile(true)
+            }}
+          />
+          {(currentPage === "friendMemories" ||
+            currentPage === "friendMap" ||
+            currentURL === `/${user}/my-friend/${friendName}/${friendId}` ||
+            currentURL ===
+              `/${user}/my-friend/${friendName}/${friendId}/memories`) && (
+            <BackToFriend to={`/${currentUser.name}/my-friends`} as={Link} />
+          )}
+          {(currentURL === `/${user}` ||
+            currentURL === `/${user}/my-memories` ||
+            currentURL === `/${user}/my-friends`) && (
+            <>
+              <div>{`Hello ${currentUser?.name} !`}</div>
+              <TabMenu
+                showMiniTab={showMiniTab}
+                onClick={() => {
+                  setShowMiniTab((isShown) => !isShown)
+                }}
+              />
+            </>
+          )}
+        </Title>
+
         <TabWrapper currentPage={currentPage}>
           <TabsInAllCondition setShowMiniTab={setShowMiniTab} />
         </TabWrapper>
@@ -472,7 +448,7 @@ function Header() {
       <MiniTabWrapper showMiniTab={showMiniTab} currentPage={currentPage}>
         <TabsInAllCondition setShowMiniTab={setShowMiniTab} />
       </MiniTabWrapper>
-      {isProfile && typeof avatarURL === "string" && <Profile />}
+      <Profile isProfile={isProfile} />
     </>
   )
 }
