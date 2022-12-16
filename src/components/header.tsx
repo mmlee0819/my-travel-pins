@@ -1,9 +1,11 @@
-import React, { useContext } from "react"
-import { Link } from "react-router-dom"
+import React, { Dispatch, SetStateAction, useContext, useState } from "react"
+import { Link, useParams, useLocation } from "react-router-dom"
 import styled from "styled-components"
 import Profile from "./profile"
 import { AuthContext } from "../context/authContext"
 import backFriend from "../assets/backToFriend.png"
+import menu from "../assets/buttons/menu.png"
+import whiteMenu from "../assets/buttons/whiteMenu.png"
 
 const HeaderContainer = styled.div`
   position: relative;
@@ -18,27 +20,28 @@ const HeaderContainer = styled.div`
   height: 60px;
   font-size: ${(props) => props.theme.title.lg};
   opacity: 1;
-  gap: 20px;
   @media screen and (max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.md};
   }
 `
-const TabWrapper = styled.div`
+const TabWrapper = styled.div<{ currentPage: string }>`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
   align-self: end;
-  margin: 0 auto;
-  padding-right: 20px;
-  max-width: 1440px;
-  width: 100%;
+  margin-right: 20px;
   height: 30px;
   font-size: ${(props) => props.theme.title.lg};
   font-weight: 500;
   opacity: 1;
   gap: 20px;
-  @media screen and (max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 800px) {
+    margin-right: 10px;
     font-size: ${(props) => props.theme.title.md};
+    gap: 10px;
+  }
+  @media screen and (max-width: 643px) {
+    display: none;
   }
 `
 
@@ -76,17 +79,13 @@ const BackToFriend = styled.div`
 
 const Title = styled.div`
   display: flex;
-  flex: 1 1 auto;
   justify-content: start;
   align-items: center;
-  margin: 0 auto;
-  width: 40%;
   line-height: 40px;
   color: ${(props) => props.theme.color.bgDark};
   font-size: ${(props) => props.theme.title.md};
   font-weight: 500;
   letter-spacing: 2px;
-
   gap: 10px;
   z-index: 20;
 `
@@ -108,9 +107,15 @@ const Tab = styled.div`
     background-color: ${(props) => props.theme.color.bgLight};
     transition: background-color 0.3s;
   }
-  @media screen and (max-width: 900px) and (min-width: 600px),
-    (max-height: 600px) {
+  @media screen and (max-width: 900px) {
     padding: 2px 10px;
+    font-size: 16px;
+  }
+  @media screen and (max-width: 630px) {
+    height: 40px;
+    line-height: 40px;
+    border-radius: 0;
+    font-size: 14px;
   }
 `
 const CurrentTab = styled(Tab)`
@@ -122,26 +127,267 @@ const CurrentTab = styled(Tab)`
     background-color: ${(props) => props.theme.color.lightMain};
   }
 `
+const MiniCurrentTabInFriend = styled.div`
+  display: none;
+  @media screen and (max-width: 630px) {
+    display: flex;
+    align-self: end;
+    height: 30px;
+    margin-right: 20px;
+    padding: 2px 10px;
+    font-size: 16px;
+    color: ${(props) => props.theme.color.bgLight};
+    background-color: ${(props) => props.theme.color.lightMain};
+    border: none;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    gap: 10px;
+    cursor: pointer;
+  }
+`
+
+const TabMenu = styled.div<{ showMiniTab: boolean }>`
+  display: none;
+  @media screen and (max-width: 643px) {
+    display: flex;
+    margin-bottom: 5px;
+    width: 20px;
+    height: 20px;
+    background-image: ${(props) =>
+      props.showMiniTab ? `url(${menu})` : `url(${whiteMenu})`};
+    background-size: 100% 100%;
+    cursor: pointer;
+  }
+`
+const TabMenuInFriend = styled(TabMenu)`
+  align-self: center;
+  width: 15px;
+  height: 15px;
+`
+
+const MiniTabWrapper = styled.div<{
+  showMiniTab: boolean
+  currentPage: string
+}>`
+  display: none;
+  @media screen and (max-width: 630px) {
+    position: absolute;
+    display: flex;
+    flex-flow: column nowrap;
+    width: calc(100% - 100px);
+    justify-content: center;
+    align-self: end;
+    overflow: hidden;
+    padding: 0;
+    margin: 0 auto 0 20px;
+    min-width: 220px;
+    max-height: 0px;
+    font-size: ${(props) => props.theme.title.md};
+    font-weight: 500;
+    background-color: #ffffff;
+    box-shadow: rgb(120, 120, 120) 0px 0px 3px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    opacity: 1;
+    gap: 5px;
+    z-index: 110;
+    transition: max-height 0.5s ease-in-out;
+    ${(props) =>
+      props.showMiniTab &&
+      `
+    max-height: 150px; 
+    padding-top: 0px;`}
+  }
+`
+function TabsInMyMap({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentUser } = useContext(AuthContext)
+
+  return (
+    <>
+      <CurrentTab>My Map</CurrentTab>
+      <Tab
+        to={`/${currentUser?.name}/my-memories`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Memories
+      </Tab>
+      <Tab
+        to={`/${currentUser?.name}/my-friends`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Friends
+      </Tab>
+    </>
+  )
+}
+
+function TabsInMyMemories({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentUser } = useContext(AuthContext)
+  return (
+    <>
+      <Tab
+        to={`/${currentUser?.name}`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Map
+      </Tab>
+      <CurrentTab>My Memories</CurrentTab>
+      <Tab
+        to={`/${currentUser?.name}/my-friends`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Friends
+      </Tab>
+    </>
+  )
+}
+
+function TabsInMyFriends({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentUser } = useContext(AuthContext)
+  return (
+    <>
+      <Tab
+        to={`/${currentUser?.name}`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Map
+      </Tab>
+      <Tab
+        to={`/${currentUser?.name}/my-memories`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        My Memories
+      </Tab>
+      <CurrentTab>My Friends</CurrentTab>
+    </>
+  )
+}
+
+function TabInFriendMap({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentUser, currentFriendInfo } = useContext(AuthContext)
+  const { friendName, friendId } = useParams()
+  return (
+    <>
+      <CurrentTab>{`${
+        friendName || currentFriendInfo?.name
+      }'s map`}</CurrentTab>
+      <Tab
+        to={`/${currentUser?.name}/my-friend/${
+          friendName || currentFriendInfo?.name
+        }/${friendId || currentFriendInfo?.id}/memories`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >
+        {`${friendName || currentFriendInfo?.name}'s Memories`}
+      </Tab>
+    </>
+  )
+}
+
+function TabInFriendMemories({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentUser, currentFriendInfo } = useContext(AuthContext)
+  const { friendName, friendId } = useParams()
+  return (
+    <>
+      <Tab
+        to={`/${currentUser?.name}/my-friend/${
+          friendName || currentFriendInfo?.name
+        }/${friendId || currentFriendInfo?.id}`}
+        as={Link}
+        onClick={() => {
+          setShowMiniTab(false)
+        }}
+      >{`${friendName || currentFriendInfo?.name}'s Map`}</Tab>
+
+      <CurrentTab>{`${
+        friendName || currentFriendInfo?.name
+      }'s Memories`}</CurrentTab>
+    </>
+  )
+}
+
+function TabsInAllCondition({
+  setShowMiniTab,
+}: {
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
+}) {
+  const { currentPage } = useContext(AuthContext)
+
+  return (
+    <>
+      {currentPage === "myMap" && (
+        <TabsInMyMap setShowMiniTab={setShowMiniTab} />
+      )}
+      {currentPage === "myMemories" && (
+        <TabsInMyMemories setShowMiniTab={setShowMiniTab} />
+      )}
+      {currentPage === "myFriends" && (
+        <TabsInMyFriends setShowMiniTab={setShowMiniTab} />
+      )}
+      {currentPage === "friendMap" && (
+        <TabInFriendMap setShowMiniTab={setShowMiniTab} />
+      )}
+      {currentPage === "friendMemories" && (
+        <TabInFriendMemories setShowMiniTab={setShowMiniTab} />
+      )}
+    </>
+  )
+}
 
 function Header() {
   const {
     currentUser,
     isLogin,
-    isMyMap,
-    setIsMyMap,
-    isMyMemory,
-    setIsMyMemory,
-    isMyFriend,
-    setIsMyFriend,
-    isFriendHome,
-    setIsFriendHome,
-    isFriendMemory,
-    setIsFriendMemory,
-    currentFriendInfo,
     isProfile,
     setIsProfile,
     avatarURL,
+    currentPage,
+    currentFriendInfo,
   } = useContext(AuthContext)
+  const { user, friendName, friendId } = useParams()
+  const [showMiniTab, setShowMiniTab] = useState(false)
+
+  const currentURL = useLocation().pathname
 
   if (
     !isLogin ||
@@ -154,182 +400,55 @@ function Header() {
   return (
     <>
       <HeaderContainer>
-        {(isFriendHome || isFriendMemory) && (
-          <Title>
-            <UserAvatar
-              avatarURL={avatarURL}
-              onClick={() => {
-                setIsProfile(true)
-              }}
-            />
-            <BackToFriend
-              to={`/${currentUser.name}/my-friends`}
-              as={Link}
-              onClick={() => {
-                setIsMyMap(false)
-                setIsMyMemory(false)
-                setIsFriendHome(false)
-                setIsFriendMemory(false)
-                setIsMyFriend(true)
-              }}
-            />
-          </Title>
-        )}
-        {(isMyMap || isMyMemory || isMyFriend) && (
-          <Title>
-            <UserAvatar
-              avatarURL={avatarURL}
-              onClick={() => {
-                setIsProfile(true)
-              }}
-            />
-            {`Hello ${currentUser?.name} !`}
-          </Title>
-        )}
-        <TabWrapper>
-          {isMyMap && (
+        <Title>
+          <UserAvatar
+            avatarURL={avatarURL}
+            onClick={() => {
+              setIsProfile(true)
+            }}
+          />
+          {(currentPage === "friendMemories" ||
+            currentPage === "friendMap" ||
+            currentURL === `/${user}/my-friend/${friendName}/${friendId}` ||
+            currentURL ===
+              `/${user}/my-friend/${friendName}/${friendId}/memories`) && (
+            <BackToFriend to={`/${currentUser.name}/my-friends`} as={Link} />
+          )}
+          {(currentURL === `/${user}` ||
+            currentURL === `/${user}/my-memories` ||
+            currentURL === `/${user}/my-friends`) && (
             <>
-              <CurrentTab>My Map</CurrentTab>
-              <Tab
-                to={`/${currentUser.name}/my-memories`}
-                as={Link}
+              <div>{`Hello ${currentUser?.name} !`}</div>
+              <TabMenu
+                showMiniTab={showMiniTab}
                 onClick={() => {
-                  setIsMyMap(false)
-                  setIsMyFriend(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyMemory(true)
+                  setShowMiniTab((isShown) => !isShown)
                 }}
-              >
-                My Memories
-              </Tab>
-              <Tab
-                to={`/${currentUser.name}/my-friends`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMap(false)
-                  setIsMyMemory(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyFriend(true)
-                }}
-              >
-                My Friends
-              </Tab>
+              />
             </>
           )}
-          {isMyMemory && (
-            <>
-              <Tab
-                to={`/${currentUser.name}`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMemory(false)
-                  setIsMyFriend(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyMap(true)
-                }}
-              >
-                My Map
-              </Tab>
-              <CurrentTab>My Memories</CurrentTab>
-              <Tab
-                to={`/${currentUser.name}/my-friends`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMemory(false)
-                  setIsMyMap(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyFriend(true)
-                }}
-              >
-                My Friends
-              </Tab>
-            </>
-          )}
-          {isMyFriend && (
-            <>
-              <Tab
-                to={`/${currentUser.name}`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMemory(false)
-                  setIsMyFriend(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyMap(true)
-                }}
-              >
-                My Map
-              </Tab>
-              <Tab
-                to={`/${currentUser.name}/my-memories`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMap(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyFriend(false)
-                  setIsMyMemory(true)
-                }}
-              >
-                My Memories
-              </Tab>
-              <CurrentTab>My Friends</CurrentTab>
-            </>
-          )}
-          {isFriendHome && (
-            <>
-              {/* <Tab
-                to={`/${currentUser.name}`}
-                as={Link}
-                onClick={() => {
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(false)
-                  setIsMyMap(true)
-                }}
-              >
-                My Map
-              </Tab> */}
-              <CurrentTab>{`${currentFriendInfo?.name}'s Map`}</CurrentTab>
-              <Tab
-                to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}/memories`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMap(false)
-                  setIsMyMemory(false)
-                  setIsMyFriend(false)
-                  setIsFriendHome(false)
-                  setIsFriendMemory(true)
-                }}
-              >
-                {`${currentFriendInfo?.name}'s Memories`}
-              </Tab>
-            </>
-          )}
-          {isFriendMemory && (
-            <>
-              <Tab
-                to={`/${currentUser?.name}/my-friend/${currentFriendInfo?.name}/${currentFriendInfo?.id}`}
-                as={Link}
-                onClick={() => {
-                  setIsMyMap(false)
-                  setIsMyMemory(false)
-                  setIsMyFriend(false)
-                  setIsFriendMemory(false)
-                  setIsFriendHome(true)
-                }}
-              >{`${currentFriendInfo?.name}'s Map`}</Tab>
-              <CurrentTab>{`${currentFriendInfo?.name}'s Memories`}</CurrentTab>
-            </>
-          )}
+        </Title>
+
+        <TabWrapper currentPage={currentPage}>
+          <TabsInAllCondition setShowMiniTab={setShowMiniTab} />
         </TabWrapper>
+        {(currentPage === "friendMap" || currentPage === "friendMemories") && (
+          <>
+            <MiniCurrentTabInFriend
+              onClick={() => {
+                setShowMiniTab((isShown) => !isShown)
+              }}
+            >
+              {friendName || currentFriendInfo?.name}
+              <TabMenuInFriend showMiniTab={showMiniTab} />
+            </MiniCurrentTabInFriend>
+          </>
+        )}
       </HeaderContainer>
-      {isProfile && typeof avatarURL === "string" && <Profile />}
+      <MiniTabWrapper showMiniTab={showMiniTab} currentPage={currentPage}>
+        <TabsInAllCondition setShowMiniTab={setShowMiniTab} />
+      </MiniTabWrapper>
+      <Profile isProfile={isProfile} />
     </>
   )
 }

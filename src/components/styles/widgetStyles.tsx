@@ -4,6 +4,7 @@ import { Responsive, WidthProvider } from "react-grid-layout"
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import xMark from "../../assets/buttons/x-mark.png"
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 export const GridContainer = styled(ResponsiveGridLayout)`
@@ -41,8 +42,13 @@ export const GridItemWrapper = styled.div`
   color: #2d2d2d;
   background: #ffffff;
   border-radius: 5px;
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 900px) {
     font-size: ${(props) => props.theme.title.sm};
+    min-width: 200px;
+    padding: 20px 33px 20px 30px;
+  }
+  @media screen and (max-width: 650px) {
+    display: none;
   }
 `
 export const Xmark = styled.div`
@@ -87,5 +93,48 @@ export const Credits = styled.a`
   }
   &:active {
     color: #b4b1b1;
+  }
+`
+
+export const Title = styled.div`
+  padding: 0;
+  height: 30px;
+  font-size: ${(props) => props.theme.title.md};
+  font-weight: 700;
+  margin-bottom: 20px;
+  @media screen and (max-width: 800px) {
+    margin-bottom: 10px;
+  }
+  @media screen and (max-width: 650px) {
+    font-size: ${(props) => props.theme.title.sm};
+  }
+`
+
+export const MobileContainer = styled.div`
+  display: none;
+  @media screen and (max-width: 650px) {
+    position: absolute;
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 20px 23px 20px 20px;
+    width: calc(100% - 60px);
+    max-width: 400px;
+    height: 480px;
+    font-size: ${(props) => props.theme.title.md};
+    color: #2d2d2d;
+    background-color: #ffffff;
+    border-radius: 5px;
+    z-index: 199;
+  }
+`
+export const MobileWrapper = styled(MobileContainer)`
+  position: relative;
+  padding: 0;
+  width: 100%;
+  height: 480px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none;
   }
 `

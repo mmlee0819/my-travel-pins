@@ -1,6 +1,7 @@
 import React from "react"
 import { createGlobalStyle, ThemeProvider } from "styled-components"
 import { Outlet } from "react-router-dom"
+import { MapContextProvider } from "./context/mapContext"
 import { AuthContextProvider } from "./context/authContext"
 import { ToolContextProvider } from "./context/toolContext"
 import { Reminder } from "./components/reminder"
@@ -24,16 +25,12 @@ const GlobalStyle = createGlobalStyle`
     color:#fff;
     background-image: url(${bg});
     background-size: 100% 100%;
+    @media screen and (min-width: 300px) and (max-width: 700px){
+      padding: 10px 30px;
+    }
   }
 `
 const theme = {
-  screens: {
-    xs: "375px",
-    sm: "600px",
-    md: "900px",
-    lg: "1200px",
-    xl: "1440px",
-  },
   title: { sm: "14px", md: "18px", lg: "20px" },
   color: {
     deepMain: "#034961",
@@ -41,10 +38,10 @@ const theme = {
     bgDark: "#454545",
     bgLight: "#ffffff",
     lightGreen: "#7ccbab",
+    orange: "#f99c62",
   },
   btnColor: {
     bgGreen: "#a5b7af",
-    bgRed: "#c56363",
     bgBlue: "#5397bd",
     bgGray: "#b4b1b1",
   },
@@ -52,17 +49,21 @@ const theme = {
 }
 function App() {
   return (
-    <AuthContextProvider>
+    <>
       <ToolContextProvider>
-        <Reminder />
-        <GlobalStyle />
-        <ThemeProvider theme={theme}>
-          <Header />
-          <ToolsRobot />
-          <Outlet />
-        </ThemeProvider>
+        <AuthContextProvider>
+          <MapContextProvider>
+            <GlobalStyle />
+            <Reminder />
+            <ThemeProvider theme={theme}>
+              <Header />
+              <ToolsRobot />
+              <Outlet />
+            </ThemeProvider>
+          </MapContextProvider>
+        </AuthContextProvider>
       </ToolContextProvider>
-    </AuthContextProvider>
+    </>
   )
 }
 

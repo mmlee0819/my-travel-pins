@@ -18,14 +18,13 @@ import {
 } from "@algolia/autocomplete-core"
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia"
 import { Hit } from "@algolia/client-search"
-import { db } from "../utils/firebase"
-import { AuthContext } from "../context/authContext"
-import { UserImg, HomeTownText } from "./styles/friendStyles"
-import queryFriendImg from "../assets/034961magnifying-friends.png"
-import xMark from "../assets/buttons/x-mark.png"
-import { notifyError } from "./reminder"
-
-/* eslint-disable react/jsx-props-no-spreading */
+import { db } from "../../utils/firebase"
+import { AuthContext } from "../../context/authContext"
+import { UserImg, HomeTownText } from "../styles/friendStyles"
+import queryFriendImg from "../../assets/magnifying-friends.png"
+import xMark from "../../assets/buttons/x-mark.png"
+import { notifyError } from "../reminder"
+import { checkDevice } from "./checkDevice"
 
 const BgOverlay = styled.div`
   position: absolute;
@@ -84,8 +83,9 @@ const ProfileArea = styled.div<{ friendStatus: string }>`
       `max-height: 100px;
      cursor: pointer`}
   }
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 600px) {
     font-size: ${(props) => props.theme.title.md};
+    width: 250px;
   }
 `
 const Xmark = styled.div`
@@ -139,16 +139,22 @@ const InputWrapper = styled.div`
   display: flex;
   flex-flow: column wrap;
   align-self: start;
-  width: 360px;
   height: 40px;
   line-height: 40px;
   margin: 15px 0px;
   padding: 0;
   align-items: center;
   gap: 8px;
-  @media screen and (max-width: 600px), (max-height: 600px) {
+
+  @media screen and (max-width: 630px) and (min-width: 575px) {
     line-height: 30px;
     height: 30px;
+  }
+  @media screen and (max-width: 575px) {
+    position: absolute;
+    top: 0px;
+    right: 20px;
+    justify-content: center;
   }
 `
 const QueryForm = styled.form`
@@ -157,23 +163,46 @@ const QueryForm = styled.form`
 const QueryFriendInput = styled.input`
   display: flex;
   flex: 1 1 auto;
-  padding-left: 40px;
+  padding-right: 40px;
+  padding-left: 8px;
   width: 100%;
   font-size: 20px;
   line-height: 40px;
   height: 40px;
   border-radius: 5px;
   border: 1px solid #8c8c8c;
+
   &:focus {
     color: #034961;
     outline: 3px solid #7ccbab;
     border: none;
   }
+  @media screen and (max-width: 575px) {
+    align-self: end;
+    max-width: 100px;
+    transform-origin: left;
+    transition: max-width 0.5s ease-in-out;
+    &:focus {
+      max-width: 300px;
+    }
+  }
+  @media screen and (max-width: 380px) {
+    align-self: end;
+    max-width: 80px;
+    transform-origin: left;
+    transition: max-width 0.5s ease-in-out;
+    &:focus {
+      align-self: end;
+      max-width: 150px;
+    }
+  }
   ::placeholder {
     font-size: 16px;
+    @media screen and (max-width: 575px) {
+      font-size: 0;
+    }
   }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    padding-left: 32px;
+  @media screen and (max-width: 630px) {
     line-height: 30px;
     height: 30px;
   }
@@ -191,22 +220,28 @@ const QueryIconWrapper = styled.div`
   }
 `
 const Label = styled.label``
-const BtnQueryIcon = styled.button`
+
+const BtnQueryIcon = styled.button<{ currentDevice: string }>`
+  ${(props) =>
+    props.currentDevice === "mobile"
+      ? "display: none;"
+      : `
   position: absolute;
   top: 5px;
-  left: 5px;
+  right: 5px;
   width: 30px;
   height: 30px;
   border: none;
   border-radius: 5px;
   background-image: url(${queryFriendImg});
-  background-size: contain;
-  @media screen and (max-width: 600px), (max-height: 600px) {
+  background-size: 100% 100%;
+  background-color: #ffffff;
+  @media screen and (max-width: 630px) {
     top: 3px;
-    left: 4px;
+    right: 4px;
     width: 24px;
     height: 24px;
-  }
+  }`}
 `
 
 const ResultsSection = styled.div`
@@ -225,8 +260,19 @@ const ResultsSection = styled.div`
   border-radius: 5px;
   border-top: none;
   z-index: 20;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    top: 65px;
+  @media screen and (max-width: 630px) and (min-width: 575px) {
+    top: 70px;
+    right: 20px;
+  }
+  @media screen and (max-width: 575px) and (min-width: 460px) {
+    top: 55px;
+    right: 20px;
+  }
+  @media screen and (max-width: 460px) {
+    top: 55px;
+    right: 20px;
+    width: calc(100% - 40px);
+    min-width: 250px;
   }
 `
 const Section = styled.section`
@@ -364,6 +410,7 @@ export function Autocomplete(props: Props) {
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [showUserProfile, setShowUserProfile] = useState(false)
   const [friendStatus, setFriendStatus] = useState("")
+  const currentDevice = checkDevice()
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -513,16 +560,24 @@ export function Autocomplete(props: Props) {
           ref={formRef}
           {...autocomplete.getFormProps({ inputElement: qInputRef.current })}
         >
-          <QueryIconWrapper>
+          <QueryIconWrapper
+            onClick={() => {
+              qInputRef.current?.focus()
+            }}
+          >
             <Label>
-              <BtnQueryIcon type="submit" {...autocomplete.getLabelProps()} />
+              <QueryFriendInput
+                ref={qInputRef}
+                {...autocomplete.getInputProps({
+                  inputElement: null,
+                })}
+                placeholder="Search a user"
+              />
             </Label>
-            <QueryFriendInput
-              ref={qInputRef}
-              {...autocomplete.getInputProps({
-                inputElement: null,
-              })}
-              placeholder="Search a user"
+            <BtnQueryIcon
+              currentDevice={currentDevice}
+              type="submit"
+              {...autocomplete.getLabelProps()}
             />
           </QueryIconWrapper>
         </QueryForm>

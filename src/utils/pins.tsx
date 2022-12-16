@@ -138,7 +138,7 @@ export const checkRealTimePinsInfo = (
   setMemories: Dispatch<SetStateAction<PinContent[]>>
 ) => {
   const q = query(collection(db, "pins"), where("userId", "==", id))
-  onSnapshot(q, (querySnapshot) => {
+  return onSnapshot(q, (querySnapshot) => {
     const newMemories: DocumentData[] = []
     querySnapshot.forEach((doc) => {
       newMemories.push(doc.data() as PinContent)
@@ -153,7 +153,7 @@ export const checkRealTimePhotos = (
   id: string,
   setAlbumUrls: Dispatch<SetStateAction<string[]>>
 ) => {
-  onSnapshot(doc(db, "pins", id), (snapshotData: DocumentData) => {
+  return onSnapshot(doc(db, "pins", id), (snapshotData: DocumentData) => {
     if (snapshotData.data() && snapshotData.data().albumURLs) {
       const newPhotos: string[] = snapshotData.data().albumURLs
       setAlbumUrls(newPhotos)
@@ -165,7 +165,7 @@ export const checkRealTimePinMessages = (
   id: string,
   setMessages: Dispatch<SetStateAction<DocumentData[]>>
 ) => {
-  onSnapshot(doc(db, "pins", id), (messageData: DocumentData) => {
+  return onSnapshot(doc(db, "pins", id), (messageData: DocumentData) => {
     const fetchMessengers = async () => {
       if (
         messageData.data() === undefined ||

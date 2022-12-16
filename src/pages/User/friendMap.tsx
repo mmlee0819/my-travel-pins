@@ -11,6 +11,7 @@ import "leaflet/dist/leaflet.css"
 import { countries } from "../../utils/customGeo"
 import homeMarker from "../../assets/markers/home1.png"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import { db } from "../../utils/firebase"
 import {
   doc,
@@ -137,17 +138,8 @@ const mdNewPinIcon = L.icon({
 })
 
 function FriendsMap() {
-  const {
-    isLoaded,
-    currentUser,
-    mapZoom,
-    setIsMyMap,
-    setIsMyMemory,
-    setIsMyFriend,
-    setIsFriendHome,
-    setIsFriendMemory,
-  } = useContext(AuthContext)
-
+  const { currentUser, setCurrentPage } = useContext(AuthContext)
+  const { isLoaded, mapZoom } = useContext(MapContext)
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
   const [markers, setMarkers] = useState<
     DocumentData[] | DefinedDocumentData[] | PinContent[]
@@ -155,19 +147,21 @@ function FriendsMap() {
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
   const [refReady, setRefReady] = useState(false)
-  const { friendName, friendId } = useParams()
+
   const markerRef = useRef<L.Marker | null>(null)
 
+  const { friendName, friendId } = useParams()
+
   useEffect(() => {
-    if (!friendInfo || !markerRef.current) return
+    if (!friendId || !markerRef.current) return
     if (markerRef.current instanceof L.Marker) {
       markerRef.current.openPopup()
     }
-  }, [friendInfo, refReady, markerRef.current])
+  }, [friendId, refReady, markerRef.current])
 
   useEffect(() => {
     const getFriendInfo = async () => {
-      if (typeof friendId !== "string") return
+      if (!friendId) return
       const docRef = doc(db, "users", friendId)
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
@@ -178,11 +172,7 @@ function FriendsMap() {
         )
       }
     }
-    setIsMyMap(false)
-    setIsMyMemory(false)
-    setIsMyFriend(false)
-    setIsFriendMemory(false)
-    setIsFriendHome(true)
+    setCurrentPage("friendMap")
     getFriendInfo()
   }, [friendId])
 
@@ -197,7 +187,7 @@ function FriendsMap() {
       setMarkers(newMarkers)
     }
     getAllPinsOfFriend()
-  }, [])
+  }, [friendId])
 
   return (
     <>

@@ -26,6 +26,12 @@ export const ContentArea = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
+  @media screen and (max-width: 1020px) and (min-width: 630px) {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  @media screen and (max-width: 630px) {
+    padding: 20px;
+  }
 `
 
 export const ArticleWrapper = styled.div`
@@ -71,6 +77,9 @@ export const MemoryList = styled.div`
   &:hover {
     box-shadow: rgb(120, 120, 120) 0px 0px 8px;
   }
+  @media screen and (max-width: 630px) {
+    max-width: 300px;
+  }
 `
 
 export const ImgWrapper = styled.div`
@@ -84,6 +93,9 @@ export const ImgWrapper = styled.div`
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   cursor: pointer;
+  @media screen and (max-width: 630px) {
+    height: 250px;
+  }
 `
 export const MemoryImg = styled.img`
   display: block;
@@ -112,6 +124,8 @@ export const PhotoText = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 100%;
+  height: 60px;
   display: flex;
   align-items: center;
   text-align: center;
@@ -134,12 +148,8 @@ export const Title = styled(Text)`
   font-weight: 700;
   font-size: ${(props) => props.theme.title.md};
   cursor: pointer;
-
   &:hover {
     text-decoration: underline;
-  }
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.sm};
   }
 `
 export const TitleWrapper = styled.div`
@@ -158,8 +168,11 @@ export const BtnSortWrapper = styled.div`
   line-height: 30px;
   width: 100%;
   gap: 10px;
+  @media screen and (max-width: 630px) {
+    padding-left: 20px;
+  }
 `
-export const BtnSort = styled.div<{ isCurrent: boolean }>`
+export const BtnSort = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -167,16 +180,22 @@ export const BtnSort = styled.div<{ isCurrent: boolean }>`
   line-height: 20px;
   height: 30px;
   font-size: ${(props) => props.theme.title.md};
-  color: ${(props) => (props.isCurrent ? "#fff" : props.theme.color.deepMain)};
-  background-color: ${(props) =>
-    props.isCurrent ? props.theme.color.deepMain : "none"};
+  color: #fff;
+  background-color: ${(props) => props.theme.color.deepMain};
   border-radius: 5px;
-  border: 1px solid
-    ${(props) => (props.isCurrent ? "none" : props.theme.btnColor.bgGray)};
-  cursor: pointer;
+  border: none;
+  @media screen and (max-width: 750px) {
+    font-size: 16px;
+  }
 `
 export const SortIcon = styled(IconInList)`
   margin: 2px 0 0 10px;
   width: 20px;
   height: 24px;
+`
+export const InfoText = styled(Title)`
+  &:hover {
+    text-decoration: none;
+    cursor: default;
+  }
 `

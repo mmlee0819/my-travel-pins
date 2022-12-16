@@ -14,6 +14,7 @@ import { StandaloneSearchBox } from "@react-google-maps/api"
 import "leaflet/dist/leaflet.css"
 import { countries } from "../utils/customGeo"
 import { AuthContext } from "../context/authContext"
+import { MapContext } from "../context/mapContext"
 import PhotoWall from "../components/photoWall"
 import TipsContent from "../components/sampleContent"
 import { notifyWarn } from "../components/reminder"
@@ -30,6 +31,8 @@ import {
 } from "../components/styles/formStyles"
 import finger from "../assets/buttons/blackFinger.png"
 import home from "../assets/markers/home1.png"
+import menu from "../assets/buttons/menu.png"
+import whiteMenu from "../assets/buttons/whiteMenu.png"
 
 const HeaderWrapper = styled.div`
   position: relative;
@@ -45,9 +48,6 @@ const HeaderWrapper = styled.div`
   font-size: ${(props) => props.theme.title.lg};
   opacity: 1;
   gap: 20px;
-  @media screen and (max-width: 600px), (max-height: 600px) {
-    font-size: ${(props) => props.theme.title.md};
-  }
 `
 const Title = styled.div`
   display: flex;
@@ -78,20 +78,64 @@ const AuthTitle = styled(StepTitle)`
   font-weight: 700;
   font-size: ${(props) => props.theme.title.md};
 `
+
 const TabWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-self: end;
   margin: 0 auto;
-  padding-left: 20px;
-  max-width: 1440px;
-  width: 100%;
+  min-width: 200px;
   height: 30px;
   font-size: ${(props) => props.theme.title.md};
   font-weight: 500;
   opacity: 1;
   gap: 20px;
+  @media screen and (max-width: 540px) {
+    display: none;
+  }
+`
+const MiniTabWrapper = styled.div<{ showMiniTab: boolean }>`
+  display: none;
+  @media screen and (max-width: 540px) {
+    position: relative;
+    display: flex;
+    flex-flow: row nowrap;
+    width: fit-content;
+    justify-content: center;
+    align-self: end;
+    overflow: hidden;
+    margin: 0 auto 0 10px;
+    min-width: 200px;
+    max-height: 0px;
+    padding-top: 3px;
+    font-size: ${(props) => props.theme.title.md};
+    font-weight: 500;
+    border-radius: 5px;
+    opacity: 1;
+    gap: 20px;
+    z-index: 110;
+    transition: max-height 0.5s ease-in-out;
+    ${(props) =>
+      props.showMiniTab &&
+      `
+    max-height: 100px; 
+    padding-top: 0px;`}
+  }
+`
+const TabMenu = styled.div<{ showMiniTab: boolean }>`
+  display: none;
+  @media screen and (max-width: 540px) {
+    display: flex;
+    align-self: end;
+    margin-bottom: 10px;
+    width: 20px;
+    height: 20px;
+    background-image: ${(props) =>
+      props.showMiniTab ? `url(${menu})` : `url(${whiteMenu})`};
+    background-size: 100% 100%;
+    cursor: pointer;
+  }
 `
 const Tab = styled.div<{ authStatus: string }>`
   display: flex;
@@ -102,8 +146,12 @@ const Tab = styled.div<{ authStatus: string }>`
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   cursor: pointer;
-  @media screen and (min-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 540px) {
     padding: 2px 10px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
   }
 `
 const SignUpTab = styled(Tab)`
@@ -147,14 +195,18 @@ const Wrapper = styled.div`
   flex-flow: column nowrap;
   justify-content: flex-start;
   width: 50%;
+  min-width: 350px;
   max-height: 100%;
   padding: 20px 40px;
   font-size: ${(props) => props.theme.title.md};
   background-color: rgb(255, 255, 255, 0.6);
-  border-radius: 10px;
+  border-radius: 5px;
   box-shadow: 0px 8px 6px #0000004c;
   z-index: 100;
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 540px) {
+    padding: 40px 20px 20px 20px;
+    min-width: initial;
+    width: 100%;
     font-size: ${(props) => props.theme.title.sm};
   }
 `
@@ -174,6 +226,7 @@ interface Props {
 interface AuthProps {
   authStatus: string
   setAuthStatus: Dispatch<SetStateAction<string>>
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
   overlayRef: React.RefObject<HTMLDivElement>
 }
 
@@ -204,7 +257,8 @@ const myCustomStyle = {
 
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
-  setAuthStatus: Dispatch<SetStateAction<string>>
+  setAuthStatus: Dispatch<SetStateAction<string>>,
+  setShowMiniTab: Dispatch<SetStateAction<boolean>>
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
@@ -214,13 +268,20 @@ function useOnClickOutside(
         !ref.current ||
         ref.current.contains(targetNode) ||
         targetElement.classList.contains("pac-item") ||
-        targetElement.classList.contains("    pac-matched") ||
+        targetElement.classList.contains("pac-matched") ||
         targetNode?.parentElement?.className === "pac-item" ||
-        targetNode?.parentElement?.className === "pac-container"
+        targetNode?.parentElement?.className === "pac-container" ||
+        targetElement?.parentElement?.classList.contains("mini-tab-wrapper") ||
+        targetElement?.parentElement?.classList.contains("mini-sign-up") ||
+        targetElement?.parentElement?.classList.contains("mini-sign-in") ||
+        targetElement.classList.contains("mini-tab-wrapper") ||
+        targetElement.classList.contains("mini-sign-up") ||
+        targetElement.classList.contains("mini-sign-in")
       ) {
         return
       }
       setAuthStatus("")
+      setShowMiniTab(false)
     }
     window.addEventListener("mousedown", listener)
     window.addEventListener("touchstart", listener)
@@ -234,7 +295,7 @@ function useOnClickOutside(
 function AuthArea(props: AuthProps) {
   const { currentUser, isLogin, signUp, signIn, isLoading } =
     useContext(AuthContext)
-  const { overlayRef, authStatus, setAuthStatus } = props
+  const { overlayRef, authStatus, setAuthStatus, setShowMiniTab } = props
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const pwRef = useRef<HTMLInputElement>(null)
@@ -243,7 +304,6 @@ function AuthArea(props: AuthProps) {
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
   const [result, setResult] = useState<google.maps.places.PlaceResult[]>()
-
   const onPlacesChanged = () => {
     if (hometownBox instanceof google.maps.places.SearchBox) {
       const searchResult = hometownBox.getPlaces()
@@ -312,7 +372,11 @@ function AuthArea(props: AuthProps) {
       signIn(emailRef?.current?.value, pwRef?.current?.value)
     }
   }
-  useOnClickOutside(overlayRef, () => setAuthStatus(""))
+  useOnClickOutside(
+    overlayRef,
+    () => setAuthStatus(""),
+    () => setShowMiniTab(false)
+  )
 
   return (
     <Wrapper ref={overlayRef}>
@@ -365,6 +429,7 @@ function AuthArea(props: AuthProps) {
               ref={emailRef}
               name="accountEmail"
               placeholder="name@xxxx.com"
+              defaultValue="demo@test.com"
               required
             />
             <AuthTitle>Password</AuthTitle>
@@ -373,6 +438,7 @@ function AuthArea(props: AuthProps) {
               ref={pwRef}
               name="password"
               placeholder="over 6 letters"
+              defaultValue="mikamika"
               required
             />
             <BtnText onClick={handleSignIn}>
@@ -424,8 +490,16 @@ const fingerIcon = L.icon({
 
 function FingerMarker({ data }: { data: RoutePositionType }) {
   const { lat, lng } = data
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const [fingerPos, setFingerPos] = useState<LatLngTuple>([lat, lng])
+  const [speed, setSpeed] = useState(2500)
+  useEffect(() => {
+    if (mapZoom !== "xs") {
+      setSpeed(2500)
+    } else {
+      setSpeed(500)
+    }
+  }, [mapZoom])
   useEffect(() => {
     if (fingerPos[0] !== lat && fingerPos[1] !== lng) {
       setFingerPos([lat, lng])
@@ -437,65 +511,85 @@ function FingerMarker({ data }: { data: RoutePositionType }) {
       <LeafletTrackingMarker
         icon={fingerIcon}
         position={[lat, lng]}
-        duration={mapZoom === "md" ? 500 : 2500}
+        duration={speed}
       />
     </>
   )
 }
 function ChangeCenter() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const miniMap = useMap()
-  if (mapZoom === "md") {
-    miniMap.flyTo([46.57447264034455, -180.03737924171946], 0.5)
-  } else {
-    miniMap.flyTo([30.51620596509747, -130.12413187632802], 1.25)
+  if (mapZoom === "lg") {
+    miniMap.flyTo([30.51620596509747, -130], 1.25)
+  } else if (mapZoom === "md") {
+    miniMap.flyTo([46.57447264034455, -130], 0.75)
+  } else if (mapZoom === "sm") {
+    miniMap.flyTo([39.9437334482122, -100], 0.5)
+  } else if (mapZoom === "xxs") {
+    miniMap.flyTo([39.9437334482122, -150], 0.5)
   }
   return null
 }
 function ChangeCenterBack() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const originMap = useMap()
-  if (mapZoom === "md") {
-    originMap.flyTo([39.9437334482122, 65.35942441225613], 0.5)
-  } else {
-    originMap.flyTo([39.9437334482122, 65.35942441225613], 1.25)
+  if (mapZoom === "lg") {
+    originMap.flyTo([39.9437334482122, 50.35942441225613], 1.25)
+  } else if (mapZoom === "md") {
+    originMap.flyTo([39.9437334482122, 35.35942441225613], 1)
+  } else if (mapZoom === "sm") {
+    originMap.flyTo([39.9437334482122, 38.35942441225613], 0.5)
+  } else if (mapZoom === "xxs") {
+    originMap.flyTo([39.9437334482122, 66], 0.75)
   }
   return null
 }
 
 let cursor = 0
 function Home() {
-  const { currentUser, isLogin, mapZoom } = useContext(AuthContext)
+  const { currentUser, isLogin } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<LatLng | null>(null)
   const [authStatus, setAuthStatus] = useState("")
   const [showTips, setShowTips] = useState(false)
-
+  const [showMiniTab, setShowMiniTab] = useState(false)
+  const [initialZoom, setInitialZoom] = useState(1.25)
   const [fingerRoute, setFingerRoute] = useState({
     lat: 76.28248506785224,
     lng: 308,
   })
   const [routePositions, setRoutePositions] = useState([
-    { lat: 76, lng: 309 },
-    { lat: 77, lng: 310 },
+    { lat: 70, lng: 300 },
+    { lat: 74, lng: 325 },
   ])
 
   useEffect(() => {
     if (mapZoom === "lg") {
+      setInitialZoom(1.25)
       setRoutePositions([
-        { lat: 66.10851411418622, lng: 300.13876852999573 },
-        { lat: 72.70521040764667, lng: 325.564188227921 },
+        { lat: 70.10851411418622, lng: 300.13876852999573 },
+        { lat: 74.70521040764667, lng: 325.564188227921 },
       ])
-    } else {
+    } else if (mapZoom === "md") {
+      setInitialZoom(1)
       setRoutePositions([
-        { lat: 76, lng: 310 },
-        { lat: 77, lng: 311 },
+        { lat: 68, lng: 298 },
+        { lat: 71, lng: 300 },
       ])
+    } else if (mapZoom === "sm") {
+      setInitialZoom(0.5)
+      setRoutePositions([
+        { lat: 69, lng: 320 },
+        { lat: 73, lng: 322 },
+      ])
+    } else if (mapZoom === "xs" || mapZoom === "xxs") {
+      setInitialZoom(0.5)
     }
   }, [mapZoom])
 
   useEffect(() => {
-    if (showTips) return
+    if (showTips || mapZoom === "xxs" || authStatus !== "") return
     setFingerRoute(routePositions[cursor])
     const interval = setInterval(() => {
       if (cursor === routePositions.length - 1) {
@@ -509,11 +603,22 @@ function Home() {
     return () => {
       clearInterval(interval)
     }
-  }, [showTips, routePositions])
+  }, [showTips, mapZoom, authStatus])
 
   return (
     <>
       <HeaderWrapper>
+        <TabMenu
+          showMiniTab={showMiniTab}
+          onClick={() => {
+            if (showMiniTab) {
+              setAuthStatus("")
+              setShowMiniTab(false)
+            } else {
+              setShowMiniTab(true)
+            }
+          }}
+        />
         <TabWrapper>
           <SignUpTab
             authStatus={authStatus}
@@ -537,19 +642,43 @@ function Home() {
         <Title>My Travel Pins</Title>
       </HeaderWrapper>
       <Container>
+        <MiniTabWrapper className="mini-tab-wrapper" showMiniTab={showMiniTab}>
+          <SignUpTab
+            className="mini-sign-up"
+            authStatus={authStatus}
+            onClick={() => {
+              setShowTips(false)
+              setAuthStatus("isSigningUp")
+            }}
+          >
+            <TabText> Sign up</TabText>
+          </SignUpTab>
+          <SignInTab
+            className="mini-sign-in"
+            authStatus={authStatus}
+            onClick={() => {
+              setShowTips(false)
+              setAuthStatus("isSigningIn")
+            }}
+          >
+            <TabText>Sign In</TabText>
+          </SignInTab>
+        </MiniTabWrapper>
         <Attribution href="https://leafletjs.com/">source: Leaflet</Attribution>
         {(!isLogin || currentUser === null) && (
           <>
             <StyleMapContainer
               id="homeMap"
-              center={[39.9437334482122, 65.35942441225613]}
-              zoomControl={false}
-              zoom={
-                window.innerWidth > 900 && window.innerHeight > 600 ? 1.25 : 0.5
+              center={
+                window.innerWidth > 900 && window.innerHeight > 600
+                  ? [39.9437334482122, 50.35942441225613]
+                  : [39, 35]
               }
+              zoomControl={false}
+              zoom={initialZoom}
               scrollWheelZoom={false}
               zoomSnap={0.25}
-              dragging={false}
+              dragging={window.innerWidth < 540 ? true : false}
               trackResize
               style={{
                 margin: "0 auto",
@@ -568,14 +697,18 @@ function Home() {
                   onEachFeature={onEachFeature}
                 />
               ))}
-              {!showTips && <FingerMarker data={fingerRoute} />}
+              {!showTips && authStatus === "" && (
+                <FingerMarker data={fingerRoute} />
+              )}
               {authStatus !== "" && <ChangeCenter />}
               <TargetArea position={position} setPosition={setPosition} />
 
-              {authStatus === "" && overlayRef.current === null && (
+              {authStatus === "" && (
                 <>
                   <ChangeCenterBack />
-                  <PhotoWall setShowTips={setShowTips} />
+                  {mapZoom !== "xxs" && !showTips && (
+                    <PhotoWall setShowTips={setShowTips} />
+                  )}
                 </>
               )}
               {authStatus === "isSigningUp" && (
@@ -602,6 +735,7 @@ function Home() {
           <AuthArea
             authStatus={authStatus}
             setAuthStatus={setAuthStatus}
+            setShowMiniTab={setShowMiniTab}
             overlayRef={overlayRef}
           />
         )}

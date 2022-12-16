@@ -16,6 +16,7 @@ import questionMark from "../../assets/question-mark.png"
 import weather from "../../assets/whiteWeather.png"
 import usa from "../../assets/flags/usa.png"
 import taiwan from "../../assets/flags/taiwan.png"
+import { useLocation } from "react-router-dom"
 
 const ToolsWrapper = styled.div`
   position: absolute;
@@ -24,6 +25,9 @@ const ToolsWrapper = styled.div`
   right: 35px;
   border-radius: 20px;
   z-index: 200;
+  @media screen and (max-width: 630px) {
+    top: 15px;
+  }
 `
 const DragWrapper = styled(animated.div)`
   position: relative;
@@ -112,12 +116,10 @@ function ToolsRobot() {
   })
 
   const styles = useSpring(loopStyles)
+
+  const currentPath = useLocation().pathname
   useEffect(() => {
-    if (
-      !showTools &&
-      (window.location.href === "https://my-travel-pins.web.app/" ||
-        window.location.href === "https://localhost:3000/")
-    ) {
+    if (!showTools && currentPath === "/") {
       setLoopStyles({
         loop: { reverse: true },
         from: { rotateZ: -20 },
@@ -161,6 +163,9 @@ function ToolsRobot() {
   }, [showTools])
 
   const handleClickWeather = () => {
+    if (window.innerWidth < 550) {
+      setShowTools(false)
+    }
     if (currentWidget === "exchange") {
       setSelectedFrom({
         id: selectedFrom.id || "TWD",
@@ -181,9 +186,23 @@ function ToolsRobot() {
   }
 
   const handleClickCurrency = () => {
+    if (window.innerWidth < 420) {
+      setShowTools(false)
+    }
     if (currentWidget !== "exchange") {
       getRatesData(setCurrenciesData)
       setCurrentWidget("exchange")
+    } else {
+      setCurrentWidget("exchange")
+    }
+  }
+
+  const handleClickTip = () => {
+    if (showTools && window.innerWidth < 500) {
+      setCurrentWidget("tips")
+      setShowTools(false)
+    } else {
+      setCurrentWidget("tips")
     }
   }
 
@@ -208,19 +227,13 @@ function ToolsRobot() {
                 currentWidget={currentWidget}
                 onClick={handleClickCurrency}
               />
-              <QaIcon
-                currentWidget={currentWidget}
-                onClick={() => {
-                  setCurrentWidget("tips")
-                }}
-              />
+              <QaIcon currentWidget={currentWidget} onClick={handleClickTip} />
             </>
           )}
         </DragWrapper>
       </ToolsWrapper>
       {currentWidget === "exchange" && (
         <CurrencyWidget
-          currentWidget={currentWidget}
           setCurrentWidget={setCurrentWidget}
           showFrom={showFrom}
           setShowFrom={setShowFrom}

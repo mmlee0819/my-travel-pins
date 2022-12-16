@@ -7,6 +7,15 @@ import successIcon from "../assets/buttons/toastSuccessIcon.png"
 const StyledContainer = styled(ToastContainer)`
   &&&.Toastify__toast-container {
     width: 30%;
+    @media screen and (min-width: 900px) and (max-width: 1200px) {
+      width: 45%;
+    }
+    @media screen and (min-width: 540px) and (max-width: 899px) {
+      width: 60%;
+    }
+    @media screen and (max-width: 539px) {
+      width: 90%;
+    }
   }
   .Toastify__toast-theme--dark {
     background-color: #454545c6;

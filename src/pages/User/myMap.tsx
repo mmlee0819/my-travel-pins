@@ -43,6 +43,7 @@ import {
   BtnBlue,
 } from "../../components/styles/modalStyles"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import Upload from "../../components/post/uploadPhoto"
 import { db, storage } from "../../utils/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
@@ -71,7 +72,7 @@ const PhotoText = styled.div`
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
 `
-const Spinner = styled(Container)`
+export const Spinner = styled(Container)`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -102,6 +103,21 @@ const PostPinWrapper = styled(Wrapper)`
   padding: 20px 20px;
   font-size: ${(props) => props.theme.title.md};
   z-index: 48;
+  @media screen and (max-width: 1000px) {
+    width: 60%;
+  }
+  @media screen and (max-width: 860px) {
+    width: 70%;
+  }
+  @media screen and (max-width: 750px) {
+    width: 80%;
+  }
+  @media screen and (max-width: 620px) {
+    width: 90%;
+  }
+  @media screen and (max-width: 550px) {
+    width: 100%;
+  }
   @media screen and(max-width: 600px), (max-height: 600px) {
     font-size: ${(props) => props.theme.title.sm};
   }
@@ -227,17 +243,22 @@ const onEachFeature = (country: CountryType, layer: L.GeoJSON) => {
   })
 }
 function ChangeCenter() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const miniMap = useMap()
   if (mapZoom === "lg") {
-    miniMap.flyTo([45, -170], 1.25)
-  } else {
-    miniMap.flyTo([42, 167], 1)
+    miniMap.flyTo([40.51620596509747, -130], 1.25)
+  } else if (mapZoom === "md") {
+    miniMap.flyTo([46.57447264034455, -110], 1)
+  } else if (mapZoom === "sm") {
+    miniMap.flyTo([39.9437334482122, -100], 0.75)
+  } else if (mapZoom === "xxs") {
+    miniMap.flyTo([39.9437334482122, -150], 0.5)
   }
+
   return null
 }
 function ChangeCenterBack() {
-  const { mapZoom } = useContext(AuthContext)
+  const { mapZoom } = useContext(MapContext)
   const originMap = useMap()
   if (mapZoom === "lg") {
     originMap.flyTo([45, 10], 1.75)
@@ -275,18 +296,8 @@ const getCurrentDate = () => {
 }
 
 export default function MyMap() {
-  const {
-    isLoaded,
-    isLogin,
-    currentUser,
-    mapZoom,
-    setIsMyMap,
-    setIsMyMemory,
-    setIsMyFriend,
-    setIsFriendHome,
-    setIsFriendMemory,
-  } = useContext(AuthContext)
-
+  const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
+  const { isLoaded, mapZoom } = useContext(MapContext)
   const [center, setCenter] = useState<LatLng | null>(null)
   const [newPin, setNewPin] = useState({
     id: "",
@@ -332,11 +343,7 @@ export default function MyMap() {
   }, [selectedMarker?.location.placeId, refReady])
 
   useEffect(() => {
-    setIsMyMap(true)
-    setIsMyMemory(false)
-    setIsMyFriend(false)
-    setIsFriendHome(false)
-    setIsFriendMemory(false)
+    setCurrentPage("myMap")
     if (typeof currentUser?.id === "string" && !showMemory) {
       getPins(
         currentUser,
@@ -347,12 +354,14 @@ export default function MyMap() {
       )
     } else return
   }, [currentUser?.id, showMemory])
+
   useEffect(() => {
     if (
       currentUser !== undefined &&
       currentUser !== null &&
       typeof currentUser?.id === "string"
     ) {
+      setCurrentPage("myMap")
       checkRealTimePinsInfo(currentUser?.id, setMarkers)
       return checkRealTimePinsInfo(currentUser?.id, setMarkers)
     }
@@ -479,6 +488,7 @@ export default function MyMap() {
       setArtiContent("")
       setHasAddPin(false)
       setCanUpload(false)
+      setShowPostArea(false)
     } catch (error) {
       if (error instanceof Error) {
         const errorMsg = error["message"].slice(9) as string
@@ -531,9 +541,6 @@ export default function MyMap() {
     setShowPostArea(false)
   }
 
-  if (!isLogin || currentUser === undefined || currentUser === null)
-    return <Spinner />
-
   return (
     <>
       {!isLoaded ||
@@ -569,6 +576,18 @@ export default function MyMap() {
               <BtnAddPin
                 onClick={() => {
                   setShowPostArea(true)
+                  if (newPin.id !== "") {
+                    setNewPin({
+                      id: "",
+                      userId: "",
+                      location: {
+                        lat: 0,
+                        lng: 0,
+                        name: "",
+                        placeId: "",
+                      },
+                    })
+                  }
                 }}
               />
             )}

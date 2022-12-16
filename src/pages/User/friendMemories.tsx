@@ -1,7 +1,10 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
+import { useParams } from "react-router-dom"
 import { AuthContext } from "../../context/authContext"
+import { MapContext } from "../../context/mapContext"
 import { getPins, getSpecificPin } from "../../utils/pins"
+import { Spinner } from "./myMap"
 import {
   Container,
   ContentArea,
@@ -16,6 +19,7 @@ import {
   BtnSortWrapper,
   BtnSort,
   SortIcon,
+  InfoText,
 } from "../../components/styles/memoriesStyles"
 import { DocumentData } from "@firebase/firestore-types"
 import {
@@ -29,32 +33,26 @@ import DetailMemory from "../../components/pinContent/detailMemory"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
 import whiteArrow from "../../assets/buttons/down-arrow-white.png"
-import deepArrow from "../../assets/buttons/down-arrow-deeMain.png"
 
 function FriendMemories() {
-  const { isLoaded, isLogin, currentUser } = useContext(AuthContext)
+  const { isLogin, currentUser, setCurrentPage } = useContext(AuthContext)
+  const { isLoaded } = useContext(MapContext)
   const [memories, setMemories] = useState<PinContent[]>([])
   const [hasFetched, setHasFetched] = useState(false)
   const [memory, setMemory] = useState<PinContent>()
   const [memoryIsShow, setMemoryIsShow] = useState(false)
-  const [isSortByPost, setIsSortByPost] = useState(true)
-  const [isSortByDate, setIsSortByDate] = useState(false)
   const [messages, setMessages] = useState<DocumentData[] | MessagesType[]>([])
 
   const msgRef = useRef<HTMLInputElement>(null)
 
-  const url = window.location.href
-  const splitUrlArr = url.split("/")
-  const friendId = splitUrlArr.slice(-2, -1)[0]
-  let friendName = splitUrlArr.slice(-3, -2)[0]
-  if (friendName[0] === "%") {
-    friendName = decodeURI(friendName)
-  }
+  const { friendId } = useParams()
+
   useEffect(() => {
     if (
       currentUser !== undefined &&
       currentUser !== null &&
-      typeof currentUser?.id === "string"
+      typeof currentUser?.id === "string" &&
+      friendId
     ) {
       getPins(currentUser, friendId, hasFetched, setHasFetched, setMemories)
     }
@@ -62,6 +60,7 @@ function FriendMemories() {
 
   useEffect(() => {
     if (friendId) {
+      setCurrentPage("friendMemories")
       checkRealTimePinsInfo(friendId, setMemories)
       return checkRealTimePinsInfo(friendId, setMemories)
     }
@@ -97,34 +96,19 @@ function FriendMemories() {
   return (
     <Container>
       <BtnSortWrapper>
-        <BtnSort
-          isCurrent={isSortByPost}
-          onClick={() => {
-            if (!isSortByPost) {
-              setIsSortByDate(false)
-              setIsSortByPost(true)
-            }
-          }}
-        >
+        <BtnSort>
           Post time
-          <SortIcon src={isSortByPost ? whiteArrow : deepArrow} />
-        </BtnSort>
-        <BtnSort
-          isCurrent={isSortByDate}
-          onClick={() => {
-            if (!isSortByDate) {
-              setIsSortByPost(false)
-              setIsSortByDate(true)
-            }
-          }}
-        >
-          Travel date
-          <SortIcon src={isSortByDate ? whiteArrow : deepArrow} />
+          <SortIcon src={whiteArrow} />
         </BtnSort>
       </BtnSortWrapper>
       <ContentArea>
+        {(!memories || memories.length === 0) && (
+          <>
+            <InfoText>There is no update.</InfoText>
+          </>
+        )}
         {isLogin && isLoaded && memories ? (
-          memories.map((item: PinContent, index: number) => {
+          memories.map((item: PinContent) => {
             return (
               <MemoryList key={`${item.id}-${item?.article?.title}`}>
                 <ImgWrapper
@@ -169,7 +153,7 @@ function FriendMemories() {
             )
           })
         ) : (
-          <Title>Please wait...</Title>
+          <Spinner />
         )}
       </ContentArea>
 
