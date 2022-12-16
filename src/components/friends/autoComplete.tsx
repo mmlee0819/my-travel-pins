@@ -24,8 +24,7 @@ import { UserImg, HomeTownText } from "../styles/friendStyles"
 import queryFriendImg from "../../assets/magnifying-friends.png"
 import xMark from "../../assets/buttons/x-mark.png"
 import { notifyError } from "../reminder"
-
-/* eslint-disable react/jsx-props-no-spreading */
+import { checkDevice } from "./checkDevice"
 
 const BgOverlay = styled.div`
   position: absolute;
@@ -84,8 +83,9 @@ const ProfileArea = styled.div<{ friendStatus: string }>`
       `max-height: 100px;
      cursor: pointer`}
   }
-  @media screen and(max-width: 600px), (max-height: 600px) {
+  @media screen and (max-width: 600px) {
     font-size: ${(props) => props.theme.title.md};
+    width: 250px;
   }
 `
 const Xmark = styled.div`
@@ -171,6 +171,7 @@ const QueryFriendInput = styled.input`
   height: 40px;
   border-radius: 5px;
   border: 1px solid #8c8c8c;
+
   &:focus {
     color: #034961;
     outline: 3px solid #7ccbab;
@@ -220,7 +221,11 @@ const QueryIconWrapper = styled.div`
 `
 const Label = styled.label``
 
-const BtnQueryIcon = styled.button`
+const BtnQueryIcon = styled.button<{ currentDevice: string }>`
+  ${(props) =>
+    props.currentDevice === "mobile"
+      ? "display: none;"
+      : `
   position: absolute;
   top: 5px;
   right: 5px;
@@ -236,7 +241,7 @@ const BtnQueryIcon = styled.button`
     right: 4px;
     width: 24px;
     height: 24px;
-  }
+  }`}
 `
 
 const ResultsSection = styled.div`
@@ -405,6 +410,7 @@ export function Autocomplete(props: Props) {
   const [queryResult, setQueryResult] = useState<DocumentData | UserInfoType>()
   const [showUserProfile, setShowUserProfile] = useState(false)
   const [friendStatus, setFriendStatus] = useState("")
+  const currentDevice = checkDevice()
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<AutocompleteItem>
   >({
@@ -557,7 +563,6 @@ export function Autocomplete(props: Props) {
           <QueryIconWrapper
             onClick={() => {
               qInputRef.current?.focus()
-              console.log(qInputRef.current)
             }}
           >
             <Label>
@@ -569,7 +574,11 @@ export function Autocomplete(props: Props) {
                 placeholder="Search a user"
               />
             </Label>
-            <BtnQueryIcon type="submit" {...autocomplete.getLabelProps()} />
+            <BtnQueryIcon
+              currentDevice={currentDevice}
+              type="submit"
+              {...autocomplete.getLabelProps()}
+            />
           </QueryIconWrapper>
         </QueryForm>
       </InputWrapper>

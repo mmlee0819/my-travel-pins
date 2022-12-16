@@ -50,11 +50,6 @@ export const GridItemWrapper = styled.div`
   @media screen and (max-width: 650px) {
     display: none;
   }
-  /* @media screen and (max-width: 500px) {
-    padding: 20px 13px 20px 10px;
-    max-width: 300px;
-    min-width: 200px;
-  } */
 `
 export const Xmark = styled.div`
   position: absolute;

@@ -193,3 +193,9 @@ export const SortIcon = styled(IconInList)`
   width: 20px;
   height: 24px;
 `
+export const InfoText = styled(Title)`
+  &:hover {
+    text-decoration: none;
+    cursor: default;
+  }
+`

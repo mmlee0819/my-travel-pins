@@ -404,6 +404,7 @@ function CurrencyWidget(props: Props) {
   }
 
   useEffect(() => {
+    amountRef?.current?.focus()
     if (!currenciesData || amount === "") return
     if (selectedFrom.id === "USD") {
       const filteredCurrency = `USD${selectedTo?.id}`

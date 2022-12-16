@@ -32,6 +32,7 @@ import {
   BtnSortWrapper,
   BtnSort,
   SortIcon,
+  InfoText,
 } from "../../components/styles/memoriesStyles"
 import {
   BgOverlay,
@@ -145,6 +146,11 @@ export default function MyMemories() {
         </BtnSort>
       </BtnSortWrapper>
       <ContentArea>
+        {(!memories || memories.length === 0) && (
+          <>
+            <InfoText>There is no update.</InfoText>
+          </>
+        )}
         {isLogin && isLoaded && memories ? (
           memories.map((item: PinContent, index: number) => {
             return (

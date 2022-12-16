@@ -47,6 +47,9 @@ const VisitArea = styled.div`
   transform-origin: bottom;
   transition: max-width 0.2s ease-in;
   cursor: pointer;
+  @media screen and (max-width: 630px) {
+    height: 100px;
+  }
 `
 const VisitText = styled.div`
   text-align: end;
@@ -181,6 +184,7 @@ export default function MyFriends() {
     isLoading,
     setIsLoading,
   } = useContext(AuthContext)
+
   const [qResultIds, setQResultIds] = useState<string[]>([])
   const [relationships, setRelationships] = useState<
     DocumentData | DefinedDocumentData

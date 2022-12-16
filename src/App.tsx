@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React from "react"
 import { createGlobalStyle, ThemeProvider } from "styled-components"
 import { Outlet } from "react-router-dom"
 import { MapContextProvider } from "./context/mapContext"
@@ -31,13 +31,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `
 const theme = {
-  screens: {
-    xs: "375px",
-    sm: "600px",
-    md: "900px",
-    lg: "1200px",
-    xl: "1440px",
-  },
   title: { sm: "14px", md: "18px", lg: "20px" },
   color: {
     deepMain: "#034961",
@@ -56,19 +49,21 @@ const theme = {
 }
 function App() {
   return (
-    <MapContextProvider>
+    <>
       <ToolContextProvider>
         <AuthContextProvider>
-          <GlobalStyle />
-          <Reminder />
-          <ThemeProvider theme={theme}>
-            <Header />
-            <ToolsRobot />
-            <Outlet />
-          </ThemeProvider>
+          <MapContextProvider>
+            <GlobalStyle />
+            <Reminder />
+            <ThemeProvider theme={theme}>
+              <Header />
+              <ToolsRobot />
+              <Outlet />
+            </ThemeProvider>
+          </MapContextProvider>
         </AuthContextProvider>
       </ToolContextProvider>
-    </MapContextProvider>
+    </>
   )
 }
 

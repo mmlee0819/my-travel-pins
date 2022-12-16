@@ -11,10 +11,10 @@ const BtnToggleWrapper = styled.div`
   line-height: 30px;
   background-color: #ffffff;
   border-radius: 5px;
-  font-size: ${(props) => props.theme.title.lg};
+  font-size: ${(props) => props.theme.title.md};
   gap: 10px;
   @media screen and (max-width: 630px) {
-    font-size: ${(props) => props.theme.title.md};
+    font-size: ${(props) => props.theme.title.sm};
     min-width: 180px;
     height: 30px;
     line-height: 20px;
@@ -65,6 +65,7 @@ const BtnSort = styled.input`
   min-width: 180px;
   height: 40px;
   padding-right: 50px;
+  cursor: pointer;
   @media screen and (max-width: 630px) {
     padding-right: 40px;
     height: 30px;
@@ -104,7 +105,7 @@ function SwitchBtn({
   currentSort: string
   setCurrentSort: Dispatch<SetStateAction<string>>
 }) {
-  const handleClickMiniBtn = () => {
+  const handleClickBtn = () => {
     if (currentSort === "friends") {
       setCurrentSort("friendRequests")
     } else {
@@ -118,7 +119,7 @@ function SwitchBtn({
         id="checkbox"
         type="checkbox"
         defaultChecked
-        onClick={handleClickMiniBtn}
+        onClick={handleClickBtn}
       />
       <BtnSortLabel htmlFor="checkbox" />
     </BtnToggleWrapper>

@@ -19,6 +19,7 @@ import {
   BtnSortWrapper,
   BtnSort,
   SortIcon,
+  InfoText,
 } from "../../components/styles/memoriesStyles"
 import { DocumentData } from "@firebase/firestore-types"
 import {
@@ -101,6 +102,11 @@ function FriendMemories() {
         </BtnSort>
       </BtnSortWrapper>
       <ContentArea>
+        {(!memories || memories.length === 0) && (
+          <>
+            <InfoText>There is no update.</InfoText>
+          </>
+        )}
         {isLogin && isLoaded && memories ? (
           memories.map((item: PinContent) => {
             return (

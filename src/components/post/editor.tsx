@@ -40,18 +40,9 @@ const StyleQuill = styled(ReactQuill)`
 function Editor(props: ArticleContentType) {
   const { artiContent, setArtiContent } = props
 
-  // const quillRef = useRef<ReactQuill>(null)
-  // useEffect(() => {
-  //   if (quillRef.current) {
-  //     console.log(quillRef.current)
-  //     quillRef.current.focus()
-  //   }
-  // })
-
   return (
     <StyleQuill
       theme="snow"
-      // ref={quillRef}
       value={artiContent}
       placeholder="What's on your mind?"
       onChange={setArtiContent}

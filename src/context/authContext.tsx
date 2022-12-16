@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -115,21 +115,27 @@ export function AuthContextProvider({ children }: Props) {
   const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState("")
 
+  const currentPath = useLocation().pathname
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
-      if (user !== null) {
-        const docRef = doc(db, "users", user.uid)
-        const docSnap = await getDoc(docRef)
-        const userInfo: DocumentData | undefined = docSnap.data()
-        if (userInfo !== undefined && typeof userInfo?.photoURL === "string") {
-          setCurrentUser(userInfo)
-          setAvatarURL(userInfo?.photoURL)
-          setIsLogin(true)
-          setIsProfile(false)
-        }
-      } else {
-        setIsLogin(false)
+      if (!user || user === null) return
+      const docRef = doc(db, "users", user.uid)
+      const docSnap = await getDoc(docRef)
+      const userInfo: DocumentData | undefined = docSnap.data()
+      if (!userInfo) {
         navigate("/")
+        return
+      }
+      if (userInfo !== undefined && typeof userInfo?.photoURL === "string") {
+        setCurrentUser(userInfo)
+        setAvatarURL(userInfo?.photoURL)
+        setIsLogin(true)
+        setIsProfile(false)
+      }
+      if (userInfo && currentPath === "/") {
+        navigate(`/${userInfo?.name}`)
+        setIsLoading(false)
       }
     })
   }, [])
@@ -144,14 +150,14 @@ export function AuthContextProvider({ children }: Props) {
     try {
       setIsLoading(true)
       const engLetter = /^[a-zA-Z]*$/
-      let UpdatedName = ""
+      let updatedName = ""
       if (engLetter.test(name[0])) {
         const namesArr = name.split(" ")
         const newNameArr = namesArr.map((word) => {
           const newName = word.charAt(0).toUpperCase() + word.slice(1)
           return newName
         })
-        UpdatedName = newNameArr.join(" ")
+        updatedName = newNameArr.join(" ")
       }
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -164,7 +170,7 @@ export function AuthContextProvider({ children }: Props) {
       if (user) {
         const userInfo = {
           id: user.uid,
-          name: UpdatedName || name,
+          name: updatedName || name,
           email: user.email,
           photoURL: defaultAvatar,
           hometownName: searchResult[0]?.name,

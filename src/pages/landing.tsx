@@ -304,7 +304,6 @@ function AuthArea(props: AuthProps) {
     google.maps.places.SearchBox | StandaloneSearchBox
   >()
   const [result, setResult] = useState<google.maps.places.PlaceResult[]>()
-
   const onPlacesChanged = () => {
     if (hometownBox instanceof google.maps.places.SearchBox) {
       const searchResult = hometownBox.getPlaces()
@@ -430,6 +429,7 @@ function AuthArea(props: AuthProps) {
               ref={emailRef}
               name="accountEmail"
               placeholder="name@xxxx.com"
+              defaultValue="demo@test.com"
               required
             />
             <AuthTitle>Password</AuthTitle>
@@ -438,6 +438,7 @@ function AuthArea(props: AuthProps) {
               ref={pwRef}
               name="password"
               placeholder="over 6 letters"
+              defaultValue="mikamika"
               required
             />
             <BtnText onClick={handleSignIn}>
@@ -559,10 +560,10 @@ function Home() {
     lng: 308,
   })
   const [routePositions, setRoutePositions] = useState([
-    { lat: 76, lng: 309 },
-    { lat: 77, lng: 310 },
+    { lat: 70, lng: 300 },
+    { lat: 74, lng: 325 },
   ])
-  console.log({ mapZoom })
+
   useEffect(() => {
     if (mapZoom === "lg") {
       setInitialZoom(1.25)
@@ -603,8 +604,6 @@ function Home() {
       clearInterval(interval)
     }
   }, [showTips, mapZoom, authStatus])
-
-  // console.log({ position })
 
   return (
     <>
