@@ -401,10 +401,6 @@ function CurrencyWidget(props: Props) {
       selectedTo,
       setConvertResult
     )
-    resultRef?.current?.scrollIntoView({
-      behavior: "smooth",
-      // block: "center",
-    })
   }
 
   useEffect(() => {

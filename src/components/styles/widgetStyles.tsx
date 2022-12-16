@@ -124,7 +124,7 @@ export const MobileContainer = styled.div`
     padding: 20px 23px 20px 20px;
     width: calc(100% - 60px);
     max-width: 400px;
-    height: 380px;
+    height: 480px;
     font-size: ${(props) => props.theme.title.md};
     color: #2d2d2d;
     background-color: #ffffff;
@@ -136,7 +136,7 @@ export const MobileWrapper = styled(MobileContainer)`
   position: relative;
   padding: 0;
   width: 100%;
-  height: 400px;
+  height: 480px;
   overflow-y: scroll;
   scrollbar-width: none;
   ::-webkit-scrollbar {
