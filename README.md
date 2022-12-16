@@ -35,7 +35,7 @@ Users can own a map, log memories and interact with friends.
 - Added a moving finger on the landing page by using [@react-leaflet-tracking-marker](https://www.npmjs.com/package/react-leaflet-tracking-marker) to assist users in easily finding out the instruction of the website.
 
 ## Functional Map
-![functional map_my travel pins](https://user-images.githubusercontent.com/102346844/207791600-e3fb0eae-b48a-4262-9b5c-8e287aa6f8a5.png)
+![functional map_my travel pins](https://user-images.githubusercontent.com/102346844/208008614-6b920d3c-b4d3-451c-bfcd-03ffe87befb6.png)
 
 ## Main Features
 
