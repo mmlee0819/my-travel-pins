@@ -141,9 +141,7 @@ function FriendsMap() {
   const { currentUser, setCurrentPage } = useContext(AuthContext)
   const { isLoaded, mapZoom } = useContext(MapContext)
   const [friendInfo, setFriendInfo] = useState<DefinedDocumentData>()
-  const [markers, setMarkers] = useState<
-    DocumentData[] | DefinedDocumentData[] | PinContent[]
-  >([])
+  const [markers, setMarkers] = useState<PinContent[]>([])
   const [selectedMarker, setSelectedMarker] = useState<PinContent | undefined>()
   const [showMemory, setShowMemory] = useState(false)
   const [refReady, setRefReady] = useState(false)
@@ -180,11 +178,11 @@ function FriendsMap() {
     const getAllPinsOfFriend = async () => {
       const q = query(collection(db, "pins"), where("userId", "==", friendId))
       const querySnapshot = await getDocs(q)
-      const newMarkers: any[] = []
-      querySnapshot.forEach((doc: any) => {
+      const newMarkers: DocumentData[] = []
+      querySnapshot.forEach((doc: DocumentData) => {
         newMarkers.push(doc.data())
       })
-      setMarkers(newMarkers)
+      setMarkers(newMarkers as PinContent[])
     }
     getAllPinsOfFriend()
   }, [friendId])
@@ -258,7 +256,7 @@ function FriendsMap() {
                 </Tooltip>
               </Marker>
 
-              {markers?.map((marker: any) => {
+              {markers?.map((marker: PinContent) => {
                 return (
                   <Marker
                     key={marker.location.placeId}
