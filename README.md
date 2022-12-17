@@ -10,10 +10,10 @@ Users can own a map, log memories and interact with friends.
 
 ## Table of Contents
 
-- [Technologies](https://github.com/mmlee0819/my-travel-pins/edit/main/README.md#technologies)
-- [Functional Map](https://github.com/mmlee0819/my-travel-pins/edit/main/README.md#functional-map)
-- [Project Descriptions](https://github.com/mmlee0819/my-travel-pins/edit/main/README.md#project-descriptions)
-- [Features Demonstration](https://github.com/mmlee0819/my-travel-pins/edit/main/README.md#features-demonstration)
+- [Technologies](https://github.com/mmlee0819/my-travel-pins#technologies)
+- [Functional Map](https://github.com/mmlee0819/my-travel-pins#functional-map)
+- [Project Descriptions](https://github.com/mmlee0819/my-travel-pins#project-descriptions)
+- [Features Demonstration](https://github.com/mmlee0819/my-travel-pins#features-demonstration)
 
 ## Technologies
 
