@@ -332,13 +332,13 @@ export default function MyMap() {
   const locationRef = useRef<HTMLInputElement>(null)
   const titleRef = useRef<HTMLInputElement>(null)
   const [refReady, setRefReady] = useState(false)
-  const popupRef = useRef<any>(null)
+  const markerRef = useRef<L.Marker | null>(null)
 
   useEffect(() => {
-    if (!selectedMarker) return
+    if (!selectedMarker || !markerRef.current) return
 
-    if (refReady && popupRef !== undefined) {
-      popupRef.current.openPopup()
+    if (refReady && markerRef !== undefined) {
+      markerRef.current.openPopup()
     }
   }, [selectedMarker?.location.placeId, refReady])
 
@@ -712,10 +712,10 @@ export default function MyMap() {
                   Hometown {currentUser?.hometownName}
                 </Tooltip>
               </Marker>
-              {markers?.map((marker: any, index: number) => {
+              {markers?.map((marker: PinContent, index: number) => {
                 return (
                   <Marker
-                    ref={popupRef}
+                    ref={markerRef}
                     key={`${marker.location.placeId}-${index}`}
                     position={[marker.location.lat, marker.location.lng]}
                     icon={mapZoom === "lg" ? lgNewPinIcon : mdNewPinIcon}
@@ -734,7 +734,7 @@ export default function MyMap() {
                         id={marker.location.placeId}
                         onClick={() => {
                           setShowMemory(true)
-                          popupRef.current.closePopup()
+                          markerRef?.current?.closePopup()
                         }}
                       >
                         <PinInfoTitle>
