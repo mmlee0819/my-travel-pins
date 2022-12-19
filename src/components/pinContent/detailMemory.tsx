@@ -27,7 +27,7 @@ import blackEditPencil from "../../assets/buttons/blackEdit.png"
 import calendar from "../../assets/calendar.png"
 import location from "../../assets/location.png"
 
-import { notifyError } from "../reminder"
+import { notifyError, notifyWarn } from "../reminder"
 
 const Container = styled.div`
   position: absolute;
@@ -369,6 +369,16 @@ interface Props {
   setShowMemory: Dispatch<React.SetStateAction<boolean>>
 }
 
+const getCurrentDate = () => {
+  const dateObj = new Date()
+  const month = ("0" + (dateObj.getMonth() + 1)).slice(-2)
+  const day = ("0" + dateObj.getDate()).slice(-2)
+  const year = dateObj.getFullYear()
+  const today = `${year}-${month}-${day}`
+
+  return today
+}
+
 function useOnClickOutside(
   ref: React.RefObject<HTMLDivElement>,
   setShowMemory: Dispatch<React.SetStateAction<boolean>>,
@@ -428,6 +438,7 @@ export default function DetailMemory(props: Props) {
   const [selectedMsgId, setSelectedMsgId] = useState("")
   const [canUpload, setCanUpload] = useState(true)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
 
   const memorySwiperModule =
     albumUrls.length > 1 ? swiperModules.manyPhoto : swiperModules.onePhoto
@@ -505,6 +516,15 @@ export default function DetailMemory(props: Props) {
 
   const handleUpdate = async () => {
     if (!selectedMarker?.id) return
+    if (artiTitle.trim() === "") {
+      titleRef?.current?.focus()
+      titleRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+      notifyWarn("Title is required")
+      return
+    }
     const docRef = doc(db, "pins", selectedMarker?.id)
     if (hasUpload) {
       updatePhotos()
@@ -782,6 +802,7 @@ export default function DetailMemory(props: Props) {
                 <>
                   <EditWrapper>
                     <Input
+                      ref={titleRef}
                       as="input"
                       value={artiTitle}
                       placeholder="Title"
@@ -794,7 +815,7 @@ export default function DetailMemory(props: Props) {
                       type="date"
                       pattern="\d{4}-\d{2}-\d{2}"
                       min="1900-01-01"
-                      max="9999-12-31"
+                      max={`${getCurrentDate()}`}
                       value={travelDate}
                       onChange={(e) => {
                         setTravelDate(e.target.value)

@@ -67,7 +67,7 @@ const PhotoText = styled.div`
   width: 100%;
   min-width: 150px;
   height: 120px;
-  font-size: ${(props) => props.theme.title.md};
+  font-size: ${(props) => props.theme.title.sm};
   color: ${(props) => props.theme.color.bgDark};
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
@@ -406,16 +406,21 @@ export default function MyMap() {
       setShowPostArea(false)
     }
   }
+
   const addMemory = async () => {
     if (newPin.location.placeId === "") {
       locationRef?.current?.focus()
-      notifyWarn("Place marker is required")
+      notifyWarn("Place a marker is required")
       return
     }
-    if (artiTitle === "") {
+    if (artiTitle.trim() === "") {
       titleRef?.current?.focus()
       titleRef?.current?.scrollIntoView({ behavior: "smooth", block: "center" })
       notifyWarn("Title is required")
+      return
+    }
+    if (!urls || urls.length === 0) {
+      notifyWarn("At least 1 photo should be uploaded.")
       return
     }
     try {
@@ -634,7 +639,7 @@ export default function MyMap() {
                     type="date"
                     pattern="\d{4}-\d{2}-\d{2}"
                     min="1900-01-01"
-                    max="9999-12-31"
+                    max={`${getCurrentDate()}`}
                     onChange={(e) => {
                       setTravelDate(e.target.value)
                     }}
@@ -740,10 +745,10 @@ export default function MyMap() {
                         <PinInfoTitle>
                           {marker?.article?.travelDate}
                         </PinInfoTitle>
-                        {marker.albumURLs && marker.albumURLs.length > 0 ? (
+                        {marker?.albumURLs?.length > 0 ? (
                           <PinInfoImg src={marker?.albumURLs[0]} />
                         ) : (
-                          <PhotoText>{marker?.article?.title}</PhotoText>
+                          <PhotoText>No Photo uploaded</PhotoText>
                         )}
                         <PinInfoTitle>{marker?.location?.name}</PinInfoTitle>
                       </PinInfoArea>
