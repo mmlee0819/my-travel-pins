@@ -208,6 +208,7 @@ const MsgContent = styled.div`
   background-color: #f6f6f6;
   border: none;
   border-radius: 5px;
+  word-break: break-all;
   @media screen and (max-width: 900px) {
     font-size: ${(props) => props.theme.title.sm};
   }
@@ -216,6 +217,7 @@ const UserAvatar = styled.div<{ avatarURL: string }>`
   display: flex;
   align-self: center;
   margin-right: 5px;
+  min-width: 30px;
   width: 30px;
   height: 30px;
   background-image: ${(props) => `url(${props.avatarURL})`};
@@ -231,7 +233,7 @@ const MsgColumnWrapper = styled.div`
 const MsgRowNoWrapper = styled.div`
   position: relative;
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row nowrap;
   justify-content: flex-start;
   margin: 5px 0;
   @media screen and (max-width: 930px) {
