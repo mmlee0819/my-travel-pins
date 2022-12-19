@@ -422,6 +422,8 @@ function WeatherWidget(props: Props) {
     },
   }
 
+  const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
+
   const onPlacesChanged = () => {
     if (!searchBox || searchBox instanceof StandaloneSearchBox) return
     const searchResult = searchBox.getPlaces()
@@ -438,7 +440,6 @@ function WeatherWidget(props: Props) {
       setShowForecast(true)
     }
   }
-  const onLoad = (ref: google.maps.places.SearchBox) => setSearchBox(ref)
 
   useEffect(() => {
     locationRef?.current?.focus()
@@ -603,15 +604,17 @@ function WeatherWidget(props: Props) {
                     </InfoWindow>
                   )}
               </GoogleMap>
-              {showForecast && window.innerWidth <= 1060 && (
-                <ForecastInfo
-                  dates={dates}
-                  maxTemps={maxTemps}
-                  minTemps={minTemps}
-                  options={options}
-                  forecastStatus={forecastStatus}
-                />
-              )}
+              {showForecast &&
+                window.innerWidth <= 1060 &&
+                window.innerWidth >= 650 && (
+                  <ForecastInfo
+                    dates={dates}
+                    maxTemps={maxTemps}
+                    minTemps={minTemps}
+                    options={options}
+                    forecastStatus={forecastStatus}
+                  />
+                )}
             </WeatherContentArea>
           </GridItemWrapper>
         )}
@@ -644,100 +647,107 @@ function WeatherWidget(props: Props) {
           </GridItemWrapper>
         )}
       </GridContainer>
-      <MobileContainer>
-        <Xmark
-          onClick={() => {
-            setShowForecast(false)
-            setSearchBox(undefined)
-            setLocation({
-              lat: 0,
-              lng: 0,
-              name: "",
-            })
-            setCurrentWidget("")
-            if (locationRef.current !== null) {
-              locationRef.current.value = ""
-            }
-          }}
-        />
-        <WidgetTitle>Weather</WidgetTitle>
-        <StandaloneSearchBox onLoad={onLoad} onPlacesChanged={onPlacesChanged}>
-          <PlaceInput ref={locationRef} placeholder="Search a place" />
-        </StandaloneSearchBox>
-        <MobileWrapper>
-          <WeatherContentArea>
-            <GoogleMap
-              mapTypeId="c85f6cd031fe4756"
-              mapContainerStyle={{
-                top: "0px",
-                height: "68%",
-                width: "100%",
-                borderRadius: "5px",
-                marginBottom: "15px",
-              }}
-              center={{
-                lat: location?.lat || 45,
-                lng: location?.lng || 60,
-              }}
-              zoom={location?.name === "" ? 1 : 8}
-              options={{
-                draggable: false,
-                mapTypeControl: false,
-                streetViewControl: false,
-                scaleControl: false,
-                fullscreenControl: false,
-                zoomControl: false,
-                mapId: "c85f6cd031fe4756",
-                minZoom: 0.8,
-              }}
-            >
-              {location.name !== "" &&
-                typeof location?.lat === "number" &&
-                typeof location?.lng === "number" &&
-                currWeatherStatus.icon !== "" && (
-                  <InfoWindow
-                    position={{
-                      lat: location?.lat,
-                      lng: location?.lng,
-                    }}
-                    options={{
-                      pixelOffset: new window.google.maps.Size(0, 70),
-                    }}
-                  >
-                    <CurrentWeatherInfoArea>
-                      <CurrentWeatherTitle>Current weather</CurrentWeatherTitle>
-                      <RowNoWrapper>
-                        <CurrentWeatherImg
-                          src={`http://openweathermap.org/img/wn/${currWeatherStatus.icon}@2x.png`}
-                        />
-                        <ColumnWrapper>
-                          <CurrentWeatherText>
-                            {currWeatherStatus?.temp}°C
-                          </CurrentWeatherText>
-                          <CurrentWeatherText>
-                            {currWeatherStatus?.description}
-                          </CurrentWeatherText>
-                        </ColumnWrapper>
-                      </RowNoWrapper>
-                      <CurrentWeatherTitle>
-                        {location?.name}
-                      </CurrentWeatherTitle>
-                    </CurrentWeatherInfoArea>
-                  </InfoWindow>
-                )}
-            </GoogleMap>
-            {showForecast && window.innerWidth <= 1060 && (
-              <ForecastInfo
-                dates={dates}
-                maxTemps={maxTemps}
-                minTemps={minTemps}
-                options={options}
-                forecastStatus={forecastStatus}
-              />
-            )}
-          </WeatherContentArea>
-        </MobileWrapper>
-      </MobileContainer>
+      {window.innerWidth <= 650 && (
+        <MobileContainer>
+          <Xmark
+            onClick={() => {
+              setShowForecast(false)
+              setSearchBox(undefined)
+              setLocation({
+                lat: 0,
+                lng: 0,
+                name: "",
+              })
+              setCurrentWidget("")
+              if (locationRef.current !== null) {
+                locationRef.current.value = ""
+              }
+            }}
+          />
+          <WidgetTitle>Weather</WidgetTitle>
+          <StandaloneSearchBox
+            onLoad={onLoad}
+            onPlacesChanged={onPlacesChanged}
+          >
+            <PlaceInput ref={locationRef} placeholder="Search a place" />
+          </StandaloneSearchBox>
+          <MobileWrapper>
+            <WeatherContentArea>
+              <GoogleMap
+                mapTypeId="c85f6cd031fe4756"
+                mapContainerStyle={{
+                  top: "0px",
+                  height: "68%",
+                  width: "100%",
+                  borderRadius: "5px",
+                  marginBottom: "15px",
+                }}
+                center={{
+                  lat: location?.lat || 45,
+                  lng: location?.lng || 60,
+                }}
+                zoom={location?.name === "" ? 1 : 8}
+                options={{
+                  draggable: false,
+                  mapTypeControl: false,
+                  streetViewControl: false,
+                  scaleControl: false,
+                  fullscreenControl: false,
+                  zoomControl: false,
+                  mapId: "c85f6cd031fe4756",
+                  minZoom: 0.8,
+                }}
+              >
+                {location.name !== "" &&
+                  typeof location?.lat === "number" &&
+                  typeof location?.lng === "number" &&
+                  currWeatherStatus.icon !== "" && (
+                    <InfoWindow
+                      position={{
+                        lat: location?.lat,
+                        lng: location?.lng,
+                      }}
+                      options={{
+                        pixelOffset: new window.google.maps.Size(0, 70),
+                      }}
+                    >
+                      <CurrentWeatherInfoArea>
+                        <CurrentWeatherTitle>
+                          Current weather
+                        </CurrentWeatherTitle>
+                        <RowNoWrapper>
+                          <CurrentWeatherImg
+                            src={`http://openweathermap.org/img/wn/${currWeatherStatus.icon}@2x.png`}
+                          />
+                          <ColumnWrapper>
+                            <CurrentWeatherText>
+                              {currWeatherStatus?.temp}°C
+                            </CurrentWeatherText>
+                            <CurrentWeatherText>
+                              {currWeatherStatus?.description}
+                            </CurrentWeatherText>
+                          </ColumnWrapper>
+                        </RowNoWrapper>
+                        <CurrentWeatherTitle>
+                          {location?.name}
+                        </CurrentWeatherTitle>
+                      </CurrentWeatherInfoArea>
+                    </InfoWindow>
+                  )}
+              </GoogleMap>
+              {showForecast && window.innerWidth <= 1060 && (
+                <ForecastInfo
+                  dates={dates}
+                  maxTemps={maxTemps}
+                  minTemps={minTemps}
+                  options={options}
+                  forecastStatus={forecastStatus}
+                />
+              )}
+            </WeatherContentArea>
+          </MobileWrapper>
+        </MobileContainer>
+      )}
     </>
   )
 }
