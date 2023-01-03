@@ -1,6 +1,7 @@
 import React from "react"
 import { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
+import { GoogleMap, Marker } from "@react-google-maps/api"
 import { AuthContext } from "../../context/authContext"
 import { MapContext } from "../../context/mapContext"
 import { getPins, getSpecificPin } from "../../utils/pins"
@@ -14,7 +15,6 @@ import {
   MemoryList,
   Text,
   Title,
-  PhotoText,
   IconInList,
   BtnSortWrapper,
   BtnSort,
@@ -120,10 +120,39 @@ function FriendMemories() {
                     getSpecificPin(item?.id, setMemory, setMemoryIsShow)
                   }}
                 >
-                  {item?.albumURLs ? (
+                  {item?.albumURLs?.length > 0 ? (
                     <MemoryImg src={item?.albumURLs[0]} />
                   ) : (
-                    <PhotoText>No photo uploaded</PhotoText>
+                    <GoogleMap
+                      mapContainerStyle={{
+                        height: "100%",
+                        width: "100%",
+                        borderTopLeftRadius: "5px",
+                        borderTopRightRadius: "5px",
+                      }}
+                      center={{
+                        lat: item?.location.lat,
+                        lng: item?.location.lng,
+                      }}
+                      zoom={12}
+                      options={{
+                        disableDefaultUI: true,
+                        draggable: false,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        scaleControl: false,
+                        fullscreenControl: false,
+                        scrollwheel: false,
+                        minZoom: 2,
+                      }}
+                    >
+                      <Marker
+                        position={{
+                          lat: item?.location.lat,
+                          lng: item?.location.lng,
+                        }}
+                      />
+                    </GoogleMap>
                   )}
                 </ImgWrapper>
                 <ArticleWrapper>
