@@ -1,6 +1,11 @@
 import React from "react"
-import { createGlobalStyle, ThemeProvider } from "styled-components"
+import {
+  DefaultTheme,
+  createGlobalStyle,
+  ThemeProvider,
+} from "styled-components"
 import { Outlet } from "react-router-dom"
+
 import { MapContextProvider } from "./context/mapContext"
 import { AuthContextProvider } from "./context/authContext"
 import { ToolContextProvider } from "./context/toolContext"
@@ -30,7 +35,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 `
-const theme = {
+const theme: DefaultTheme = {
   title: { sm: "14px", md: "18px", lg: "20px" },
   color: {
     deepMain: "#034961",
@@ -49,21 +54,19 @@ const theme = {
 }
 function App() {
   return (
-    <>
-      <ToolContextProvider>
-        <AuthContextProvider>
-          <MapContextProvider>
-            <GlobalStyle />
-            <Reminder />
-            <ThemeProvider theme={theme}>
-              <Header />
-              <ToolsRobot />
-              <Outlet />
-            </ThemeProvider>
-          </MapContextProvider>
-        </AuthContextProvider>
-      </ToolContextProvider>
-    </>
+    <ToolContextProvider>
+      <AuthContextProvider>
+        <MapContextProvider>
+          <GlobalStyle />
+          <Reminder />
+          <ThemeProvider theme={theme}>
+            <Header />
+            <ToolsRobot />
+            <Outlet />
+          </ThemeProvider>
+        </MapContextProvider>
+      </AuthContextProvider>
+    </ToolContextProvider>
   )
 }
 

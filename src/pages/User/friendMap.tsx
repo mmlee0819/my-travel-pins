@@ -35,6 +35,7 @@ const PhotoText = styled.div`
   margin-bottom: 10px;
   width: 150px;
   height: 120px;
+  font-size: ${(props) => props.theme.title.sm};
   color: ${(props) => props.theme.color.bgDark};
   background-color: ${(props) => props.theme.btnColor.bgGreen};
   border-radius: 5px;
@@ -277,7 +278,7 @@ function FriendsMap() {
                           setShowMemory(true)
                         }}
                       >
-                        {marker.albumURLs ? (
+                        {marker?.albumURLs?.length > 0 ? (
                           <PinInfoImg src={marker?.albumURLs[0]} />
                         ) : (
                           <PhotoText>No photo uploaded</PhotoText>

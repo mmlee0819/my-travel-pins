@@ -26,7 +26,7 @@ Users can own a map, log memories and interact with friends.
 ![ESLint](https://img.shields.io/badge/-ESLint-blue)
 ![Prettier](https://img.shields.io/badge/-Prettier-blue)
 
-### Back-End Service
+### Cloud Service
 
 ![firestore](https://img.shields.io/badge/-Firebase%20Firestore-blue)
 ![storage](https://img.shields.io/badge/-Firebase%20Storage-blue)

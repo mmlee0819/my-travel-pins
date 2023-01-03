@@ -136,8 +136,11 @@ export const PhotoText = styled.div`
 `
 
 export const Text = styled.div`
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 180px;
   vertical-align: text-bottom;
   height: 30px;
   font-size: ${(props) => props.theme.title.sm};
@@ -145,6 +148,7 @@ export const Text = styled.div`
   min-width: 30%;
 `
 export const Title = styled(Text)`
+  width: 180px;
   font-weight: 700;
   font-size: ${(props) => props.theme.title.md};
   cursor: pointer;
